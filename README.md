@@ -1,2 +1,0 @@
-# YEDAM-TEAM2-ERP
-정재민 만세
