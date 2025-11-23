@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>index</title>
+<style>
+fieldset.scheduler-border {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1.4em;
+  margin: 0 0 1.5em 0;
+}
+
+legend.scheduler-border {
+  font-size: 1.2em;
+  font-weight: bold;
+  display: inline-block;   /* block → inline-block */
+  width: auto;             /* 100% → auto */
+  padding: 0 10px;         /* 좌우 여백 */
+  margin-bottom: 0;
+  
+  position: relative;
+  top: -2em;
+  background: #fff;   /* 카드 배경색과 맞추기 */
+  
+}
+
+</style>
+</head>
+<body layout:fragment="content">
+<h1>태초마을</h1>
+<h1>[[${test}]]</h1>
+<fieldset class="scheduler-border">
+  <legend class="scheduler-border">검색조건</legend>
+  <!-- 폼 요소들 -->
+</fieldset>
+</body>
+</html>

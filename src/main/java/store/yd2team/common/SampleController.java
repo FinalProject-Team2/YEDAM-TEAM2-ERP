@@ -14,6 +14,6 @@ public class SampleController {
 			
 			
 			model.addAttribute("test", "testone");
-			return "test";
+			return "index";
 		}
 }

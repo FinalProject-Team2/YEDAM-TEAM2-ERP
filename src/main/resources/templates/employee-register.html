@@ -6,15 +6,49 @@
 <head>
 <meta charset="UTF-8">
 <title>employee-register</title>
+<style>
+fieldset.scheduler-border {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1.4em;
+  margin: 0 0 1.5em 0;
+}
+
+legend.scheduler-border {
+  font-size: 1.2em;
+  font-weight: bold;
+  display: inline-block;   /* block → inline-block */
+  width: auto;             /* 100% → auto */
+  padding: 0 10px;         /* 좌우 여백 */
+  margin-bottom: 0;
+  
+  position: relative;
+  top: -2em;
+  background: #fff;   /* 카드 배경색과 맞추기 */
+  
+}
+
+</style>
 </head>
 <body layout:fragment="content">
-
+<div class="row">
+<!-- 버튼 영역 -->
+                <div class="mb-3 text-end">
+                    <button class="btn btn-dark">초기화</button>
+                    <button class="btn btn-outline-dark">조회</button>
+                    <button class="btn btn-outline-dark">등록</button>
+                    <button class="btn btn-outline-dark">삭제</button>
+                    <button class="btn btn-outline-dark">근로계약서</button>
+                </div>
+</div>
         <div class="row">
             <!-- 검색조건 -->
             <div class="col-md-6">
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">검색조건</h5>
+                    <fieldset class="scheduler-border">
+                        <legend class="scheduler-border">검색조건</legend>
+
                         <div class="row mb-2">
                             <div class="col-md-6">
                                 <label>이름</label>
@@ -35,6 +69,8 @@
                                 <input type="text" class="form-control" placeholder="Value">
                             </div>
                         </div>
+                     </fieldset>
+
                     </div>
                 </div>
 
@@ -66,14 +102,7 @@
 
             <!-- 우측 패널 -->
             <div class="col-md-6">
-                <!-- 버튼 영역 -->
-                <div class="mb-3 text-end">
-                    <button class="btn btn-dark">초기화</button>
-                    <button class="btn btn-secondary">조회</button>
-                    <button class="btn btn-primary">등록</button>
-                    <button class="btn btn-danger">삭제</button>
-                    <button class="btn btn-outline-dark">근로계약서</button>
-                </div>
+                
 
                 <!-- 기본정보 -->
                 <div class="card mb-3">
@@ -173,7 +202,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label>입사일</label>
-                                <input type="date" class="form-control" value="1990-01-01" />
+                                <input type="date" class="form-control"  />
                             </div>
                         </div>
 

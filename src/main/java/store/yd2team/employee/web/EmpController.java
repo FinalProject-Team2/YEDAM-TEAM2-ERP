@@ -1,4 +1,4 @@
-package store.yd2team.common;
+package store.yd2team.employee.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
