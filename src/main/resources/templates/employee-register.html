@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>employee-register</title>
+<style>
+fieldset.scheduler-border {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1.4em;
+  margin: 0 0 1.5em 0;
+}
+
+legend.scheduler-border {
+  font-size: 1.2em;
+  font-weight: bold;
+  display: inline-block;   /* block → inline-block */
+  width: auto;             /* 100% → auto */
+  padding: 0 10px;         /* 좌우 여백 */
+  margin-bottom: 0;
+  
+  position: relative;
+  top: -2em;
+  background: #fff;   /* 카드 배경색과 맞추기 */
+  
+}
+
+</style>
+</head>
+<body layout:fragment="content">
+<div class="row">
+<!-- 버튼 영역 -->
+                <div class="mb-3 text-end">
+                    <button class="btn btn-dark">초기화</button>
+                    <button class="btn btn-outline-dark">조회</button>
+                    <button class="btn btn-outline-dark">등록</button>
+                    <button class="btn btn-outline-dark">삭제</button>
+                    <button class="btn btn-outline-dark">근로계약서</button>
+                </div>
+</div>
+        <div class="row">
+            <!-- 검색조건 -->
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-body">
+                    <fieldset class="scheduler-border">
+                        <legend class="scheduler-border">검색조건</legend>
+
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label>이름</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                            <div class="col-md-6">
+                                <label>사번</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>부서</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                            <div class="col-md-6">
+                                <label>직급</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                        </div>
+                     </fieldset>
+
+                    </div>
+                </div>
+
+                <!-- 사원목록 -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">사원목록</h5>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>이름</th>
+                                    <th>사번</th>
+                                    <th>부서</th>
+                                    <th>직급</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>홍길동</td>
+                                    <td>jamin-001</td>
+                                    <td>인사</td>
+                                    <td>사원</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 우측 패널 -->
+            <div class="col-md-6">
+                
+
+                <!-- 기본정보 -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">기본정보</h5>
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <img src="" alt="사진" class="img-thumbnail" />
+                            </div>
+                            <div class="col-md-8">
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <label>사번</label>
+                                        <input type="text" class="form-control" placeholder="사번(자동생성)" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>이름</label>
+                                        <input type="text" class="form-control" value="홍길동" />
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <label>주민등록번호</label>
+                                        <input type="text" class="form-control" value="200101" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>&nbsp;</label>
+                                        <input type="text" class="form-control" value="1234567" />
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <label>연락처</label>
+                                        <input type="text" class="form-control" value="010-1234-1234" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>이메일</label>
+                                        <input type="email" class="form-control" value="abc@c.com" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 인사정보 -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">인사정보</h5>
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label>부서</label>
+                                <select class="form-select">
+                                    <option>인사</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>직무</label>
+                                <select class="form-select">
+                                    <option>HRM(인적자원관리)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label>직급</label>
+                                <select class="form-select">
+                                    <option>사원</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>직책</label>
+                                <select class="form-select">
+                                    <option>팀원</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label>고용형태</label>
+                                <select class="form-select">
+                                    <option>정직원/계약직/일용직/퇴직원</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>기본급/시급</label>
+                                <input type="text" class="form-control" value="3,000,000" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label>계좌번호</label>
+                                <input type="text" class="form-control" value="516-910-135-38907(하나)" />
+                            </div>
+                            <div class="col-md-6">
+                                <label>입사일</label>
+                                <input type="date" class="form-control"  />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>재직상태</label>
+                                <select class="form-select">
+                                    <option>재직/퇴직/휴직/퇴사</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    
+
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+a[data-add-more-fields-btn] {
+    display: none !important;
+}
+</style>
+</head>
+<body>
+<div id="tree"></div>
+<script src="https://cdn.balkan.app/orgchart.js"></script>
+<script>
+
+//JavaScript
+
+OrgChart.templates.anaOrange = Object.assign({}, OrgChart.templates.ana);
+OrgChart.templates.anaOrange.editFormHeaderColor = '#FFCA28';
+
+
+var chart = new OrgChart(document.getElementById("tree"), {
+    enableSearch: false,
+    mouseScrool: OrgChart.action.none,
+    layout: OrgChart.mixed,
+    enableDragDrop: true,
+    controls: {
+        zoom_in: { title: "Zoom In"},
+        zoom_out: { title: "Zoom Out"}
+    },
+    menu: {
+        pdf_preview: { text: "Export to PDF" },
+        csv: { text: "Save as CSV" }
+    },
+    tags: {
+        orange: {
+            template: 'anaOrange'
+        }
+    },
+    editForm: {
+        titleBinding: "EmployeeName",
+        photoBinding: "ImgUrl",
+      /* 'Add element' */
+        addMoreBtn: null,
+        /* addMore: 'Add more elements', 
+        addMoreFieldName: 'Element name',*/
+        buttons: {
+            edit: {
+                icon: OrgChart.icon.edit(24, 24, '#fff'),
+                text: 'Edit',
+                hideIfEditMode: true,
+                hideIfDetailsMode: false
+            },
+            share: {
+                icon: OrgChart.icon.share(24, 24, '#fff'),
+                text: 'Share'
+            },
+            pdf: {
+                icon: OrgChart.icon.pdf(24, 24, '#fff'),
+                text: 'Save as PDF'
+            },
+            remove: {
+                icon: OrgChart.icon.remove(24, 24, '#fff'),
+                text: 'Remove',
+                hideIfDetailsMode: true
+            }
+        },
+        generateElementsFromFields: true,
+        elements: [
+            { type: 'textbox', label: 'Full Name', binding: 'EmployeeName' },
+            { type: 'textbox', label: 'Job Title', binding: 'Title' },
+
+            { type: 'textbox', label: 'Email Address', binding: 'Email', vlidators: { required: 'Is required', email: 'Invalid email' } },
+            [
+                { type: 'textbox', label: 'Phone', binding: 'Mobile' },
+                { type: 'date', label: 'Start Date', binding: 'Start' }
+            ],
+            [
+                { type: 'select', options: [{ value: 'bg', text: 'Bulgaria' }, { value: 'ru', text: 'Russia' }, { value: 'gr', text: 'Greece' }], label: 'Country', binding: 'Country' },
+                { type: 'textbox', label: 'City', binding: 'Vity' },
+            ],
+            { type: 'textbox', label: 'Photo Url', binding: 'ImgUrl', btn: 'Upload' },
+        ]
+    },
+    nodeMenu: {
+        edit: { text: "Edit" },
+        details: { text: "Details" },
+        add: { text: "Add" },        
+        remove: { text: "Remove" }
+    },
+    nodeBinding: {
+        field_0: "EmployeeName",
+        field_1: "Title",
+        img_0: "ImgUrl"
+    }
+});
+
+//chart.on('init', function (sender) { sender.editUI.show(2, true); });
+
+chart.editUI.on('element-btn-click', function (sender, args) {	
+    OrgChart.fileUploadDialog(function (file) {
+        var formData = new FormData();
+        formData.append('file', file);
+        alert('upload the file');
+    })
+});
+
+chart.on('update', function(sender, oldNode, newNode){
+    console.log("노드 업데이트됨:", newNode);    
+});
+
+chart.load([
+    { id: "1", EmployeeName: "Jack Hill", Title: "Chairman and CEO", Email: "amber@domain.com", ImgUrl: "https://cdn.balkan.app/shared/16.jpg", tags: ['orange'] },
+    { id: "2", pid: "1", EmployeeName: "Lexie Cole", Title: "QA Lead", Email: "ava@domain.com", ImgUrl: "https://cdn.balkan.app/shared/2.jpg" },
+    { id: "3", pid: "1", EmployeeName: "Janae Barrett", Title: "Technical Director", ImgUrl: "https://cdn.balkan.app/shared/3.jpg" },
+    { id: "4", pid: "1", EmployeeName: "Aaliyah Webb", Title: "Manager", Email: "jay@domain.com", ImgUrl: "https://cdn.balkan.app/shared/4.jpg", tags: ['orange'] },
+    { id: "5", pid: "2", EmployeeName: "Elliot Ross", Title: "QA", ImgUrl: "https://cdn.balkan.app/shared/5.jpg" },
+    { id: "6", pid: "2", EmployeeName: "Anahi Gordon", Title: "QA", ImgUrl: "https://cdn.balkan.app/shared/6.jpg" },
+    { id: "7", pid: "2", EmployeeName: "Knox Macias", Title: "QA", ImgUrl: "https://cdn.balkan.app/shared/7.jpg" },
+    { id: "8", pid: "3", EmployeeName: "Nash Ingram", Title: ".NET Team Lead", Email: "kohen@domain.com", ImgUrl: "https://cdn.balkan.app/shared/8.jpg", tags: ['orange'] },
+    { id: "9", pid: "3", EmployeeName: "Sage Barnett", Title: "JS Team Lead", ImgUrl: "https://cdn.balkan.app/shared/9.jpg", tags: ['orange'] },
+    { id: "10", pid: "8", EmployeeName: "Alice Gray", Title: "Programmer", ImgUrl: "https://cdn.balkan.app/shared/10.jpg" },
+    { id: "11", pid: "8", EmployeeName: "Anne Ewing", Title: "Programmer", ImgUrl: "https://cdn.balkan.app/shared/11.jpg" },
+    { id: "12", pid: "9", EmployeeName: "Reuben Mcleod", Title: "Programmer", ImgUrl: "https://cdn.balkan.app/shared/12.jpg" },
+    { id: "13", pid: "9", EmployeeName: "Ariel Wiley", Title: "Programmer", ImgUrl: "https://cdn.balkan.app/shared/13.jpg" },
+    { id: "14", pid: "4", EmployeeName: "Lucas West", Title: "Marketer", ImgUrl: "https://cdn.balkan.app/shared/14.jpg" },
+    { id: "15", pid: "4", EmployeeName: "Adan Travis", Title: "Designer", ImgUrl: "https://cdn.balkan.app/shared/15.jpg" },
+    { id: "16", pid: "4", EmployeeName: "Alex Snider", Title: "Sales Manager", ImgUrl: "https://cdn.balkan.app/shared/16.jpg" }
+]);
+
+
+
+
+ 
+</script>
+</body>
+</html>
