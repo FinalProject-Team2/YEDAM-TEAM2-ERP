@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class SalyController {
-	@GetMapping("/salyRegister")
+	@GetMapping("/salyLedg")
 	public String selectall(Model model) {
 		model.addAttribute("test", "testone");
-		return "salyRegister";
+		return "/saly/salyLedg";
 	}
 }

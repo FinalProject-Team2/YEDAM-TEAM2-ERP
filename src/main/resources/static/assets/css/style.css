@@ -12854,6 +12854,9 @@ textarea.is-invalid.tt-hint, .select2-container--default .select2-selection--sin
   flex: 1 1 auto;
   padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
   color: var(--bs-card-color);
+  border-radius: var(--bs-card-border-radius);
+  box-shadow: 0 4px 10px -4px rgba(0,0,0,0.25);
+
 }
 
 .card-title {
