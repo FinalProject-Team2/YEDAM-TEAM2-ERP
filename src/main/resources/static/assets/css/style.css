@@ -30379,4 +30379,10 @@ dl li {
   background-color: darkgrey;
   outline: 1px solid slategrey;
 }
+.navbar.default-layout,
+.navbar.default-layout .navbar-brand-wrapper,
+.navbar.default-layout .navbar-menu-wrapper {
+background: #E2E4E7 !important;
+border-bottom: 0.5px solid #CDD0D5 !important;
+}
 /*# sourceMappingURL=maps/style.css.map */
