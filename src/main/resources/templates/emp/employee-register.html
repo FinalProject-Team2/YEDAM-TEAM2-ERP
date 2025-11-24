@@ -7,26 +7,7 @@
 <meta charset="UTF-8">
 <title>employee-register</title>
 <style>
-fieldset.scheduler-border {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 1.4em;
-  margin: 0 0 1.5em 0;
-}
 
-legend.scheduler-border {
-  font-size: 1.2em;
-  font-weight: bold;
-  display: inline-block;   /* block → inline-block */
-  width: auto;             /* 100% → auto */
-  padding: 0 10px;         /* 좌우 여백 */
-  margin-bottom: 0;
-  
-  position: relative;
-  top: -2em;
-  background: #fff;   /* 카드 배경색과 맞추기 */
-  
-}
 .fixed-photo {
     width: 150px;       /* 원하는 가로 크기 */
     height: 200px;      /* 원하는 세로 크기 */
@@ -44,43 +25,46 @@ legend.scheduler-border {
                 <div class="mb-3 text-end">
                     <button class="btn btn-dark">초기화</button>
                     <button class="btn btn-outline-dark">조회</button>
-                    <button class="btn btn-outline-dark">등록</button>
-                    <button class="btn btn-outline-dark">삭제</button>
-                    <button class="btn btn-outline-dark">근로계약서</button>
+                    
+                </div>
+</div>
+<div class="row">
+<div class="col-md-12 mb-3">
+                   <div class="card">
+                    <div class="card-body">                    
+                        
+                        <h5 class="card-title">조회</h5>
+
+                        <div class="row mb-2">
+                            <div class="col-md-3">
+                                <label>이름</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                            <div class="col-md-3">
+                                <label>사번</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                        
+                        
+                            <div class="col-md-3">
+                                <label>부서</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                            <div class="col-md-3">
+                                <label>직급</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                        </div>
+                     
+
+                    </div>
+                    </div>
                 </div>
 </div>
         <div class="row">
             <!-- 검색조건 -->
             <div class="col-md-6">
-                <div class="card mb-3">
-                    <div class="card-body">
-                    <fieldset class="scheduler-border">
-                        <legend class="scheduler-border">검색조건</legend>
-
-                        <div class="row mb-2">
-                            <div class="col-md-6">
-                                <label>이름</label>
-                                <input type="text" class="form-control" placeholder="Value">
-                            </div>
-                            <div class="col-md-6">
-                                <label>사번</label>
-                                <input type="text" class="form-control" placeholder="Value">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label>부서</label>
-                                <input type="text" class="form-control" placeholder="Value">
-                            </div>
-                            <div class="col-md-6">
-                                <label>직급</label>
-                                <input type="text" class="form-control" placeholder="Value">
-                            </div>
-                        </div>
-                     </fieldset>
-
-                    </div>
-                </div>
+                
 
                 <!-- 사원목록 -->
                 <div class="card">
@@ -115,7 +99,10 @@ legend.scheduler-border {
                 <!-- 기본정보 -->
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">기본정보</h5>
+                        <span class="card-title">기본정보</span>
+                        <button class="btn btn-outline-dark">근로계약서</button>
+                        <button class="btn btn-outline-dark">등록</button>
+                    	<button class="btn btn-outline-dark">삭제</button>                    
                         <div class="row">
                             <div class="col-md-4 text-center">
                                 <img src="/images/faces/face11.jpg" alt="사진" class="img-thumbnail fixed-photo" />

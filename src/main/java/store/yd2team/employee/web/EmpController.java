@@ -13,6 +13,6 @@ public class EmpController {
 		
 		
 		model.addAttribute("test", "testone");
-		return "employee-register";
+		return "emp/employee-register";
 	}
 }
