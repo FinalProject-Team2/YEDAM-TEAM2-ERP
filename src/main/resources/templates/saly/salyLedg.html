@@ -5,16 +5,31 @@
       layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
-<title>employee-register</title>
-
-
-
+<title>salyLedg</title>
 <style>
+fieldset.scheduler-border {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1.4em;
+  margin: 0 0 1.5em 0;
+}
 
-
-
-
+legend.scheduler-border {
+  font-size: 1.2em;
+  font-weight: bold;
+  display: inline-block;   /* block → inline-block */
+  width: auto;             /* 100% → auto */
+  padding: 0 10px;         /* 좌우 여백 */
+  margin-bottom: 0;
+  
+  position: relative;
+  top: -2em;
+  background: #fff;   /* 카드 배경색과 맞추기 */
+  
+}
 .fixed-photo {
     width: 150px;       /* 원하는 가로 크기 */
     height: 200px;      /* 원하는 세로 크기 */
@@ -23,7 +38,6 @@
 .form-select {
     color: #000 !important;
 }
-
 </style>
 </head>
 <body layout:fragment="content">
@@ -32,77 +46,49 @@
                 <div class="mb-3 text-end">
                     <button class="btn btn-dark">초기화</button>
                     <button class="btn btn-outline-dark">조회</button>
-
-                    
-                </div>
-</div>
-<div class="row">
-<div class="col-md-12 mb-3">
-                   <div class="card">
-                    <div class="card-body">                    
-                        
-                        <h5 class="card-title">조회</h5>
-
-                        <div class="row mb-2">
-                            <div class="col-md-3">
-                                <label>이름</label>
-                                <input type="text" class="form-control" placeholder="Value">
-                            </div>
-                            <div class="col-md-3">
-                                <label>사번</label>
-                                <input type="text" class="form-control" placeholder="Value">
-                            </div>
-                        
-                        
-                            <div class="col-md-3">
-                                <label>부서</label>
-                                <input type="text" class="form-control" placeholder="Value">
-                            </div>
-                            <div class="col-md-3">
-
-                                <label>직급</label>
-                                <input type="text" class="form-control" placeholder="Value">
-                            </div>
-                        </div>
-
-                     
-
-                    </div>
-                    </div>
+                    <button class="btn btn-outline-dark">등록</button>
+                    <button class="btn btn-outline-dark">삭제</button>
+                    <button class="btn btn-outline-dark">근로계약서</button>
                 </div>
 </div>
         <div class="row">
             <!-- 검색조건 -->
             <div class="col-md-6">
-                
+                <div class="card mb-3">
+                    <div class="card-body">
+                    <fieldset class="scheduler-border">
+                        <legend class="scheduler-border">검색조건</legend>
 
-                     
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label>이름</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                            <div class="col-md-6">
+                                <label>사번</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>부서</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                            <div class="col-md-6">
+                                <label>직급</label>
+                                <input type="text" class="form-control" placeholder="Value">
+                            </div>
+                        </div>
+                     </fieldset>
 
-                    
-
+                    </div>
+                </div>
 
                 <!-- 사원목록 -->
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">사원목록</h5>
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>이름</th>
-                                    <th>사번</th>
-                                    <th>부서</th>
-                                    <th>직급</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>홍길동</td>
-                                    <td>jamin-001</td>
-                                    <td>인사</td>
-                                    <td>사원</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <h5 class="card-title">급여목록</h5>
+							<div id="grid" style="margin:20px;"></div>
                     </div>
                 </div>
             </div>
@@ -249,6 +235,58 @@
             </div>
         </div>
     
+
+<script>
+// 화면 테스트용 데이터
+tui.Grid.applyTheme('default', {
+  cell: {
+    normal: {                // 일반 셀(본문)
+      border: '#ccc',
+      background: "#fff"
+      showVerticalBorder: true,   // 세로 라인 표시
+    },
+    header: {                // 헤더 셀
+      border: '#ccc',
+      background: '#E3E6ED',
+      showVerticalBorder: true,
+    },
+    editable: {                   // ★ 편집 가능한 셀 공통 스타일
+        background: '#FFFDF0',      // 연노랑 같은 색으로 표시
+        text: '#000'
+      },
+    selectedHeader: {              // 헤더 클릭했을 때 색
+        background: '#E3E6ED'        // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+      },
+      selected: {                    // 선택된 셀 색
+        background: '#ffffff'        // 필요하면 여기도 조정
+      }
+  }
+});
+
+const gridData = [
+  { name: "아이유", artist: "IU", type: "앨범", release: "2020-05-06", genre: "K-Pop" },
+  { name: "뉴진스", artist: "NewJeans", type: "싱글", release: "2023-01-10", genre: "K-Pop"},
+  { name: "임영웅", artist: "Hero", type: "앨범", release: "2024-03-02", genre: "발라드" }
+];
+
+// Grid 생성
+const grid = new tui.Grid({
+  el: document.getElementById('grid'),
+  data: gridData,
+  scrollX: false,
+  scrollY: false,
+  minBodyHeight: 0,
+  autoWidth: true,
+  columns: [
+    { header: '이름', name: 'name', sortable: 'true'},
+    { header: '가수', name: 'artist', editor: 'text'},
+    { header: '타입', name: 'type'},
+    { header: '발매일', name: 'release', align: 'center'},
+    { header: '장르', name: 'genre'}
+  ]
+});
+</script>
+
 
 </body>
 </html>
