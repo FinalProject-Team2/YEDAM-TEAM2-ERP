@@ -1,4 +1,4 @@
-package store.yd2team.salary.service.impl;
+package store.yd2team.insa.service.impl;
 
 import org.springframework.stereotype.Service;
 
