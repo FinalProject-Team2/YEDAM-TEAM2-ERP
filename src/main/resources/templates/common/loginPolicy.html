@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>보안 정책 설정</title>
+
+    <style>
+        .security-wrapper .card-title {
+            font-weight: 600;
+        }
+
+        /* 카드 헤더 : 제목 왼쪽, 버튼 오른쪽 */
+        .card-header.with-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header-left h5 {
+            margin-bottom: 0;
+        }
+
+        .card-header-right .btn {
+            margin-left: 0.25rem;
+        }
+
+        /* 숫자 입력 단위(span) 크기 맞추기 */
+        .unit-span {
+            min-width: 40px;
+            text-align: center;
+        }
+
+        /* 이 페이지 안에서만 form-check 정렬 재정의
+           → 카드 밖으로 튀어나오지 않고 같은 열에 정렬되도록 */
+        .security-wrapper .form-check {
+            display: inline-flex;   /* 라벨 + 인풋 한 줄 */
+            align-items: center;
+            padding-left: 0;
+            margin-bottom: 0.25rem;
+        }
+
+        .security-wrapper .form-check-input {
+            position: static;
+            float: none;
+            /* 글자와 동그라미/체크박스 사이 여백 */
+            margin: 0 0 0 .45rem;
+        }
+
+        .security-wrapper .form-check-inline + .form-check-inline {
+            margin-left: 0.75rem;   /* 같은 라인 내 옵션 간 간격 */
+        }
+    </style>
+</head>
+<body layout:fragment="content">
+<div class="security-wrapper">
+
+    <!-- 전체 카드 -->
+    <div class="card">
+
+        <!-- 상단 헤더 : 제목 + 버튼 -->
+        <div class="card-header with-actions">
+            <div class="card-header-left">
+                <h5 class="card-title">보안 정책 설정</h5>
+            </div>
+            <div class="card-header-right">
+                <button type="button" class="btn btn-dark">초기화</button>
+                <button type="button" class="btn btn-outline-dark">저장</button>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <!-- 왼쪽 : 계정 잠금 / 세션 정책 -->
+                <div class="col-md-6">
+
+                    <!-- 계정 잠금 정책 카드 -->
+                    <div class="card mb-3">
+
+                        <!-- 카드 헤더 -->
+                        <div class="card-header with-actions">
+                            <div class="card-header-left">
+                                <h5 class="card-title">계정 잠금 정책</h5>
+                            </div>
+                            <div class="card-header-right">
+                                <!-- 필요하면 여기에 카드별 버튼 추가 -->
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">로그인 실패 허용 횟수</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" value="5">
+                                    <span class="input-group-text unit-span">회</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">잠금 유지 시간</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" value="30">
+                                    <span class="input-group-text unit-span">분</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-1">
+                                <span class="form-label d-block mb-1">자동 잠금 해제 여부</span>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="autoUnlockY">사용</label>
+                                    <input class="form-check-input" type="radio" name="autoUnlockYn"
+                                           id="autoUnlockY" value="Y" checked>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="autoUnlockN">미사용</label>
+                                    <input class="form-check-input" type="radio" name="autoUnlockYn"
+                                           id="autoUnlockN" value="N">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 세션 정책 카드 -->
+                    <div class="card">
+
+                        <!-- 카드 헤더 -->
+                        <div class="card-header with-actions">
+                            <div class="card-header-left">
+                                <h5 class="card-title">세션 정책</h5>
+                            </div>
+                            <div class="card-header-right">
+                                <!-- 필요하면 여기에도 버튼 추가 가능 -->
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">세션 타임 아웃</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" value="30">
+                                    <span class="input-group-text unit-span">분</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-1">
+                                <span class="form-label d-block mb-1">타임 아웃 시 동작</span>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="timeoutAutoLogout">자동 로그 아웃</label>
+                                    <input class="form-check-input" type="radio" name="timeoutAction"
+                                           id="timeoutAutoLogout" value="AUTO" checked>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="timeoutWarnLogout">경고 후 로그 아웃</label>
+                                    <input class="form-check-input" type="radio" name="timeoutAction"
+                                           id="timeoutWarnLogout" value="WARN">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 오른쪽 : 비밀번호 정책 카드 -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+
+                        <!-- 카드 헤더 -->
+                        <div class="card-header with-actions">
+                            <div class="card-header-left">
+                                <h5 class="card-title">비밀번호 정책</h5>
+                            </div>
+                            <div class="card-header-right">
+                                <!-- 필요 시 버튼 추가 -->
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <!-- 비밀번호 길이 -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">최소 길이</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" value="8">
+                                        <span class="input-group-text unit-span">자</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">최대 길이</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" value="20">
+                                        <span class="input-group-text unit-span">자</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 필수 포함 규칙 -->
+                            <div class="mb-3">
+                                <span class="form-label d-block mb-1">필수 포함 규칙</span>
+                                <div class="form-check">
+                                    <label class="form-check-label" for="ruleUpper">대문자 포함</label>
+                                    <input class="form-check-input" type="checkbox" id="ruleUpper" checked>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <label class="form-check-label" for="ruleLower">소문자 포함</label>
+                                    <input class="form-check-input" type="checkbox" id="ruleLower" checked>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <label class="form-check-label" for="ruleNumber">숫자 포함</label>
+                                    <input class="form-check-input" type="checkbox" id="ruleNumber" checked>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <label class="form-check-label" for="ruleSpecial">특수문자 포함</label>
+                                    <input class="form-check-input" type="checkbox" id="ruleSpecial">
+                                </div>
+                            </div>
+
+                            <!-- 2단계 인증(OTP) -->
+                            <div class="mb-3">
+                                <span class="form-label d-block mb-1">2단계 인증(OTP) 사용 유무</span>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="otpY">사용</label>
+                                    <input class="form-check-input" type="radio" name="otpYn"
+                                           id="otpY" value="Y" checked>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="otpN">미사용</label>
+                                    <input class="form-check-input" type="radio" name="otpYn"
+                                           id="otpN" value="N">
+                                </div>
+                            </div>
+
+                            <!-- CAPTCHA -->
+                            <div>
+                                <span class="form-label d-block mb-1">CAPTCHA 사용 유무</span>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="captchaY">사용</label>
+                                    <input class="form-check-input" type="radio" name="captchaYn"
+                                           id="captchaY" value="Y" checked>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <label class="form-check-label" for="captchaN">미사용</label>
+                                    <input class="form-check-input" type="radio" name="captchaYn"
+                                           id="captchaN" value="N">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div> <!-- /row -->
+        </div> <!-- /card-body -->
+    </div> <!-- /card -->
+
+</div> <!-- /security-wrapper -->
+</body>
+</html>
