@@ -9,6 +9,6 @@ public class SalyController {
 	@GetMapping("/salyLedg")
 	public String selectall(Model model) {
 		model.addAttribute("test", "testone");
-		return "/saly/salyLedg";
+		return "/insa/salyLedg";
 	}
 }
