@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>시스템 로그 조회</title>
+
+<!-- Toast UI Grid -->
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+<style>
+.log-wrapper .card-title {
+	font-weight: 600;
+}
+
+.form-select {
+	color: #000 !important;
+}
+
+/* 공통 카드 헤더(제목 + 버튼) 정렬 */
+.card-header.with-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.card-header.with-actions .card-title {
+	margin-bottom: 0;
+}
+
+.card-header.with-actions .card-header-right .btn+.btn {
+	margin-left: .25rem;
+}
+
+/* Grid 컨테이너 */
+.log-wrapper #logGrid {
+	width: 100%;
+	margin-top: 4px;
+}
+
+/* row header(체크박스) 헤더 셀만 회색, 바디는 흰색 */
+.log-wrapper .tui-grid-header .tui-grid-cell-row-header {
+	background-color: #f5f5f5;
+}
+
+.log-wrapper .tui-grid-body .tui-grid-cell-row-header {
+	background-color: #ffffff;
+}
+
+/* 상단 헤더의 체크박스(행 헤더) 셀만 회색 */
+.tui-grid-header-area .tui-grid-cell-row-header {
+  background-color: #f5f5f5;
+}
+
+/* 데이터 행의 체크박스 셀은 흰색 유지 */
+.tui-grid-body-area .tui-grid-cell-row-header {
+  background-color: #ffffff;
+}
+
+</style>
+</head>
+
+<body layout:fragment="content">
+	<div class="log-wrapper">
+
+		<!-- 검색 영역 -->
+		<div class="card mb-3">
+			<div class="card-header with-actions">
+				<div class="card-header-left">
+					<h5 class="card-title">시스템 로그 조회</h5>
+				</div>
+				<div class="card-header-right">
+					<button type="button" class="btn btn-dark">초기화</button>
+					<button type="button" class="btn btn-outline-dark">조회</button>
+				</div>
+			</div>
+
+			<div class="card-body">
+				<div class="row mb-2">
+					<div class="col-md-3">
+						<label for="accountId" class="form-label">계정 ID</label> <input
+							id="accountId" type="text" class="form-control"
+							placeholder="HONG@NON.AC">
+					</div>
+					<div class="col-md-3">
+						<label for="module" class="form-label">모듈</label> <select
+							id="module" class="form-select">
+							<option value="">전체</option>
+							<option value="COMMON">공통</option>
+							<option value="HR">인사</option>
+							<option value="SALES">영업</option>
+						</select>
+					</div>
+					<div class="col-md-3">
+						<label for="action" class="form-label">액션</label> <select
+							id="action" class="form-select">
+							<option value="">전체</option>
+							<option value="LOGIN">LOGIN</option>
+							<option value="INSERT">INSERT</option>
+							<option value="UPDATE">UPDATE</option>
+							<option value="DELETE">DELETE</option>
+						</select>
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">로그 발생 기간</label>
+						<div class="input-group">
+							<input type="date" class="form-control"> <span
+								class="input-group-text">~</span> <input type="date"
+								class="form-control">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 로그 목록 영역 -->
+		<div class="card">
+			<div class="card-header with-actions">
+				<div class="card-header-left">
+					<h5 class="card-title">로그 목록</h5>
+				</div>
+				<div class="card-header-right">
+					<!-- 버튼 없음(필요 시 추가) -->
+				</div>
+			</div>
+
+			<div class="card-body">
+				<div id="logGrid"></div>
+			</div>
+		</div>
+
+	</div>
+
+	<script>
+		// Grid 테마 설정
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : {
+					border : '#dedede',
+					background : '#ffffff',
+					showVerticalBorder : true
+				},
+				header : {
+					border : '#dedede',
+					background : '#f5f5f5',
+					showVerticalBorder : true
+				},
+				// ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
+				rowHeader : {
+					border : '#dedede',
+					background : '#ffffff',
+					showVerticalBorder : true
+				},
+				editable : {
+					background : '#FFFDF0',
+					text : '#000'
+				},
+				selectedHeader : {
+					background : '#f5f5f5'
+				},
+				selected : {
+					background : '#ffffff'
+				}
+			}
+		});
+
+		const logData = [ {
+			occurredAt : '2019-05-05 09:12:54',
+			accountId : 'HONG@NON.AC',
+			module : '공통',
+			action : 'LOGIN',
+			targetTable : '-',
+			targetId : '-',
+			summary : '관리자 로그인'
+		}, {
+			occurredAt : '2019-05-06 10:11:22',
+			accountId : 'KIM@NON.AC',
+			module : '주문',
+			action : 'INSERT',
+			targetTable : 'ORDER',
+			targetId : 'ORD_20240501_001',
+			summary : '주문 등록'
+		} ];
+
+		const logGrid = new tui.Grid({
+			el : document.getElementById('logGrid'),
+			data : logData,
+			bodyHeight : 320,
+			scrollX : false,
+			scrollY : false,
+			rowHeaders : [ 'checkbox' ],
+			columnOptions : {
+				minWidth : 80,
+				resizable : true
+			},
+			columns : [ {
+				header : '발생 일시',
+				name : 'occurredAt',
+				minWidth : 160
+			}, {
+				header : '계정 ID',
+				name : 'accountId',
+				minWidth : 160
+			}, {
+				header : '모듈',
+				name : 'module',
+				minWidth : 100
+			}, {
+				header : '액션',
+				name : 'action',
+				minWidth : 100
+			}, {
+				header : '대상 테이블',
+				name : 'targetTable',
+				minWidth : 120
+			}, {
+				header : '대상 ID',
+				name : 'targetId',
+				minWidth : 160
+			}, {
+				header : '요약 정보',
+				name : 'summary',
+				minWidth : 200
+			} ]
+		});
+	</script>
+
+</body>
+</html>
