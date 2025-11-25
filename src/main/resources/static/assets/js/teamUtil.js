@@ -5,6 +5,22 @@ export function bindGridToForm(rowData) {
   Object.keys(rowData).forEach(key => {
     const input = document.getElementById("v_" + key);
     if (input) input.value = rowData[key];
+    if(("v_" + key) == "v_st") {
+		if(rowData[key] == '신청'){
+			//stIsShow
+			document.getElementById("hugadeta").classList.add("stIsShow");
+		}else if(rowData[key] == '승인'){
+			document.getElementById("hugadeta").classList.remove("stIsShow");			
+			document.getElementById("hugaSt1").classList.remove("stIsShow");			
+			document.getElementById("hugaSt2").classList.add("stIsShow");			
+		}else{
+			document.getElementById("hugadeta").classList.remove("stIsShow");			
+			document.getElementById("hugaSt1").classList.add("stIsShow");			
+			document.getElementById("hugaSt2").classList.remove("stIsShow");
+		}
+			
+			
+	}
   });
 }
 
