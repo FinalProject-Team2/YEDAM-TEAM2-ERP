@@ -1,5 +1,5 @@
 package store.yd2team.common.service;
 
-public class test {
+public class f {
 
 }

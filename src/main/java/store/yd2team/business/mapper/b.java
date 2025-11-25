@@ -1,5 +1,5 @@
 package store.yd2team.business.mapper;
 
-public class test {
+public class b {
 
 }
