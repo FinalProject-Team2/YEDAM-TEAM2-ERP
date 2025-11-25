@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>vcatn.html</title>
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<style>
+.form-select {
+	color: #000 !important;
+}
+/* 추가 CSS */
+.readonly-input[readonly] {
+	background-color: #e9ecef; /* Bootstrap 기본 disabled 색상 */
+	cursor: not-allowed; /* 마우스 커서도 입력 불가 느낌 */
+}
+
+.stIsShow{
+display: none;
+}
+</style>
+</head>
+<body layout:fragment="content">	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card mb-3">
+				<div class="card-body">
+				<div class="row">
+						<div class="col-md-4 text-start">
+					<h5 class="card-title">조회-(사원용)</h5>					 
+                    </div>
+                    <div class="col-md-8 text-end">
+					<button class="btn btn-dark">초기화</button>
+					<button class="btn btn-outline-dark">조회</button>						 
+                    </div>
+                    </div>
+					
+					<div class="row mb-2">
+						<div class="col-md-3">
+							<label>기간</label> <input type="date" class="form-control"
+								placeholder="Value">
+						</div>
+						<div class="col-md-3">
+							<label> </label> <input type="date" class="form-control"
+								placeholder="Value">
+						</div>
+						<div class="col-md-3">
+							<label>휴가유형</label> <select class="form-select">
+								<option>연차</option>
+								<option>병가</option>
+								<option>특별휴가</option>
+							</select>
+						</div>
+						<div class="col-md-3">
+							<label>상태</label> <select class="form-select">
+								<option>전체</option>
+								<option>신청</option>
+								<option>승인</option>
+								<option>반려</option>
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<!-- 검색조건 -->
+		<div class="col-md-6">
+			<!-- 사원목록 -->
+			<div class="card" style="height:758.75px;">
+				<div class="card-body">
+					<h5 class="card-title">나의 휴가 신청 내역 - 홍길동 (D001/개발팀)</h5>
+					<div id="toastGrid" style="margin:20px;"></div>
+				</div>
+			</div>
+		</div>
+		<!-- 우측 패널 -->
+		<div class="col-md-6">
+			<!-- 기본정보 -->
+			<div class="card mb-3">
+				<div class="card-body">
+					
+					<div class="row">
+						<div class="col-md-4 text-start">
+					<h5 class="card-title">휴가 신청상세</h5>
+					 
+                    </div>
+                    <div class="col-md-8 text-end">
+					
+					 <button class="btn btn-outline-dark ">등록</button>
+                    <button class="btn btn-outline-dark ">삭제</button>                    
+                    </div>
+                    </div>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="row mb-2">
+								<div class="col-md-6">
+									<label>이름</label> <input type="text" class="form-control" />
+								</div>
+								<div class="col-md-6">
+									<label>사번</label> <input type="text"
+										class="form-control readonly-input" readonly="readonly" />
+								</div>
+							</div>
+							<div class="row mb-2">
+								<div class="col-md-6">
+									<label>휴가유형</label> <select id="v_vcatnTy" class="form-select">
+										<option>연차</option>
+										<option>병가</option>
+										<option>특별휴가</option>
+									</select>
+								</div>
+								<div class="col-md-6">
+									<label>신청일</label> <input id="v_creaDt" type="date" class="form-control" />
+								</div>
+							</div>
+							<div class="row mb-2">
+								<div class="col-md-6">
+									<label>기간</label> <input id="v_begin" type="date" class="form-control" />
+								</div>
+								<div class="col-md-6">
+									<label> </label> <input id="v_end" type="date" class="form-control" />
+								</div>
+							</div>
+							<div class="row mb-2">
+								<div class="col-md-12">
+									<label>사유</label> <input type="text" class="form-control" />
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 인사정보 -->
+			<div class="card">
+				<div class="card-body stIsShow" >
+					<h5 class="card-title">휴가처리 정보</h5>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label>처리일</label> <input type="text" class="form-control" />
+						</div>
+						<div class="col-md-6">
+							<label>승인자</label> <input id="v_nm" type="text" class="form-control" 
+								 />
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label>상태</label> <select id="v_st" class="form-select">
+								<option>신청</option>
+								<option>승인</option>
+								<option>반려</option>
+							</select>
+						</div>
+						<div class="col-md-6" >							 
+							<label>반려사유</label> 
+								<textarea class="form-control" rows="5" style="height:150px;" ></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script >
+
+// 화면 테스트용 데이터
+tui.Grid.applyTheme('default', {
+  cell: {
+    normal: {                // 일반 셀(본문)
+      border: '#ccc',
+      background: "#fff",
+      showVerticalBorder: true,   // 세로 라인 표시
+    },
+    header: {                // 헤더 셀
+      border: '#ccc',
+      background: '#E3E6ED',
+      showVerticalBorder: true,
+    },
+    editable: {                   // ★ 편집 가능한 셀 공통 스타일
+        background: '#FFFDF0',      // 연노랑 같은 색으로 표시
+        text: '#000'
+      },
+    selectedHeader: {              // 헤더 클릭했을 때 색
+        background: '#E3E6ED'        // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+      },
+      selected: {                    // 선택된 셀 색
+        background: '#ffffff'        // 필요하면 여기도 조정
+      }
+  }
+});
+
+const gridData = [
+  { creaDt: "1990-01-01", vcatnTy: "연차", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "신청", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-02", vcatnTy: "병가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "승인", nm: "김관리"},
+  { creaDt: "1990-01-03", vcatnTy: "특별휴가", vcatnBegin: "1990-01-01", vcatnEnd: "1990-01-02", st: "반려", nm: "김15"},
+  
+];
+
+// Grid 생성
+const grid = new tui.Grid({
+  el: document.getElementById('toastGrid'),
+  data: gridData,
+  scrollX: false,
+  scrollY: true,
+  minBodyHeight: 0,
+  autoWidth: true,
+  columns: [
+    { header: '신청일', name: 'creaDt', sortable: 'true'},
+    { header: '휴가유형', name: 'vcatnTy'},
+    { header: '시작일', name: 'vcatnBegin'},
+    { header: '종료일', name: 'vcatnEnd'},
+    { header: '상태', name: 'st'},
+    { header: '승인자', name: 'nm', align: 'center'}    
+  ],
+  bodyHeight: 600,   // 본문 높이 고정
+});
+
+</script>
+<script type="module">
+import { bindGridToForm, formToJson } from '/assets/js/teamUtil.js';
+
+//그리드 행 클릭 시 상세정보 입력
+grid.on('click', function(ev) {
+    const rowData = grid.getRow(ev.rowKey);
+    if (!rowData) return;
+
+    bindGridToForm(rowData);    
+    
+    const dto = formToJson();  
+    console.log(dto);
+});
+</script>
+</body>
+
+</html>

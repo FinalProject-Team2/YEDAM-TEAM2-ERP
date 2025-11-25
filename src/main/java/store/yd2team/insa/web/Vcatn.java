@@ -5,15 +5,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class EmpController {
-	@GetMapping("/emp-register")
+public class Vcatn {
+	@GetMapping("/vcatn")
 	public String selectall(Model model) {
 		
 		
 		
 		
 		model.addAttribute("test", "testone");
-		return "insa/employee-register";
+		return "insa/vcatn";
 
 	}
 }
