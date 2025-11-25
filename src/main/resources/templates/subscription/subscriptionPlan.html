@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>Subscription Plan</title>
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<style>
+/* 구독 플랜 목록 그리드 높이 조정 (대략 10행 노출) */
+#subscriptionGrid {
+	height: 400px;
+}
+
+/* 두 컬럼이 같은 높이로 늘어나도록 */
+.subscription-row-equal .card {
+	height: 100%;
+}
+</style>
+</head>
+<body layout:fragment="content">
+
+	<div class="row subscription-row-equal">
+		<!-- 좌측: 구독 플랜 목록 -->
+		<div class="col-md-6 d-flex">
+			<div class="card mb-3 flex-fill">
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">구독 플랜 목록</h5>
+					</div>
+				</div>
+				<div class="card-body">
+					<div id="subscriptionGrid" class="mt-3"></div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 우측: 구독 플랜 상세 -->
+		<div class="col-md-6 d-flex">
+			<div class="card mb-3 flex-fill">
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">구독 플랜 상세</h5>
+					</div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark">저장</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<form>
+
+						<!-- 1행: 플랜명, 계정 발급 수 -->
+						<div class="row mb-3">
+							<div class="col-md-6">
+								<label class="form-label">플랜 명</label> <input type="text"
+									class="form-control" placeholder="플랜명을 입력하세요" />
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">최대 계정 생성 수</label> <input
+									type="number" class="form-control" placeholder="계정 수를 입력하세요" />
+							</div>
+						</div>
+
+						<!-- 2행: 월 API 호출 횟수, 적용 일자 -->
+						<div class="row mb-3">
+							<div class="col-md-6">
+								<label class="form-label">월 API 호출 횟수</label> <input
+									type="number" class="form-control"
+									placeholder="월 API 호출 횟수를 입력하세요" />
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">적용 일자</label> <input type="date"
+									class="form-control" />
+							</div>
+						</div>
+
+						<!-- 3행: 결제주기, 노출 여부 -->
+						<div class="row mb-3">
+							<div class="col-md-6">
+								<label class="form-label">결제 주기</label> <input type="text"
+									class="form-control" placeholder="예: 월, 연" />
+							</div>
+
+							<div class="col-md-6">
+								<label class="form-label d-block">노출 여부</label>
+								<div class="d-flex align-items-center">
+									<label class="me-4 mb-0"> Y <input class="ms-1"
+										type="radio" name="exposureYn" id="exposureY" value="Y"
+										checked>
+									</label> <label class="mb-0"> N <input class="ms-1"
+										type="radio" name="exposureYn" id="exposureN" value="N">
+									</label>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// 화면 테스트용 데이터
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : { // 일반 셀(본문)
+					border : '#ccc',
+					background : "#fff",
+					showVerticalBorder : true, // 세로 라인 표시
+				},
+				header : { // 헤더 셀
+					border : '#ccc',
+					background : '#E3E6ED',
+					showVerticalBorder : true,
+				},
+				editable : { // ★ 편집 가능한 셀 공통 스타일
+					background : '#FFFDF0', // 연노랑 같은 색으로 표시
+					text : '#000'
+				},
+				selectedHeader : { // 헤더 클릭했을 때 색
+					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+				},
+				selected : { // 선택된 셀 색
+					background : '#ffffff' // 필요하면 여기도 조정
+				}
+			}
+		});
+
+		// 화면 테스트용 더미 데이터
+		const gridData = [ {
+			planName : 'Basic',
+			exposureYn : 'Y',
+			billingCycle : '월간'
+		}, {
+			planName : 'Standard',
+			exposureYn : 'Y',
+			billingCycle : '월간'
+		}, {
+			planName : 'Premium',
+			exposureYn : 'Y',
+			billingCycle : '연간'
+		}, {
+			planName : 'Enterprise',
+			exposureYn : 'N',
+			billingCycle : '연간'
+		}, {
+			planName : 'Starter',
+			exposureYn : 'Y',
+			billingCycle : '월간'
+		}, {
+			planName : 'Developer',
+			exposureYn : 'Y',
+			billingCycle : '월간'
+		}, {
+			planName : 'Team',
+			exposureYn : 'Y',
+			billingCycle : '월간'
+		}, {
+			planName : 'Business',
+			exposureYn : 'Y',
+			billingCycle : '연간'
+		}, {
+			planName : 'Growth',
+			exposureYn : 'N',
+			billingCycle : '연간'
+		}, {
+			planName : 'Legacy',
+			exposureYn : 'N',
+			billingCycle : '연간'
+		}, {
+			planName : 'Test Plan',
+			exposureYn : 'Y',
+			billingCycle : '월간'
+		}, {
+			planName : 'Legacy1',
+			exposureYn : 'N',
+			billingCycle : '연간'
+		}, {
+			planName : 'Legacy2',
+			exposureYn : 'N',
+			billingCycle : '연간'
+		}, {
+			planName : 'Legacy3',
+			exposureYn : 'N',
+			billingCycle : '연간'
+		}, {
+			planName : 'Legacy4',
+			exposureYn : 'N',
+			billingCycle : '연간'
+		} ];
+
+		const subscriptionGrid = new tui.Grid({
+			el : document.getElementById('subscriptionGrid'),
+			data : gridData,
+			scrollX : false,
+			scrollY : true, // 세로 스크롤 활성화
+			bodyHeight : 360, // 약 10행 정도 보이도록 설정
+			rowHeight : 36,
+			/* autoWidth : true, */
+			columns : [ {
+				header : '플랜 명',
+				name : 'planName',
+				align : 'left'
+			}, {
+				header : '노출 여부',
+				name : 'exposureYn',
+				align : 'left'
+			}, {
+				header : '결제 주기',
+				name : 'billingCycle',
+				align : 'left'
+			} ]
+		});
+		
+		<!-- 그리드 레이아웃 새로고침 (스크롤바 벗어남 해결책) -->
+		window.addEventListener('load', function() {
+			subscriptionGrid.refreshLayout();
+		});
+	</script>
+
+</body>
+</html>
