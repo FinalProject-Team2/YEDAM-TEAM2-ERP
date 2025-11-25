@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+    <title>salyLedg</title>
+    <style>
+        .form-select {
+            color: #000 !important;
+        }
+    </style>
+</head>
+<body layout:fragment="content">
+    <div class="row">
+        <!-- 검색조건 -->
+        <div class="col-md-12">
+            <div class="card mb-3">
+            <div class="card-header">
+            <h5 class="card-title">검색조건</h5>
+            <div class="card-header-right">
+            <button class="btn btn-outline-dark">조회</button>
+        </div>
+            </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>급여대장명칭</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label>부서명</label>
+                            <select id="dept" class="form-control">
+                            	<option>전체</option>
+                            	<option>인사</option>
+                            	<option>자재</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>급여확정여부</label>
+                            <select id="pay_yn" class="form-control">
+                            	<option>전체</option>
+                            	<option>확정</option>
+                            	<option>미확정</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>지급일</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-md-2">
+                        	<label> </label>
+                            <input type="text" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사원목록 -->
+            <div class="card">
+            <div class="card-header">
+                    <h5 class="card-title">급여목록</h5>
+                    <div class= "card-header-right"><button class="btn btn-outline-dark">등록</button></div>
+            </div>
+                <div class="card-body">
+                    <div id="grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 화면 테스트용 데이터
+        tui.Grid.applyTheme('default', {
+            cell: {
+                normal: {                // 일반 셀(본문)
+                    border: '#ccc',
+                    background: "#fff",
+                    showVerticalBorder: true,   // 세로 라인 표시
+                },
+                header: {                // 헤더 셀
+                    border: '#ccc',
+                    background: '#E3E6ED',
+                    showVerticalBorder: true,
+                },
+                editable: {              // ★ 편집 가능한 셀 공통 스타일
+                    background: '#FFFDF0', // 연노랑 같은 색으로 표시
+                    text: '#000'
+                },
+            }
+        });
+
+        const gridData = [
+            { name: "아이유", artist: "IU",       type: "앨범", release: "2020-05-06", genre: "K-Pop" },
+            { name: "뉴진스", artist: "NewJeans", type: "싱글", release: "2023-01-10", genre: "K-Pop" },
+            { name: "임영웅", artist: "Hero",     type: "앨범", release: "2024-03-02", genre: "발라드" }
+        ];
+
+        // Grid 생성
+        const grid = new tui.Grid({
+            el: document.getElementById('grid'),
+            data: gridData,
+            scrollX: true,
+            scrollY: true,
+            minBodyHeight: 0,
+            autoWidth: true,
+            columns: [
+                { header: '이름',   name: 'name',    sortable: 'true' },
+                { header: '가수',   name: 'artist' },
+                { header: '타입',   name: 'type' },
+                { header: '발매일', name: 'release', align: 'center' },
+                { header: '장르',   name: 'genre' }
+            ]
+        });
+        <!-- 그리드 레이아웃 새로고침 (스크롤바 벗어남 해결책) -->
+        window.addEventListener('load', function() {
+            subscriptionGrid.refreshLayout();
+        });
+    </script>
+</body>
+</html>
