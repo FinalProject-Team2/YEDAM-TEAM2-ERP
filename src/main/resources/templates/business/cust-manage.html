@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+<title>고객관리 화면</title>
+
+</head>
+<body layout:fragment="content">
+	<div class="card">
+		<div class="card-header with-actions">
+			<div class="card-header-left">
+				<h5 class="card-title">검색조건</h5>
+			</div> <!-- card-header-left end -->
+			
+			<div calss="card-header right">
+				<button class="btn btn-dark">초기화</button>
+				<button class="btn btn-outline-dark">조회</button>
+			</div> <!-- card-header right end -->
+		</div> <!-- card-header wihy-actions end -->
+		
+		<div class="card-body">
+                        <div class="row mb-2">
+                              <div class="col-md-4">
+                                <label>고객코드</label>
+                                <select class="form-select">
+                                    <option>251125-001</option>
+                                    <option>251125-002</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>고객사</label>
+                                <select class="form-select">
+                                    <option>무신사</option>
+                                    <option>29cm</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>담당자</label>
+                                <select class="form-select">
+                                    <option>논개</option>
+                                    <option>구론산</option>
+                                </select>
+                            </div>
+           </div>                 
+	</div>	<!-- card end -->
+	
+
+		
+		<div class="card">
+		  <div class="card-header with-actions">
+			<div class="card-header-left">
+				<h5 class="card-title">고객정보</h5>
+			</div> <!-- card-header-left end -->
+			
+
+		  </div> <!-- card-header wihy-actions end -->
+		  
+               <div class="row mb-2">
+			       
+	         </div>	<!-- card end -->
+	  </div> <!-- card body end -->       
+</body>
+</html>

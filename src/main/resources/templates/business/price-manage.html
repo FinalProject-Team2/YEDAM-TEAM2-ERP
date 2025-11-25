@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+<title>단가관리 화면</title>
+
+</head>
+<body layout:fragment="content">
+	<div class="card">
+		<div class="card-header with-actions">
+			<div class="card-header-left">
+				<h5 class="card-title">검색조건</h5>
+			</div> <!-- card-header-left end -->
+			
+			<div class="card-header right">
+				<button class="btn btn-dark">초기화</button>
+				<button class="btn btn-outline-dark">조회</button>
+				<button class="btn btn-outline-dark">등록</button>
+				<button class="btn btn-outline-dark">삭제</button>
+				<button class="btn btn-outline-dark">근로계약서</button>
+			</div> <!-- card-header right end -->
+		</div> <!-- card-header wihy-actions end -->
+		
+		<div class="card-body">
+			어쩌구저쩌구 바디 컨텐츠
+		</div> <!-- card-body end -->
+	</div>	<!-- card end -->
+</body>
+</html>
