@@ -1,230 +1,328 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout}">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
-<meta charset="UTF-8">
-<title>공통 코드 관리</title>
+    <meta charset="UTF-8">
+    <title>공통 코드 관리</title>
 
-<!-- Toast UI Grid -->
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+    <!-- Toast UI Grid -->
+    <link rel="stylesheet"
+          href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
-<style>
-.form-select {
-	color: #000 !important;
-}
+    <style>
+        /* form-select 색상은 style.css 공통 사용 → 별도 오버라이드 제거 */
 
-.common-code-wrapper #groupGrid, .common-code-wrapper #codeGrid {
-	width: 100%;
-	margin-top: 4px;
-}
+        .common-code-wrapper #groupGrid,
+        .common-code-wrapper #codeGrid {
+            width: 100%;
+            margin-top: 4px;
+        }
 
-.common-code-wrapper .card-title {
-	font-weight: 600;
-}
+        .common-code-wrapper .card-title {
+            font-weight: 600;
+        }
 
-/* 카드 공통 헤더 : 제목 왼쪽, 버튼 오른쪽 */
-.common-code-wrapper .card-header.with-actions {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
+        /* 제목 h5 아래 여백 줄이기 */
+        .common-code-wrapper .card-header-left h5 {
+            margin-bottom: 0;
+        }
 
-.common-code-wrapper .card-header-left h5 {
-	margin-bottom: 0;
-}
-
-.common-code-wrapper .card-header-right .btn {
-	margin-left: .25rem;
-}
-</style>
+        /* 버튼 간격은 style.css 의 .card-header-right(gap) 공통 사용 → 여기선 추가 마진 제거 */
+    </style>
 </head>
 
 <body layout:fragment="content">
-	<div class="common-code-wrapper">
+<div class="common-code-wrapper">
 
-		<!-- 공통 코드 조회 카드 -->
-		<div class="row">
-			<div class="col-md-12 mb-3">
-				<div class="card">
+    <!-- 공통 코드 조회 카드 -->
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <div class="card">
 
-					<!-- 헤더: 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">공통 코드 조회</h5>
-						</div>
-						<div class="card-header-right">
-							<button id="btnReset" class="btn btn-dark">초기화</button>
-							<button id="btnSearch" class="btn btn-outline-dark">조회</button>
-						</div>
-					</div>
+                <!-- 헤더: 제목 + 초기화/조회 버튼 -->
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <h5 class="card-title">공통 코드 조회</h5>
+                    </div>
+                    <div class="card-header-right">
+                        <button id="btnReset" class="btn btn-dark" type="button">초기화</button>
+                        <button id="btnSearch" class="btn btn-outline-dark" type="button">조회</button>
+                    </div>
+                </div>
 
-					<div class="card-body">
-						<div class="row mb-2">
-							<div class="col-md-6">
-								<label for="codeGroupName">코드 그룹 명</label> <input
-									id="codeGroupName" type="text" class="form-control"
-									placeholder="직급">
-							</div>
-							<div class="col-md-6">
-								<label for="useYn">사용 여부</label> <select id="useYn"
-									class="form-select">
-									<option value="" selected>전체</option>
-									<option value="Y">사용</option>
-									<option value="N">미사용</option>
-								</select>
-							</div>
-						</div>
-					</div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label for="codeGroupName">코드 그룹 명</label>
 
-				</div>
-			</div>
-		</div>
+                            <!-- [자동완성][추가] 코드 그룹명 input + 추천 목록을 함께 감싸는 래퍼 -->
+                            <div class="position-relative">
+                                <!-- [자동완성][기존 input에 autocomplete="off"만 추가] -->
+                                <input
+                                        id="codeGroupName"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="직급"
+                                        autocomplete="off"><!-- 브라우저 기본 자동완성 끄기 -->
 
-		<!-- 좌측: 그룹 Grid / 우측: 코드 Grid -->
-		<div class="row">
-			<!-- 그룹 Grid 카드 -->
-			<div class="col-md-6">
-				<div class="card mb-3">
+                                <!-- [자동완성][추가] 코드 그룹명 자동완성 후보 리스트 -->
+                                <ul id="codeGroupSuggest"
+                                    class="list-group position-absolute w-100"
+                                    style="z-index: 2000;">
+                                    <!-- JS에서 <li> 항목이 동적으로 추가됨 -->
+                                </ul>
+                            </div>
 
-					<!-- 헤더: 코드 그룹 목록 (버튼 없음) -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">코드 그룹 목록</h5>
-						</div>
-						<div class="card-header-right">
-							<!-- 필요 시 버튼 추가 -->
-						</div>
-					</div>
+                            <!-- 필요하면 그룹 ID용 hidden 추가 (예시)
+                            <input type="hidden" id="codeGroupId" name="codeGroupId">
+                            -->
+                        </div>
+                        <div class="col-md-6">
+                            <label for="useYn">사용 여부</label>
+                            <select id="useYn" class="form-select">
+                                <option value="" selected>전체</option>
+                                <option value="Y">사용</option>
+                                <option value="N">미사용</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
-					<div class="card-body">
-						<div id="groupGrid"></div>
-					</div>
-				</div>
-			</div>
+            </div>
+        </div>
+    </div>
 
-			<!-- 코드 Grid 카드 -->
-			<div class="col-md-6">
-				<div class="card mb-3">
+    <!-- 좌측: 그룹 Grid / 우측: 코드 Grid -->
+    <div class="row">
+        <!-- 그룹 Grid 카드 -->
+        <div class="col-md-6">
+            <div class="card mb-3">
 
-					<!-- 헤더: 공통 코드 목록 + 등록 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">공통 코드 목록</h5>
-						</div>
-						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark">등록</button>
-						</div>
-					</div>
+                <!-- 헤더: 코드 그룹 목록 -->
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <h5 class="card-title">코드 그룹 목록</h5>
+                    </div>
+                    <div class="card-header-right">
+                        <button type="button" class="btn btn-outline-dark">등록</button>
+                    </div>
+                </div>
 
-					<div class="card-body">
-						<div id="codeGrid"></div>
-					</div>
-				</div>
-			</div>
-		</div>
+                <div class="card-body">
+                    <div id="groupGrid"></div>
+                </div>
+            </div>
+        </div>
 
-	</div>
+        <!-- 코드 Grid 카드 -->
+        <div class="col-md-6">
+            <div class="card mb-3">
 
-	<script>
-    // ==========================
-    // 1. Grid 테마 설정
-    // ==========================
-    tui.Grid.applyTheme('default', {
-        cell: {
-            normal: {
-                border: '#dedede',
-                background: '#ffffff',
-                showVerticalBorder: true
-            },
-            header: {
-                border: '#dedede',
-                background: '#f5f5f5',
-                showVerticalBorder: true
-            },
-            editable: {
-                background: '#FFFDF0',
-                text: '#000'
-            },
-            selectedHeader: {
-                background: '#f5f5f5'
-            },
-            selected: {
-                background: '#ffffff'
+                <!-- 헤더: 공통 코드 목록 -->
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <h5 class="card-title">공통 코드 목록</h5>
+                    </div>
+                    <div class="card-header-right">
+                        <button type="button" class="btn btn-outline-dark">등록</button>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div id="codeGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Toast Grid 로딩 확인 (혹시 모를 에러 방지)
+        if (!window.tui || !tui.Grid) {
+            return;
+        }
+
+        // ==========================
+        // 1. 화면 테스트용 기본 데이터
+        // ==========================
+        const groupData = [
+            { groupId: 'MA_001', groupName: '직급', description: '직급 공통 코드', useYn: 'Y' },
+            { groupId: 'MA_002', groupName: '직무', description: '직무 공통 코드', useYn: 'Y' },
+            { groupId: 'MA_003', groupName: '부서', description: '부서 공통 코드', useYn: 'N' }
+        ];
+
+        const codeData = [
+            { codeId: 'SUB_001', codeName: '관리자', useYn: 'Y' },
+            { codeId: 'SUB_002', codeName: '팀장',   useYn: 'Y' },
+            { codeId: 'SUB_003', codeName: '사원',   useYn: 'Y' }
+        ];
+
+        // ==========================
+        // 2. Grid 공통 옵션 + 생성
+        // ==========================
+        const commonGridOptions = {
+            bodyHeight: 320,
+            scrollX: false,
+            scrollY: false,   // 세로 스크롤 없애서 우측 여백 제거
+            rowHeaders: [],
+            columnOptions: {
+                minWidth: 80,
+                resizable: true
             }
+        };
+
+        // 좌측: 코드 그룹 Grid
+        const groupGrid = new tui.Grid({
+            el: document.getElementById('groupGrid'),
+            data: groupData,   // 더미 데이터 바로 바인딩
+            ...commonGridOptions,
+            columns: [
+                { header: '그룹 ID',      name: 'groupId' },
+                { header: '코드 그룹 명', name: 'groupName', editor: 'text'},
+                { header: '설명',         name: 'description', editor: 'text' },
+                { header: '사용 여부',    name: 'useYn', // ✅ 셀 편집기를 select로 사용
+                    editor: {
+                        type: 'select',
+                        options: {
+                          listItems: [
+                            { text: '사용',   value: 'Y' },
+                            { text: '미사용', value: 'N' }
+                          ]
+                        }
+                      },
+
+                      // (선택) 화면에는 한글로 보여주고, 값은 Y/N 저장하고 싶을 때
+                      formatter: function({ value }) {
+                        if (value === 'Y') return '사용';
+                        if (value === 'N') return '미사용';
+                        return 'value';
+                      } }
+            ]
+        });
+
+        // 우측: 공통 코드 Grid
+        const codeGrid = new tui.Grid({
+            el: document.getElementById('codeGrid'),
+            data: codeData,    // 더미 데이터 바로 바인딩
+            ...commonGridOptions,
+            columns: [
+                { header: '코드 ID',   name: 'codeId' },
+                { header: '코드 명',   name: 'codeName', editor: 'text' },
+                { header: '사용 여부', name: 'useYn',
+                	editor: {
+                        type: 'select',
+                        options: {
+                          listItems: [
+                            { text: '사용',   value: 'Y' },
+                            { text: '미사용', value: 'N' }
+                          ]
+                        }
+                      },
+
+                      // (선택) 화면에는 한글로 보여주고, 값은 Y/N 저장하고 싶을 때
+                      formatter: function({ value }) {
+                        if (value === 'Y') return '사용';
+                        if (value === 'N') return '미사용';
+                        return value;
+                      } }
+            ]
+        });
+        
+        TeamCommon.grid.applyRequiredHeaders([
+        	  { gridId: 'groupGrid', columns: ['groupName', 'description', 'useYn'] },
+        	  { gridId: 'codeGrid',  columns: ['codeName', 'useYn']  }
+        	]);
+        
+        // ==========================
+        // 3. 초기화 버튼 (화면용)
+        // ==========================
+        const $btnReset = document.getElementById('btnReset');
+        const $codeGroupName = document.getElementById('codeGroupName');
+        const $useYn = document.getElementById('useYn');
+
+        if ($btnReset && $codeGroupName && $useYn) {
+            $btnReset.addEventListener('click', function () {
+                $codeGroupName.value = '';
+                $useYn.value = '';   // 전체로 초기화
+
+                // 초기화 시 그리드도 비움 (원하면 groupData/codeData로 다시 채워도 됨)
+                groupGrid.resetData([]);
+                codeGrid.resetData([]);
+            });
         }
-    });
 
-    // ==========================
-    // 2. 화면 테스트용 기본 데이터
-    // ==========================
-    const groupData = [
-        { groupId: 'MA_001', groupName: '직급', description: '직급 공통 코드', useYn: 'Y' },
-        { groupId: 'MA_002', groupName: '직무', description: '직무 공통 코드', useYn: 'Y' },
-        { groupId: 'MA_003', groupName: '부서', description: '부서 공통 코드', useYn: 'N' }
-    ];
+        // 조회 버튼은 나중에 백엔드 연동 시 로직 추가 예정
+        // const $btnSearch = document.getElementById('btnSearch');
+        // $btnSearch.addEventListener('click', function () { ... });
 
-    const codeData = [
-        { codeId: 'SUB_001', codeName: '관리자', useYn: 'Y' },
-        { codeId: 'SUB_002', codeName: '팀장',   useYn: 'Y' },
-        { codeId: 'SUB_003', codeName: '사원',   useYn: 'Y' }
-    ];
 
-    // ==========================
-    // 3. Grid 공통 옵션 + 생성
-    // ==========================
-    const commonGridOptions = {
-        bodyHeight: 320,
-        scrollX: false,
-        scrollY: false,    // 세로 스크롤 없애서 우측 여백 제거
-        rowHeaders: [],
-        columnOptions: {
-            minWidth: 80,
-            resizable: true
+        // ==========================
+        // 4. 코드 그룹명 자동완성 (테스트용)
+        // ==========================
+        // [주의] teamAutocomplete.js 가 layout(공통 템플릿) 등에서 미리 로딩되어 있어야 함
+        if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
+
+            TeamCommon.autocomplete.init({
+                // [필수] 입력창 selector
+                inputSelector: '#codeGroupName',
+
+                // [필수] 추천 목록을 표시할 UL selector
+                listSelector: '#codeGroupSuggest',
+
+                // [필수] 서버 자동완성 API URL
+                //  - 실제 구현할 때 컨트롤러 기준으로 경로 맞춰주면 됨
+                //  - 예: @GetMapping("/api/common-codes/group/autocomplete")
+                url: '/api/common-codes/group/autocomplete', // [자동완성][TODO] 실제 API 경로로 수정
+
+                // [선택] 서버에서 받을 파라미터 이름 (@RequestParam)
+                //  - 예: public List<Dto> autocomplete(@RequestParam("keyword") String keyword)
+                paramName: 'keyword',
+
+                // [선택] 몇 글자 이상 입력했을 때부터 검색할지 (기본 2)
+                minLength: 1, // 코드 그룹명은 짧으니까 1글자부터 검색하도록 테스트
+
+                // [선택] 디바운스 지연 시간(ms)
+                delay: 300,
+
+                // [선택] 서버 응답 -> {id, label, value} 변환
+                //  - 여기서는 서버가 {groupId, groupName}를 내려준다고 가정
+                mapResponse: function (item) {
+                    return {
+                        id: item.groupId,         // 예: "MA_001"
+                        label: item.groupName,    // 목록에 보이는 텍스트 (예: "직급")
+                        value: item.groupName     // input에 들어갈 값
+                    };
+                },
+
+                // [선택] 항목 선택 시 동작 정의
+                onSelect: function (item) {
+                    // 1) input에 선택한 코드 그룹명 넣기
+                    document.getElementById('codeGroupName').value = item.value;
+
+                    // 2) 필요하다면 hidden input에 groupId를 저장할 수도 있음
+                    // const hidden = document.getElementById('codeGroupId');
+                    // if (hidden) {
+                    //     hidden.value = item.id;
+                    // }
+
+                    // 3) 선택 후 추가 작업 (예: 해당 그룹에 속한 코드 목록 조회 등)
+                    //    나중에 groupId로 Ajax 조회해서 codeGrid.resetData(...) 하면 됨
+                }
+            });
+
+        } else {
+            console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamAutocomplete.js 로딩 여부 확인 필요');
         }
-    };
 
-    // 좌측: 코드 그룹 Grid (기본 데이터 출력)
-    const groupGrid = new tui.Grid({
-        el: document.getElementById('groupGrid'),
-        data: groupData,   // 더미 데이터 바로 바인딩
-        ...commonGridOptions,
-        columns: [
-            { header: '그룹 ID',     name: 'groupId' },
-            { header: '코드 그룹 명', name: 'groupName' },
-            { header: '설명',        name: 'description' },
-            { header: '사용 여부',   name: 'useYn', align: 'center' }
-        ]
     });
-
-    // 우측: 공통 코드 Grid (기본 데이터 출력)
-    const codeGrid = new tui.Grid({
-        el: document.getElementById('codeGrid'),
-        data: codeData,    // 더미 데이터 바로 바인딩
-        ...commonGridOptions,
-        columns: [
-            { header: '코드 ID',   name: 'codeId' },
-            { header: '코드 명',   name: 'codeName' },
-            { header: '사용 여부', name: 'useYn', align: 'center' }
-        ]
-    });
-
-    // ==========================
-    // 4. 초기화 버튼만 동작 (화면용)
-    // ==========================
-    document.getElementById('btnReset').addEventListener('click', () => {
-        document.getElementById('codeGroupName').value = '';
-        document.getElementById('useYn').value = '';   // 전체로 초기화
-
-        // 초기화 시 그리드도 비움 (원하면 groupData/codeData로 다시 채워도 됨)
-        groupGrid.resetData([]);
-        codeGrid.resetData([]);
-    });
-
-    // 조회 / 클릭 이벤트는 나중에 백엔드 붙일 때 다시 활성화하면 됨
+    
+    
 </script>
 
 </body>

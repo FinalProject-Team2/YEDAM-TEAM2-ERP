@@ -7,13 +7,6 @@
 <meta charset="UTF-8">
 <title>단가정책관리</title>
 
-<!-- Toast UI Grid -->
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-<link rel="stylesheet" href="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 <style>
 .lock-account-wrapper .card-title {
@@ -51,6 +44,20 @@
 .tui-grid-body-area .tui-grid-cell-row-header {
   background-color: #ffffff;
 }
+
+/* 그리드 버튼 스타일 */
+.grid-btn {
+    padding: 4px 10px;
+    border: 1px solid #bbb;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.grid-btn:hover {
+    background-color: #eee;
+}
+
 </style>
 </head>
 
@@ -76,34 +83,27 @@
 					<div class="card-body">
 						<div class="row g-2">
 							<div class="col-md-3">
-								<label for="clientName" class="form-label">단가정책코드</label> <input
-									id="clientName" type="text" class="form-control"
-									placeholder="YEDAM">
+								<label for="clientName" class="form-label">단가정책명</label>
+								<input id="clientName" type="text" class="form-control" placeholder="YEDAM">
 							</div>
 
 							<div class="col-md-3">
-								<label for="accountId" class="form-label">단가정책명</label> <input
-									id="accountId" type="text" class="form-control"
-									placeholder="HONG@NON.AC">
+								<label class="form-label">단가정책유형</label>
+						        <select class="form-select same-height">
+						          <option>거래처별</option>
+						          <option>품목별</option>
+						        </select>
 							</div>
 
 							<div class="col-md-3">
 								<label for="userName" class="form-label">적용일</label>
-								<!--  <input id="userName" type="text" class="form-control" placeholder="홍길동">
-								 <input id="datePicker" type="text" class="form-control" placeholder="날짜 선택"> -->
-								 <!-- <div class="input-group date">
-								    <input type="text" class="form-control datepicker" placeholder="날짜 선택">
-								    <span class="input-group-text">
-								        <i class="bi bi-calendar"></i>
-								    </span>
-								</div> -->
 								<div class="input-group date" id="applyDatePicker">
 								    <input type="text" class="form-control" id="applyDate" placeholder="날짜 선택">
 								    <span class="input-group-text" id="icon-calendar">
 								        <i class="bi bi-calendar"></i>
 								    </span>
 								</div>
-								
+																
 							</div>
 
 						</div>
@@ -115,8 +115,10 @@
 
 		<!-- 단가정책목록 카드 -->
 		<div class="row">
-			<div class="col-md-12">
-				<div class="card">
+		
+			<!-- 단가정책목록 그리드 -->
+			<div class="col-md-7 d-flex">
+    			<div class="card w-100 h-100">
 
 					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
 					<div class="card-header with-actions">
@@ -129,103 +131,366 @@
 					</div>
 
 					<div class="card-body">
-						<div id="accountGrid"></div>
+						<div class="priceGridWrap">
+							<div id="priceGrid"></div>
+						</div>
 					</div>
 				</div>
 			</div>
+			
+			<!-- 단가정책 등록폼 -->
+			<div class="col-md-5 d-flex">
+    			<div class="card w-100 h-100">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">단가정책 등록</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark">초기화</button>
+							<button type="button" class="btn btn-outline-dark">저장</button>
+						</div>
+					</div>
+
+					<!-- 정책등록폼 -->
+					<div class="card-body d-flex flex-column justify-content-between">
+						  <div class="row g-3">
+						    <!-- 위쪽 영역 -->
+						    <div class="col-12">
+						      <label class="form-label">단가정책명</label>
+						      <input id="priceName" type="text" class="form-control">
+						    </div>
+						
+						    <!-- 중간 : 유형 / 할인율 / 적용일 -->
+						    <div class="col-md-6">
+						      <div class="mb-3">
+						        <label class="form-label">유형</label>
+						        <select id="priceType" class="form-select same-height">
+						          <option>거래처별</option>
+						          <option>품목별</option>
+						        </select>
+						      </div>
+						    </div>
+						    
+						    <div class="col-md-6">
+						      <div class="mb-3">
+						        <label class="form-label">할인율(%)</label>
+						        <input id="percent" type="text" class="form-control same-height">
+						      </div>
+						    </div>
+						
+						    <div class="col-12">
+						      <label class="form-label">적용일</label>
+						      <div class="d-flex align-items-center">
+						        <div class="input-group date me-2">
+						          <input id="beginDt" type="text" class="form-control" placeholder="시작일 선택">
+						          <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+						        </div>
+						        <span class="mx-1 fw-bold fs-5">~</span>
+						        <div class="input-group date ms-2">
+						          <input id="endDt" type="text" class="form-control" placeholder="종료일 선택">
+						          <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+						        </div>
+						      </div>
+						    </div>
+						
+						    <!-- 아래 : 비고 (아래쪽에 붙도록) -->
+						    <div class="col-12 mt-auto">
+						      <label class="form-label">비고</label>
+						      <input id="rm" type="text" class="form-control">
+						    </div>
+						  </div>
+					</div> <!-- 정책등록폼 end -->
+					
+				</div>
+			</div>
+			
+			<!-- 단가정책 등록폼 -->
+			<div class="col-md-5 d-flex">
+    			<div class="card w-100 h-100">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">단가정책 등록</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark">초기화</button>
+							<button type="button" class="btn btn-outline-dark">저장</button>
+						</div>
+					</div>
+
+					<!-- 정책등록폼 -->
+					<div class="card-body d-flex flex-column justify-content-between">
+						  <div class="row g-3">
+						    <!-- 위쪽 영역 -->
+						    <div class="col-12">
+						      <label class="form-label">단가정책명</label>
+						      <input id="priceName" type="text" class="form-control">
+						    </div>
+						
+						    <!-- 중간 : 유형 / 할인율 / 적용일 -->
+						    <div class="col-md-6">
+						      <div class="mb-3">
+						        <label class="form-label">유형</label>
+						        <select id="priceType" class="form-select same-height">
+						          <option>거래처별</option>
+						          <option>품목별</option>
+						        </select>
+						      </div>
+						    </div>
+						    
+						    <div class="col-md-6">
+						      <div class="mb-3">
+						        <label class="form-label">할인율(%)</label>
+						        <input id="percent" type="text" class="form-control same-height">
+						      </div>
+						    </div>
+
+						
+						    <div class="col-12">
+						      <label class="form-label">적용일</label>
+						      <div class="d-flex align-items-center">
+						        <div class="input-group date me-2">
+						          <input id="beginDt" type="text" class="form-control" placeholder="시작일 선택">
+						          <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+						        </div>
+						        <span class="mx-1 fw-bold fs-5">~</span>
+						        <div class="input-group date ms-2">
+						          <input id="endDt" type="text" class="form-control" placeholder="종료일 선택">
+						          <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+						        </div>
+						      </div>
+						    </div>
+						
+						    <!-- 아래 : 비고 (아래쪽에 붙도록) -->
+						    <div class="col-12 mt-auto">
+						      <label class="form-label">비고</label>
+						      <input id="rm" type="text" class="form-control">
+						    </div>
+						  </div>
+					</div> <!-- 정책등록폼 end -->
+					
+				</div>
+			</div>
+			
 		</div>
 
 	</div>
 
-	<script>
+<script>
 
 
 	
     // 1. Toast UI Grid 테마
-tui.Grid.applyTheme('default', {
-  cell: {
-    normal: {
-      border: '#dedede',
-      background: '#ffffff',
-      showVerticalBorder: true
-    },
-    header: {
-      border: '#dedede',
-      background: '#f5f5f5',
-      showVerticalBorder: true
-    },
-    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
-    rowHeader: {
-      border: '#dedede',
-      background: '#ffffff',
-      showVerticalBorder: true
-    },
-    editable: {
-      background: '#FFFDF0',
-      text: '#000'
-    },
-    selectedHeader: {
-      background: '#f5f5f5'
-    },
-    selected: {
-      background: '#ffffff'
-    }
-  }
-});
+		tui.Grid.applyTheme('default', {
+		  cell: {
+		    normal: {
+		      border: '#dedede',
+		      background: '#ffffff',
+		      showVerticalBorder: true
+		    },
+		    header: {
+		      border: '#dedede',
+		      background: '#f5f5f5',
+		      showVerticalBorder: true
+		    },
+		    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
+		    rowHeader: {
+		      border: '#dedede',
+		      background: '#ffffff',
+		      showVerticalBorder: true
+		    },
+		    editable: {
+		      background: '#FFFDF0',
+		      text: '#000'
+		    },
+		    selectedHeader: {
+		      background: '#f5f5f5'
+		    },
+		    selected: {
+		      background: '#ffffff'
+		    }
+		  }
+		}); // 1. 끝
 
 
 
     // 2. 더미 데이터
-    const accountData = [
+    const priceData = [
         {
-            clientName: 'YEDAM',
-            accountId: 'HONG@NON.AC',
-            userName: '홍길동',
-            status: 'LOCKED',
-            lockTime: '2019-05-05 09:12:54'
+        	priceName: '논개',
+            percent: 12,
+            beginDt: '2019-10-28',
+            endDt: '2019-10-30',
+            type: '거래처별',
+            rm: '논개가좋아하는믹스커피X2마시고3시에15분담요쓰고기절하기구론산컨피던스박카스'
         },
         {
-            clientName: 'YEDAM',
-            accountId: 'KIM@NON.AC',
-            userName: '김영업',
-            status: 'LOCKED',
-            lockTime: '2019-05-06 10:11:22'
+        	priceName: '구론산',
+            percent: 5,
+            beginDt: '2019-07-14',
+            endDt: '2019-07-21',
+            type: '품목별',
+            rm: '논개최애간식딸기맛마이쮸초콜릿빵쿠키사탕젤리'
+        },
+        {
+        	priceName: '레이',
+            percent: 5,
+            beginDt: '2019-05-02',
+            endDt: '2019-05-05',
+            type: '품목별',
+            rm: '레이주특기제자리에서점프하고땀흘리기'
+        },
+        {
+        	priceName: '논개',
+            percent: 12,
+            beginDt: '2019-05-04',
+            endDt: '2019-05-06',
+            type: '거래처별',
+            rm: '논개가좋아하는믹스커피X2구론산컨피던스박카스'
+        },
+        {
+        	priceName: '구론산',
+            percent: 5,
+            beginDt: '2019-07-14',
+            endDt: '2019-07-21',
+            type: '품목별',
+            rm: '논개최애간식딸기맛마이쮸초콜릿빵쿠키사탕젤리'
+        },
+        {
+        	priceName: '레이',
+            percent: 5,
+            beginDt: '2019-05-02',
+            endDt: '2019-05-05',
+            type: '품목별',
+            rm: '레이주특기제자리에서점프하고땀흘리기'
+        },
+        {
+        	priceName: '논개',
+            percent: 12,
+            beginDt: '2019-10-28',
+            endDt: '2019-10-30',
+            type: '거래처별',
+            rm: '논개가좋아하는믹스커피X2구론산컨피던스박카스'
+        },
+        {
+        	priceName: '구론산',
+            percent: 5,
+            beginDt: '2019-07-14',
+            endDt: '2019-07-21',
+            type: '품목별',
+            rm: '논개최애간식딸기맛마이쮸초콜릿빵쿠키사탕젤리'
+        },
+        {
+        	priceName: '레이',
+            percent: 5,
+            beginDt: '2019-05-02',
+            endDt: '2019-05-05',
+            type: '품목별',
+            rm: '레이주특기제자리에서점프하고땀흘리기'
         }
-    ];
+    ]; // 2. 끝
 
     // 3. Grid 공통 옵션
-    const commonGridOptions = {
-        bodyHeight: 320,
-        scrollX: false,
-        scrollY: false,
+    const priceGridOptions = {
+        bodyHeight: 340,
+        scrollX: true,
+        scrollY: true,  // 세로
         rowHeaders: ['checkbox'],     // 좌측 체크박스
         columnOptions: {
             minWidth: 80,
             resizable: true
         }
-    };
+    }; // 3. 끝
 
-    // 4. 계정 목록 Grid 생성
-    const accountGrid = new tui.Grid({
-        el: document.getElementById('accountGrid'),
-        data: accountData,
-        ...commonGridOptions,
+    // 4. 단가정책 목록 Grid 생성
+    const priceGrid = new tui.Grid({
+        el: document.getElementById('priceGrid'),
+        data: priceData,
+        ...priceGridOptions,
         columns: [
-            { header: '단가정책코드', name: 'clientName', minWidth: 120 },
-            { header: '단가정책명', name: 'accountId', minWidth: 180 },
-            { header: '유형', name: 'userName', minWidth: 120 },
-            { header: '할인율(%)', name: 'userName', minWidth: 120 },
-            { header: '정책 적용시작일', name: 'userName', minWidth: 120 },
-            { header: '정책 적용종료일', name: 'userName', minWidth: 120 },
-            { header: '거래처별', name: 'userName', minWidth: 120 },
-            { header: '품목별', name: 'userName', minWidth: 120 },
-            { header: '비고', name: 'userName', minWidth: 120 },
+        	{ header: 'ID', name: 'priceId', hidden: true },
+            { header: '단가정책명', name: 'priceName', width: 180 },
+            { header: '할인율(%)', name: 'percent', width: 80 },
+            { header: '적용시작일', name: 'beginDt', width: 100 },
+            { header: '적용종료일', name: 'endDt', width: 100 },
+            { header: '유형', name: 'type', width: 80 },
+            { header: '거래처설정', name: 'clientSetting', width: 120, align: 'center',
+            	formatter: () => {
+            		return '<button class="grid-btn client-btn">거래처설정</button>';
+            	}
+            },
+            { header: '품목설정', name: 'itemSetting', width: 120, align: 'center',
+                formatter: () => {
+                    return '<button class="grid-btn item-btn">품목설정</button>';
+                }
+            },
+            { header: '비고', name: 'rm', width: 'auto' },
         ]
-    });
+    }); // 4. 끝
+    
+    
+	 // 5. 폼 요소 캐싱
+	    const priceForm = {
+	      priceName: document.getElementById('priceName'),
+	      priceType: document.getElementById('priceType'),
+	      percent:   document.getElementById('percent'),
+	      beginDt:   document.getElementById('beginDt'),
+	      endDt:     document.getElementById('endDt'),
+	      rm:        document.getElementById('rm')
+	      
+	    }; // 5. 끝
 
+    // 6. 행 클릭 시 폼에 데이터 세팅
+    	priceGrid.on('click', ev => {
+    		
+      // 버튼(거래처설정/품목설정) 클릭은 무시
+      if (ev.columnName === 'clientSetting' || ev.columnName === 'itemSetting') {
+        return;
+      }
+
+      const rowKey = ev.rowKey;
+      if (rowKey == null) return;
+
+      const row = priceGrid.getRow(rowKey);
+      if (!row) return;
+
+      // Grid 데이터 → 폼 매핑
+      priceForm.priceName.value = row.priceName || '';
+      priceForm.percent.value   = row.percent || '';
+
+      // select 박스는 value 로 지정
+      if (row.type) {
+        priceForm.priceType.value = row.type;
+      } else {
+        priceForm.priceType.value = ''; // 필요시 기본값
+      }
+
+      priceForm.beginDt.value = row.beginDt || '';
+      priceForm.endDt.value   = row.endDt || '';
+      priceForm.rm.value      = row.rm || '';
+    }); // 6. 끝
     
+ // 7. 버튼 클릭 이벤트 처리
+ 	document.addEventListener('click', (e) => {
+	     if (e.target.classList.contains('client-btn')) {
+	         const rowKey = priceGrid.getFocusedCell().rowKey;
+	         const rowData = priceGrid.getRow(rowKey);
+	         alert(`거래처 설정 클릭: ${rowData.priceId}`);
+	     }
+	
+	     if (e.target.classList.contains('item-btn')) {
+	         const rowKey = priceGrid.getFocusedCell().rowKey;
+	         const rowData = priceGrid.getRow(rowKey);
+	         alert(`품목 설정 클릭: ${rowData.priceId}`);
+	     }
+      
+ 	}); // 7. 끝
+		
     
-    $('#applyDatePicker input').datepicker({
+  /*  $('#applyDatePicker input').datepicker({
         format: "yyyy-mm-dd",
         autoclose: true,
         todayHighlight: true

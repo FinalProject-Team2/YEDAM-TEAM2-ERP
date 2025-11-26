@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.busi1">
+
+	<select id="selectPolicy">
+		SELECT
+		       p.price_policy_id
+		     , p.vend_id
+		     , p.price_policy_name price_name 
+		     , p.price_ty type
+		     , p.basis_dc_rate percent
+		     , p.applc_begin_dt beginDt
+		     , p.applc_end_de endDt
+		     , p.yn
+		     , p.rm
+		FROM   tb_price p
+		WHERE  p.yn = 'Y' 
+		  AND  (:p_price_policy_name IS NULL
+		        OR p_price_policy_name LIKE '%' || :p_price_policy_name || '%')
+		  AND  (:p_price_ty IS NULL
+		        OR p.PRICE_TY = :p_price_ty)
+		  AND  (
+		          :p_applc_dt IS NULL
+		       OR :p_applc_dt BETWEEN p.applc_begin_dt
+		                          AND NVL(p.applc_end_dt,
+		                                  TO_DATE('29991231','YYYYMMDD'))
+		       )
+		ORDER BY p.crea_dt DESC
+	</select>
+	
+	
+	
+	
+</mapper>

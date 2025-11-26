@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+</head>
+
+<body layout:fragment="content">
+	<div class="lock-account-wrapper">
+
+		<!-- 고객 조회 -->
+		<div class="row mb-3">
+			<div class="col-md-12">
+				<div class="card">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">검색 조건</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark">초기화</button>
+							<button type="button" class="btn btn-outline-dark">조회</button>
+						</div>
+					</div>
+
+					<!-- /card-body start -->
+					<div class="card-body">
+						<div class="row g-5">
+							<div class="col-md-4">
+								<label>고객코드</label> <select class="form-select">
+									<option>251125-001</option>
+									<option>251125-002</option>
+								</select>
+							</div>
+							<div class="col-md-4">
+								<label>고객사</label> <select class="form-select">
+									<option>무신사</option>
+									<option>29cm</option>
+								</select>
+							</div>
+
+						</div>
+					</div>
+					<!-- /card-body end -->
+				</div>
+			</div>
+		</div>
+		
+				<!-- 단가정책목록 카드 -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="card">
+
+					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">여신한도설정</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark">초기화</button>
+							<button type="button" class="btn btn-outline-dark">저장</button>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div id="accountGrid"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<script>
+
+
+	
+    // 1. Toast UI Grid 테마
+tui.Grid.applyTheme('default', {
+  cell: {
+    normal: {
+      border: '#dedede',
+      background: '#ffffff',
+      showVerticalBorder: true
+    },
+    header: {
+      border: '#dedede',
+      background: '#f5f5f5',
+      showVerticalBorder: true
+    },
+    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
+    rowHeader: {
+      border: '#dedede',
+      background: '#ffffff',
+      showVerticalBorder: true
+    },
+    editable: {
+      background: '#FFFDF0',
+      text: '#000'
+    },
+    selectedHeader: {
+      background: '#f5f5f5'
+    },
+    selected: {
+      background: '#ffffff'
+    }
+  }
+});
+
+
+
+    // 2. 더미 데이터
+    const accountData = [
+        {
+            clientName: 'YEDAM',
+            accountId: 'HONG@NON.AC',
+            userName: '홍길동',
+            status: 'LOCKED',
+            lockTime: '2019-05-05 09:12:54'
+        },
+        {
+            clientName: 'YEDAM',
+            accountId: 'KIM@NON.AC',
+            userName: '김영업',
+            status: 'LOCKED',
+            lockTime: '2019-05-06 10:11:22'
+        }
+    ];
+
+    // 3. Grid 공통 옵션
+    const commonGridOptions = {
+        bodyHeight: 320,
+        scrollX: false,
+        scrollY: false,
+        rowHeaders: ['checkbox'],     // 좌측 체크박스
+        columnOptions: {
+            minWidth: 80,
+            resizable: true
+        }
+    };
+
+    // 4. 계정 목록 Grid 생성
+    const accountGrid = new tui.Grid({
+        el: document.getElementById('accountGrid'),
+        data: accountData,
+        ...commonGridOptions,
+        columns: [
+            { header: '단가정책코드', name: 'clientName', minWidth: 120 },
+            { header: '단가정책명', name: 'accountId', minWidth: 180 },
+            { header: '유형', name: 'userName', minWidth: 120 },
+            { header: '할인율(%)', name: 'userName', minWidth: 120 },
+            { header: '정책 적용시작일', name: 'userName', minWidth: 120 },
+            { header: '정책 적용종료일', name: 'userName', minWidth: 120 },
+            { header: '거래처별', name: 'userName', minWidth: 120 },
+            { header: '품목별', name: 'userName', minWidth: 120 },
+            { header: '비고', name: 'userName', minWidth: 120 },
+        ]
+    });
+
+    
+    
+    $('#applyDatePicker input').datepicker({
+        format: "yyyy-mm-dd",
+        autoclose: true,
+        todayHighlight: true
+    });
+
+    // 아이콘 클릭 → input focus → 달력 열림
+    $('#icon-calendar').on('click', function () {
+        $('#applyDate').focus();
+    }); 
+</script>
+
+</body>
+</html>

@@ -57,7 +57,7 @@
 }
 
 .subscription-choice-card {
-    min-height: 600px;   /* 최소 높이 지정 */
+	min-height: 480px; /* 최소 높이 지정 */
 }
 
 /* 요금 주기 토글 버튼 라인 */
@@ -79,13 +79,29 @@
 	color: #0d6efd; /* 기본 텍스트 색상 유지(부트스트랩 primary 톤) */
 }
 
-.billing-toggle-row .btn-outline-primary.active,
-.billing-toggle-row .btn-outline-primary:hover,
-.billing-toggle-row .btn-outline-primary:focus {
+/* active/hover 상태에서 동일한 스타일 유지 */
+.billing-toggle-row .btn-outline-primary.billing-active,
+	.billing-toggle-row .btn-outline-primary:hover, .billing-toggle-row .btn-outline-primary:focus
+	{
 	border-color: #e0e0e0;
-	background-color: rgba(13, 110, 253, 0.06); /* 살짝만 채움 */
+	background-color: rgba(13, 110, 253, 0.06);
 	color: #0d6efd;
 	box-shadow: none;
+}
+
+/* 플랜 선택 버튼 active 상태를 hover 상태와 동일하게 보이도록 */
+.plan-cta .btn.btn-outline-primary.active, .plan-cta .btn.btn-outline-primary:hover
+	{
+	color: #fff;
+	background-color: #0d6efd;
+	border-color: #0d6efd;
+}
+
+.plan-cta .btn.btn-outline-dark.active, .plan-cta .btn.btn-outline-dark:hover
+	{
+	color: #fff;
+	background-color: #343a40;
+	border-color: #343a40;
 }
 </style>
 </head>
@@ -107,12 +123,16 @@
 
 					<!-- 월간 / 연간 요금 토글 영역 -->
 					<div class="billing-toggle-row">
-						<div class="btn-group btn-group-toggle" data-toggle="buttons">
-							<label class="btn btn-outline-primary w-50">
-								<input type="radio" name="billingCycle" id="billingMonthly" autocomplete="off" checked> 월간 요금
-							</label>
-							<label class="btn btn-outline-primary w-50">
-								<input type="radio" name="billingCycle" id="billingYearly" autocomplete="off"> 연간 요금
+						<div class="btn-group btn-group-toggle">
+							<label
+								class="btn btn-outline-primary w-50 billing-toggle-btn billing-active"
+								data-billing="MONTHLY"> <input type="radio"
+								name="billingCycle" id="billingMonthly" autocomplete="off"
+								checked> 월간 요금
+							</label> <label class="btn btn-outline-primary w-50 billing-toggle-btn"
+								data-billing="YEARLY"> <input type="radio"
+								name="billingCycle" id="billingYearly" autocomplete="off">
+								연간 요금
 							</label>
 						</div>
 					</div>
@@ -124,12 +144,13 @@
 								<div class="plan-tag">BASIC</div>
 								<div class="plan-header">베이식 플랜</div>
 								<div class="plan-body">
-									작은 팀이나 테스트용으로 적합한 기본 기능 제공. <br />
-									월간 사용량이 많지 않은 경우에 추천합니다.
+									작은 팀이나 테스트용으로 적합한 기본 기능 제공. <br /> 월간 사용량이 많지 않은 경우에 추천합니다.
 								</div>
 								<div class="plan-price">₩19,000 / 월</div>
 								<div class="plan-cta">
-									<button type="button" class="btn btn-outline-dark btn-sm">선택</button>
+									<button type="button"
+										class="btn btn-outline-dark btn-sm plan-select-btn"
+										data-plan="BASIC">선택</button>
 								</div>
 							</div>
 						</div>
@@ -139,13 +160,13 @@
 							<div class="plan-wrapper h-100">
 								<div class="plan-tag">STANDARD</div>
 								<div class="plan-header">스탠다드 플랜</div>
-								<div class="plan-body">
-									일반적인 비즈니스 운영에 필요한 기능을 균형 있게 제공.
-									추가 계정과 API 호출 한도가 포함된 플랜입니다.
-								</div>
+								<div class="plan-body">일반적인 비즈니스 운영에 필요한 기능을 균형 있게 제공. 추가
+									계정과 API 호출 한도가 포함된 플랜입니다.</div>
 								<div class="plan-price">₩49,000 / 월</div>
 								<div class="plan-cta">
-									<button type="button" class="btn btn-outline-dark btn-sm">선택</button>
+									<button type="button"
+										class="btn btn-outline-dark btn-sm plan-select-btn"
+										data-plan="STANDARD">선택</button>
 								</div>
 							</div>
 						</div>
@@ -155,13 +176,13 @@
 							<div class="plan-wrapper h-100">
 								<div class="plan-tag">PREMIUM</div>
 								<div class="plan-header">프리미엄 플랜</div>
-								<div class="plan-body">
-									고급 기능과 넉넉한 사용량을 제공하는 상위 플랜.
-									성장 단계 이상의 기업에 적합한 구성입니다.
-								</div>
+								<div class="plan-body">고급 기능과 넉넉한 사용량을 제공하는 상위 플랜. 성장 단계
+									이상의 기업에 적합한 구성입니다.</div>
 								<div class="plan-price">₩99,000 / 월</div>
 								<div class="plan-cta">
-									<button type="button" class="btn btn-outline-dark btn-sm">선택</button>
+									<button type="button"
+										class="btn btn-outline-dark btn-sm plan-select-btn"
+										data-plan="PREMIUM">선택</button>
 								</div>
 							</div>
 						</div>
@@ -170,6 +191,35 @@
 			</div>
 		</div>
 	</div>
+
+	<script>
+	// 플랜 선택 버튼 클릭 시 active 상태 토글 (한 개만 선택되도록)
+	document.addEventListener('DOMContentLoaded', function() {
+		const planButtons = document.querySelectorAll('.plan-select-btn');
+		planButtons.forEach(btn => {
+			btn.addEventListener('click', function() {
+				// 기존 선택 해제
+				planButtons.forEach(b => b.classList.remove('active'));
+				// 현재 버튼 선택
+				this.classList.add('active');
+			});
+		});
+
+		// 월간/연간 요금 토글 active 관리
+		const billingButtons = document.querySelectorAll('.billing-toggle-btn');
+		billingButtons.forEach(btn => {
+			btn.addEventListener('click', function() {
+				billingButtons.forEach(b => b.classList.remove('billing-active'));
+				this.classList.add('billing-active');
+				// 라디오도 함께 체크 상태로 변경
+				const input = this.querySelector('input[type="radio"]');
+				if (input) {
+					input.checked = true;
+				}
+			});
+		});
+	});
+	</script>
 
 </body>
 </html>

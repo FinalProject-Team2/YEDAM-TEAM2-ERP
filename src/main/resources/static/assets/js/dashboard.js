@@ -451,6 +451,7 @@
       if (navbar) {
         navbar.classList.add('fixed-top');
       }
+
     }
 
     // 원래 코드: if ($(".navbar").hasClass("fixed-top")) { ... } else { ... }

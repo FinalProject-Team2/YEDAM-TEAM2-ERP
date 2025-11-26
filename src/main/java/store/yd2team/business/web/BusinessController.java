@@ -15,6 +15,13 @@ public class BusinessController {
 	 * }
 	 */
 
+	@GetMapping("/samplepage")
+	public String sample(Model model) {
+		System.out.println("=== BusinessController.insert() 호출됨 ===");
+		model.addAttribute("test", "testone");
+		return "business/samplepage"; // /는 빼도 됨
+	}
+	
 	@GetMapping("/churnRiskStdrRegister")
 	public String insert(Model model) {
 	    System.out.println("=== BusinessController.insert() 호출됨 ===");
@@ -27,6 +34,27 @@ public class BusinessController {
 		System.out.println("=== BusinessController.selectall() 호출됨 ===");
 		model.addAttribute("test", "testone");
 		return "business/churnRiskList";
+	}
+	
+	@GetMapping("/potentialCustRegister")
+	public String update(Model model) {
+		System.out.println("=== BusinessController.update() 호출됨 ===");
+		model.addAttribute("test", "testone");
+		return "business/potentialCustRegister";
+	}
+	
+	@GetMapping("/potentialCustList")
+	public String list(Model model) {
+		System.out.println("=== BusinessController.update() 호출됨 ===");
+		model.addAttribute("test", "testone");
+		return "business/potentialCustList";
+	}
+	
+	@GetMapping("/salesActivity")
+	public String update1(Model model) {
+		System.out.println("=== BusinessController.update() 호출됨 ===");
+		model.addAttribute("test", "testone");
+		return "business/salesactivity";
 	}
 }
 

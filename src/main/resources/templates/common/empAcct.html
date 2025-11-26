@@ -1,351 +1,340 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout}">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
-<meta charset="UTF-8">
-<title>사원 계정 관리</title>
+    <meta charset="UTF-8">
+    <title>사원 계정 관리</title>
 
-<!-- Toast UI Grid -->
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+    <!-- Toast UI Grid -->
+    <link rel="stylesheet"
+          href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
-<style>
-.form-select {
-	color: #000 !important;
-}
+    <style>
+        /* 페이지 전용 스타일 (공통 style.css / Grid 테마 중복 제거) */
 
-.emp-account-wrapper .card-title {
-	font-weight: 600;
-	font-size: 1.1rem;
-}
+        .emp-account-wrapper .card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
 
-.emp-account-wrapper #empGrid, .emp-account-wrapper #roleGrid {
-	width: 100%;
-	margin-top: 4px;
-}
+        .emp-account-wrapper #empGrid,
+        .emp-account-wrapper #roleGrid {
+            width: 100%;
+            margin-top: 4px;
+        }
 
-.emp-account-wrapper .help-text {
-	font-size: 12px;
-	color: #6c757d;
-}
+        .emp-account-wrapper .help-text {
+            font-size: 12px;
+            color: #6c757d;
+        }
 
-.emp-account-wrapper .card-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
+        .emp-account-wrapper .card-header-left {
+            display: flex;
+            align-items: center;
+        }
 
-.emp-account-wrapper .card-header-left {
-	display: flex;
-	align-items: center;
-}
+        .emp-account-wrapper .card-header-left .card-title {
+            margin-bottom: 0;
+        }
 
-.emp-account-wrapper .card-header-left .card-title {
-	margin-bottom: 0;
-}
+        /* 상단 헤더의 체크박스(행 헤더) 셀만 회색 */
+        .tui-grid-header-area .tui-grid-cell-row-header {
+            background-color: #f5f5f5;
+        }
 
-.emp-account-wrapper .card-header-right .btn {
-	margin-left: .25rem;
-}
-
-/* 상단 헤더의 체크박스(행 헤더) 셀만 회색 */
-.tui-grid-header-area .tui-grid-cell-row-header {
-	background-color: #f5f5f5;
-}
-
-/* 데이터 행의 체크박스 셀은 흰색 유지 */
-.tui-grid-body-area .tui-grid-cell-row-header {
-	background-color: #ffffff;
-}
-</style>
+        /* 데이터 행의 체크박스 셀은 흰색 유지 */
+        .tui-grid-body-area .tui-grid-cell-row-header {
+            background-color: #ffffff;
+        }
+        
+    </style>
 </head>
 
 <body layout:fragment="content">
-	<div class="emp-account-wrapper">
+<div class="emp-account-wrapper">
 
-		<!-- 사원 조회 카드 -->
-		<div class="row">
-			<div class="col-md-12 mb-3">
-				<div class="card">
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">사원 조회</h5>
-						</div>
-						<div class="card-header-right">
-							<button class="btn btn-dark">초기화</button>
-							<button class="btn btn-outline-dark">조회</button>
-						</div>
-					</div>
+    <!-- 사원 조회 카드 -->
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <h5 class="card-title">사원 조회</h5>
+                    </div>
+                    <div class="card-header-right">
+                        <button class="btn btn-dark" type="button">초기화</button>
+                        <button class="btn btn-outline-dark" type="button">조회</button>
+                    </div>
+                </div>
 
-					<div class="card-body">
-						<div class="row mb-2">
-							<div class="col-md-3">
-								<label for="deptName">부서 명</label> <select id="deptName"
-									class="form-select">
-									<option value="">YEDAM</option>
-									<option value="HR">인사</option>
-									<option value="SALES">영업</option>
-								</select>
-							</div>
-							<div class="col-md-3">
-								<label for="jobName">직급 명</label> <select id="jobName"
-									class="form-select">
-									<option value="">YEDAM</option>
-									<option>사원</option>
-									<option>대리</option>
-									<option>과장</option>
-								</select>
-							</div>
-							<div class="col-md-3">
-								<label for="empName">사원 이름</label> <input id="empName"
-									type="text" class="form-control" placeholder="홍길동">
-							</div>
-							<div class="col-md-3">
-								<label for="accountId">계정 ID</label> <input id="accountId"
-									type="text" class="form-control" placeholder="HONG@HONG.AC">
-							</div>
-						</div>
-					</div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <label for="deptName">부서 명</label>
+                            <select id="deptName" class="form-select">
+                                <option value="">YEDAM</option>
+                                <option value="HR">인사</option>
+                                <option value="SALES">영업</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="jobName">직급 명</label>
+                            <select id="jobName" class="form-select">
+                                <option value="">YEDAM</option>
+                                <option>사원</option>
+                                <option>대리</option>
+                                <option>과장</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="empName">사원 이름</label>
+                            <input id="empName"
+                                   type="text"
+                                   class="form-control"
+                                   placeholder="홍길동">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="accountId">계정 ID</label>
+                            <input id="accountId"
+                                   type="text"
+                                   class="form-control"
+                                   placeholder="HONG@HONG.AC">
+                        </div>
+                    </div>
+                </div>
 
-				</div>
-			</div>
-		</div>
+            </div>
+        </div>
+    </div>
 
-		<!-- 사원 목록 + 사원 계정 정보 / 계정 역할 설정 -->
-		<div class="row">
-			<!-- 좌측 : 사원 목록 -->
-			<div class="col-md-7">
-				<div class="card mb-3">
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title me-2">사원 목록</h5>
-							<span class="help-text"> * 사원 목록에서 대상을 선택하면 오른쪽에서 계정을
-								생성·변경할 수 있습니다. 계정 상태에 따라 임시 비밀번호 발급 및 문자 전송 방식이 달라집니다. </span>
-						</div>
-						<div class="card-header-right"></div>
-					</div>
+    <!-- 사원 목록 + 사원 계정 정보 / 계정 역할 설정 -->
+    <div class="row">
+        <!-- 좌측 : 사원 목록 -->
+        <div class="col-md-7">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <h5 class="card-title me-2">사원 목록</h5>
+                        <span class="help-text">
+                            * 사원 목록에서 대상을 선택하면 오른쪽에서 계정을 생성·변경할 수 있습니다.
+                            계정 상태에 따라 임시 비밀번호 발급 및 문자 전송 방식이 달라집니다.
+                        </span>
+                    </div>
+                    <div class="card-header-right"></div>
+                </div>
 
-					<div class="card-body">
-						<div id="empGrid"></div>
-					</div>
-				</div>
-			</div>
+                <div class="card-body">
+                    <div id="empGrid"></div>
+                </div>
+            </div>
+        </div>
 
-			<!-- 우측 : 사원 계정 정보 + 계정 역할 설정 -->
-			<div class="col-md-5">
+        <!-- 우측 : 사원 계정 정보 + 계정 역할 설정 -->
+        <div class="col-md-5">
 
-				<!-- 사원 계정 정보 카드 -->
-				<div class="card mb-3">
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">사원 계정 정보</h5>
-						</div>
-						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark">저장</button>
-						</div>
-					</div>
+            <!-- 사원 계정 정보 카드 -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <h5 class="card-title">사원 계정 정보</h5>
+                    </div>
+                    <div class="card-header-right">
+                        <button type="button" class="btn btn-outline-dark">저장</button>
+                    </div>
+                </div>
 
-					<div class="card-body">
-						<div class="row mb-2">
-							<div class="col-md-6">
-								<label>부서 명</label> <input type="text"
-									class="form-control form-control-sm" placeholder="YEDAM">
-							</div>
-							<div class="col-md-6">
-								<label>직급 명</label> <input type="text"
-									class="form-control form-control-sm" placeholder="사원">
-							</div>
-						</div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label>부서 명</label>
+                            <input type="text"
+                                   class="form-control form-control-sm"
+                                   placeholder="YEDAM">
+                        </div>
+                        <div class="col-md-6">
+                            <label>직급 명</label>
+                            <input type="text"
+                                   class="form-control form-control-sm"
+                                   placeholder="사원">
+                        </div>
+                    </div>
 
-						<div class="row mb-2">
-							<div class="col-md-6">
-								<label>사번</label> <input type="text"
-									class="form-control form-control-sm" placeholder="2511001">
-							</div>
-							<div class="col-md-6">
-								<label>사원 명</label> <input type="text"
-									class="form-control form-control-sm" placeholder="홍길동">
-							</div>
-						</div>
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label>사번</label>
+                            <input type="text"
+                                   class="form-control form-control-sm"
+                                   placeholder="2511001">
+                        </div>
+                        <div class="col-md-6">
+                            <label>사원 명</label>
+                            <input type="text"
+                                   class="form-control form-control-sm"
+                                   placeholder="홍길동">
+                        </div>
+                    </div>
 
-						<div class="row mb-2">
-							<div class="col-md-6">
-								<label>연락처</label> <input type="text"
-									class="form-control form-control-sm"
-									placeholder="010-1111-1234">
-							</div>
-							<div class="col-md-6">
-								<label>이메일</label> <input type="email"
-									class="form-control form-control-sm"
-									placeholder="YEDAM@YEDAM.AC">
-							</div>
-						</div>
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label>연락처</label>
+                            <input type="text"
+                                   class="form-control form-control-sm"
+                                   placeholder="010-1111-1234">
+                        </div>
+                        <div class="col-md-6">
+                            <label>이메일</label>
+                            <input type="email"
+                                   class="form-control form-control-sm"
+                                   placeholder="YEDAM@YEDAM.AC">
+                        </div>
+                    </div>
 
-						<div class="row mb-2">
-							<div class="col-md-6">
-								<label>회사 코드</label> <input type="text"
-									class="form-control form-control-sm" placeholder="CO_YEDAM001">
-							</div>
-							<div class="col-md-6">
-								<label>아이디</label> <input type="text"
-									class="form-control form-control-sm" placeholder="HONG@HONG.AC">
-							</div>
-						</div>
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label>회사 코드</label>
+                            <input type="text"
+                                   class="form-control form-control-sm"
+                                   placeholder="CO_YEDAM001">
+                        </div>
+                        <div class="col-md-6">
+                            <label>아이디</label>
+                            <input type="text"
+                                   class="form-control form-control-sm"
+                                   placeholder="HONG@HONG.AC">
+                        </div>
+                    </div>
 
-						<div class="row mb-1">
-							<div class="col-md-6">
-								<label>계정 상태</label> <select class="form-select form-select-sm">
-									<option>ACTIVE</option>
-									<option>LOCKED</option>
-									<option>INACTIVE</option>
-								</select>
-							</div>
-						</div>
-					</div>
-				</div>
+                    <div class="row mb-1">
+                        <div class="col-md-6">
+                            <label class='astar'>계정 상태</label>
+                            <select class="form-select form-select-sm">
+                                <option>ACTIVE</option>
+                                <option>LOCKED</option>
+                                <option>INACTIVE</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-				<!-- 계정 역할 설정 카드 -->
-				<div class="card mb-3">
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title me-2 mb-0">계정 역할 설정</h5>
-							<span class="help-text">※ 계정이 존재할 경우, 설정 가능합니다.</span>
-						</div>
-						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark">역할 조회</button>
-							<button type="button" class="btn btn-outline-dark">저장</button>
-							<button type="button" class="btn btn-danger">삭제</button>
-						</div>
-					</div>
+            <!-- 계정 역할 설정 카드 -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <h5 class="card-title me-2 mb-0">계정 역할 설정</h5>
+                        <span class="help-text">※ 계정이 존재할 경우, 설정 가능합니다.</span>
+                    </div>
+                    <div class="card-header-right">
+                        <button type="button" class="btn btn-outline-dark">역할 조회</button>
+                        <button type="button" class="btn btn-outline-dark">저장</button>
+                        <button type="button" class="btn btn-danger">삭제</button>
+                    </div>
+                </div>
 
-					<div class="card-body">
-						<div id="roleGrid"></div>
-					</div>
-				</div>
+                <div class="card-body">
+                    <div id="roleGrid"></div>
+                </div>
+            </div>
 
-			</div>
-		</div>
+        </div>
+    </div>
 
-	</div>
+</div>
 
-	<script>
-  // 공통 테마
-tui.Grid.applyTheme('default', {
-  cell: {
-    normal: {
-      border: '#dedede',
-      background: '#ffffff',
-      showVerticalBorder: true
-    },
-    header: {
-      border: '#dedede',
-      background: '#f5f5f5',
-      showVerticalBorder: true
-    },
-    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
-    rowHeader: {
-      border: '#dedede',
-      background: '#ffffff',
-      showVerticalBorder: true
-    },
-    editable: {
-      background: '#FFFDF0',
-      text: '#000'
-    },
-    selectedHeader: {
-      background: '#f5f5f5'
-    },
-    selected: {
-      background: '#ffffff'
-    }
-  }
-});
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Toast UI Grid 방어 코드 (혹시 스크립트 로딩 실패 시)
+        if (!window.tui || !tui.Grid) {
+            return;
+        }
 
-  const commonGridOptions = {
-    bodyHeight: 260,
-    scrollX: false,
-    scrollY: false,
-    columnOptions: {
-      minWidth: 80,
-      resizable: true
-    }
-  };
+        // 공통 Grid 옵션 (페이지 전용)
+        const commonGridOptions = {
+            bodyHeight: 260,
+            scrollX: false,
+            scrollY: false,
+            columnOptions: {
+                minWidth: 80,
+                resizable: true
+            }
+        };
 
-  // 더미 데이터
-  const empData = [
-    { deptName: 'YEDAM', jobName: '사원', empNo: '2511001', empName: '홍길동', hasAccount: 'Y', status: 'ACTIVE' },
-    { deptName: 'YEDAM', jobName: '사원', empNo: '2511002', empName: '김영업', hasAccount: 'N', status: 'LOCKED' },
-    { deptName: 'YEDAM', jobName: '과장', empNo: '2511003', empName: '박관리', hasAccount: 'Y', status: 'INACTIVE' }
-  ];
+        // 더미 데이터
+        const empData = [
+            { deptName: 'YEDAM', jobName: '사원', empNo: '2511001', empName: '홍길동', hasAccount: 'Y', status: 'ACTIVE' },
+            { deptName: 'YEDAM', jobName: '사원', empNo: '2511002', empName: '김영업', hasAccount: 'N', status: 'LOCKED' },
+            { deptName: 'YEDAM', jobName: '과장', empNo: '2511003', empName: '박관리', hasAccount: 'Y', status: 'INACTIVE' }
+        ];
 
-  const roleData = [
-    { checked: true,  roleName: '인사 담당',     roleType: '인사' },
-    { checked: false, roleName: '영업 담당',     roleType: '영업' },
-    { checked: false, roleName: '시스템 관리자', roleType: '공통' }
-  ];
+        const roleData = [
+            { checked: true,  roleName: '인사 담당',     roleType: '인사' },
+            { checked: false, roleName: '영업 담당',     roleType: '영업' },
+            { checked: false, roleName: '시스템 관리자', roleType: '공통' }
+        ];
 
-  // 사원 목록 Grid (체크박스 필요 X)
-  const empGrid = new tui.Grid({
-    el: document.getElementById('empGrid'),
-    data: empData,
-    rowHeaders: [], // 명시적으로 없음
-    ...commonGridOptions,
-    columns: [
-      { header: '부서 명',        name: 'deptName',   minWidth: 100 },
-      { header: '직급 명',        name: 'jobName',    minWidth: 100 },
-      { header: '사번',           name: 'empNo',      minWidth: 100 },
-      { header: '사원 명',        name: 'empName',    minWidth: 120 },
-      { header: '계정 존재 유무', name: 'hasAccount', width: 110, align: 'center' },
-      { header: '계정 상태',      name: 'status',     minWidth: 100, align: 'center' }
-    ]
-  });
+        // 사원 목록 Grid (체크박스 없음)
+        const empGrid = new tui.Grid({
+            el: document.getElementById('empGrid'),
+            data: empData,
+            rowHeaders: [],
+            ...commonGridOptions,
+            columns: [
+                { header: '부서 명',        name: 'deptName',   minWidth: 100 },
+                { header: '직급 명',        name: 'jobName',    minWidth: 100 },
+                { header: '사번',           name: 'empNo',      minWidth: 100 },
+                { header: '사원 명',        name: 'empName',    minWidth: 120 },
+                { header: '계정 존재 유무', name: 'hasAccount', width: 110 },
+                { header: '계정 상태',      name: 'status',     minWidth: 100 }
+            ]
+        });
 
-  // 계정 역할 설정 Grid (행 헤더 체크박스 사용)
-  const roleGrid = new tui.Grid({
-    el: document.getElementById('roleGrid'),
-    data: roleData,
-    rowHeaders: ['checkbox'],      // ✅ 잠금 계정 조회와 동일한 방식
-    ...commonGridOptions,
-    columns: [
-      { header: '역할 명',   name: 'roleName', minWidth: 140 },
-      { header: '역할 유형', name: 'roleType', minWidth: 100 }
-    ]
-  });
+        // 계정 역할 설정 Grid (행 헤더 체크박스 사용)
+        const roleGrid = new tui.Grid({
+            el: document.getElementById('roleGrid'),
+            data: roleData,
+            rowHeaders: ['checkbox'],
+            ...commonGridOptions,
+            columns: [
+                { header: '역할 명',   name: 'roleName', minWidth: 140 },
+                { header: '역할 유형', name: 'roleType', minWidth: 100 }
+            ]
+        });
 
-  // 초기 checked 값(true)인 행들은 체크 상태로 맞춰주기
-  roleGrid.getData().forEach(row => {
-    if (row.checked) {
-      roleGrid.check(row.rowKey);
-    }
-  });
+        // 초기 checked 값(true)인 행들은 체크 상태로 맞춰주기
+        roleGrid.getData().forEach(function (row) {
+            if (row.checked) {
+                roleGrid.check(row.rowKey);
+            }
+        });
 
-  // 체크/해제 이벤트에서 데이터의 checked 필드도 같이 동기화
-  roleGrid.on('check', ev => {
-    roleGrid.setValue(ev.rowKey, 'checked', true, false);
-  });
+        // 체크/해제 이벤트에서 데이터의 checked 필드도 같이 동기화
+        roleGrid.on('check', function (ev) {
+            roleGrid.setValue(ev.rowKey, 'checked', true, false);
+        });
 
-  roleGrid.on('uncheck', ev => {
-    roleGrid.setValue(ev.rowKey, 'checked', false, false);
-  });
+        roleGrid.on('uncheck', function (ev) {
+            roleGrid.setValue(ev.rowKey, 'checked', false, false);
+        });
 
-  // 전체 선택/해제 시에도 checked 필드 동기화
-  roleGrid.on('checkAll', () => {
-    roleGrid.getData().forEach(row => {
-      roleGrid.setValue(row.rowKey, 'checked', true, false);
+        // 전체 선택/해제 시에도 checked 필드 동기화
+        roleGrid.on('checkAll', function () {
+            roleGrid.getData().forEach(function (row) {
+                roleGrid.setValue(row.rowKey, 'checked', true, false);
+            });
+        });
+
+        roleGrid.on('uncheckAll', function () {
+            roleGrid.getData().forEach(function (row) {
+                roleGrid.setValue(row.rowKey, 'checked', false, false);
+            });
+        });
+
+        // 필요 시: 선택된 역할 목록
+        // const selectedRoles = roleGrid.getCheckedRows();
     });
-  });
-
-  roleGrid.on('uncheckAll', () => {
-    roleGrid.getData().forEach(row => {
-      roleGrid.setValue(row.rowKey, 'checked', false, false);
-    });
-  });
-
-  // 이제 선택된 역할들 얻고 싶으면:
-  // const selectedRows = roleGrid.getCheckedRows();
 </script>
 
 </body>
