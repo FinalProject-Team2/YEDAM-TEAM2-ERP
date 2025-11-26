@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>churn_risk_stdr_register</title>
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+</head>
+<title>employee-register</title>
+<style>
+.fixed-photo {
+	width: 150px; /* 원하는 가로 크기 */
+	height: 200px; /* 원하는 세로 크기 */
+	object-fit: cover; /* 비율 유지하며 영역에 맞게 채움 */
+}
+
+.form-select {
+	color: #000 !important;
+}
+</style>
+<body layout:fragment="content">
+
+	<!-- 사원목록 -->
+	<div class="card mb-3">
+		<div class="card-body">
+			<h5 class="card-title">사원목록</h5>
+			<div id="grid" style="margin: 20px;"></div>
+		</div>
+	</div>
+
+	<!-- 휴먼기준 -->
+	<div class="card mb-3">
+		<div class="card-header">
+			<div class="card-header-left">
+				<h5 class="card-title">휴먼기준</h5>
+			</div>
+			<!-- card-header-left end -->
+			<div class="card-header-right">
+				<button class="btn btn-dark">초기화</button>
+				<button class="btn btn-outline-dark">조회</button>
+				<button class="btn btn-outline-dark">등록</button>
+				<button class="btn btn-outline-dark">삭제</button>
+				<button class="btn btn-outline-dark">근로계약서</button>
+			</div> <!-- //card-header right end -->
+		</div> <!-- //card-header wihy-actions end -->
+		<div class="card-body">
+			<div id="dormancygrid" style="margin: 20px;"></div>
+		</div>
+	</div>
+
+	<!-- 이탈위험기준 -->
+	<div class="card mb-3">
+		<div class="card-body">
+			<h5 class="card-title">이탈위험기준</h5>
+			<div id="churnriskgrid" style="margin: 20px;"></div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="card-header">
+			<h5 class="card-title">검색조건</h5>
+			<!-- //기본으로 왼쪽에 배치됨 -->
+			<div class="card-header-right">
+				<button class="btn btn-dark">초기화</button>
+				<button class="btn btn-outline-dark">조회</button>
+				<button class="btn btn-outline-dark">등록</button>
+				<button class="btn btn-outline-dark">삭제</button>
+				<button class="btn btn-outline-dark">근로계약서</button>
+			</div> <!-- //card-header right end -->
+		</div>
+		<!-- //card-header wihy-actions end -->
+		<div class="card-body">어쩌구저쩌구 바디 컨텐츠</div>
+		<!-- //card-body end -->
+	</div>
+	<!-- //card end -->
+	<!-- 기본정보 -->
+	<div class="card mb-3">
+		<div class="card-body">
+			<h5 class="card-title">기본정보</h5>
+			<div class="row">
+				<div class="col-md-4 text-center">
+					<img src="/images/faces/face11.jpg" alt="사진" class="img-thumbnail fixed-photo" />
+				</div>
+				<div class="col-md-8">
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">사번</label> <input type="text" class="form-control" placeholder="사번(자동생성)" />
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">이름</label> <input type="text" class="form-control" placeholder="홍길동" />
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">생년월일</label> <input type="date" class="form-control" />
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">연락처</label> <input type="text" class="form-control" placeholder="010-1234-1234" />
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">이메일</label> <input type="email" class="form-control" placeholder="abc@mail.com" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 인사정보 -->
+	<div class="card mb-3">
+		<div class="card-body">
+			<h5 class="card-title">인사정보</h5>
+			<div class="row mb-2">
+				<div class="col-md-6">
+					<label class="form-label">부서</label> <select class="form-select">
+						<option>인사</option>
+						<option>영업</option>
+					</select>
+				</div>
+				<div class="col-md-6">
+					<label class="form-label">직무</label> <input type="text" class="form-control" placeholder="HRM(인적자원관리)" />
+				</div>
+			</div>
+			<div class="row mb-2">
+				<div class="col-md-6">
+					<label class="form-label">직급</label> <select class="form-select">
+						<option>사원</option>
+						<option>대리</option>
+						<option>과장</option>
+						<option>부장</option>
+						<option>이사</option>
+					</select>
+				</div>
+				<div class="col-md-6">
+					<label class="form-label">직책</label> <select class="form-select">
+						<option>팀원</option>
+						<option>팀장</option>
+						<option>관리자</option>
+						<option>임원</option>
+					</select>
+				</div>
+			</div>
+			<div class="row mb-2">
+				<div class="col-md-6">
+					<label class="form-label">고용형태</label> <select class="form-select">
+						<option>정직원</option>
+						<option>계약직</option>
+						<option>일용직</option>
+					</select>
+				</div>
+				<div class="col-md-6">
+					<label class="form-label">계좌번호</label> <input type="text" class="form-control" placeholder="계좌번호입력" />
+				</div>
+			</div>
+			<div class="row mb-2">
+				<div class="col-md-6">
+					<label class="form-label">급여 방식</label> <select id="salaryType" class="form-select">
+						<option value="monthly">기본급</option>
+						<option value="hourly">시급</option>
+					</select>
+				</div>
+				<div class="col-md-6">
+					<label class="form-label">기본급/시급</label> <input type="text" id="salaryInput" class="form-control" placeholder="금액입력" name="monthlySalary" />
+				</div>
+			</div>
+			<div class="row mb-2">
+				<div class="col-md-6">
+					<label class="form-label">입사일</label> <input type="date" class="form-control" />
+				</div>
+				<div class="col-md-6">
+					<label class="form-label">재직상태</label> <select class="form-select">
+						<option>재직</option>
+						<option>퇴직</option>
+						<option>휴직</option>
+						<option>퇴사</option>
+					</select>
+				</div>
+			</div>
+			<div class="row"></div>
+		</div>
+	</div>
+
+
+	<div class="row">
+		<div class="col-md-6">
+			<!-- 업종 -->
+			<div class="card mb-3" style="height: 500px;">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">업종</h5>
+					</div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark">추가</button>
+						<button class="btn btn-outline-dark">등록</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div id="custtypegrid" style="margin: 20px;"></div>
+				</div>
+			</div>
+
+			<!-- 설립 -->
+			<div class="card mb-3" style="height: 500px;">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">설립</h5>
+					</div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark">추가</button>
+						<button class="btn btn-outline-dark">등록</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div id="creategrid" style="margin: 20px;"></div>
+				</div>
+			</div>
+		</div>
+		<!-- 우측 패널 -->
+		<div class="col-md-6">
+			<!-- 규모 -->
+			<div class="card mb-3" style="height: 500px;">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">규모</h5>
+					</div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark">추가</button>
+						<button class="btn btn-outline-dark">등록</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div id="sizegrid" style="margin: 20px;"></div>
+				</div>
+			</div>
+
+			<!-- 지역/상권 -->
+			<div class="card mb-3" style="height: 500px;">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">지역/상권</h5>
+					</div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark">추가</button>
+						<button class="btn btn-outline-dark">등록</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div id="regiongrid" style="margin: 20px;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		// 화면 테스트용 데이터
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : { // 일반 셀(본문)
+					border : '#ccc',
+					background : "#fff",
+					showVerticalBorder : true, // 세로 라인 표시
+				},
+				header : { // 헤더 셀
+					border : '#ccc',
+					background : '#E3E6ED',
+					showVerticalBorder : true,
+				},
+				editable : { // ★ 편집 가능한 셀 공통 스타일
+					background : '#FFFDF0', // 연노랑 같은 색으로 표시
+					text : '#000'
+				},
+				selectedHeader : { // 헤더 클릭했을 때 색
+					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+				},
+				selected : { // 선택된 셀 색
+					background : '#ffffff' // 필요하면 여기도 조정
+				}
+			}
+		});
+		const gridData = [ {
+			name : "아이유",
+			artist : "IU",
+			type : "앨범",
+			release : "2020-05-06",
+			genre : "K-Pop"
+		}, {
+			name : "뉴진스",
+			artist : "NewJeans",
+			type : "싱글",
+			release : "2023-01-10",
+			genre : "K-Pop"
+		}, {
+			name : "임영웅",
+			artist : "Hero",
+			type : "앨범",
+			release : "2024-03-02",
+			genre : "발라드"
+		} ];
+		// Grid 생성
+		const grid = new tui.Grid({
+			el : document.getElementById('grid'),
+			data : gridData,
+			scrollX : false,
+			scrollY : false,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+				header : '이름',
+				name : 'name',
+				sortable : 'true'
+			}, {
+				header : '가수',
+				name : 'artist',
+				editor : 'text'
+			}, {
+				header : '타입',
+				name : 'type'
+			}, {
+				header : '발매일',
+				name : 'release',
+				align : 'center'
+			}, {
+				header : '장르',
+				name : 'genre'
+			} ]
+		});
+		// 휴먼기준 데이터
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : { // 일반 셀(본문)
+					border : '#ccc',
+					background : "#fff",
+					showVerticalBorder : true, // 세로 라인 표시
+				},
+				header : { // 헤더 셀
+					border : '#ccc',
+					background : '#E3E6ED',
+					showVerticalBorder : true,
+				},
+				editable : { // ★ 편집 가능한 셀 공통 스타일
+					background : '#FFFDF0', // 연노랑 같은 색으로 표시
+					text : '#000'
+				},
+				selectedHeader : { // 헤더 클릭했을 때 색
+					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+				},
+				selected : { // 선택된 셀 색
+					background : '#ffffff' // 필요하면 여기도 조정
+				}
+			}
+		});
+		const dormancygridData = [ {
+			name : "거래중단기간",
+			stdrValue : "6개월",
+			account : "고객이 최근 특정기간 이상 아무 거래도 하지 않았을 때 판단하는 기준.",
+			yn : "Y",
+		}, {
+			name : "미갱신기간",
+			stdrValue : "3개월",
+			account : "계약 종료 후 특정기간 이상 갱신이 되지 않은 경우를 판단하는 기준.",
+			yn : "Y",
+		} ];
+		// Grid 생성
+		const dormancygrid = new tui.Grid({
+			el : document.getElementById('dormancygrid'),
+			data : dormancygridData,
+			scrollX : false,
+			scrollY : false,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+				header : '기준유형',
+				name : 'name',
+				sortable : 'true'
+			}, {
+				header : '기준값',
+				name : 'stdrValue',
+				editor : 'text'
+			}, {
+				header : '설명',
+				name : 'account',
+				editor : 'text'
+			}, {
+				header : '사용여부',
+				name : 'yn',
+				align : 'center'
+			} ]
+		});
+		// 이탈위험기준 데이터
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : { // 일반 셀(본문)
+					border : '#ccc',
+					background : "#fff",
+					showVerticalBorder : true, // 세로 라인 표시
+				},
+				header : { // 헤더 셀
+					border : '#ccc',
+					background : '#E3E6ED',
+					showVerticalBorder : true,
+				},
+				editable : { // ★ 편집 가능한 셀 공통 스타일
+					background : '#FFFDF0', // 연노랑 같은 색으로 표시
+					text : '#000'
+				},
+				selectedHeader : { // 헤더 클릭했을 때 색
+					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+				},
+				selected : { // 선택된 셀 색
+					background : '#ffffff' // 필요하면 여기도 조정
+				}
+			}
+		});
+		const churnriskgridData = [ {
+			name : "매출변동",
+			stdrValue : "-30%",
+			account : "최근 매출이 평소 대비 특정 지수 이상 감소했을 때 판단하는 기준.",
+			yn : "Y",
+		}, {
+			name : "평균 구매주기 및 초과",
+			stdrValue : "3개월",
+			account : "고객의 평균 구매주기와 초과한 기간을 판단하는 기준.",
+			yn : "Y",
+		}, {
+			name : "이탈위험점수",
+			stdrValue : "83%",
+			account : "각 조건들을 종합하여 나타낸 이탈위험 지수. 100% 도달할 경우 자동 이탈 전환",
+			yn : "Y",
+		} ];
+		// Grid 생성
+		const churnriskgrid = new tui.Grid({
+			el : document.getElementById('churnriskgrid'),
+			data : churnriskgridData,
+			scrollX : false,
+			scrollY : false,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+				header : '기준유형',
+				name : 'name',
+				sortable : 'true'
+			}, {
+				header : '기준값',
+				name : 'stdrValue',
+				editor : 'text'
+			}, {
+				header : '설명',
+				name : 'account',
+				editor : 'text'
+			}, {
+				header : '사용여부',
+				name : 'yn',
+				align : 'center'
+			} ]
+		});
+	</script>
+</body>
+</html>
+

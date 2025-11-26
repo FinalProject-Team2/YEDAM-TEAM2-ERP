@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class OrgChartController {
 	//test
 			@GetMapping("/org")
-			public String selectall(Model model) {
+			public String orgChartRender(Model model) {
 				
 				
 				
