@@ -5,32 +5,251 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<title>잠금 계정 조회</title>
+
+<!-- Toast UI Grid -->
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<link rel="stylesheet" href="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-<title>단가관리 화면</title>
+<style>
+.lock-account-wrapper .card-title {
+	font-weight: 600;
+}
 
+/* 공통 카드 헤더 (제목 왼쪽, 버튼 오른쪽) */
+.card-header.with-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.card-header-left h5.card-title {
+	margin: 0;
+	font-size: 1.05rem;
+}
+
+.card-header-right .btn+.btn {
+	margin-left: .25rem;
+}
+
+/* Grid 영역 */
+.lock-account-wrapper #accountGrid {
+	width: 100%;
+	margin-top: 4px;
+}
+
+/* 상단 헤더의 체크박스(행 헤더) 셀만 회색 */
+.tui-grid-header-area .tui-grid-cell-row-header {
+  background-color: #f5f5f5;
+}
+
+/* 데이터 행의 체크박스 셀은 흰색 유지 */
+.tui-grid-body-area .tui-grid-cell-row-header {
+  background-color: #ffffff;
+}
+</style>
 </head>
+
 <body layout:fragment="content">
-	<div class="card">
-		<div class="card-header with-actions">
-			<div class="card-header-left">
-				<h5 class="card-title">검색조건</h5>
-			</div> <!-- card-header-left end -->
-			
-			<div class="card-header right">
-				<button class="btn btn-dark">초기화</button>
-				<button class="btn btn-outline-dark">조회</button>
-				<button class="btn btn-outline-dark">등록</button>
-				<button class="btn btn-outline-dark">삭제</button>
-				<button class="btn btn-outline-dark">근로계약서</button>
-			</div> <!-- card-header right end -->
-		</div> <!-- card-header wihy-actions end -->
-		
-		<div class="card-body">
-			어쩌구저쩌구 바디 컨텐츠
-		</div> <!-- card-body end -->
-	</div>	<!-- card end -->
+	<div class="lock-account-wrapper">
+
+		<!-- 단가정책 조회 -->
+		<div class="row mb-3">
+			<div class="col-md-12">
+				<div class="card">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">단가정책 조회</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark">초기화</button>
+							<button type="button" class="btn btn-outline-dark">조회</button>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div class="row g-2">
+							<div class="col-md-3">
+								<label for="clientName" class="form-label">단가정책코드</label> <input
+									id="clientName" type="text" class="form-control"
+									placeholder="YEDAM">
+							</div>
+
+							<div class="col-md-3">
+								<label for="accountId" class="form-label">단가정책명</label> <input
+									id="accountId" type="text" class="form-control"
+									placeholder="HONG@NON.AC">
+							</div>
+
+							<div class="col-md-3">
+								<label for="userName" class="form-label">적용일</label>
+								<!--  <input id="userName" type="text" class="form-control" placeholder="홍길동">
+								 <input id="datePicker" type="text" class="form-control" placeholder="날짜 선택"> -->
+								 <!-- <div class="input-group date">
+								    <input type="text" class="form-control datepicker" placeholder="날짜 선택">
+								    <span class="input-group-text">
+								        <i class="bi bi-calendar"></i>
+								    </span>
+								</div> -->
+								<div class="input-group date" id="applyDatePicker">
+								    <input type="text" class="form-control" id="applyDate" placeholder="날짜 선택">
+								    <span class="input-group-text" id="icon-calendar">
+								        <i class="bi bi-calendar"></i>
+								    </span>
+								</div>
+								
+							</div>
+
+						</div>
+
+					</div> <!-- /card-body -->
+				</div>
+			</div>
+		</div>
+
+		<!-- 단가정책목록 카드 -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="card">
+
+					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">단가정책 목록</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-danger">삭제</button>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div id="accountGrid"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<script>
+
+
+	
+    // 1. Toast UI Grid 테마
+tui.Grid.applyTheme('default', {
+  cell: {
+    normal: {
+      border: '#dedede',
+      background: '#ffffff',
+      showVerticalBorder: true
+    },
+    header: {
+      border: '#dedede',
+      background: '#f5f5f5',
+      showVerticalBorder: true
+    },
+    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
+    rowHeader: {
+      border: '#dedede',
+      background: '#ffffff',
+      showVerticalBorder: true
+    },
+    editable: {
+      background: '#FFFDF0',
+      text: '#000'
+    },
+    selectedHeader: {
+      background: '#f5f5f5'
+    },
+    selected: {
+      background: '#ffffff'
+    }
+  }
+});
+
+
+
+    // 2. 더미 데이터
+    const accountData = [
+        {
+            clientName: 'YEDAM',
+            accountId: 'HONG@NON.AC',
+            userName: '홍길동',
+            status: 'LOCKED',
+            lockTime: '2019-05-05 09:12:54'
+        },
+        {
+            clientName: 'YEDAM',
+            accountId: 'KIM@NON.AC',
+            userName: '김영업',
+            status: 'LOCKED',
+            lockTime: '2019-05-06 10:11:22'
+        }
+    ];
+
+    // 3. Grid 공통 옵션
+    const commonGridOptions = {
+        bodyHeight: 320,
+        scrollX: false,
+        scrollY: false,
+        rowHeaders: ['checkbox'],     // 좌측 체크박스
+        columnOptions: {
+            minWidth: 80,
+            resizable: true
+        }
+    };
+
+    // 4. 계정 목록 Grid 생성
+    const accountGrid = new tui.Grid({
+        el: document.getElementById('accountGrid'),
+        data: accountData,
+        ...commonGridOptions,
+        columns: [
+            { header: '단가정책코드', name: 'clientName', minWidth: 120 },
+            { header: '단가정책명', name: 'accountId', minWidth: 180 },
+            { header: '유형', name: 'userName', minWidth: 120 },
+            { header: '할인율(%)', name: 'userName', minWidth: 120 },
+            { header: '정책 적용시작일', name: 'userName', minWidth: 120 },
+            { header: '정책 적용종료일', name: 'userName', minWidth: 120 },
+            { header: '거래처별', name: 'userName', minWidth: 120 },
+            { header: '품목별', name: 'userName', minWidth: 120 },
+            { header: '비고', name: 'userName', minWidth: 120 },
+        ]
+    });
+
+    
+    $(function(){
+        $('.datepicker').datepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayHighlight: true
+        });
+    });
+    
+    
+    $('#datePickerGroup').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true
+    });
+    
+    
+    $('#applyDatePicker input').datepicker({
+        format: "yyyy-mm-dd",
+        autoclose: true,
+        todayHighlight: true
+    });
+
+    // 아이콘 클릭 → input focus → 달력 열림
+    $('#icon-calendar').on('click', function () {
+        $('#applyDate').focus();
+    });
+</script>
+
 </body>
 </html>
