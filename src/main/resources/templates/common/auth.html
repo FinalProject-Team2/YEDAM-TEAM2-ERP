@@ -13,9 +13,7 @@
     <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
     <style>
-        .form-select {
-            color: #000 !important;
-        }
+        /* 공통 form-select는 style.css에 있으므로 색상 오버라이드 삭제 */
 
         .role-auth-wrapper #roleGrid,
         .role-auth-wrapper #authGridHr,
@@ -29,29 +27,10 @@
             font-weight: 600;
         }
 
+        /* 필요 시 섹션 제목용 */
         .role-auth-wrapper .section-title {
             font-size: 15px;
             font-weight: 600;
-        }
-
-        /* 카드 헤더(제목 + 버튼) 공통 스타일 */
-        .role-auth-wrapper .card-header.with-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .role-auth-wrapper .card-header-left {
-            display: flex;
-            align-items: center;
-        }
-
-        .role-auth-wrapper .card-header-left .card-title {
-            margin-bottom: 0;
-        }
-
-        .role-auth-wrapper .card-header-right .btn {
-            margin-left: .25rem;
         }
 
         /* 아코디언 헤더 줄 정렬용 */
@@ -113,8 +92,8 @@
                         <h5 class="card-title">역할 조회</h5>
                     </div>
                     <div class="card-header-right">
-                        <button class="btn btn-dark">초기화</button>
-                        <button class="btn btn-outline-dark">조회</button>
+                        <button class="btn btn-dark" type="button">초기화</button>
+                        <button class="btn btn-outline-dark" type="button">조회</button>
                     </div>
                 </div>
 
@@ -397,206 +376,211 @@
 </div>
 
 <script>
-    // 1. Grid 테마
-    tui.Grid.applyTheme('default', {
-        cell: {
-            normal: {
-                border: '#dedede',
-                background: '#ffffff',
-                showVerticalBorder: true
-            },
-            header: {
-                border: '#dedede',
-                background: '#f5f5f5',
-                showVerticalBorder: true
-            },
-            editable: {
-                background: '#FFFDF0',
-                text: '#000'
-            },
-            selectedHeader: {
-                background: '#f5f5f5'
-            },
-            selected: {
-                background: '#ffffff'
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // 1. 화면용 더미 데이터
+        const roleData = [
+            { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
+            { roleName: '영업 담당',     roleType: '영업/매입', useYn: '사용' },
+            { roleName: '시스템 관리자', roleType: '공통',     useYn: '사용' },
+            { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
+            { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
+            { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
+            { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
+            { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
+            { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
+            { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' }
+        ];
+
+        const authDataHr = [
+            { menuName: '사원 목록', canRead: true,  canSave: true,  canDelete: false },
+            { menuName: '사원 등록', canRead: true,  canSave: true,  canDelete: true  },
+            { menuName: '급여 계산', canRead: true,  canSave: false, canDelete: false }
+        ];
+
+        const authDataSales = [
+            { menuName: '주문 등록', canRead: true,  canSave: true,  canDelete: false },
+            { menuName: '매출 조회', canRead: true,  canSave: false, canDelete: false },
+            { menuName: '출고 관리', canRead: true,  canSave: true,  canDelete: true  }
+        ];
+
+        const authDataCommon = [
+            { menuName: '공통 코드 관리', canRead: true, canSave: true,  canDelete: true  },
+            { menuName: '메뉴 관리',     canRead: true, canSave: true,  canDelete: false },
+            { menuName: '로그 조회',     canRead: true, canSave: false, canDelete: false }
+        ];
+
+        const commonGridOptions = {
+            bodyHeight: 240,
+            scrollX: false,
+            scrollY: true,
+            rowHeaders: [],
+            columnOptions: {
+                minWidth: 80,
+                resizable: true
             }
+        };
+
+        // Toast UI Grid가 로딩되지 않은 경우 방어
+        if (!window.tui || !tui.Grid) {
+            return;
         }
-    });
 
-    // 2. 화면용 더미 데이터
-    const roleData = [
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '영업 담당',     roleType: '영업/매입', useYn: '사용' },
-        { roleName: '시스템 관리자', roleType: '공통',     useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' },
-        { roleName: '인사 담당',     roleType: '인사/급여', useYn: '사용' }
-    ];
-
-    const authDataHr = [
-        { menuName: '사원 목록', canRead: true,  canSave: true,  canDelete: false },
-        { menuName: '사원 등록', canRead: true,  canSave: true,  canDelete: true  },
-        { menuName: '급여 계산', canRead: true,  canSave: false, canDelete: false }
-    ];
-
-    const authDataSales = [
-        { menuName: '주문 등록', canRead: true,  canSave: true,  canDelete: false },
-        { menuName: '매출 조회', canRead: true,  canSave: false, canDelete: false },
-        { menuName: '출고 관리', canRead: true,  canSave: true,  canDelete: true  }
-    ];
-
-    const authDataCommon = [
-        { menuName: '공통 코드 관리', canRead: true, canSave: true,  canDelete: true  },
-        { menuName: '메뉴 관리',     canRead: true, canSave: true,  canDelete: false },
-        { menuName: '로그 조회',     canRead: true, canSave: false, canDelete: false }
-    ];
-
-    const commonGridOptions = {
-        bodyHeight: 240,
-        scrollX: false,
-        scrollY: true,
-        rowHeaders: [],
-        columnOptions: {
-            minWidth: 80,
-            resizable: true
-        }
-    };
-
-    // 3. 역할 목록 Grid
-    const roleGrid = new tui.Grid({
-        el: document.getElementById('roleGrid'),
-        data: roleData,
-        ...commonGridOptions,
-        columns: [
-            { header: '역할 명',   name: 'roleName' },
-            { header: '역할 유형', name: 'roleType' },
-            { header: '사용 여부', name: 'useYn', align: 'center' }
-        ]
-    });
-
-    // 4. 권한 설정 Grid들 (각 아코디언 섹션별)
-    function createAuthGrid(elId, data) {
-        return new tui.Grid({
-            el: document.getElementById(elId),
-            data: data,
+        // 2. 역할 목록 Grid
+        const roleGrid = new tui.Grid({
+            el: document.getElementById('roleGrid'),
+            data: roleData,
             ...commonGridOptions,
             columns: [
-                { header: '메뉴 / 화면', name: 'menuName', minWidth: 200 },
-                {
-                    header: '조회',
-                    name: 'canRead',
-                    align: 'center',
-                    formatter: ({ value }) =>
-                        `<input type="checkbox" ${value ? 'checked' : ''} />`
-                },
-                {
-                    header: '저장 / 수정',
-                    name: 'canSave',
-                    align: 'center',
-                    formatter: ({ value }) =>
-                        `<input type="checkbox" ${value ? 'checked' : ''} />`
-                },
-                {
-                    header: '삭제',
-                    name: 'canDelete',
-                    align: 'center',
-                    formatter: ({ value }) =>
-                        `<input type="checkbox" ${value ? 'checked' : ''} />`
-                }
+                { header: '역할 명',   name: 'roleName' },
+                { header: '역할 유형', name: 'roleType' },
+                { header: '사용 여부', name: 'useYn',
+                	editor: {
+                        type: 'select',
+                        options: {
+                          listItems: [
+                            { text: '사용',   value: 'Y' },
+                            { text: '미사용', value: 'N' }
+                          ]
+                        }
+                      },
+
+                      // (선택) 화면에는 한글로 보여주고, 값은 Y/N 저장하고 싶을 때
+                      formatter: function({ value }) {
+                        if (value === 'Y') return '사용';
+                        if (value === 'N') return '미사용';
+                        return value;
+                      }}
             ]
         });
-    }
+		
+        TeamCommon.grid.applyRequiredHeaders([
+            { gridId: 'roleGrid', columns: ['useYn'] }
+          ]);
+        
+        // 3. 권한 설정 Grid들 (각 아코디언 섹션별)
+        function createAuthGrid(elId, data) {
+            return new tui.Grid({
+                el: document.getElementById(elId),
+                data: data,
+                ...commonGridOptions,
+                columns: [
+                    { header: '메뉴 / 화면', name: 'menuName', minWidth: 200 },
+                    {
+                        header: '조회',
+                        name: 'canRead',
+                        align: 'center',
+                        formatter: ({ value }) =>
+                            '<input type="checkbox" ' + (value ? 'checked' : '') + ' />'
+                    },
+                    {
+                        header: '저장 / 수정',
+                        name: 'canSave',
+                        align: 'center',
+                        formatter: ({ value }) =>
+                            '<input type="checkbox" ' + (value ? 'checked' : '') + ' />'
+                    },
+                    {
+                        header: '삭제',
+                        name: 'canDelete',
+                        align: 'center',
+                        formatter: ({ value }) =>
+                            '<input type="checkbox" ' + (value ? 'checked' : '') + ' />'
+                    }
+                ]
+            });
+        }
 
-    const authGridHr     = createAuthGrid('authGridHr', authDataHr);
-    const authGridSales  = createAuthGrid('authGridSales', authDataSales);
-    const authGridCommon = createAuthGrid('authGridCommon', authDataCommon);
+        const authGridHr     = createAuthGrid('authGridHr', authDataHr);
+        const authGridSales  = createAuthGrid('authGridSales', authDataSales);
+        const authGridCommon = createAuthGrid('authGridCommon', authDataCommon);
 
-    // 5. Grid 키별 객체 반환
-    function getGridByKey(key) {
-        if (key === 'hr') return authGridHr;
-        if (key === 'sales') return authGridSales;
-        if (key === 'common') return authGridCommon;
-        return null;
-    }
+        // 4. Grid 키별 객체 반환
+        function getGridByKey(key) {
+            if (key === 'hr')     return authGridHr;
+            if (key === 'sales')  return authGridSales;
+            if (key === 'common') return authGridCommon;
+            return null;
+        }
 
-    // 6. 빠른 설정 체크박스를 그리드 데이터 기준으로 동기화
-    function syncQuickCheckboxes(grid, gridKey) {
-        if (!grid) return;
-        const rows = grid.getData();
+        // 5. 빠른 설정 체크박스를 그리드 데이터 기준으로 동기화
+        function syncQuickCheckboxes(grid, gridKey) {
+            if (!grid) return;
 
-        const allRead   = rows.length > 0 && rows.every(r => !!r.canRead);
-        const allSave   = rows.length > 0 && rows.every(r => !!r.canSave);
-        const allDelete = rows.length > 0 && rows.every(r => !!r.canDelete);
+            const rows = grid.getData();
+            const allRead   = rows.length > 0 && rows.every(function (r) { return !!r.canRead; });
+            const allSave   = rows.length > 0 && rows.every(function (r) { return !!r.canSave; });
+            const allDelete = rows.length > 0 && rows.every(function (r) { return !!r.canDelete; });
 
-        const qsRead   = document.querySelector(`#qs-${gridKey}-read`);
-        const qsSave   = document.querySelector(`#qs-${gridKey}-save`);
-        const qsDelete = document.querySelector(`#qs-${gridKey}-delete`);
+            const qsRead   = document.querySelector('#qs-' + gridKey + '-read');
+            const qsSave   = document.querySelector('#qs-' + gridKey + '-save');
+            const qsDelete = document.querySelector('#qs-' + gridKey + '-delete');
 
-        if (qsRead)   qsRead.checked   = allRead;
-        if (qsSave)   qsSave.checked   = allSave;
-        if (qsDelete) qsDelete.checked = allDelete;
-    }
+            if (qsRead)   qsRead.checked   = allRead;
+            if (qsSave)   qsSave.checked   = allSave;
+            if (qsDelete) qsDelete.checked = allDelete;
+        }
 
-    // 7. 빠른 설정 체크박스로 일괄 적용
-    function applyBulkSetting(grid, action, checked) {
-        if (!grid) return;
-        const rows = grid.getData().map(row => {
-            if (action === 'readAll')   row.canRead   = checked;
-            if (action === 'saveAll')   row.canSave   = checked;
-            if (action === 'deleteAll') row.canDelete = checked;
-            return row;
+        // 6. 빠른 설정 체크박스로 일괄 적용
+        function applyBulkSetting(grid, action, checked) {
+            if (!grid) return;
+
+            const rows = grid.getData().map(function (row) {
+                if (action === 'readAll')   row.canRead   = checked;
+                if (action === 'saveAll')   row.canSave   = checked;
+                if (action === 'deleteAll') row.canDelete = checked;
+                return row;
+            });
+
+            grid.resetData(rows);
+        }
+
+        // 빠른 설정 체크박스 이벤트
+        document.querySelectorAll('.quick-bulk-check').forEach(function (cb) {
+            cb.addEventListener('change', function (e) {
+                const gridKey = e.target.dataset.grid;  // hr / sales / common
+                const action  = e.target.value;         // readAll / saveAll / deleteAll
+                const checked = e.target.checked;
+
+                const grid = getGridByKey(gridKey);
+                applyBulkSetting(grid, action, checked);   // 일괄 적용 또는 해제
+                syncQuickCheckboxes(grid, gridKey);        // 데이터 기준으로 상태 다시 맞추기
+            });
         });
-        grid.resetData(rows);
-    }
 
-    document.querySelectorAll('.quick-bulk-check').forEach(cb => {
-        cb.addEventListener('change', e => {
-            const gridKey = e.target.dataset.grid;  // hr / sales / common
-            const action  = e.target.value;         // readAll / saveAll / deleteAll
-            const checked = e.target.checked;
+        // 7. 그리드 셀 클릭 시 → 값 토글 + 빠른 설정 체크박스 동기화
+        function setupGridClickSync(grid, gridKey) {
+            grid.on('click', function (ev) {
+                const col = ev.columnName;
+                const rowKey = ev.rowKey;
 
-            const grid = getGridByKey(gridKey);
-            applyBulkSetting(grid, action, checked);   // 일괄 적용 또는 해제
-            syncQuickCheckboxes(grid, gridKey);        // 데이터 기준으로 상태 다시 맞추기
+                if (rowKey == null) return;
+                if (['canRead', 'canSave', 'canDelete'].indexOf(col) === -1) return;
+
+                const current = grid.getValue(rowKey, col);
+                grid.setValue(rowKey, col, !current, false);
+
+                // 일부만 해제되면 빠른 설정 체크박스 자동 해제/설정
+                syncQuickCheckboxes(grid, gridKey);
+            });
+        }
+
+        setupGridClickSync(authGridHr, 'hr');
+        setupGridClickSync(authGridSales, 'sales');
+        setupGridClickSync(authGridCommon, 'common');
+
+        // 초기 로딩 시에도 현재 데이터 기준으로 빠른 설정 체크박스 상태 동기화
+        syncQuickCheckboxes(authGridHr, 'hr');
+        syncQuickCheckboxes(authGridSales, 'sales');
+        syncQuickCheckboxes(authGridCommon, 'common');
+
+        // 레이아웃 깨짐 방지용 (창 크기 변경 시)
+        window.addEventListener('resize', function () {
+            roleGrid.refreshLayout();
+            authGridHr.refreshLayout();
+            authGridSales.refreshLayout();
+            authGridCommon.refreshLayout();
         });
-    });
-
-    // 8. 그리드 셀 클릭 시 → 값 토글 + 빠른 설정 체크박스 동기화
-    function setupGridClickSync(grid, gridKey) {
-        grid.on('click', ev => {
-            const col = ev.columnName;
-            const rowKey = ev.rowKey;
-
-            if (rowKey == null) return;
-            if (!['canRead', 'canSave', 'canDelete'].includes(col)) return;
-
-            const current = grid.getValue(rowKey, col);
-            grid.setValue(rowKey, col, !current, false);
-
-            // 일부만 해제되면 빠른 설정 체크박스 자동 해제
-            syncQuickCheckboxes(grid, gridKey);
-        });
-    }
-
-    setupGridClickSync(authGridHr, 'hr');
-    setupGridClickSync(authGridSales, 'sales');
-    setupGridClickSync(authGridCommon, 'common');
-    
-    // 그리드 레이아웃 새로고침 (스크롤바 벗어남 해결책)
-    window.addEventListener('load', function() {
-        subscriptionGrid.refreshLayout();
     });
 </script>
 

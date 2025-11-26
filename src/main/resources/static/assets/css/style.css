@@ -12877,7 +12877,7 @@ textarea.is-invalid.tt-hint, .select2-container--default .select2-selection--sin
 }
 
 .card-header {
-  padding: 16px 24px;
+  padding: 16px 24px 4px 24px;
   display: flex;
   justify-content: space-between;
   background-color: #fff;
@@ -26043,6 +26043,8 @@ select.form-control.border-light, select.border-light.typeahead,
 select.border-light.tt-query,
 select.border-light.tt-hint, .select2-container--default .select2-selection--single select.border-light.select2-search__field, .select2-container--default select.border-light.select2-selection--single {
   outline: 1px solid #E9E9E9;
+  
+  
 }
 select.form-control.border-light:focus, select.border-light.typeahead:focus,
 select.border-light.tt-query:focus,
@@ -30390,10 +30392,40 @@ background: #E2E4E7 !important;
 border-bottom: 0.5px solid #CDD0D5 !important;
 }
 
-label.astar::after {
+/*# sourceMappingURL=maps/style.css.map */
+
+/* ========================
+   YEDAM ERP 공통 스타일_일단 나만
+   ======================== */
+   
+label.astar::after,
+.tui-grid-header-area .required-header::after {
     content: " *";
     color: red;
     font-weight: bold;
     margin-left: 2px;
 }
-/*# sourceMappingURL=maps/style.css.map */
+
+/* select 기본 글자색 통일 */
+.form-select {
+  color: #000 !important;
+}
+
+/* Toast UI Grid - 체크박스 헤더/바디 색상 */
+.tui-grid-header-area .tui-grid-cell-row-header {
+  background-color: #f5f5f5;
+}
+
+.tui-grid-body-area .tui-grid-cell-row-header {
+  background-color: #ffffff;
+}
+
+.tui-select-box-icon {
+  font-size: 0 !important;
+}
+
+
+/* 전체 스크롤 잠금 */
+/*html, body {
+  overflow: hidden;
+} */ 
