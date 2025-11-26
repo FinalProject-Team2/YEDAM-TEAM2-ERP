@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>vcatn.html</title>
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<style>
+.form-select {
+	color: #000 !important;
+}
+/* 추가 CSS */
+.readonly-input[readonly] {
+	background-color: #e9ecef; /* Bootstrap 기본 disabled 색상 */
+	cursor: not-allowed; /* 마우스 커서도 입력 불가 느낌 */
+}
+
+.stIsShow {
+	display: none;
+}
+
+.menu-item {
+    cursor: pointer; /* 마우스 올리면 손가락 모양 */
+  }
+</style>
+</head>
+<body layout:fragment="content">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card mb-3">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">평가 진행 현황 박스</h5>
+					</div>
+
+				</div>
+				<div class="card-body">
+
+					<div class="row mb-2">
+						<div class="col-md-4">
+							<label class="form-label">본인 평가 완료 여부</label> <input type="text"
+								value="0 / 3" class="form-control" />
+						</div>
+						<div class="col-md-4">
+							<label class="form-label">상사 평가 완료 여부</label> <input type="text"
+								value="0 / 2" class="form-control" />
+						</div>
+						<div class="col-md-4">
+							<label class="form-label">부하 평가 완료 여부</label> <input type="text"
+								value="0 / 5" class="form-control" />
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="row">
+		<div class="col-md-2">
+			<div class="card">
+				<div class="menu-item" onclick="chTitle(this)">
+					<i class="fa fa-edit"></i>본인 평가
+				</div>
+				<div class="menu-item" onclick="chTitle(this)">
+					<i class="fa fa-edit"></i>상사 평가
+				</div>
+				<div class="menu-item" onclick="chTitle(this)">
+					<i class="fa fa-edit"></i>부하 평가
+				</div>
+				<div class="menu-item" onclick="chTitle(this)">
+					<i class="fa fa-edit"></i>결과지 확인
+				</div>
+			</div>
+		</div>
+		<!-- 검색조건 -->
+		<div class="col-md-10">
+			<!-- 사원목록 -->
+			<div id="mlssUser" class="card">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div
+					class="card-header d-flex justify-content-between align-items-center">
+					<div class="card-header-left">
+						<!-- collapse 토글 버튼으로 변경 -->
+						<h5 class="card-title mb-0">
+							<a id="collapseToggle"
+								class="text-dark text-decoration-none"
+								data-bs-toggle="collapse" href="#selfEvalCollapse" role="button"
+								aria-expanded="false" aria-controls="selfEvalCollapse"> 본인
+								평가 </a>
+						</h5>
+					</div>
+					<div class="card-header-right">
+						<button type="button" class="btn btn-outline-dark">임시저장</button>
+						<button type="button" class="btn btn-outline-dark">제출</button>
+					</div>
+				</div>
+				<div id="selfEvalCollapse" class="collapse">
+					<div class="card-body">
+						<div class="row mb-2">
+							<div class="col-md-4">
+								<label class="form-label">이름</label> <input type="text"
+									value="0 / 3" class="form-control" />
+							</div>
+							<div class="col-md-4">
+								<label class="form-label">부서</label> <input type="text"
+									value="0 / 2" class="form-control" />
+							</div>
+							<div class="col-md-4">
+								<label class="form-label">직급</label> <input type="text"
+									value="0 / 5" class="form-control" />
+							</div>
+						</div>
+						<div class="row mb-2">
+							<div class="col-md-6">
+								<label for="userName" class="form-label">기간</label>
+								<div class="input-group date" id="applyDatePicker">
+									<input type="text" class="form-control" id="b_vcatnBegin"
+										placeholder="날짜 선택"> <span class="input-group-text"
+										id="icon-calendar"> <i class="bi bi-calendar"></i>
+									</span>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<label for="userName" class="form-label">　</label>
+								<div class="input-group date" id="applyDatePicker">
+									<input type="text" class="form-control" id="b_vcatnEnd"
+										placeholder="날짜 선택"> <span class="input-group-text"
+										id="icon-calendar"> <i class="bi bi-calendar"></i>
+									</span>
+								</div>
+							</div>
+						</div>
+						<h5 class="card-title">역량 그룹별 평가 항목</h5>
+						<p>직무 역량</p>
+						<div id="toastGrid" style="margin: 20px;"></div>						
+						<p>협업 역량</p>
+						<div id="toastGrid2" style="margin: 20px;"></div>						
+						<p>자기관리 역량</p>
+						<div id="toastGrid3" style="margin: 20px;"></div>
+					</div>
+				</div>
+			</div>
+			<div id="mlssResult" class="card stIsShow">
+			<div id="chart"></div>
+		</div>
+	</div>
+
+	<script>
+	
+	function chTitle(el) {
+	    // div 안의 텍스트 가져오기 (아이콘 제외)
+	    const text = el.innerText.trim();
+	    if(text =="결과지 확인"){
+	    	document.getElementById("mlssUser").classList.add("stIsShow");
+	    	document.getElementById("mlssResult").classList.remove("stIsShow");
+	    }else{
+	    	document.getElementById("mlssUser").classList.remove("stIsShow");
+	    	document.getElementById("mlssResult").classList.add("stIsShow");
+	    }
+	    // a 태그의 텍스트 변경
+	    document.getElementById("collapseToggle").innerText = text;
+	  }
+
+	const gridData = [
+		  { id: 1, ability: "업무 이해도" },
+		  { id: 2, ability: "전문성" },
+		  { id: 3, ability: "문제 해결 능력" }
+		];
+
+
+		const grid = new tui.Grid({
+		  el: document.getElementById('toastGrid'),
+		  data: gridData,
+		  rowKey: 'id',
+		  scrollX: false,
+		  scrollY: false,
+		  minBodyHeight: 0,
+		  autoWidth: true,
+		  columns: [
+		    {
+		      header: '평가 항목',
+		      name: 'ability',
+		      sortable: true
+		    },
+		    {
+		      header: '매우 부족',
+		      name: 'score1',
+		      align: 'center',
+		      formatter: function(props) {			    	  
+		        return `<input type="radio" name="row-${props.row.id}" value="1">`;
+		      }
+		    },
+		    {
+		      header: '부족',
+		      name: 'score2',
+		      align: 'center',
+		      formatter: function(props) {
+		        return `<input type="radio" name="row-${props.row.id}" value="2">`;
+		      }
+		    },
+		    {
+		      header: '보통',
+		      name: 'score3',
+		      align: 'center',
+		      formatter: function(props) {
+		        return `<input type="radio" name="row-${props.row.id}" value="3">`;
+		      }
+		    },
+		    {
+		      header: '우수',
+		      name: 'score4',
+		      align: 'center',
+		      formatter: function(props) {
+		        return `<input type="radio" name="row-${props.row.id}" value="4">`;
+		      }
+		    },
+		    {
+		      header: '매우 우수',
+		      name: 'score5',
+		      align: 'center',
+		      formatter: function(props) {
+		        return `<input type="radio" name="row-${props.row.id}" value="5">`;
+		      }
+		    }
+		  ]
+		});
+
+		// 아코디언 열릴 때 레이아웃 갱신
+		const collapseEl = document.getElementById('selfEvalCollapse');
+		collapseEl.addEventListener('shown.bs.collapse', function() {
+			grid.refreshLayout();
+			grid2.refreshLayout();
+			grid3.refreshLayout();
+		});
+		
+		const gridData2 = [ {
+			id: 4,
+			ability : "의사소통 능력",
+			
+		}, {
+			id: 5,
+			ability : "협력 태도",
+			
+		}, {
+			id: 6,
+			ability : "문제해결 및 기여도",
+			
+		}, ];
+
+		// Grid 생성
+		const grid2 = new tui.Grid({
+			el : document.getElementById('toastGrid2'),
+			data : gridData2,
+			scrollX : false,
+			scrollY : false,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+			      header: '평가 항목',
+			      name: 'ability',
+			      sortable: true
+			    },
+			    {
+			      header: '매우 부족',
+			      name: 'score1',
+			      align: 'center',
+			      formatter: function(props) {		    	  
+			        return `<input type="radio" name="row-${props.row.id}" value="1">`;
+			      }
+			    },
+			    {
+			      header: '부족',
+			      name: 'score2',
+			      align: 'center',
+			      formatter: function(props) {
+			        return `<input type="radio" name="row-${props.row.id}" value="2">`;
+			      }
+			    },
+			    {
+			      header: '보통',
+			      name: 'score3',
+			      align: 'center',
+			      formatter: function(props) {
+			        return `<input type="radio" name="row-${props.row.id}" value="3">`;
+			      }
+			    },
+			    {
+			      header: '우수',
+			      name: 'score4',
+			      align: 'center',
+			      formatter: function(props) {
+			        return `<input type="radio" name="row-${props.row.id}" value="4">`;
+			      }
+			    },
+			    {
+			      header: '매우 우수',
+			      name: 'score5',
+			      align: 'center',
+			      formatter: function(props) {
+			        return `<input type="radio" name="row-${props.row.id}" value="5">`;
+			      }
+			    } ]
+		});
+		
+		const gridData3 = [ {
+			id: 7,
+			ability : "시간 및  업무관리",			
+		}, {
+			id: 8,
+			ability : "자기개발 및 학습태도",			
+		}, {
+			id: 9,
+			ability : "책임감 및 규율 준수",			
+		}, ];
+
+		// Grid 생성
+		const grid3 = new tui.Grid({
+			el : document.getElementById('toastGrid3'),
+			data : gridData3,
+			scrollX : false,
+			scrollY : false,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+			      header: '평가 항목',
+			      name: 'ability',
+			      sortable: true
+			    },
+			    {
+			      header: '매우 부족',
+			      name: 'score1',
+			      align: 'center',
+			      formatter: function(props) {		    	  
+			        return `<input type="radio" name="row-${props.row.id}" value="1">`;
+			      }
+			    },
+			    {
+			      header: '부족',
+			      name: 'score2',
+			      align: 'center',
+			      formatter: function(props) {
+			        return `<input type="radio" name="row-${props.row.id}" value="2">`;
+			      }
+			    },
+			    {
+			      header: '보통',
+			      name: 'score3',
+			      align: 'center',
+			      formatter: function(props) {
+			        return `<input type="radio" name="row-${props.row.id}" value="3">`;
+			      }
+			    },
+			    {
+			      header: '우수',
+			      name: 'score4',
+			      align: 'center',
+			      formatter: function(props) {
+			        return `<input type="radio" name="row-${props.row.id}" value="4">`;
+			      }
+			    },
+			    {
+			      header: '매우 우수',
+			      name: 'score5',
+			      align: 'center',
+			      formatter: function(props) {
+			        return `<input type="radio" name="row-${props.row.id}" value="5">`;
+			      }
+			    } ]
+		});
+		/* namespace */
+		const Chart = toastui.Chart;
+		const el = document.getElementById('chart');
+		const data = {
+		  categories: ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+		  series: [
+		    {
+		      name: 'Budget',
+		      data: [5000, 3000, 5000, 7000, 6000, 4000, 1000],
+		    },
+		    {
+		      name: 'Income',
+		      data: [8000, 4000, 7000, 2000, 6000, 3000, 5000],
+		    },
+		  ],
+		};
+		const options = {
+		  chart: { width: 700, height: 400 },
+		};
+
+		
+	</script>	
+	<script type="module">
+import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
+
+//그리드 행 클릭 시 상세정보 입력
+grid.on('click', function(ev) {
+    const rowData = grid.getRow(ev.rowKey);
+    if (!rowData) return;
+
+    bindGridToForm(rowData);    
+    
+    const dto = formToJson();  
+    console.log(dto);
+});
+</script>
+</body>
+
+</html>
