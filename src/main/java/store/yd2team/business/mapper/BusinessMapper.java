@@ -13,7 +13,7 @@ public interface BusinessMapper {
 	List<BusinessVO> getList();
 	
 	//등록
-	
+	int insert(BusinessVO business);
 	
 	//수정
 	

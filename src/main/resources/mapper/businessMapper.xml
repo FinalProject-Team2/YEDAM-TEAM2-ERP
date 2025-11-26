@@ -3,6 +3,11 @@
 <mapper namespace="store.yd2team.business.mapper.BusinessMapper">
 
 <select id="getList">
+ SELECT sysdate
+ FROM    dual;
+</select> 
+
+<!-- <select id="getList">
  SELECT stdr_detail_id,
         potential_info_no,
         vend_id,
@@ -15,7 +20,7 @@
         updt_dt,
         updt_by
 FROM    tb_potential_stdr;
-</select>
+</select> -->
 
 <insert id="insert">
 INSERT INTO 
