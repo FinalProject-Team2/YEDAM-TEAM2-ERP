@@ -24,16 +24,17 @@
 </style>
 </head>
 <body layout:fragment="content">
-	
+
 	<div class="row">
 		<div class="col-md-12 mb-3">
 			<div class="card">
 				<div class="card-body">
-					<div class="row">
-						<div class="col-md-2 text-start">
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
 							<h5 class="card-title">조회</h5>
 						</div>
-						<div class="col-md-10 text-end">
+						<div class="card-header-right">
 							<button class="btn btn-dark">초기화</button>
 							<button class="btn btn-outline-dark">조회</button>
 						</div>
@@ -65,9 +66,14 @@
 		<!-- 검색조건 -->
 		<div class="col-md-6">
 			<!-- 사원목록 -->
-			<div class="card" style="height:804.18px;">
+			<div class="card" style="height: 818.22px;">
 				<div class="card-body">
-					<h5 class="card-title">사원목록</h5>
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">사원목록</h5>
+						</div>
+					</div>
 					<div id="employeeGrid" style="margin: 20px;"></div>
 				</div>
 			</div>
@@ -78,18 +84,18 @@
 			<!-- 기본정보 -->
 			<div class="card mb-3">
 				<div class="card-body ">
-					<div class="row">
-						<div class="col-md-2 text-start">
-							<span class="card-title">기본정보</span>
-
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">기본정보</h5>
 						</div>
-						<div class="col-md-10 text-end">
-
+						<div class="card-header-right">
+							<button class="btn btn-outline-dark ">근로계약서</button>
 							<button class="btn btn-outline-dark ">등록</button>
 							<button class="btn btn-outline-dark ">삭제</button>
-							<button class="btn btn-outline-dark ">근로계약서</button>
 						</div>
 					</div>
+
 					<div class="row">
 						<div class="col-md-4 text-center">
 							<img src="/images/faces/face11.jpg" alt="사진"
@@ -130,7 +136,12 @@
 			<!-- 인사정보 -->
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title">인사정보</h5>
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">인사정보</h5>
+						</div>
+											</div>
 					<div class="row mb-2">
 						<div class="col-md-6">
 							<label>부서</label> <select id="v_deptNm" class="form-select">
@@ -207,91 +218,268 @@
 			</div>
 		</div>
 	</div>
-<script >
-	
+	<script>
+		// 화면 테스트용 데이터
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : { // 일반 셀(본문)
+					border : '#ccc',
+					background : "#fff",
+					showVerticalBorder : true, // 세로 라인 표시
+				},
+				header : { // 헤더 셀
+					border : '#ccc',
+					background : '#E3E6ED',
+					showVerticalBorder : true,
+				},
+				editable : { // ★ 편집 가능한 셀 공통 스타일
+					background : '#FFFDF0', // 연노랑 같은 색으로 표시
+					text : '#000'
+				},
+				selectedHeader : { // 헤더 클릭했을 때 색
+					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+				},
+				selected : { // 선택된 셀 색
+					background : '#ffffff' // 필요하면 여기도 조정
+				}
+			}
+		});
 
-// 화면 테스트용 데이터
-tui.Grid.applyTheme('default', {
-  cell: {
-    normal: {                // 일반 셀(본문)
-      border: '#ccc',
-      background: "#fff",
-      showVerticalBorder: true,   // 세로 라인 표시
-    },
-    header: {                // 헤더 셀
-      border: '#ccc',
-      background: '#E3E6ED',
-      showVerticalBorder: true,
-    },
-    editable: {                   // ★ 편집 가능한 셀 공통 스타일
-        background: '#FFFDF0',      // 연노랑 같은 색으로 표시
-        text: '#000'
-      },
-    selectedHeader: {              // 헤더 클릭했을 때 색
-        background: '#E3E6ED'        // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-      },
-      selected: {                    // 선택된 셀 색
-        background: '#ffffff'        // 필요하면 여기도 조정
-      }
-  }
-});
+		const gridData = [ {
+			nm : "아이유",
+			empId : "com001",
+			deptId : "영업",
+			clsf : "사원",
+			brthdy : "1993-05-16",
+			cttpc : "010-1234-5678",
+			email : "IU@email.com",
+			deptNm : "영업",
+			dty : "영업 관리자",
+			rspofc : "팀원",
+			bslry : "2,000,000"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "뉴진스",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "총16개",
+			empId : "com002",
+			deptId : "인사",
+			clsf : "과장",
+			brthdy : "2005-04-11",
+			cttpc : "010-2345-6789",
+			email : "NewJeans@email.com",
+			deptNm : "인사",
+			dty : "HRM(인적자원관리)",
+			rspofc : "팀장",
+			pymhr : "10,030"
+		}, {
+			nm : "임영웅",
+			empId : "com003",
+			deptId : "생산",
+			clsf : "이사",
+			brthdy : "1991-06-16",
+			cttpc : "010-3456-7890",
+			email : "ImYoungWoong@email.com",
+			deptNm : "생산",
+			dty : "생산관리",
+			rspofc : "관리자",
+			bslry : "3,000,000"
+		} ];
 
-const gridData = [
-  { nm: "아이유", empId: "com001", deptId: "영업", clsf: "사원", brthdy: "1993-05-16", cttpc: "010-1234-5678", email: "IU@email.com", deptNm: "영업", dty: "영업 관리자", rspofc: "팀원", bslry: "2,000,000"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},  
-  { nm: "뉴진스", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},
-  { nm: "총16개", empId: "com002", deptId: "인사", clsf: "과장", brthdy: "2005-04-11", cttpc: "010-2345-6789", email: "NewJeans@email.com", deptNm: "인사", dty: "HRM(인적자원관리)", rspofc: "팀장", pymhr: "10,030"},  
-  { nm: "임영웅", empId: "com003", deptId: "생산", clsf: "이사", brthdy: "1991-06-16", cttpc: "010-3456-7890", email: "ImYoungWoong@email.com", deptNm: "생산", dty: "생산관리", rspofc: "관리자", bslry: "3,000,000"}  
-];
+		// Grid 생성
+		const grid = new tui.Grid({
+			el : document.getElementById('employeeGrid'),
+			data : gridData,
+			scrollX : false,
+			scrollY : true,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+				header : '이름',
+				name : 'nm',
+				sortable : 'true'
+			}, {
+				header : '사번',
+				name : 'empId'
+			}, {
+				header : '부서',
+				name : 'deptNm'
+			}, {
+				header : '직급',
+				name : 'clsf',
+				align : 'center'
+			} ],
+			bodyHeight : 640, // 본문 높이 고정
+		});
 
-// Grid 생성
-const grid = new tui.Grid({
-  el: document.getElementById('employeeGrid'),
-  data: gridData,
-  scrollX: false,
-  scrollY: true,
-  minBodyHeight: 0,
-  autoWidth: true,
-  columns: [
-    { header: '이름', name: 'nm', sortable: 'true'},
-    { header: '사번', name: 'empId'},
-    { header: '부서', name: 'deptNm'},
-    { header: '직급', name: 'clsf', align: 'center'}    
-  ],
-  bodyHeight: 640,   // 본문 높이 고정
-});
-
-
-
-//급여 경우의수 처리
-function bindSalary(rowData) {
-    if (rowData.bslry) {
-        salaryType.value = "bslry";
-        salaryInput.value = rowData.bslry;
-    } else if (rowData.pymhr) {
-        salaryType.value = "pymhr";
-        salaryInput.value = rowData.pymhr;
-    } else {
-        salaryType.value = "";
-        salaryInput.value = "";
-    }
-}
-
-
-
-</script>
-<script type="module">
+		//급여 경우의수 처리
+		function bindSalary(rowData) {
+			if (rowData.bslry) {
+				salaryType.value = "bslry";
+				salaryInput.value = rowData.bslry;
+			} else if (rowData.pymhr) {
+				salaryType.value = "pymhr";
+				salaryInput.value = rowData.pymhr;
+			} else {
+				salaryType.value = "";
+				salaryInput.value = "";
+			}
+		}
+	</script>
+	<script type="module">
 import { bindGridToForm, formToJson } from '/assets/js/teamUtil.js';
 //그리드 행 클릭 시 상세정보 입력
 grid.on('click', function(ev) {

@@ -33,7 +33,7 @@
 					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 					<div class="card-header with-actions">
 						<div class="card-header-left">
-							<h5 class="card-title">조회-(사원용)</h5>
+							<h5 class="card-title">조회</h5>
 						</div>
 						<div class="card-header-right">
 							<button type="button" class="btn btn-dark">초기화</button>
@@ -43,13 +43,10 @@
 
 					<div class="row mb-2">
 						<div class="col-md-3">
-							<label>기간</label> <input type="date" class="form-control"
+							<label>교육명</label> <input type="text" class="form-control"
 								placeholder="Value">
 						</div>
-						<div class="col-md-3">
-							<label> </label> <input type="date" class="form-control"
-								placeholder="Value">
-						</div>
+
 						<div class="col-md-3">
 							<label>휴가유형</label> <select class="form-select">
 								<option>연차</option>
@@ -58,12 +55,7 @@
 							</select>
 						</div>
 						<div class="col-md-3">
-							<label>상태</label> <select class="form-select">
-								<option>전체</option>
-								<option>신청</option>
-								<option>승인</option>
-								<option>반려</option>
-							</select>
+							<label>연도</label> <select id="year" class="form-select"></select>
 						</div>
 					</div>
 				</div>
@@ -79,7 +71,7 @@
 					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 					<div class="card-header with-actions">
 						<div class="card-header-left">
-							<h5 class="card-title">나의 휴가 신청 내역 - 홍길동 (D001/개발팀)</h5>
+							<h5 class="card-title">교육 목록 테이블</h5>
 						</div>
 					</div>
 					<div id="toastGrid" style="margin: 20px;"></div>
@@ -95,7 +87,7 @@
 					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 					<div class="card-header with-actions">
 						<div class="card-header-left">
-							<h5 class="card-title">휴가 신청상세</h5>
+							<h5 class="card-title">교육 기본 정보</h5>
 						</div>
 						<div class="card-header-right">
 							<button class="btn btn-outline-dark ">등록</button>
@@ -106,23 +98,18 @@
 						<div class="col-md-12">
 							<div class="row mb-2">
 								<div class="col-md-6">
-									<label>이름</label> <input type="text" class="form-control" />
+									<label>교육명</label> <input type="text" class="form-control" />
 								</div>
 								<div class="col-md-6">
-									<label>사번</label> <input type="text"
-										class="form-control readonly-input" readonly="readonly" />
+									<label>교육구분</label> <input type="text" class="form-control" />
 								</div>
 							</div>
 							<div class="row mb-2">
 								<div class="col-md-6">
-									<label>휴가유형</label> <select id="v_vcatnTy" class="form-select">
-										<option>연차</option>
-										<option>병가</option>
-										<option>특별휴가</option>
-									</select>
+									<label>대상자 수</label> <input id="v_vcatnTy" class="form-control" />
 								</div>
 								<div class="col-md-6">
-									<label>신청일</label> <input id="v_creaDt" type="date"
+									<label>등록일</label> <input id="v_creaDt" type="date"
 										class="form-control" />
 								</div>
 							</div>
@@ -136,11 +123,6 @@
 										class="form-control" />
 								</div>
 							</div>
-							<div class="row mb-2">
-								<div class="col-md-12">
-									<label>사유</label> <input type="text" class="form-control" />
-								</div>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -148,42 +130,30 @@
 			<!-- 인사정보 -->
 			<div class="card">
 				<div class="card-body " style="height: 345.45px;">
-				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 					<div class="card-header with-actions">
 						<div class="card-header-left">
-							<h5 class="card-title">휴가처리 정보</h5>
+							<h5 class="card-title">대상자 목록</h5>
 						</div>
 					</div>
-				<div id="hugadeta" class="stIsShow" >					
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>처리일</label> <input type="text" class="form-control" />
-						</div>
-						<div class="col-md-6">
-							<label>승인자</label> <input id="v_nm" type="text"
-								class="form-control" />
-						</div>
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>상태</label> <select id="v_st" class="form-select">
-								<option>신청</option>
-								<option>승인</option>
-								<option>반려</option>
-							</select>
-						</div>
-						<div class="col-md-6">
-							<label id="hugaSt1">비고</label> <label id="hugaSt2">반려사유</label>
-							<textarea class="form-control" rows="5" style="height: 150px;"></textarea>
-						</div>
-					</div>
-					</div>
+							
 				</div>
 			</div>
 		</div>
 	</div>
 
 	<script>
+		const select = document.getElementById("year");
+		const currentYear = new Date().getFullYear(); // 현재 연도
+		const startYear = 1980; // 시작 연도
+
+		for (let y = currentYear; y >= startYear; y--) {
+			const option = document.createElement("option");
+			option.value = y;
+			option.textContent = y;
+			select.appendChild(option);
+		}
+
 		// 화면 테스트용 데이터
 		tui.Grid.applyTheme('default', {
 			cell : {
@@ -308,7 +278,7 @@
 			vcatnEnd : "1990-01-02",
 			st : "승인",
 			nm : "김관리"
-		},  {
+		}, {
 			creaDt : "1990-01-03",
 			vcatnTy : "특별휴가",
 			vcatnBegin : "1990-01-01",
