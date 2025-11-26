@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>churn_risk_list</title>
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+</head>
+<style>
+.fixed-photo {
+	width: 150px; /* 원하는 가로 크기 */
+	height: 200px; /* 원하는 세로 크기 */
+	object-fit: cover; /* 비율 유지하며 영역에 맞게 채움 */
+}
+
+.form-select {
+	color: #000 !important;
+}
+</style>
+<body layout:fragment="content">
+
+	<div class="row">
+		<div class="col-md-12 mb-3">
+			<div class="card">
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header">
+						<div class="card-header-left">
+							<h5 class="card-title">조회조건</h5>
+						</div>
+						<div class="card-header-right">
+							<button class="btn btn-dark">초기화</button>
+							<button class="btn btn-outline-dark">조회</button>
+						</div>
+					</div>
+					<div class="card-body">
+						<div class="row mb-2">
+								<div class="row mb-2">
+								<div class="col-md-3">
+									<label class="form-label">업종</label> <select class="form-select">
+										<option>건설</option>
+										<option>IT</option>
+										<option>제과</option>
+										<option>의류</option>
+									</select>
+								</div>
+									<div class="col-md-3">
+										<label class="form-label">업체규모</label> <input type="text" class="form-control" placeholder="Value">
+									</div>
+									<div class="col-md-3">
+										<label class="form-label">지역/상권</label> <input type="text" class="form-control" placeholder="Value">
+									</div>
+								</div>
+									<div class="col-md-3">
+										<label class="form-label">설립일</label> <input type="date" class="form-control" placeholder="Value">
+									</div>
+									<div class="col-md-3">
+										<label class="form-label"></label> <input type="text" class="form-control" placeholder="Value">
+									</div>
+							</div>
+							
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		
+		
+	<!-- 휴먼고객 -->
+	<div class="card mb-3">
+		<div class="card-header">
+			<div class="card-header-left">
+				<h5 class="card-title">휴먼고객목록</h5>
+			</div>
+			<!-- card-header-left end  -->
+			<div class="card-header-right">
+				<button class="btn btn-dark">초기화</button>
+				<button class="btn btn-outline-dark">조회</button>
+			</div>
+		</div>
+		<div class="card-body">
+			<div id="dormancygrid" style="margin: 20px;"></div>
+		</div>
+	</div>
+	<script>
+		
+		// 휴먼/이탈고객 데이터
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : { // 일반 셀(본문)
+					border : '#ccc',
+					background : "#fff",
+					showVerticalBorder : true, // 세로 라인 표시
+				},
+				header : { // 헤더 셀
+					border : '#ccc',
+					background : '#E3E6ED',
+					showVerticalBorder : true,
+				},
+				editable : { // ★ 편집 가능한 셀 공통 스타일
+					background : '#FFFDF0', // 연노랑 같은 색으로 표시
+					text : '#000'
+				},
+				selectedHeader : { // 헤더 클릭했을 때 색
+					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+				},
+				selected : { // 선택된 셀 색
+					background : '#ffffff' // 필요하면 여기도 조정
+				}
+			}
+		});
+		const dormancygridData = [
+			{
+				rank: "1",
+				custname: "코드예담",
+				custtype: "IT",
+				scale: "중견기업",
+				ceatedate: "1968년",
+				region: "대구광역시",
+				leadscore: "83점"
+			},
+			{
+				rank: "2",
+				custname: "건설예담",
+				custtype: "건설",
+				scale: "중소기업",
+				ceatedate: "1985년",
+				region: "경상북도",
+				leadscore: "68점"
+			},
+			{
+				rank: "3",
+				custname: "푸드예담",
+				custtype: "식품",
+				scale: "중견기업",
+				ceatedate: "1992년",
+				region: "경기도",
+				leadscore: "72점"
+			},
+			{
+				rank: "4",
+				custname: "메디예담",
+				custtype: "의료기기",
+				scale: "중소기업",
+				ceatedate: "2001년",
+				region: "서울특별시",
+				leadscore: "65점"
+			},
+			{
+				rank: "5",
+				custname: "엔지니어링예담",
+				custtype: "제조",
+				scale: "중견기업",
+				ceatedate: "1989년",
+				region: "울산광역시",
+				leadscore: "78점"
+			},
+			{
+				rank: "6",
+				custname: "바이오예담",
+				custtype: "바이오",
+				scale: "중소기업",
+				ceatedate: "2014년",
+				region: "충청북도",
+				leadscore: "61점"
+			},
+			{
+				rank: "7",
+				custname: "패션예담",
+				custtype: "의류",
+				scale: "중견기업",
+				ceatedate: "1999년",
+				region: "부산광역시",
+				leadscore: "74점"
+			},
+			{
+				rank: "8",
+				custname: "모빌리티예담",
+				custtype: "자동차부품",
+				scale: "대기업",
+				ceatedate: "1975년",
+				region: "경상남도",
+				leadscore: "89점"
+			},
+			{
+				rank: "9",
+				custname: "그린예담",
+				custtype: "환경",
+				scale: "중소기업",
+				ceatedate: "2010년",
+				region: "전라북도",
+				leadscore: "57점"
+			},
+			{
+				rank: "10",
+				custname: "스마트예담",
+				custtype: "IT",
+				scale: "중소기업",
+				ceatedate: "2018년",
+				region: "인천광역시",
+				leadscore: "63점"
+			},
+			{
+				rank: "11",
+				custname: "테크예담",
+				custtype: "전자",
+				scale: "중견기업",
+				ceatedate: "1995년",
+				region: "세종특별자치시",
+				leadscore: "76점"
+			},
+			{
+				rank: "12",
+				custname: "로지스예담",
+				custtype: "물류",
+				scale: "중소기업",
+				ceatedate: "2007년",
+				region: "강원도",
+				leadscore: "59점"
+			}
+		];
+
+		// Grid 생성
+		const dormancygrid = new tui.Grid({
+			el : document.getElementById('dormancygrid'),
+			data : dormancygridData,
+			scrollX : false,
+			scrollY : true,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+				header : '순위',
+				name : 'rank',
+				sortable : 'true',
+				align : 'center'
+			}, {
+				header : '업체명',
+				name : 'custname',
+				editor : 'text'
+			}, {
+				header : '업종',
+				name : 'custtype',
+				sortable : 'true',
+				align : 'center'
+			},  {
+				header : '규모',
+				name : 'scale',
+				align : 'center'
+			},{
+				header : '설립일',
+				name : 'ceatedate',
+				align : 'center'
+			},{
+				header : '지역/상권',
+				name : 'region',
+				align : 'center'
+			}, {
+				header : '리드점수',
+				name : 'leadscore',
+				align : 'center'
+			} ]
+		});
+	</script>
+</body>
+</html>
+

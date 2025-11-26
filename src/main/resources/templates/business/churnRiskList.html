@@ -5,12 +5,11 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<title>churn_risk_stdr_register</title>
+<title>churn_risk_list</title>
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 </head>
-<title>employee-register</title>
 <style>
 .fixed-photo {
 	width: 150px; /* 원하는 가로 크기 */
@@ -24,156 +23,71 @@
 </style>
 <body layout:fragment="content">
 
-	<!-- 사원목록 -->
-	<div class="card mb-3">
-		<div class="card-body">
-			<h5 class="card-title">사원목록</h5>
-			<div id="grid" style="margin: 20px;"></div>
-		</div>
-	</div>
-
 	<div class="row">
 		<div class="col-md-12 mb-3">
 			<div class="card">
-				<div class="card-body">
 					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header with-actions">
+					<div class="card-header">
 						<div class="card-header-left">
-							<h5 class="card-title">조회</h5>
+							<h5 class="card-title">조회조건</h5>
 						</div>
 						<div class="card-header-right">
 							<button class="btn btn-dark">초기화</button>
 							<button class="btn btn-outline-dark">조회</button>
 						</div>
 					</div>
-						<div class="row mb-2">
+						<div class="card-body">
+							<div class="row mb-2">
 								<div class="col-md-3">
-									<label>마지막 거래일</label> <input type="text" class="form-control" placeholder="Value">
+									<label class="form-label">마지막 거래일</label> <input type="text" class="form-control" placeholder="Value">
 								</div>
 								<div class="col-md-3">
-									<label>갱신여부</label> <input type="text" class="form-control" placeholder="Value">
+									<label class="form-label">갱신여부</label> <input type="text" class="form-control" placeholder="Value">
 								</div>
 								<div class="col-md-3">
-									<label>미갱신기간</label> <input type="text" class="form-control" placeholder="Value">
+									<label class="form-label">미갱신기간</label> <input type="text" class="form-control" placeholder="Value">
 								</div>
 								<div class="col-md-3">
-									<label>매출변동</label> <input type="text" class="form-control" placeholder="Value">
+									<label class="form-label">매출변동</label> <input type="text" class="form-control" placeholder="Value">
 								</div>
 							</div>
 							<div class="row mb-2">
 								<div class="col-md-3">
-									<label>최근 웹활동</label> <input type="text" class="form-control" placeholder="Value">
+									<label class="form-label">최근 웹활동</label> <input type="text" class="form-control" placeholder="Value">
 								</div>
 								<div class="col-md-3">
-									<label>평균 구매주기</label> <input type="text" class="form-control" placeholder="Value">
+									<label class="form-label">평균 구매주기</label> <input type="text" class="form-control" placeholder="Value">
 								</div>
 								<div class="col-md-3">
-									<label>평균 구매주기</label> <input type="text" class="form-control" placeholder="Value">
-							</div>	
+									<label class="form-label">평균 구매주기</label> <input type="text" class="form-control" placeholder="Value">
+								</div>	
+							</div>
 						</div>
-					</div>
 				</div>
 			</div>
 		</div>
-	<!-- 휴먼기준 -->
+		
+		
+		
+	<!-- 휴먼고객 -->
 	<div class="card mb-3">
 		<div class="card-header">
 			<div class="card-header-left">
-				<h5 class="card-title">휴먼조건</h5>
+				<h5 class="card-title">휴먼고객목록</h5>
 			</div>
 			<!-- card-header-left end -->
-			<div class="card-header-right">
+		<!-- 	<div class="card-header-right">
 				<button class="btn btn-dark">초기화</button>
 				<button class="btn btn-outline-dark">조회</button>
-				<button class="btn btn-outline-dark">등록</button>
-				<button class="btn btn-outline-dark">삭제</button>
-			</div>
-			<!-- //card-header right end -->
-		</div>
-		<!-- //card-header wihy-actions end -->
+			</div> //card-header right end -->
+		</div> <!-- //card-header wihy-actions end -->
 		<div class="card-body">
 			<div id="dormancygrid" style="margin: 20px;"></div>
 		</div>
 	</div>
-
-	
 	<script>
-		// 화면 테스트용 데이터
-		tui.Grid.applyTheme('default', {
-			cell : {
-				normal : { // 일반 셀(본문)
-					border : '#ccc',
-					background : "#fff",
-					showVerticalBorder : true, // 세로 라인 표시
-				},
-				header : { // 헤더 셀
-					border : '#ccc',
-					background : '#E3E6ED',
-					showVerticalBorder : true,
-				},
-				editable : { // ★ 편집 가능한 셀 공통 스타일
-					background : '#FFFDF0', // 연노랑 같은 색으로 표시
-					text : '#000'
-				},
-				selectedHeader : { // 헤더 클릭했을 때 색
-					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-				},
-				selected : { // 선택된 셀 색
-					background : '#ffffff' // 필요하면 여기도 조정
-				}
-			}
-		});
-		const gridData = [ {
-			name : "아이유",
-			artist : "IU",
-			type : "앨범",
-			release : "2020-05-06",
-			genre : "K-Pop"
-		}, {
-			name : "뉴진스",
-			artist : "NewJeans",
-			type : "싱글",
-			release : "2023-01-10",
-			genre : "K-Pop"
-		}, {
-			name : "임영웅",
-			artist : "Hero",
-			type : "앨범",
-			release : "2024-03-02",
-			genre : "발라드"
-		} ];
-		// Grid 생성
-		const grid = new tui.Grid({
-			el : document.getElementById('grid'),
-			data : gridData,
-			scrollX : false,
-			scrollY : false,
-			minBodyHeight : 0,
-			autoWidth : true,
-			columns : [ {
-				header : '이름',
-				name : 'name',
-				sortable : 'true'
-			}, {
-				header : '가수',
-				name : 'artist',
-				editor : 'text'
-			}, {
-				header : '타입',
-				name : 'type'
-			}, {
-				header : '발매일',
-				name : 'release',
-				align : 'center'
-			}, {
-				header : '장르',
-				name : 'genre'
-			} ]
-		});
 		
-		
-		
-		// 휴먼기준 데이터
+		// 휴먼/이탈고객 데이터
 		tui.Grid.applyTheme('default', {
 			cell : {
 				normal : { // 일반 셀(본문)
@@ -199,44 +113,46 @@
 			}
 		});
 		const dormancygridData = [ {
-			name : "마지막 거래일",
-			custName: "업체명",
-			INACTIVE_PERIOD_DAYS: "거래중단기간",
-			NON_RENEWAL_PERIOD_DAYS: "미갱신기간",
-			REVENUE_CHG: ""
-			AVG_PURCHASE_CYCLE_DAYS
-			CHURN_RISK_SCORE
-				
+			custName: "코드예담",
+			dormancyBreakaway: "이탈",
+			INACTIVE_PERIOD_DAYS: "11개월",
+			NON_RENEWAL_PERIOD_DAYS: "6개월",
+			REVENUE_CHG: "-73%",
+			AVG_PURCHASE_CYCLE_DAYS: "2개월",
+			CHURN_RISK_SCORE: "73"
 		}, {
-			name : "미갱신기간",
-			stdrValue : "3개월",
-			account : "계약 종료 후 특정기간 이상 갱신이 되지 않은 경우를 판단하는 기준.",
-			yn : "Y",
+			custName : "예담건설",
+			dormancyBreakaway: "휴면",
+			INACTIVE_PERIOD_DAYS: "14개월",
+			NON_RENEWAL_PERIOD_DAYS: "8개월",
+			REVENUE_CHG: "-64%",
+			AVG_PURCHASE_CYCLE_DAYS: "3개월",
+			CHURN_RISK_SCORE: "57"
 		} ];
 		// Grid 생성
 		const dormancygrid = new tui.Grid({
 			el : document.getElementById('dormancygrid'),
 			data : dormancygridData,
 			scrollX : false,
-			scrollY : false,
+			scrollY : true,
 			minBodyHeight : 0,
 			autoWidth : true,
 			columns : [ {
 				header : '업체명',
 				name : 'custName',
 				sortable : 'true'
+			},{
+				header : '휴면/이탈',
+				name : 'dormancyBreakaway',
+				sortable : 'true'
 			}, {
 				header : '거래중단기간',
 				name : 'INACTIVE_PERIOD_DAYS',
 				editor : 'text'
 			}, {
-				header : '갱신여부',
-				name : 'RENEWAL_YN',
-				editor : 'text'
-			}, {
 				header : '미갱신기간',
 				name : 'NON_RENEWAL_PERIOD_DAYS',
-				align : ''
+				align : 'center'
 			},{
 				header : '매출변동',
 				name : 'REVENUE_CHG',
@@ -248,73 +164,6 @@
 			}, {
 				header : '이탈위험점수',
 				name : 'CHURN_RISK_SCORE',
-				align : 'center'
-			} ]
-		});
-		// 이탈위험기준 데이터
-		tui.Grid.applyTheme('default', {
-			cell : {
-				normal : { // 일반 셀(본문)
-					border : '#ccc',
-					background : "#fff",
-					showVerticalBorder : true, // 세로 라인 표시
-				},
-				header : { // 헤더 셀
-					border : '#ccc',
-					background : '#E3E6ED',
-					showVerticalBorder : true,
-				},
-				editable : { // ★ 편집 가능한 셀 공통 스타일
-					background : '#FFFDF0', // 연노랑 같은 색으로 표시
-					text : '#000'
-				},
-				selectedHeader : { // 헤더 클릭했을 때 색
-					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-				},
-				selected : { // 선택된 셀 색
-					background : '#ffffff' // 필요하면 여기도 조정
-				}
-			}
-		});
-		const churnriskgridData = [ {
-			name : "매출변동",
-			stdrValue : "-30%",
-			account : "최근 매출이 평소 대비 특정 지수 이상 감소했을 때 판단하는 기준.",
-			yn : "Y",
-		}, {
-			name : "평균 구매주기 및 초과",
-			stdrValue : "3개월",
-			account : "고객의 평균 구매주기와 초과한 기간을 판단하는 기준.",
-			yn : "Y",
-		}, {
-			name : "이탈위험점수",
-			stdrValue : "83%",
-			account : "각 조건들을 종합하여 나타낸 이탈위험 지수. 100% 도달할 경우 자동 이탈 전환",
-			yn : "Y",
-		} ];
-		// Grid 생성
-		const churnriskgrid = new tui.Grid({
-			el : document.getElementById('churnriskgrid'),
-			data : churnriskgridData,
-			scrollX : false,
-			scrollY : false,
-			minBodyHeight : 0,
-			autoWidth : true,
-			columns : [ {
-				header : '기준유형',
-				name : 'name',
-				sortable : 'true'
-			}, {
-				header : '기준값',
-				name : 'stdrValue',
-				editor : 'text'
-			}, {
-				header : '설명',
-				name : 'account',
-				editor : 'text'
-			}, {
-				header : '사용여부',
-				name : 'yn',
 				align : 'center'
 			} ]
 		});
