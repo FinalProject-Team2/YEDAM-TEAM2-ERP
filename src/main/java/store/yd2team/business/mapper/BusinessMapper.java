@@ -14,6 +14,7 @@ public interface BusinessMapper {
 	
 	//등록
 	
+	
 	//수정
 	
 	//단건조회
