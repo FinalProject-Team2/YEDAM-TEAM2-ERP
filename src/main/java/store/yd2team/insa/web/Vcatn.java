@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class Vcatn {
 	@GetMapping("/vcatn")
-	public String selectall(Model model) {
+	public String vcatnRender(Model model) {
 		
 		
 		
