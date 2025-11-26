@@ -206,6 +206,75 @@
 				</div>
 			</div>
 			
+			<!-- 단가정책 등록폼 -->
+			<div class="col-md-5 d-flex">
+    			<div class="card w-100 h-100">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">단가정책 등록</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark">초기화</button>
+							<button type="button" class="btn btn-outline-dark">저장</button>
+						</div>
+					</div>
+
+					<!-- 정책등록폼 -->
+					<div class="card-body d-flex flex-column justify-content-between">
+						  <div class="row g-3">
+						    <!-- 위쪽 영역 -->
+						    <div class="col-12">
+						      <label class="form-label">단가정책명</label>
+						      <input id="priceName" type="text" class="form-control">
+						    </div>
+						
+						    <!-- 중간 : 유형 / 할인율 / 적용일 -->
+						    <div class="col-md-6">
+						      <div class="mb-3">
+						        <label class="form-label">유형</label>
+						        <select id="priceType" class="form-select same-height">
+						          <option>거래처별</option>
+						          <option>품목별</option>
+						        </select>
+						      </div>
+						    </div>
+						    
+						    <div class="col-md-6">
+						      <div class="mb-3">
+						        <label class="form-label">할인율(%)</label>
+						        <input id="percent" type="text" class="form-control same-height">
+						      </div>
+						    </div>
+
+						
+						    <div class="col-12">
+						      <label class="form-label">적용일</label>
+						      <div class="d-flex align-items-center">
+						        <div class="input-group date me-2">
+						          <input id="beginDt" type="text" class="form-control" placeholder="시작일 선택">
+						          <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+						        </div>
+						        <span class="mx-1 fw-bold fs-5">~</span>
+						        <div class="input-group date ms-2">
+						          <input id="endDt" type="text" class="form-control" placeholder="종료일 선택">
+						          <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+						        </div>
+						      </div>
+						    </div>
+						
+						    <!-- 아래 : 비고 (아래쪽에 붙도록) -->
+						    <div class="col-12 mt-auto">
+						      <label class="form-label">비고</label>
+						      <input id="rm" type="text" class="form-control">
+						    </div>
+						  </div>
+					</div> <!-- 정책등록폼 end -->
+					
+				</div>
+			</div>
+			
 		</div>
 
 	</div>
@@ -409,13 +478,13 @@
 	     if (e.target.classList.contains('client-btn')) {
 	         const rowKey = priceGrid.getFocusedCell().rowKey;
 	         const rowData = priceGrid.getRow(rowKey);
-	         alert(`거래처 설정 클릭됨: ${rowData.priceId}`);
+	         alert(`거래처 설정 클릭: ${rowData.priceId}`);
 	     }
 	
 	     if (e.target.classList.contains('item-btn')) {
 	         const rowKey = priceGrid.getFocusedCell().rowKey;
 	         const rowData = priceGrid.getRow(rowKey);
-	         alert(`품목 설정 클릭됨: ${rowData.priceId}`);
+	         alert(`품목 설정 클릭: ${rowData.priceId}`);
 	     }
       
  	}); // 7. 끝
