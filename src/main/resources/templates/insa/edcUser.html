@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>vcatn.html</title>
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<style>
+.form-select {
+	color: #000 !important;
+}
+/* 추가 CSS */
+.readonly-input[readonly] {
+	background-color: #e9ecef; /* Bootstrap 기본 disabled 색상 */
+	cursor: not-allowed; /* 마우스 커서도 입력 불가 느낌 */
+}
+
+.stIsShow {
+	display: none;
+}
+</style>
+</head>
+<body layout:fragment="content">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card mb-3">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header with-actions">
+					<div class="card-header-left">
+						<h5 class="card-title">조회</h5>
+					</div>
+					<div class="card-header-right">
+						<button type="button" class="btn btn-dark">초기화</button>
+						<button type="button" class="btn btn-outline-dark">조회</button>
+					</div>
+				</div>
+				<div class="card-body">
+
+
+					<div class="row mb-2">
+						<div class="col-md-3">
+							<label class="form-label">교육명</label> <input type="text"
+								class="form-control" placeholder="Value">
+						</div>
+
+						<div class="col-md-3">
+							<label class="form-label">교육부분</label> <select
+								class="form-select">
+								<option>법정의무교육</option>
+								<option>직무교육</option>
+								<option>소양교육</option>
+								<option>사내교육</option>
+							</select>
+						</div>
+						<div class="col-md-3">
+							<label class="form-label">연도</label> <select id="year"
+								class="form-select"></select>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<!-- 검색조건 -->
+		<div class="col-md-6">
+			<!-- 사원목록 -->
+			<div class="card" style="height: 710px;">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header with-actions">
+					<div class="card-header-left">
+						<h5 class="card-title">교육 목록 테이블</h5>
+					</div>
+				</div>
+				<div class="card-body">
+
+					<div id="toastGrid" style="margin: 20px;"></div>
+				</div>
+			</div>
+		</div>
+		<!-- 우측 패널 -->
+		<div class="col-md-6">
+			<!-- 기본정보 -->
+			<div class="card mb-3">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header with-actions">
+					<div class="card-header-left">
+						<h5 class="card-title">교육 기본 정보</h5>
+					</div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark ">등록</button>
+					</div>
+				</div>
+				<div class="card-body">
+
+
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">교육명</label> <input type="text"
+								class="form-control" />
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">교육구분</label> <input type="text"
+								class="form-control" />
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">대상자 수</label> <input id="v_vcatnTy"
+								class="form-control" />
+						</div>
+						<div class="col-md-6">
+							<label for="userName" class="form-label">등록일</label>
+							<div class="input-group date" id="applyDatePicker">
+								<input type="text" class="form-control" id="v_creaDt"
+									placeholder="날짜 선택"> <span class="input-group-text"
+									id="icon-calendar"> <i class="bi bi-calendar"></i>
+								</span>
+							</div>
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label for="userName" class="form-label">기간</label>
+							<div class="input-group date" id="applyDatePicker">
+								<input type="text" class="form-control" id="v_edcBeginDt"
+									placeholder="날짜 선택"> <span class="input-group-text"
+									id="icon-calendar"> <i class="bi bi-calendar"></i>
+								</span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<label for="userName" class="form-label">　</label>
+							<div class="input-group date" id="applyDatePicker">
+								<input type="text" class="form-control" id="v_edcEndDt"
+									placeholder="날짜 선택"> <span class="input-group-text"
+									id="icon-calendar"> <i class="bi bi-calendar"></i>
+								</span>
+							</div>
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">수료증 업로드</label> <input type="text"
+								class="form-control" />
+						</div>						
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+
+
+	<script>
+		const select = document.getElementById("year");
+		const currentYear = new Date().getFullYear(); // 현재 연도
+		const startYear = 1980; // 시작 연도
+
+		for (let y = currentYear; y >= startYear; y--) {
+			const option = document.createElement("option");
+			option.value = y;
+			option.textContent = y;
+			select.appendChild(option);
+		}
+
+		const gridData = [ {
+			edcNm : "산업안전보건교육",
+			edcBeginTt : "2025.10.26",
+			edcEndTt : "2025.11.26",
+			complSt : "수료",
+			complDt : "2025.11.26"
+		}, {
+			edcNm : "산업안전보건교육",
+			edcBeginTt : "2025.10.26",
+			edcEndTt : "2025.11.26",
+			complSt : "반려",
+			complDt : "2025.11.26"
+		}, {
+			edcNm : "산업안전보건교육",
+			edcBeginTt : "2025.10.26",
+			edcEndTt : "2025.11.26",
+			complSt : "미수료",
+			complDt : null
+		}, {
+			edcNm : "산업안전보건교육",
+			edcBeginTt : "2025.10.26",
+			edcEndTt : "2025.11.26",
+			complSt : "수료",
+			complDt : "2025.11.26"
+		}, {
+			edcNm : "산업안전보건교육",
+			edcBeginTt : "2025.10.26",
+			edcEndTt : "2025.11.26",
+			complSt : "수료",
+			complDt : "2025.11.26"
+		},
+
+		];
+
+		// Grid 생성
+		const grid = new tui.Grid({
+			el : document.getElementById('toastGrid'),
+			data : gridData,
+			scrollX : false,
+			scrollY : true,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+				header : '교육명',
+				name : 'edcNm',
+				sortable : 'true'
+			}, {
+				header : '시작날짜',
+				name : 'edcBeginTt'
+			}, {
+				header : '종료날짜',
+				name : 'edcEndTt'				
+			}, {
+				header : '수료여부',
+				name : 'complSt'				
+			}, {
+				header : '수료일',
+				name : 'complDt',
+				align : 'center'
+			} ],
+			bodyHeight : 520, // 본문 높이 고정
+		});
+		
+		
+	</script>
+	<script type="module">
+import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
+
+//그리드 행 클릭 시 상세정보 입력
+grid.on('click', function(ev) {
+    const rowData = grid.getRow(ev.rowKey);
+    if (!rowData) return;
+
+    bindGridToForm(rowData);    
+    
+    const dto = formToJson();  
+    console.log(dto);
+});
+</script>
+</body>
+
+</html>

@@ -497,7 +497,7 @@
 
 
     if ($.cookie('staradmin2-pro-banner')!="true") {
-      document.querySelector('#proBanner').classList.add('d-flex');
+      /*document.querySelector('#proBanner').classList.add('d-flex');*/
       document.querySelector('.navbar').classList.remove('fixed-top');
     }
     else {
