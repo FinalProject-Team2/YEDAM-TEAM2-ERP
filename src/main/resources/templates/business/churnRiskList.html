@@ -10,10 +10,7 @@
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 </head>
-<meta charset="UTF-8">
-
 <title>employee-register</title>
-
 <style>
 .fixed-photo {
 	width: 150px; /* 원하는 가로 크기 */
@@ -25,7 +22,6 @@
 	color: #000 !important;
 }
 </style>
-</head>
 <body layout:fragment="content">
 
 	<!-- 사원목록 -->
@@ -36,6 +32,49 @@
 		</div>
 	</div>
 
+	<div class="row">
+		<div class="col-md-12 mb-3">
+			<div class="card">
+				<div class="card-body">
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">조회</h5>
+						</div>
+						<div class="card-header-right">
+							<button class="btn btn-dark">초기화</button>
+							<button class="btn btn-outline-dark">조회</button>
+						</div>
+					</div>
+						<div class="row mb-2">
+								<div class="col-md-3">
+									<label>마지막 거래일</label> <input type="text" class="form-control" placeholder="Value">
+								</div>
+								<div class="col-md-3">
+									<label>갱신여부</label> <input type="text" class="form-control" placeholder="Value">
+								</div>
+								<div class="col-md-3">
+									<label>미갱신기간</label> <input type="text" class="form-control" placeholder="Value">
+								</div>
+								<div class="col-md-3">
+									<label>매출변동</label> <input type="text" class="form-control" placeholder="Value">
+								</div>
+							</div>
+							<div class="row mb-2">
+								<div class="col-md-3">
+									<label>최근 웹활동</label> <input type="text" class="form-control" placeholder="Value">
+								</div>
+								<div class="col-md-3">
+									<label>평균 구매주기</label> <input type="text" class="form-control" placeholder="Value">
+								</div>
+								<div class="col-md-3">
+									<label>평균 구매주기</label> <input type="text" class="form-control" placeholder="Value">
+							</div>	
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	<!-- 휴먼기준 -->
 	<div class="card mb-3">
 		<div class="card-header">
@@ -43,176 +82,21 @@
 				<h5 class="card-title">휴먼조건</h5>
 			</div>
 			<!-- card-header-left end -->
-			<div calss="card-header-right">
+			<div class="card-header-right">
 				<button class="btn btn-dark">초기화</button>
 				<button class="btn btn-outline-dark">조회</button>
 				<button class="btn btn-outline-dark">등록</button>
 				<button class="btn btn-outline-dark">삭제</button>
-				<button class="btn btn-outline-dark">근로계약서</button>
-			</div> <!-- //card-header right end -->
-		</div> <!-- //card-header wihy-actions end -->
-
+			</div>
+			<!-- //card-header right end -->
+		</div>
+		<!-- //card-header wihy-actions end -->
 		<div class="card-body">
 			<div id="dormancygrid" style="margin: 20px;"></div>
 		</div>
 	</div>
 
-	<!-- 이탈위험기준 -->
-	<div class="card mb-3">
-		<div class="card-body">
-			<h5 class="card-title">이탈위험기준</h5>
-			<div id="churnriskgrid" style="margin: 20px;"></div>
-		</div>
-	</div>
-
-
-	<div class="card">
-		<div class="card-header">
-			<h5 class="card-title">검색조건</h5> <!-- //기본으로 왼쪽에 배치됨 -->
-			<div calss="card-header-right">
-				<button class="btn btn-dark">초기화</button>
-				<button class="btn btn-outline-dark">조회</button>
-				<button class="btn btn-outline-dark">등록</button>
-				<button class="btn btn-outline-dark">삭제</button>
-				<button class="btn btn-outline-dark">근로계약서</button>
-			</div> <!-- //card-header right end -->
-		</div> <!-- //card-header wihy-actions end -->
-		<div class="card-body">
-			어쩌구저쩌구 바디 컨텐츠
-		</div><!-- //card-body end -->
-	</div><!-- //card end -->
-
-
-
-			<!-- 기본정보 -->
-			<div class="card mb-3">
-				<div class="card-body">
-					<h5 class="card-title">기본정보</h5>
-					<div class="row">
-						<div class="col-md-4 text-center">
-							<img src="/images/faces/face11.jpg" alt="사진"
-								class="img-thumbnail fixed-photo" />
-						</div>
-						<div class="col-md-8">
-							<div class="row mb-2">
-								<div class="col-md-6">
-									<label>사번</label> <input type="text" class="form-control"
-										placeholder="사번(자동생성)" />
-								</div>
-
-							</div>
-							<div class="row mb-2">
-								<div class="col-md-6">
-									<label>이름</label> <input type="text" class="form-control"
-										placeholder="홍길동" />
-								</div>
-								<div class="col-md-6">
-									<label>생년월일</label> <input type="date" class="form-control" />
-								</div>
-
-							</div>
-							<div class="row mb-2">
-								<div class="col-md-6">
-									<label>연락처</label> <input type="text" class="form-control"
-										placeholder="010-1234-1234" />
-								</div>
-								<div class="col-md-6">
-									<label>이메일</label> <input type="email" class="form-control"
-										placeholder="abc@mail.com" />
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- 인사정보 -->
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">인사정보</h5>
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>부서</label> <select class="form-select">
-								<option>인사</option>
-								<option>영업</option>
-							</select>
-						</div>
-						<div class="col-md-6">
-							<label>직무</label> <input type="text" class="form-control"
-								placeholder="HRM(인적자원관리)" />
-						</div>
-					</div>
-
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>직급</label> <select class="form-select">
-								<option>사원</option>
-								<option>대리</option>
-								<option>과장</option>
-								<option>부장</option>
-								<option>이사</option>
-							</select>
-						</div>
-						<div class="col-md-6">
-							<label>직책</label> <select class="form-select">
-								<option>팀원</option>
-								<option>팀장</option>
-								<option>관리자</option>
-								<option>임원</option>
-							</select>
-						</div>
-					</div>
-
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>고용형태</label> <select class="form-select">
-								<option>정직원</option>
-								<option>계약직</option>
-								<option>일용직</option>
-							</select>
-						</div>
-						<div class="col-md-6">
-							<label>계좌번호</label> <input type="text" class="form-control"
-								placeholder="계좌번호입력" />
-						</div>
-
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>급여 방식</label> <select id="salaryType" class="form-select">
-								<option value="monthly">기본급</option>
-								<option value="hourly">시급</option>
-							</select>
-						</div>
-
-						<div class="col-md-6">
-							<label>기본급/시급</label> <input type="text" id="salaryInput"
-								class="form-control" placeholder="금액입력" name="monthlySalary" />
-						</div>
-					</div>
-					<div class="row mb-2">
-
-						<div class="col-md-6">
-							<label>입사일</label> <input type="date" class="form-control" />
-						</div>
-						<div class="col-md-6">
-							<label>재직상태</label> <select class="form-select">
-								<option>재직</option>
-								<option>퇴직</option>
-								<option>휴직</option>
-								<option>퇴사</option>
-							</select>
-						</div>
-					</div>
-
-					<div class="row"></div>
-
-				</div>
-			</div>
-
-		</div>
-	</div>
-
+	
 	<script>
 		// 화면 테스트용 데이터
 		tui.Grid.applyTheme('default', {
@@ -239,7 +123,6 @@
 				}
 			}
 		});
-
 		const gridData = [ {
 			name : "아이유",
 			artist : "IU",
@@ -259,7 +142,6 @@
 			release : "2024-03-02",
 			genre : "발라드"
 		} ];
-
 		// Grid 생성
 		const grid = new tui.Grid({
 			el : document.getElementById('grid'),
@@ -288,7 +170,9 @@
 				name : 'genre'
 			} ]
 		});
-
+		
+		
+		
 		// 휴먼기준 데이터
 		tui.Grid.applyTheme('default', {
 			cell : {
@@ -314,19 +198,21 @@
 				}
 			}
 		});
-
 		const dormancygridData = [ {
-			name : "거래중단기간",
-			stdrValue : "6개월",
-			account : "고객이 최근 특정기간 이상 아무 거래도 하지 않았을 때 판단하는 기준.",
-			yn : "Y",
+			name : "마지막 거래일",
+			custName: "업체명",
+			INACTIVE_PERIOD_DAYS: "거래중단기간",
+			NON_RENEWAL_PERIOD_DAYS: "미갱신기간",
+			REVENUE_CHG: ""
+			AVG_PURCHASE_CYCLE_DAYS
+			CHURN_RISK_SCORE
+				
 		}, {
 			name : "미갱신기간",
 			stdrValue : "3개월",
 			account : "계약 종료 후 특정기간 이상 갱신이 되지 않은 경우를 판단하는 기준.",
 			yn : "Y",
 		} ];
-
 		// Grid 생성
 		const dormancygrid = new tui.Grid({
 			el : document.getElementById('dormancygrid'),
@@ -336,24 +222,35 @@
 			minBodyHeight : 0,
 			autoWidth : true,
 			columns : [ {
-				header : '기준유형',
-				name : 'name',
+				header : '업체명',
+				name : 'custName',
 				sortable : 'true'
 			}, {
-				header : '기준값',
-				name : 'stdrValue',
+				header : '거래중단기간',
+				name : 'INACTIVE_PERIOD_DAYS',
 				editor : 'text'
 			}, {
-				header : '설명',
-				name : 'account',
+				header : '갱신여부',
+				name : 'RENEWAL_YN',
 				editor : 'text'
 			}, {
-				header : '사용여부',
-				name : 'yn',
+				header : '미갱신기간',
+				name : 'NON_RENEWAL_PERIOD_DAYS',
+				align : ''
+			},{
+				header : '매출변동',
+				name : 'REVENUE_CHG',
+				align : 'center'
+			},{
+				header : '평균구매주기',
+				name : 'AVG_PURCHASE_CYCLE_DAYS',
+				align : 'center'
+			}, {
+				header : '이탈위험점수',
+				name : 'CHURN_RISK_SCORE',
 				align : 'center'
 			} ]
 		});
-
 		// 이탈위험기준 데이터
 		tui.Grid.applyTheme('default', {
 			cell : {
@@ -379,7 +276,6 @@
 				}
 			}
 		});
-
 		const churnriskgridData = [ {
 			name : "매출변동",
 			stdrValue : "-30%",
@@ -396,7 +292,6 @@
 			account : "각 조건들을 종합하여 나타낸 이탈위험 지수. 100% 도달할 경우 자동 이탈 전환",
 			yn : "Y",
 		} ];
-
 		// Grid 생성
 		const churnriskgrid = new tui.Grid({
 			el : document.getElementById('churnriskgrid'),
@@ -426,3 +321,4 @@
 	</script>
 </body>
 </html>
+

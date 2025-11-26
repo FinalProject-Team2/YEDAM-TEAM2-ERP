@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>Subscription Choice</title>
+<style>
+/* 카드 내 구독 플랜 선택 영역 정렬 */
+.subscription-choice-card .plan-column {
+	text-align: center;
+}
+
+.subscription-choice-card .plan-header {
+	font-size: 1.25rem;
+	font-weight: 600;
+	margin-bottom: 0.5rem;
+}
+
+.subscription-choice-card .plan-body {
+	font-size: 0.95rem;
+	color: #555;
+	min-height: 80px;
+}
+
+.subscription-choice-card .plan-wrapper {
+	border: 1px solid #e0e0e0;
+	border-radius: 0.5rem;
+	padding: 1.5rem 1rem;
+	transition: box-shadow 0.2s ease, transform 0.2s ease;
+	cursor: pointer;
+}
+
+.subscription-choice-card .plan-wrapper:hover {
+	box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+	transform: translateY(-2px);
+}
+
+.subscription-choice-card .plan-tag {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: #6c757d;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	margin-bottom: 0.25rem;
+}
+
+.subscription-choice-card .plan-price {
+	font-size: 1.1rem;
+	font-weight: 600;
+	margin-top: 0.75rem;
+}
+
+.subscription-choice-card .plan-cta {
+	margin-top: 1rem;
+}
+
+.subscription-choice-card {
+    min-height: 600px;   /* 최소 높이 지정 */
+}
+
+/* 요금 주기 토글 버튼 라인 */
+.billing-toggle-row {
+	margin-bottom: 1.5rem;
+}
+
+.billing-toggle-row .btn-group-toggle {
+	width: 100%;
+}
+
+.billing-toggle-row .btn-group-toggle .btn {
+	flex: 1 1 50%;
+}
+
+/* 요금 토글 버튼 테두리 색을 플랜 테두리(#e0e0e0)와 동일하게 */
+.billing-toggle-row .btn-outline-primary {
+	border-color: #e0e0e0;
+	color: #0d6efd; /* 기본 텍스트 색상 유지(부트스트랩 primary 톤) */
+}
+
+.billing-toggle-row .btn-outline-primary.active,
+.billing-toggle-row .btn-outline-primary:hover,
+.billing-toggle-row .btn-outline-primary:focus {
+	border-color: #e0e0e0;
+	background-color: rgba(13, 110, 253, 0.06); /* 살짝만 채움 */
+	color: #0d6efd;
+	box-shadow: none;
+}
+</style>
+</head>
+<body layout:fragment="content">
+
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card mb-3 subscription-choice-card">
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">구독 플랜</h5>
+					</div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark">홈으로</button>
+						<button class="btn btn-outline-dark">다음</button>
+					</div>
+				</div>
+				<div class="card-body">
+
+					<!-- 월간 / 연간 요금 토글 영역 -->
+					<div class="billing-toggle-row">
+						<div class="btn-group btn-group-toggle" data-toggle="buttons">
+							<label class="btn btn-outline-primary w-50">
+								<input type="radio" name="billingCycle" id="billingMonthly" autocomplete="off" checked> 월간 요금
+							</label>
+							<label class="btn btn-outline-primary w-50">
+								<input type="radio" name="billingCycle" id="billingYearly" autocomplete="off"> 연간 요금
+							</label>
+						</div>
+					</div>
+
+					<div class="row">
+						<!-- Basic Plan -->
+						<div class="col-md-4 plan-column mb-3 mb-md-0">
+							<div class="plan-wrapper h-100">
+								<div class="plan-tag">BASIC</div>
+								<div class="plan-header">베이식 플랜</div>
+								<div class="plan-body">
+									작은 팀이나 테스트용으로 적합한 기본 기능 제공. <br />
+									월간 사용량이 많지 않은 경우에 추천합니다.
+								</div>
+								<div class="plan-price">₩19,000 / 월</div>
+								<div class="plan-cta">
+									<button type="button" class="btn btn-outline-dark btn-sm">선택</button>
+								</div>
+							</div>
+						</div>
+
+						<!-- Standard Plan -->
+						<div class="col-md-4 plan-column mb-3 mb-md-0">
+							<div class="plan-wrapper h-100">
+								<div class="plan-tag">STANDARD</div>
+								<div class="plan-header">스탠다드 플랜</div>
+								<div class="plan-body">
+									일반적인 비즈니스 운영에 필요한 기능을 균형 있게 제공.
+									추가 계정과 API 호출 한도가 포함된 플랜입니다.
+								</div>
+								<div class="plan-price">₩49,000 / 월</div>
+								<div class="plan-cta">
+									<button type="button" class="btn btn-outline-dark btn-sm">선택</button>
+								</div>
+							</div>
+						</div>
+
+						<!-- Premium Plan -->
+						<div class="col-md-4 plan-column">
+							<div class="plan-wrapper h-100">
+								<div class="plan-tag">PREMIUM</div>
+								<div class="plan-header">프리미엄 플랜</div>
+								<div class="plan-body">
+									고급 기능과 넉넉한 사용량을 제공하는 상위 플랜.
+									성장 단계 이상의 기업에 적합한 구성입니다.
+								</div>
+								<div class="plan-price">₩99,000 / 월</div>
+								<div class="plan-cta">
+									<button type="button" class="btn btn-outline-dark btn-sm">선택</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
