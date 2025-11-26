@@ -37,5 +37,55 @@ legend.scheduler-border {
   <legend class="scheduler-border">검색조건</legend>
   <!-- 폼 요소들 -->
 </fieldset>
+
+<!-- 모달 열기 버튼 -->
+<button class="btn btn-outline-dark" type="button" id="openModal">Open Modal</button>
+
+<!-- 모달 -->
+<div class="modal fade" id="myModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      
+      <!-- 헤더 -->
+      <div class="modal-header">
+        <h5 class="modal-title">모달 제목</h5>
+        <button type="button" class="btn-close" id="closeModal"></button>
+      </div>
+      
+      <!-- 바디 -->
+      <div class="modal-body">
+        여기에 모달 내용을 넣습니다.
+      </div>
+      
+      <!-- 푸터 -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" id="closeModalFooter">닫기</button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<script>
+const modal = document.getElementById("myModal");
+const openBtn = document.getElementById("openModal");
+const closeBtn = document.getElementById("closeModal");
+const closeFooterBtn = document.getElementById("closeModalFooter");
+
+openBtn.addEventListener("click", () => {
+  modal.classList.add("show");
+  modal.style.display = "block"; // CSS에서 기본은 display:none이므로 block으로 바꿔줌
+  document.body.classList.add("modal-open"); // 스크롤 막기용
+});
+
+function closeModal() {
+  modal.classList.remove("show");
+  modal.style.display = "none";
+  document.body.classList.remove("modal-open");
+}
+
+closeBtn.addEventListener("click", closeModal);
+closeFooterBtn.addEventListener("click", closeModal);
+</script>
 </body>
 </html>
