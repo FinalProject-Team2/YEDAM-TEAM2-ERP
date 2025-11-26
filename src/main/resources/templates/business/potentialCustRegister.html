@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+
+<head>
+<meta charset="UTF-8">
+
+<title>employee-register</title>
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<style>
+.fixed-photo {
+	width: 150px; /* 원하는 가로 크기 */
+	height: 200px; /* 원하는 세로 크기 */
+	object-fit: cover; /* 비율 유지하며 영역에 맞게 채움 */
+}
+
+.form-select {
+	color: #000 !important;
+}
+</style>
+</head>
+<body layout:fragment="content">
+
+	
+
+	<div class="row">
+		<div class="col-md-6">
+			<!-- 업종 -->
+			<div class="card mb-3" style="height: 500px;">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">업종</h5>
+					</div>
+					<div class="card-header-right">
+							<button class="btn btn-outline-dark">추가</button>
+							<button class="btn btn-outline-dark">등록</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div id="custtypegrid" style="margin: 20px;"></div>
+				</div>
+			</div>
+			
+			<!-- 설립 -->
+			<div class="card" style="height: 500px;">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">설립</h5>
+					</div>
+					<div class="card-header-right">
+							<button class="btn btn-outline-dark">추가</button>
+							<button class="btn btn-outline-dark">등록</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div id="creategrid" style="margin: 20px;"></div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 우측 패널 -->
+		<div class="col-md-6">
+				<!-- 규모 -->
+				<div class="card mb-3" style="height: 500px;">
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header">
+						<div class="card-header-left">
+							<h5 class="card-title">규모</h5>
+						</div>
+						<div class="card-header-right">
+							<button class="btn btn-outline-dark">추가</button>
+							<button class="btn btn-outline-dark">등록</button>
+						</div>
+					</div>
+					<div class="card-body">
+						<div id="sizegrid" style="margin: 20px;"></div>
+					</div>
+				</div>
+
+			<!-- 지역/상권 -->
+				<div class="card mb-3" style="height: 500px;">
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header">
+						<div class="card-header-left">
+							<h5 class="card-title">지역/상권</h5>
+						</div>
+						<div class="card-header-right">
+							<button class="btn btn-outline-dark">추가</button>
+							<button class="btn btn-outline-dark">등록</button>
+						</div>
+					</div>
+					<div class="card-body">
+						<div id="regiongrid" style="margin: 20px;"></div>
+					</div>
+				</div>
+		</div>
+	</div>
+	<script>
+	// 업종 데이터
+	tui.Grid.applyTheme('default', {
+		cell : {
+			normal : { // 일반 셀(본문)
+				border : '#ccc',
+				background : "#fff",
+				showVerticalBorder : true, // 세로 라인 표시
+			},
+			header : { // 헤더 셀
+				border : '#ccc',
+				background : '#E3E6ED',
+				showVerticalBorder : true,
+			},
+			editable : { // ★ 편집 가능한 셀 공통 스타일
+				background : '#FFFDF0', // 연노랑 같은 색으로 표시
+				text : '#000'
+			},
+			selectedHeader : { // 헤더 클릭했을 때 색
+				background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+			},
+			selected : { // 선택된 셀 색
+				background : '#ffffff' // 필요하면 여기도 조정
+			}
+		}
+	});
+	const custTypeData = [ {
+		detail: "핵심 타깃 업종 (예: 의류·화장품 등)",
+		score: "+25"
+	}, {
+		detail : "유사/관련 업종",
+		score: "+15"
+	}, {
+		detail : "비관련 업종",
+		score: "+10"
+	}, ];
+	// Grid 생성
+	const grid = new tui.Grid({
+		el : document.getElementById('custtypegrid'),
+		data : custTypeData,
+		scrollX : false,
+		scrollY : true,
+		minBodyHeight : 0,
+		autoWidth : true,
+		columns : [ {
+			header : '상세',
+			name : 'detail',
+			sortable : 'true',
+			editor : 'text',
+			width: 300
+		},{
+			header : '점수',
+			name : 'score',
+			sortable : 'true',
+			editor : 'text'
+		} ]
+	});
+	
+		
+		
+		
+		// 규모 데이터
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : { // 일반 셀(본문)
+					border : '#ccc',
+					background : "#fff",
+					showVerticalBorder : true, // 세로 라인 표시
+				},
+				header : { // 헤더 셀
+					border : '#ccc',
+					background : '#E3E6ED',
+					showVerticalBorder : true,
+				},
+				editable : { // ★ 편집 가능한 셀 공통 스타일
+					background : '#FFFDF0', // 연노랑 같은 색으로 표시
+					text : '#000'
+				},
+				selectedHeader : { // 헤더 클릭했을 때 색
+					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+				},
+				selected : { // 선택된 셀 색
+					background : '#ffffff' // 필요하면 여기도 조정
+				}
+			}
+		});
+		const dormancygridData = [ {
+			detail: "대기업",
+			score: "+25"
+		}, {
+			detail : "준대기업",
+			score: "+20"
+		}, {
+			detail : "중견기업",
+			score: "+15"
+		}, {
+			detail : "중소기업",
+			score: "+10"
+		}, {
+			detail : "강소기업",
+			score: "+5"
+		} ];
+		// Grid 생성
+		const dormancygrid = new tui.Grid({
+			el : document.getElementById('sizegrid'),
+			data : dormancygridData,
+			scrollX : false,
+			scrollY : true,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+				header : '상세',
+				name : 'detail',
+				sortable : 'true',
+				editor : 'text',
+				width: 300
+			},{
+				header : '점수',
+				name : 'score',
+				sortable : 'true',
+				editor : 'text'
+			} ]
+		});
+		
+		
+		
+		// 설립일 데이터
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : { // 일반 셀(본문)
+					border : '#ccc',
+					background : "#fff",
+					showVerticalBorder : true, // 세로 라인 표시
+				},
+				header : { // 헤더 셀
+					border : '#ccc',
+					background : '#E3E6ED',
+					showVerticalBorder : true,
+				},
+				editable : { // ★ 편집 가능한 셀 공통 스타일
+					background : '#FFFDF0', // 연노랑 같은 색으로 표시
+					text : '#000'
+				},
+				selectedHeader : { // 헤더 클릭했을 때 색
+					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+				},
+				selected : { // 선택된 셀 색
+					background : '#ffffff' // 필요하면 여기도 조정
+				}
+			}
+		});
+		const creategridData = [ {
+			detail: "50년이상",
+			score: "+25"
+		}, {
+			detail : "40년이상",
+			score: "+20"
+		}, {
+			detail : "30년이상",
+			score: "+15"
+		}, {
+			detail : "20년이상",
+			score: "+10"
+		}, {
+			detail : "10년이상",
+			score: "+5"
+		}, {
+			detail : "5년이하",
+			score: "+0"
+		}  ];
+		// Grid 생성
+		const creategrid = new tui.Grid({
+			el : document.getElementById('creategrid'),
+			data : creategridData,
+			scrollX : false,
+			scrollY : true,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+				header : '상세',
+				name : 'detail',
+				sortable : 'true',
+				editor : 'text',
+				width: 300
+			},{
+				header : '점수',
+				name : 'score',
+				sortable : 'true',
+				editor : 'text'
+			} ]
+		});
+		
+		
+		
+		
+		// 설립일 데이터
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : { // 일반 셀(본문)
+					border : '#ccc',
+					background : "#fff",
+					showVerticalBorder : true, // 세로 라인 표시
+				},
+				header : { // 헤더 셀
+					border : '#ccc',
+					background : '#E3E6ED',
+					showVerticalBorder : true,
+				},
+				editable : { // ★ 편집 가능한 셀 공통 스타일
+					background : '#FFFDF0', // 연노랑 같은 색으로 표시
+					text : '#000'
+				},
+				selectedHeader : { // 헤더 클릭했을 때 색
+					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+				},
+				selected : { // 선택된 셀 색
+					background : '#ffffff' // 필요하면 여기도 조정
+				}
+			}
+		});
+		const regiongridData = [ {
+			detail: "대기업·중견다수, 유동인구 최고",
+			score: "+25"
+		}, {
+			detail : "강남, 판교, 성수, 마곡 등",
+			score: "+20"
+		}, {
+			detail : "상업지구·오피스 밀집지역",
+			score: "+15"
+		}, {
+			detail : "준주거, 지역상권 혼합",
+			score: "+10"
+		}, {
+			detail : "외곽·산업단지 밀집 지역",
+			score: "+5"
+		} ];
+		// Grid 생성
+		const regiongrid = new tui.Grid({
+			el : document.getElementById('regiongrid'),
+			data : regiongridData,
+			scrollX : false,
+			scrollY : true,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+				header : '상세',
+				name : 'detail',
+				sortable : 'true',
+				editor : 'text',
+				width: 300
+			},{
+				header : '점수',
+				name : 'score',
+				sortable : 'true',
+				editor : 'text'
+			} ]
+		});
+		
+		
+		
+	</script>
+	<script type="module">
+import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
+//그리드 행 클릭 시 상세정보 입력
+grid.on('click', function(ev) {
+    const rowData = grid.getRow(ev.rowKey);
+    if (!rowData) return;
+
+    bindGridToForm(rowData);
+    bindSalary(rowData); // 급여 처리
+    
+    const dto = formToJson();  
+    console.log(dto);
+});
+</script>
+</body>
+</html>
