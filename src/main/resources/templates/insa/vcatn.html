@@ -43,29 +43,41 @@
 
 					<div class="row mb-2">
 						<div class="col-md-3">
-							<label>기간</label> <input type="date" class="form-control"
-								placeholder="Value">
+							<label for="userName" class="form-label">기간</label>
+							<div class="input-group date" id="applyDatePicker">
+								<input type="text" class="form-control" id="b_vcatnBegin"
+									placeholder="날짜 선택"> <span class="input-group-text"
+									id="icon-calendar"> <i class="bi bi-calendar"></i>
+								</span>
+							</div>
 						</div>
 						<div class="col-md-3">
-							<label> </label> <input type="date" class="form-control"
-								placeholder="Value">
+							<label for="userName" class="form-label">　</label>
+							<div class="input-group date" id="applyDatePicker">
+								<input type="text" class="form-control" id="b_vcatnEnd"
+									placeholder="날짜 선택"> <span class="input-group-text"
+									id="icon-calendar"> <i class="bi bi-calendar"></i>
+								</span>
+							</div>
 						</div>
 						<div class="col-md-3">
-							<label>휴가유형</label> <select class="form-select">
+							<label class="form-label">휴가유형</label> <select class="form-select">
 								<option>연차</option>
 								<option>병가</option>
 								<option>특별휴가</option>
 							</select>
 						</div>
 						<div class="col-md-3">
-							<label>상태</label> <select class="form-select">
+							<label class="form-label">상태</label> <select class="form-select">
 								<option>전체</option>
 								<option>신청</option>
 								<option>승인</option>
 								<option>반려</option>
 							</select>
 						</div>
-					</div>
+					</div>				
+					
+					
 				</div>
 			</div>
 		</div>
@@ -107,34 +119,49 @@
 						<div class="col-md-12">
 							<div class="row mb-2">
 								<div class="col-md-6">
-									<label>이름</label> <input type="text" class="form-control" />
+									<label class="form-label">이름</label> <input type="text" class="form-control" />
 								</div>
 								<div class="col-md-6">
-									<label>사번</label> <input type="text"
+									<label class="form-label">사번</label> <input type="text"
 										class="form-control readonly-input" readonly="readonly" />
 								</div>
 							</div>
 							<div class="row mb-2">
 								<div class="col-md-6">
-									<label>휴가유형</label> <select id="v_vcatnTy" class="form-select">
+									<label class="form-label">휴가유형</label> <select id="v_vcatnTy" class="form-select">
 										<option>연차</option>
 										<option>병가</option>
 										<option>특별휴가</option>
 									</select>
 								</div>
 								<div class="col-md-6">
-									<label>신청일</label> <input id="v_creaDt" type="date"
-										class="form-control" />
+									<label for="userName" class="form-label">신청일</label>
+							<div class="input-group date" id="applyDatePicker">
+								<input type="text" class="form-control" id="v_creaDt"
+									placeholder="날짜 선택"> <span class="input-group-text"
+									id="icon-calendar"> <i class="bi bi-calendar"></i>
+								</span>
+							</div>
 								</div>
 							</div>
 							<div class="row mb-2">
 								<div class="col-md-6">
-									<label>기간</label> <input id="v_begin" type="date"
-										class="form-control" />
+									<label for="userName" class="form-label">기간</label>
+							<div class="input-group date" id="applyDatePicker">
+								<input type="text" class="form-control" id="v_vcatnBegin"
+									placeholder="날짜 선택"> <span class="input-group-text"
+									id="icon-calendar"> <i class="bi bi-calendar"></i>
+								</span>
+							</div>
 								</div>
 								<div class="col-md-6">
-									<label> </label> <input id="v_end" type="date"
-										class="form-control" />
+									<label for="userName" class="form-label">　</label>
+							<div class="input-group date" id="applyDatePicker">
+								<input type="text" class="form-control" id="v_vcatnEnd"
+									placeholder="날짜 선택"> <span class="input-group-text"
+									id="icon-calendar"> <i class="bi bi-calendar"></i>
+								</span>
+							</div>
 								</div>
 							</div>
 							<div class="row mb-2">
@@ -186,31 +213,7 @@
 	</div>
 
 	<script>
-		// 화면 테스트용 데이터
-		tui.Grid.applyTheme('default', {
-			cell : {
-				normal : { // 일반 셀(본문)
-					border : '#ccc',
-					background : "#fff",
-					showVerticalBorder : true, // 세로 라인 표시
-				},
-				header : { // 헤더 셀
-					border : '#ccc',
-					background : '#E3E6ED',
-					showVerticalBorder : true,
-				},
-				editable : { // ★ 편집 가능한 셀 공통 스타일
-					background : '#FFFDF0', // 연노랑 같은 색으로 표시
-					text : '#000'
-				},
-				selectedHeader : { // 헤더 클릭했을 때 색
-					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-				},
-				selected : { // 선택된 셀 색
-					background : '#ffffff' // 필요하면 여기도 조정
-				}
-			}
-		});
+		
 
 		const gridData = [ {
 			creaDt : "1990-01-01",
@@ -353,6 +356,8 @@
 			} ],
 			bodyHeight : 600, // 본문 높이 고정
 		});
+		
+		
 	</script>
 	<script type="module">
 import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
