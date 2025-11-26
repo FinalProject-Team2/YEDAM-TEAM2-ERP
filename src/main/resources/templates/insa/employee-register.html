@@ -28,18 +28,18 @@
 	<div class="row">
 		<div class="col-md-12 mb-3">
 			<div class="card">
-			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">조회</h5>
-						</div>
-						<div class="card-header-right">
-							<button class="btn btn-dark">초기화</button>
-							<button class="btn btn-outline-dark">조회</button>
-						</div>
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">조회</h5>
 					</div>
+					<div class="card-header-right">
+						<button class="btn btn-dark">초기화</button>
+						<button class="btn btn-outline-dark">조회</button>
+					</div>
+				</div>
 				<div class="card-body">
-					
+
 
 					<div class="row mb-2">
 						<div class="col-md-3">
@@ -68,14 +68,14 @@
 		<div class="col-md-6">
 			<!-- 사원목록 -->
 			<div class="card" style="height: 818.22px;">
-			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">사원목록</h5>
-						</div>
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">사원목록</h5>
 					</div>
+				</div>
 				<div class="card-body">
-					
+
 					<div id="employeeGrid" style="margin: 20px;"></div>
 				</div>
 			</div>
@@ -85,19 +85,19 @@
 		<div class="col-md-6">
 			<!-- 기본정보 -->
 			<div class="card mb-3">
-			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">기본정보</h5>
-						</div>
-						<div class="card-header-right">
-							<button class="btn btn-outline-dark ">근로계약서</button>
-							<button class="btn btn-outline-dark ">등록</button>
-							<button class="btn btn-outline-dark ">삭제</button>
-						</div>
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">기본정보</h5>
 					</div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark ">근로계약서</button>
+						<button class="btn btn-outline-dark ">등록</button>
+						<button class="btn btn-outline-dark ">삭제</button>
+					</div>
+				</div>
 				<div class="card-body ">
-					
+
 
 					<div class="row">
 						<div class="col-md-4 text-center">
@@ -117,8 +117,13 @@
 										class="form-control" placeholder="홍길동" />
 								</div>
 								<div class="col-md-6">
-									<label>생년월일</label> <input id="v_brthdy" type="date"
-										class="form-control" />
+									<label for="userName" class="form-label">생년월일</label>
+									<div class="input-group date" id="applyDatePicker">
+										<input type="text" class="form-control" id="applyDate"
+											placeholder="날짜 선택"> <span class="input-group-text"
+											id="icon-calendar"> <i class="bi bi-calendar"></i>
+										</span>
+									</div>
 								</div>
 							</div>
 							<div class="row mb-2">
@@ -138,14 +143,14 @@
 
 			<!-- 인사정보 -->
 			<div class="card">
-			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">인사정보</h5>
-						</div>
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">인사정보</h5>
 					</div>
+				</div>
 				<div class="card-body">
-					
+
 					<div class="row mb-2">
 						<div class="col-md-6">
 							<label>부서</label> <select id="v_deptNm" class="form-select">
@@ -206,7 +211,13 @@
 					<div class="row mb-2">
 
 						<div class="col-md-6">
-							<label>입사일</label> <input type="date" class="form-control" />
+							<label for="userName" class="form-label">입사일</label>
+							<div class="input-group date" id="applyDatePicker">
+								<input type="text" class="form-control" id="applyDate"
+									placeholder="날짜 선택"> <span class="input-group-text"
+									id="icon-calendar"> <i class="bi bi-calendar"></i>
+								</span>
+							</div>
 						</div>
 						<div class="col-md-6">
 							<label>재직상태</label> <select class="form-select">

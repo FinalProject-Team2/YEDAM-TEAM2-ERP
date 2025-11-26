@@ -179,6 +179,74 @@
 						        <input id="percent" type="text" class="form-control same-height">
 						      </div>
 						    </div>
+						
+						    <div class="col-12">
+						      <label class="form-label">적용일</label>
+						      <div class="d-flex align-items-center">
+						        <div class="input-group date me-2">
+						          <input id="beginDt" type="text" class="form-control" placeholder="시작일 선택">
+						          <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+						        </div>
+						        <span class="mx-1 fw-bold fs-5">~</span>
+						        <div class="input-group date ms-2">
+						          <input id="endDt" type="text" class="form-control" placeholder="종료일 선택">
+						          <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+						        </div>
+						      </div>
+						    </div>
+						
+						    <!-- 아래 : 비고 (아래쪽에 붙도록) -->
+						    <div class="col-12 mt-auto">
+						      <label class="form-label">비고</label>
+						      <input id="rm" type="text" class="form-control">
+						    </div>
+						  </div>
+					</div> <!-- 정책등록폼 end -->
+					
+				</div>
+			</div>
+			
+			<!-- 단가정책 등록폼 -->
+			<div class="col-md-5 d-flex">
+    			<div class="card w-100 h-100">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">단가정책 등록</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark">초기화</button>
+							<button type="button" class="btn btn-outline-dark">저장</button>
+						</div>
+					</div>
+
+					<!-- 정책등록폼 -->
+					<div class="card-body d-flex flex-column justify-content-between">
+						  <div class="row g-3">
+						    <!-- 위쪽 영역 -->
+						    <div class="col-12">
+						      <label class="form-label">단가정책명</label>
+						      <input id="priceName" type="text" class="form-control">
+						    </div>
+						
+						    <!-- 중간 : 유형 / 할인율 / 적용일 -->
+						    <div class="col-md-6">
+						      <div class="mb-3">
+						        <label class="form-label">유형</label>
+						        <select id="priceType" class="form-select same-height">
+						          <option>거래처별</option>
+						          <option>품목별</option>
+						        </select>
+						      </div>
+						    </div>
+						    
+						    <div class="col-md-6">
+						      <div class="mb-3">
+						        <label class="form-label">할인율(%)</label>
+						        <input id="percent" type="text" class="form-control same-height">
+						      </div>
+						    </div>
 
 						
 						    <div class="col-12">
@@ -251,7 +319,78 @@
 
     // 2. 더미 데이터
     const priceData = [
-        
+        {
+        	priceName: '논개',
+            percent: 12,
+            beginDt: '2019-10-28',
+            endDt: '2019-10-30',
+            type: '거래처별',
+            rm: '논개가좋아하는믹스커피X2마시고3시에15분담요쓰고기절하기구론산컨피던스박카스'
+        },
+        {
+        	priceName: '구론산',
+            percent: 5,
+            beginDt: '2019-07-14',
+            endDt: '2019-07-21',
+            type: '품목별',
+            rm: '논개최애간식딸기맛마이쮸초콜릿빵쿠키사탕젤리'
+        },
+        {
+        	priceName: '레이',
+            percent: 5,
+            beginDt: '2019-05-02',
+            endDt: '2019-05-05',
+            type: '품목별',
+            rm: '레이주특기제자리에서점프하고땀흘리기'
+        },
+        {
+        	priceName: '논개',
+            percent: 12,
+            beginDt: '2019-05-04',
+            endDt: '2019-05-06',
+            type: '거래처별',
+            rm: '논개가좋아하는믹스커피X2구론산컨피던스박카스'
+        },
+        {
+        	priceName: '구론산',
+            percent: 5,
+            beginDt: '2019-07-14',
+            endDt: '2019-07-21',
+            type: '품목별',
+            rm: '논개최애간식딸기맛마이쮸초콜릿빵쿠키사탕젤리'
+        },
+        {
+        	priceName: '레이',
+            percent: 5,
+            beginDt: '2019-05-02',
+            endDt: '2019-05-05',
+            type: '품목별',
+            rm: '레이주특기제자리에서점프하고땀흘리기'
+        },
+        {
+        	priceName: '논개',
+            percent: 12,
+            beginDt: '2019-10-28',
+            endDt: '2019-10-30',
+            type: '거래처별',
+            rm: '논개가좋아하는믹스커피X2구론산컨피던스박카스'
+        },
+        {
+        	priceName: '구론산',
+            percent: 5,
+            beginDt: '2019-07-14',
+            endDt: '2019-07-21',
+            type: '품목별',
+            rm: '논개최애간식딸기맛마이쮸초콜릿빵쿠키사탕젤리'
+        },
+        {
+        	priceName: '레이',
+            percent: 5,
+            beginDt: '2019-05-02',
+            endDt: '2019-05-05',
+            type: '품목별',
+            rm: '레이주특기제자리에서점프하고땀흘리기'
+        }
     ]; // 2. 끝
 
     // 3. Grid 공통 옵션
@@ -297,43 +436,42 @@
 	    const priceForm = {
 	      priceName: document.getElementById('priceName'),
 	      priceType: document.getElementById('priceType'),
-	      percent: document.getElementById('percent'),
-	      beginDt: document.getElementById('beginDt'),
-	      endDt: document.getElementById('endDt'),
-	      rm: document.getElementById('rm')
+	      percent:   document.getElementById('percent'),
+	      beginDt:   document.getElementById('beginDt'),
+	      endDt:     document.getElementById('endDt'),
+	      rm:        document.getElementById('rm')
 	      
 	    }; // 5. 끝
 
     // 6. 행 클릭 시 폼에 데이터 세팅
     	priceGrid.on('click', ev => {
     		
-		      // 버튼(거래처설정/품목설정) 클릭은 무시
-		      if (ev.columnName === 'clientSetting' || ev.columnName === 'itemSetting') {
-		        return;
-		      }
-		
-		      const rowKey = ev.rowKey;
-		      if (rowKey == null) return;
-		
-		      const row = priceGrid.getRow(rowKey);
-		      if (!row) return;
-		
-		      // Grid 데이터 → 폼 매핑
-		      priceForm.priceName.value = row.priceName || '';
-		      priceForm.percent.value   = row.percent || '';
-		
-		      // select 박스는 value 로 지정
-		      if (row.type) {
-		        priceForm.priceType.value = row.type;
-		      } else {
-		        priceForm.priceType.value = ''; // 필요시 기본값
-		      }
-		
-		      priceForm.beginDt.value = row.beginDt || '';
-		      priceForm.endDt.value   = row.endDt || '';
-		      priceForm.rm.value      = row.rm || '';
-		      
-    	}); // 6. 끝
+      // 버튼(거래처설정/품목설정) 클릭은 무시
+      if (ev.columnName === 'clientSetting' || ev.columnName === 'itemSetting') {
+        return;
+      }
+
+      const rowKey = ev.rowKey;
+      if (rowKey == null) return;
+
+      const row = priceGrid.getRow(rowKey);
+      if (!row) return;
+
+      // Grid 데이터 → 폼 매핑
+      priceForm.priceName.value = row.priceName || '';
+      priceForm.percent.value   = row.percent || '';
+
+      // select 박스는 value 로 지정
+      if (row.type) {
+        priceForm.priceType.value = row.type;
+      } else {
+        priceForm.priceType.value = ''; // 필요시 기본값
+      }
+
+      priceForm.beginDt.value = row.beginDt || '';
+      priceForm.endDt.value   = row.endDt || '';
+      priceForm.rm.value      = row.rm || '';
+    }); // 6. 끝
     
  // 7. 버튼 클릭 이벤트 처리
  	document.addEventListener('click', (e) => {

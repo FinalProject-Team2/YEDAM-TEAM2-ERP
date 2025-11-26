@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.business.mapper.BusinessMapper">
+
+<select id="getList">
+ SELECT stdr_detail_id,
+        potential_info_no,
+        vend_id,
+        industry_type_cond,
+        company_size_cond,
+        establish_dt_cond,
+        region_cond,
+        crea_dt,
+        crea_by,
+        updt_dt,
+        updt_by
+FROM    tb_potential_stdr;
+</select>
+
+<insert id="insert">
+INSERT INTO 
+</insert>
+
+</mapper>
