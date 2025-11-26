@@ -29,9 +29,8 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="card mb-3">
-				<div class="card-body">
-					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header with-actions">
+			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header">
 						<div class="card-header-left">
 							<h5 class="card-title">조회-(사원용)</h5>
 						</div>
@@ -40,6 +39,7 @@
 							<button type="button" class="btn btn-outline-dark">조회</button>
 						</div>
 					</div>
+				<div class="card-body">					
 
 					<div class="row mb-2">
 						<div class="col-md-3">
@@ -75,13 +75,14 @@
 		<div class="col-md-6">
 			<!-- 사원목록 -->
 			<div class="card" style="height: 775.75px;">
-				<div class="card-body">
-					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header with-actions">
+			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header">
 						<div class="card-header-left">
 							<h5 class="card-title">나의 휴가 신청 내역 - 홍길동 (D001/개발팀)</h5>
 						</div>
 					</div>
+				<div class="card-body">
+					
 					<div id="toastGrid" style="margin: 20px;"></div>
 				</div>
 			</div>
@@ -90,10 +91,8 @@
 		<div class="col-md-6">
 			<!-- 기본정보 -->
 			<div class="card mb-3">
-				<div class="card-body">
-
-					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header with-actions">
+			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header">
 						<div class="card-header-left">
 							<h5 class="card-title">휴가 신청상세</h5>
 						</div>
@@ -102,6 +101,8 @@
 							<button class="btn btn-outline-dark ">삭제</button>
 						</div>
 					</div>
+				<div class="card-body">
+					
 					<div class="row">
 						<div class="col-md-12">
 							<div class="row mb-2">
@@ -147,13 +148,14 @@
 			</div>
 			<!-- 인사정보 -->
 			<div class="card">
-				<div class="card-body " style="height: 345.45px;">
-				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header with-actions">
+			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header">
 						<div class="card-header-left">
 							<h5 class="card-title">휴가처리 정보</h5>
 						</div>
 					</div>
+				<div class="card-body " style="height: 345.45px;">
+				
 				<div id="hugadeta" class="stIsShow" >					
 					<div class="row mb-2">
 						<div class="col-md-6">
@@ -353,7 +355,7 @@
 		});
 	</script>
 	<script type="module">
-import { bindGridToForm, formToJson } from '/assets/js/teamUtil.js';
+import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
 
 //그리드 행 클릭 시 상세정보 입력
 grid.on('click', function(ev) {

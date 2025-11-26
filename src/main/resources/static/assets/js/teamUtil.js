@@ -1,36 +1,61 @@
-// teamUtil.js
+// teamExportUtil.js
 
-//toast ui의 key를 html태그의 id값과 매핑시키는 메서드 (규칙 -> 컬럼명 앞에 v_ 붙이면 알아서 매핑해줌)
-export function bindGridToForm(rowData) {
-  Object.keys(rowData).forEach(key => {
-    const input = document.getElementById("v_" + key);
-    if (input) input.value = rowData[key];
-    if(("v_" + key) == "v_st") {
-		if(rowData[key] == '신청'){
-			//stIsShow
-			document.getElementById("hugadeta").classList.add("stIsShow");
-		}else if(rowData[key] == '승인'){
-			document.getElementById("hugadeta").classList.remove("stIsShow");			
-			document.getElementById("hugaSt1").classList.remove("stIsShow");			
-			document.getElementById("hugaSt2").classList.add("stIsShow");			
-		}else{
-			document.getElementById("hugadeta").classList.remove("stIsShow");			
-			document.getElementById("hugaSt1").classList.add("stIsShow");			
-			document.getElementById("hugaSt2").classList.remove("stIsShow");
-		}
-			
-			
-	}
-  });
-}
 
-//input태그에 있는 id에 붙은 v_제거하여 db에 fetch로 보낼 데이터 가공해주는 메서드
-export function formToJson(prefix = "v_") {
-  const inputs = document.querySelectorAll(`[id^='${prefix}']`);
-  const obj = {};
-  inputs.forEach(input => {
-    const key = input.id.replace(prefix, "");
-    obj[key] = input.value;
-  });
-  return obj;
-}
+
+$(function(){
+        $('.datepicker').datepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayHighlight: true
+        });
+    });
+    
+    
+    $('#datePickerGroup').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true
+    });
+
+$('#applyDatePicker input').datepicker({
+        format: "yyyy-mm-dd",
+        autoclose: true,
+        todayHighlight: true
+    });
+
+    // 아이콘 클릭 → input focus → 달력 열림
+    $('#icon-calendar').on('click', function () {
+        $('#applyDate').focus();
+    });
+    
+    
+    // 1. Toast UI Grid 테마
+tui.Grid.applyTheme('default', {
+  cell: {
+    normal: {
+      border: '#dedede',
+      background: '#ffffff',
+      showVerticalBorder: true
+    },
+    header: {
+      border: '#dedede',
+      background: '#f5f5f5',
+      showVerticalBorder: true
+    },
+    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
+    rowHeader: {
+      border: '#dedede',
+      background: '#ffffff',
+      showVerticalBorder: true
+    },
+    editable: {
+      background: '#FFFDF0',
+      text: '#000'
+    },
+    selectedHeader: {
+      background: '#f5f5f5'
+    },
+    selected: {
+      background: '#ffffff'
+    }
+  }
+});
