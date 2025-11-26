@@ -452,6 +452,7 @@ $(function() {
     // -------------------------------------------------------------
     $input.on('keydown', function (e) {
       if (e.key === 'Escape') clearList();
+
     });
 
     // -------------------------------------------------------------
@@ -480,6 +481,7 @@ $(function() {
   // ---------------------------------------------------------------
 
 })(window, jQuery); // <- 여기서 global=window, $=jQuery 를 인자로 전달
+
 
 
 (function (global) {
@@ -520,10 +522,12 @@ $(function() {
   gridNs.markRequiredHeaderMulti = function (configs) {
     if (!Array.isArray(configs)) return;
 
+
     configs.forEach(function (conf) {
       if (!conf || !conf.gridId || !Array.isArray(conf.columns)) return;
       gridNs.markRequiredHeader(conf.gridId, conf.columns);
     });
+
   };
 
   /**

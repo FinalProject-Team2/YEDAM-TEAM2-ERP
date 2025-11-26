@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+    <title>salyLedg</title>
+    <style>
+        .form-select {
+            color: #000 !important;
+        }
+    </style>
+</head>
+<body layout:fragment="content">
+    <div class="row">
+        <!-- 검색조건 -->
+        <div class="col-md-12">
+            <div class="card mb-3">
+            <div class="card-header">
+            <h5 class="card-title">검색조건</h5>
+            <div class="card-header-right">
+            <button class="btn btn-outline-dark">조회</button>
+        </div>
+            </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">급여대장명칭</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">부서명</label>
+                            <select id="dept" class="form-control">
+                            	<option>전체</option>
+                            	<option>인사</option>
+                            	<option>자재</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">급여확정여부</label>
+                            <select id="pay_yn" class="form-control">
+                            	<option>전체</option>
+                            	<option>확정</option>
+                            	<option>미확정</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">지급일</label>
+                            <div class="d-flex align-items-center">
+                                <!-- 시작일 -->
+                                <div class="input-group date me-2" id="applyDatePickerStart">
+                                    <input type="text" class="form-control" id="applyDateStart" placeholder="날짜 선택">
+                                    <span class="input-group-text" id="icon-calendar-start">
+                                        <i class="bi bi-calendar"></i>
+                                    </span>
+                                </div>
+
+                                <!-- ~ -->
+                                <span class="mx-1 fw-bold fs-5">~</span>
+
+                                <!-- 종료일 -->
+                                <div class="input-group date ms-2" id="applyDatePickerEnd">
+                                    <input type="text" class="form-control" id="applyDateEnd" placeholder="날짜 선택">
+                                    <span class="input-group-text" id="icon-calendar-end">
+                                        <i class="bi bi-calendar"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사원목록 -->
+            <div class="card">
+            <div class="card-header">
+                    <h5 class="card-title">급여목록</h5>
+                    <div class= "card-header-right">
+                    	<button class="btn btn-outline-dark" id="openSalyRegistModal">등록</button>
+                    </div>
+            </div>
+                <div class="card-body">
+                    <div id="grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:replace="insa/modal/salyRegistModal :: salyRegistModal"></div>
+    <script>
+    const gridData = [
+    	  {
+    	    revsMmdd: "2025-01",
+    	    payDt: "2025-01-25",
+    	    salyLedgNm: "2025년 1월 급여대장",
+    	    deptNm: "개발팀",
+    	    rcnt: 8,
+    	    preWork: "완료",
+    	    salyLedg: "작성완료",
+    	    ttPayAmt: 3500000,
+    	    salySpec: "출력"
+    	  },
+    	  {
+    	    revsMmdd: "2025-01",
+    	    payDt: "2025-01-25",
+    	    salyLedgNm: "2025년 1월 급여대장",
+    	    deptNm: "인사팀",
+    	    rcnt: 3,
+    	    preWork: "완료",
+    	    salyLedg: "확정",
+    	    ttPayAmt: 2800000,
+    	    salySpec: "출력"
+    	  },
+    	  {
+    	    revsMmdd: "2025-01",
+    	    payDt: "2025-01-25",
+    	    salyLedgNm: "2025년 1월 급여대장",
+    	    deptNm: "영업팀",
+    	    rcnt: 10,
+    	    preWork: "미완료",
+    	    salyLedg: "작성중",
+    	    ttPayAmt: 4200000,
+    	    salySpec: "미출력"
+    	  },
+    	  {
+    	    revsMmdd: "2025-02",
+    	    payDt: "2025-02-25",
+    	    salyLedgNm: "2025년 2월 급여대장",
+    	    deptNm: "개발팀",
+    	    rcnt: 9,
+    	    preWork: "완료",
+    	    salyLedg: "작성완료",
+    	    ttPayAmt: 3600000,
+    	    salySpec: "출력"
+    	  },
+    	  {
+    	    revsMmdd: "2025-02",
+    	    payDt: "2025-02-25",
+    	    salyLedgNm: "2025년 2월 급여대장",
+    	    deptNm: "인사팀",
+    	    rcnt: 3,
+    	    preWork: "완료",
+    	    salyLedg: "확정",
+    	    ttPayAmt: 2750000,
+    	    salySpec: "출력"
+    	  },
+    	  {
+    	    revsMmdd: "2025-02",
+    	    payDt: "2025-02-25",
+    	    salyLedgNm: "2025년 2월 급여대장",
+    	    deptNm: "영업팀",
+    	    rcnt: 11,
+    	    preWork: "완료",
+    	    salyLedg: "작성완료",
+    	    ttPayAmt: 4300000,
+    	    salySpec: "출력"
+    	  },
+    	  {
+    	    revsMmdd: "2025-03",
+    	    payDt: "2025-03-25",
+    	    salyLedgNm: "2025년 3월 급여대장",
+    	    deptNm: "총무팀",
+    	    rcnt: 4,
+    	    preWork: "완료",
+    	    salyLedg: "확정",
+    	    ttPayAmt: 3000000,
+    	    salySpec: "출력"
+    	  }
+    	];
+        // Grid 생성
+        const grid = new tui.Grid({
+            el: document.getElementById('grid'),
+            data: gridData,
+            scrollX: true,
+            scrollY: true,
+            minBodyHeight: 0,
+            autoWidth: true,
+            columns: [
+            	  { header: '귀속연월', name: 'revsMmdd', align: 'center' },
+            	  { header: '지급일', name: 'payDt', align: 'center' },
+            	  { header: '급여대장명칭', name: 'salyLedgNm' },
+            	  { header: '부서명', name: 'deptNm' },
+            	  { header: '인원수', name: 'rcnt', align: 'right' },
+            	  { header: '사전작업', name: 'preWork' },
+            	  { header: '급여대장', name: 'salyLedg' },
+            	  { header: '총지급액', name: 'ttPayAmt', align: 'right' },
+            	  { header: '명세서', name: 'salySpec' }
+            	]
+        });
+    	 // 모달창
+        const openSalyRegistBtn = document.getElementById("openSalyRegistModal");
+        const salyRegistModal = document.getElementById("salyRegistModal");
+        const salyRegistModalClose = document.getElementById("salyRegistModalClose");
+        const salyRegistBackdrop  = document.getElementById("salyRegistBackdrop");
+
+        // 열기
+        openSalyRegistBtn.addEventListener("click", () => {
+          salyRegistModal.classList.add("show");
+          salyRegistModal.style.display = "block";
+          salyRegistBackdrop.style.display = "block";
+          document.body.classList.add("modal-open");
+        });
+    </script>
+</body>
+</html>
