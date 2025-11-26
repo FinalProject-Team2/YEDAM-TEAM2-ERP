@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>Subscription Payment</title>
+<!-- Toss Payments SDK -->
+<script src="https://js.tosspayments.com/v1"></script>
+<style>
+/* 카드 자체 최대 너비만 줄여서 전체 카드 폭 축소 */
+.subscription-payment-card {
+	max-width: 540px; /* 필요하면 380~460px 사이에서 마음에 드는 값으로 조절 */
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.subscription-payment-card .card-body {
+	max-width: 100%;
+}
+
+.subscription-payment-card .amount-text {
+	font-size: 1.2rem;
+	font-weight: 600;
+}
+
+.subscription-payment-card .summary-label {
+	color: #6c757d;
+}
+
+.subscription-payment-card .info-text {
+	font-size: 0.9rem;
+	color: #6c757d;
+	margin-top: 0.75rem;
+}
+</style>
+</head>
+<body layout:fragment="content">
+
+	<!-- 결제 결과 플래시 메시지 영역 -->
+	<div th:if="${paymentResult == 'success'}" class="alert alert-success" role="alert">
+		결제가 성공적으로 완료되었습니다.
+	</div>
+	<div th:if="${paymentResult == 'fail'}" class="alert alert-danger" role="alert">
+		결제가 실패했습니다. <span th:text="${paymentErrorMessage}"></span>
+	</div>
+
+	<div class="row justify-content-center">
+		<div class="col-md-8 col-lg-6">
+			<div class="card mb-3 subscription-payment-card">
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">구독 결제</h5>
+					</div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark">홈으로</button>
+						<button class="btn btn-outline-dark">이전</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<!-- 결제 요약 영역 (임시 값) -->
+					<div class="mb-4">
+						<div
+							class="d-flex justify-content-between align-items-center mb-2">
+							<span class="summary-label">선택한 플랜</span> <span
+								class="fw-semibold" id="selectedPlanName">BASIC (테스트)</span>
+						</div>
+						<div
+							class="d-flex justify-content-between align-items-center mb-1">
+							<span class="summary-label">결제 주기</span> <span
+								id="billingCycleText">월간</span>
+						</div>
+						<div class="d-flex justify-content-between align-items-center">
+							<span class="summary-label">결제 금액</span> <span
+								class="amount-text" id="paymentAmount">₩1,000</span>
+						</div>
+					</div>
+
+					<!-- 서버 연동 시 사용할 숨김 필드 (현재는 테스트 값으로만 동작) -->
+					<input type="hidden" id="orderId" th:value="${orderId}"> <input
+						type="hidden" id="orderName" th:value="${orderName}"> <input
+						type="hidden" id="customerEmail" th:value="${customerEmail}">
+					<input type="hidden" id="customerName" th:value="${customerName}">
+					<input type="hidden" id="amount" th:value="${amount}">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script th:inline="javascript">
+    // Toss Payments 초기화 (클라이언트 키는 프론트에서만 사용)
+    const clientKey = 'test_ck_LkKEypNArWd4MlKE1v1z8lmeaxYG';
+    const tossPayments = TossPayments(clientKey);
+
+    function startTossPayment() {
+        // 테스트 환경에서 결제창이 확실히 뜨도록 고정 값 사용
+        const orderId = 'order-' + new Date().getTime();
+        const orderName = '구독 플랜 결제 (테스트)';
+        const amount = 1000; // 고정 금액 (테스트)
+        const customerEmail = 'customer@example.com';
+        const customerName = '테스트 사용자';
+
+        // successUrl / failUrl 을 하드코딩된 문자열로 지정하여 Toss에 항상 전달되도록 보장
+        const successUrl = 'http://localhost:80/subscription/payment/success';
+        const failUrl = 'http://localhost:80/subscription/payment/fail';
+
+        console.log('Toss payment URLs:', { successUrl, failUrl });
+
+        tossPayments.requestPayment('카드', {
+            amount: amount,
+            orderId: orderId,
+            orderName: orderName,
+            customerEmail: customerEmail,
+            customerName: customerName,
+            successUrl: successUrl,
+            failUrl: failUrl
+        }).catch(function (error) {
+            if (error.code === 'USER_CANCEL') {
+                console.log('사용자 결제 취소');
+            } else {
+                console.error('Toss payment error:', error);
+                alert('토스 결제 중 오류가 발생했습니다. 콘솔 로그를 확인해 주세요.');
+            }
+        });
+    }
+
+    // 페이지 로드가 완료되면 약간의 딜레이 후 자동으로 결제 시도
+    document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(startTossPayment, 300);
+    });
+</script>
+
+</body>
+</html>

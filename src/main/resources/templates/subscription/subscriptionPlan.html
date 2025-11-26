@@ -56,11 +56,11 @@
 						<div class="row mb-3">
 							<div class="col-md-6">
 								<label class="form-label">플랜 명</label> <input type="text"
-									class="form-control" placeholder="플랜명을 입력하세요" />
+									class="form-control" name="subspPlanId" placeholder="플랜명을 입력하세요" />
 							</div>
 							<div class="col-md-6">
 								<label class="form-label">최대 계정 생성 수</label> <input
-									type="number" class="form-control" placeholder="계정 수를 입력하세요" />
+									type="number" class="form-control" name="acctIssuCnt" placeholder="계정 수를 입력하세요" />
 							</div>
 						</div>
 
@@ -68,12 +68,18 @@
 						<div class="row mb-3">
 							<div class="col-md-6">
 								<label class="form-label">월 API 호출 횟수</label> <input
-									type="number" class="form-control"
+									type="number" class="form-control" name="apiIssuCnt"
 									placeholder="월 API 호출 횟수를 입력하세요" />
 							</div>
+
 							<div class="col-md-6">
-								<label class="form-label">적용 일자</label> <input type="date"
-									class="form-control" />
+								<label for="userName" class="form-label">적용 일자</label>
+								<div class="input-group date" id="applyDatePicker">
+									<input type="text" class="form-control" id="applyDate"
+										name="applcDt" placeholder="날짜 선택"> <span class="input-group-text"
+										id="icon-calendar"> <i class="bi bi-calendar"></i>
+									</span>
+								</div>
 							</div>
 						</div>
 
@@ -81,20 +87,25 @@
 						<div class="row mb-3">
 							<div class="col-md-6">
 								<label class="form-label">결제 주기</label> <input type="text"
-									class="form-control" placeholder="예: 월, 연" />
+									class="form-control" name="sttlPerd" placeholder="예: 월, 연" />
 							</div>
 
 							<div class="col-md-6">
-								<label class="form-label d-block">노출 여부</label>
+								<label class="form-label">가격</label> <input type="number"
+									class="form-control" name="amt" placeholder="가격을 입력하세요" />
+							</div>
+						</div>
+						
+						<div class="row mb-3">
+						<label class="form-label d-block">노출 여부</label>
 								<div class="d-flex align-items-center">
 									<label class="me-4 mb-0"> Y <input class="ms-1"
-										type="radio" name="exposureYn" id="exposureY" value="Y"
+										type="radio" name="YN" id="YN" value="Y"
 										checked>
 									</label> <label class="mb-0"> N <input class="ms-1"
-										type="radio" name="exposureYn" id="exposureN" value="N">
+										type="radio" name="YN" id="YN" value="N">
 									</label>
 								</div>
-							</div>
 						</div>
 					</form>
 				</div>
@@ -103,32 +114,6 @@
 	</div>
 
 	<script>
-		// 화면 테스트용 데이터
-		tui.Grid.applyTheme('default', {
-			cell : {
-				normal : { // 일반 셀(본문)
-					border : '#ccc',
-					background : "#fff",
-					showVerticalBorder : true, // 세로 라인 표시
-				},
-				header : { // 헤더 셀
-					border : '#ccc',
-					background : '#E3E6ED',
-					showVerticalBorder : true,
-				},
-				editable : { // ★ 편집 가능한 셀 공통 스타일
-					background : '#FFFDF0', // 연노랑 같은 색으로 표시
-					text : '#000'
-				},
-				selectedHeader : { // 헤더 클릭했을 때 색
-					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-				},
-				selected : { // 선택된 셀 색
-					background : '#ffffff' // 필요하면 여기도 조정
-				}
-			}
-		});
-
 		// 화면 테스트용 더미 데이터
 		const gridData = [ {
 			planName : 'Basic',
@@ -219,6 +204,17 @@
 		window.addEventListener('load', function() {
 			subscriptionGrid.refreshLayout();
 		});
+		
+		$('#applyDatePicker input').datepicker({
+	        format: "yyyy-mm-dd",
+	        autoclose: true,
+	        todayHighlight: true
+	    });
+
+	    // 아이콘 클릭 → input focus → 달력 열림
+	    $('#icon-calendar').on('click', function () {
+	        $('#applyDate').focus();
+	    });
 	</script>
 
 </body>

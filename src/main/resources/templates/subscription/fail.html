@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 실패</title>
+</head>
+<body layout:fragment="content">
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading mb-2">결제에 실패했습니다.</h4>
+            <p class="mb-1">다시 시도해 주세요.</p>
+            <hr>
+            <p class="mb-0 small text-muted">해당 화면은 Toss 결제 실패 콜백 테스트용 페이지입니다.</p>
+        </div>
+        <div class="d-flex justify-content-end gap-2">
+            <a href="/" class="btn btn-outline-secondary btn-sm">홈으로</a>
+            <a href="/Payment" class="btn btn-primary btn-sm">다시 결제 테스트</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
