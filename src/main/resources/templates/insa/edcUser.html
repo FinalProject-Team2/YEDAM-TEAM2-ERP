@@ -6,10 +6,8 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<title>vcatn.html</title>
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<title>edcUser.html</title>
+
 <style>
 .form-select {
 	color: #000 !important;
@@ -116,39 +114,51 @@
 						</div>
 						<div class="col-md-6">
 							<label for="userName" class="form-label">등록일</label>
-							<div class="input-group date" id="applyDatePicker">
-								<input type="text" class="form-control" id="v_creaDt"
-									placeholder="날짜 선택"> <span class="input-group-text"
-									id="icon-calendar"> <i class="bi bi-calendar"></i>
+							<div class="input-group date js-date-single">
+								<input type="text" class="form-control datepicker js-date-input"
+									placeholder="날짜 선택"> <span
+									class="input-group-text js-date-icon"> <i
+									class="bi bi-calendar"></i>
 								</span>
 							</div>
 						</div>
 					</div>
 					<div class="row mb-2">
-						<div class="col-md-6">
+						<div class="col-md-12">
 							<label for="userName" class="form-label">기간</label>
-							<div class="input-group date" id="applyDatePicker">
-								<input type="text" class="form-control" id="v_edcBeginDt"
-									placeholder="날짜 선택"> <span class="input-group-text"
-									id="icon-calendar"> <i class="bi bi-calendar"></i>
-								</span>
-							</div>
+							<div class="d-flex align-items-center js-date-range">
+
+										<!-- 시작일 -->
+										<div class="input-group date">
+											<input type="text"
+												class="form-control datepicker js-date-range-start"
+												placeholder="시작일"> <span
+												class="input-group-text js-date-range-icon-start"> <i
+												class="bi bi-calendar"></i>
+											</span>
+										</div>
+
+										<span class="mx-1 fw-bold fs-5">~</span>
+
+										<!-- 종료일 -->
+										<div class="input-group date ms-2">
+											<input type="text"
+												class="form-control datepicker js-date-range-end"
+												placeholder="종료일"> <span
+												class="input-group-text js-date-range-icon-end"> <i
+												class="bi bi-calendar"></i>
+											</span>
+										</div>
+
+									</div>
 						</div>
-						<div class="col-md-6">
-							<label for="userName" class="form-label">　</label>
-							<div class="input-group date" id="applyDatePicker">
-								<input type="text" class="form-control" id="v_edcEndDt"
-									placeholder="날짜 선택"> <span class="input-group-text"
-									id="icon-calendar"> <i class="bi bi-calendar"></i>
-								</span>
-							</div>
-						</div>
+						
 					</div>
 					<div class="row mb-2">
 						<div class="col-md-6">
 							<label class="form-label">수료증 업로드</label> <input type="text"
 								class="form-control" />
-						</div>						
+						</div>
 					</div>
 				</div>
 			</div>
@@ -221,10 +231,10 @@
 				name : 'edcBeginTt'
 			}, {
 				header : '종료날짜',
-				name : 'edcEndTt'				
+				name : 'edcEndTt'
 			}, {
 				header : '수료여부',
-				name : 'complSt'				
+				name : 'complSt'
 			}, {
 				header : '수료일',
 				name : 'complDt',
@@ -232,8 +242,6 @@
 			} ],
 			bodyHeight : 520, // 본문 높이 고정
 		});
-		
-		
 	</script>
 	<script type="module">
 import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';

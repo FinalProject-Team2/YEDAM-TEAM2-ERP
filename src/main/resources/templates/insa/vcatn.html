@@ -7,9 +7,6 @@
 <head>
 <meta charset="UTF-8">
 <title>vcatn.html</title>
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <style>
 .form-select {
 	color: #000 !important;
@@ -29,39 +26,49 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="card mb-3">
-			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">조회-(사원용)</h5>
-						</div>
-						<div class="card-header-right">
-							<button type="button" class="btn btn-dark">초기화</button>
-							<button type="button" class="btn btn-outline-dark">조회</button>
-						</div>
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">조회-(사원용)</h5>
 					</div>
-				<div class="card-body">					
+					<div class="card-header-right">
+						<button type="button" class="btn btn-dark">초기화</button>
+						<button type="button" class="btn btn-outline-dark">조회</button>
+					</div>
+				</div>
+				<div class="card-body">
 
 					<div class="row mb-2">
-						<div class="col-md-3">
+						<div class="col-md-6">
 							<label for="userName" class="form-label">기간</label>
-							<div class="input-group date" id="applyDatePicker">
-								<input type="text" class="form-control" id="b_vcatnBegin"
-									placeholder="날짜 선택"> <span class="input-group-text"
-									id="icon-calendar"> <i class="bi bi-calendar"></i>
-								</span>
+							<div class="d-flex align-items-center js-date-range">
+
+								<!-- 시작일 -->
+								<div class="input-group date">
+									<input type="text"
+										class="form-control datepicker js-date-range-start"
+										placeholder="시작일"> <span
+										class="input-group-text js-date-range-icon-start"> <i
+										class="bi bi-calendar"></i>
+									</span>
+								</div>
+
+								<span class="mx-1 fw-bold fs-5">~</span>
+
+								<!-- 종료일 -->
+								<div class="input-group date ms-2">
+									<input type="text"
+										class="form-control datepicker js-date-range-end"
+										placeholder="종료일"> <span
+										class="input-group-text js-date-range-icon-end"> <i
+										class="bi bi-calendar"></i>
+									</span>
+								</div>
 							</div>
 						</div>
 						<div class="col-md-3">
-							<label for="userName" class="form-label">　</label>
-							<div class="input-group date" id="applyDatePicker">
-								<input type="text" class="form-control" id="b_vcatnEnd"
-									placeholder="날짜 선택"> <span class="input-group-text"
-									id="icon-calendar"> <i class="bi bi-calendar"></i>
-								</span>
-							</div>
-						</div>
-						<div class="col-md-3">
-							<label class="form-label">휴가유형</label> <select class="form-select">
+							<label class="form-label">휴가유형</label> <select
+								class="form-select">
 								<option>연차</option>
 								<option>병가</option>
 								<option>특별휴가</option>
@@ -75,9 +82,9 @@
 								<option>반려</option>
 							</select>
 						</div>
-					</div>				
-					
-					
+					</div>
+
+
 				</div>
 			</div>
 		</div>
@@ -87,14 +94,14 @@
 		<div class="col-md-6">
 			<!-- 사원목록 -->
 			<div class="card" style="height: 775.75px;">
-			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">나의 휴가 신청 내역 - 홍길동 (D001/개발팀)</h5>
-						</div>
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">나의 휴가 신청 내역 - 홍길동 (D001/개발팀)</h5>
 					</div>
+				</div>
 				<div class="card-body">
-					
+
 					<div id="toastGrid" style="margin: 20px;"></div>
 				</div>
 			</div>
@@ -103,23 +110,24 @@
 		<div class="col-md-6">
 			<!-- 기본정보 -->
 			<div class="card mb-3">
-			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">휴가 신청상세</h5>
-						</div>
-						<div class="card-header-right">
-							<button class="btn btn-outline-dark ">등록</button>
-							<button class="btn btn-outline-dark ">삭제</button>
-						</div>
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">휴가 신청상세</h5>
 					</div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark ">등록</button>
+						<button class="btn btn-outline-dark ">삭제</button>
+					</div>
+				</div>
 				<div class="card-body">
-					
+
 					<div class="row">
 						<div class="col-md-12">
 							<div class="row mb-2">
 								<div class="col-md-6">
-									<label class="form-label">이름</label> <input type="text" class="form-control" />
+									<label class="form-label">이름</label> <input type="text"
+										class="form-control" />
 								</div>
 								<div class="col-md-6">
 									<label class="form-label">사번</label> <input type="text"
@@ -128,7 +136,8 @@
 							</div>
 							<div class="row mb-2">
 								<div class="col-md-6">
-									<label class="form-label">휴가유형</label> <select id="v_vcatnTy" class="form-select">
+									<label class="form-label">휴가유형</label> <select id="v_vcatnTy"
+										class="form-select">
 										<option>연차</option>
 										<option>병가</option>
 										<option>특별휴가</option>
@@ -136,32 +145,42 @@
 								</div>
 								<div class="col-md-6">
 									<label for="userName" class="form-label">신청일</label>
-							<div class="input-group date" id="applyDatePicker">
-								<input type="text" class="form-control" id="v_creaDt"
-									placeholder="날짜 선택"> <span class="input-group-text"
-									id="icon-calendar"> <i class="bi bi-calendar"></i>
-								</span>
-							</div>
+									<div class="input-group date js-date-single">
+										<input type="text"
+											class="form-control datepicker js-date-input"
+											placeholder="날짜 선택"> <span
+											class="input-group-text js-date-icon"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
 								</div>
 							</div>
 							<div class="row mb-2">
-								<div class="col-md-6">
-									<label for="userName" class="form-label">기간</label>
-							<div class="input-group date" id="applyDatePicker">
-								<input type="text" class="form-control" id="v_vcatnBegin"
-									placeholder="날짜 선택"> <span class="input-group-text"
-									id="icon-calendar"> <i class="bi bi-calendar"></i>
-								</span>
-							</div>
-								</div>
-								<div class="col-md-6">
-									<label for="userName" class="form-label">　</label>
-							<div class="input-group date" id="applyDatePicker">
-								<input type="text" class="form-control" id="v_vcatnEnd"
-									placeholder="날짜 선택"> <span class="input-group-text"
-									id="icon-calendar"> <i class="bi bi-calendar"></i>
-								</span>
-							</div>
+								<label for="userName" class="form-label">기간</label>
+								<div class="d-flex align-items-center js-date-range">
+
+									<!-- 시작일 -->
+									<div class="input-group date">
+										<input type="text"
+											class="form-control datepicker js-date-range-start"
+											placeholder="시작일"> <span
+											class="input-group-text js-date-range-icon-start"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+
+									<span class="mx-1 fw-bold fs-5">~</span>
+
+									<!-- 종료일 -->
+									<div class="input-group date ms-2">
+										<input type="text"
+											class="form-control datepicker js-date-range-end"
+											placeholder="종료일"> <span
+											class="input-group-text js-date-range-icon-end"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+
 								</div>
 							</div>
 							<div class="row mb-2">
@@ -175,37 +194,37 @@
 			</div>
 			<!-- 인사정보 -->
 			<div class="card">
-			<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">휴가처리 정보</h5>
-						</div>
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">휴가처리 정보</h5>
 					</div>
+				</div>
 				<div class="card-body " style="height: 345.45px;">
-				
-				<div id="hugadeta" class="stIsShow" >					
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>처리일</label> <input type="text" class="form-control" />
+
+					<div id="hugadeta" class="stIsShow">
+						<div class="row mb-2">
+							<div class="col-md-6">
+								<label>처리일</label> <input type="text" class="form-control" />
+							</div>
+							<div class="col-md-6">
+								<label>승인자</label> <input id="v_nm" type="text"
+									class="form-control" />
+							</div>
 						</div>
-						<div class="col-md-6">
-							<label>승인자</label> <input id="v_nm" type="text"
-								class="form-control" />
+						<div class="row mb-2">
+							<div class="col-md-6">
+								<label>상태</label> <select id="v_st" class="form-select">
+									<option>신청</option>
+									<option>승인</option>
+									<option>반려</option>
+								</select>
+							</div>
+							<div class="col-md-6">
+								<label id="hugaSt1">비고</label> <label id="hugaSt2">반려사유</label>
+								<textarea class="form-control" rows="5" style="height: 150px;"></textarea>
+							</div>
 						</div>
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>상태</label> <select id="v_st" class="form-select">
-								<option>신청</option>
-								<option>승인</option>
-								<option>반려</option>
-							</select>
-						</div>
-						<div class="col-md-6">
-							<label id="hugaSt1">비고</label> <label id="hugaSt2">반려사유</label>
-							<textarea class="form-control" rows="5" style="height: 150px;"></textarea>
-						</div>
-					</div>
 					</div>
 				</div>
 			</div>
@@ -213,8 +232,6 @@
 	</div>
 
 	<script>
-		
-
 		const gridData = [ {
 			creaDt : "1990-01-01",
 			vcatnTy : "연차",
@@ -313,7 +330,7 @@
 			vcatnEnd : "1990-01-02",
 			st : "승인",
 			nm : "김관리"
-		},  {
+		}, {
 			creaDt : "1990-01-03",
 			vcatnTy : "특별휴가",
 			vcatnBegin : "1990-01-01",
@@ -356,8 +373,6 @@
 			} ],
 			bodyHeight : 600, // 본문 높이 고정
 		});
-		
-		
 	</script>
 	<script type="module">
 import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
