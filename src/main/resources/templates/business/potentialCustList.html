@@ -5,7 +5,7 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<title>churn_risk_list</title>
+<title>potentialCustList</title>
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
@@ -23,58 +23,112 @@
 </style>
 <body layout:fragment="content">
 
-<p>테스트</p>
+	<span th:text="${#lists.size(list)}">0</span>
+	<form th:action="@{/potential/sync}" method="post" class="mb-2">
+		<button class="btn btn-primary">공공데이터 동기화</button>
+	</form>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>잠재정보번호</th>
+				<th>조건번호</th>
+				<th>거래처ID</th>
+				<th>순위</th>
+				<th>거래처명</th>
+				<th>업종</th>
+				<th>규모</th>
+				<th>지역</th>
+				<th>설립일</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="row : ${list}">
+				<td th:text="${row.potentialInfoNo}"></td>
+				<td th:text="${row.potentialCondNo}"></td>
+				<td th:text="${row.vendId}"></td>
+				<td th:text="${row.rank}"></td>
+				<td th:text="${row.vendNm}"></td>
+				<td th:text="${row.industryType}"></td>
+				<td th:text="${row.companySize}"></td>
+				<td th:text="${row.region}"></td>
+				<td th:text="${row.establishDate.substring(0,4) + '년 ' 
+					            + row.establishDate.substring(5,7) + '월 ' 
+					            + row.establishDate.substring(8,10) + '일'}"></td>
+			</tr>
+		</tbody>
+	</table>
 	<div class="row">
 		<div class="col-md-12 mb-3">
 			<div class="card">
-					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">조회조건</h5>
-						</div>
-						<div class="card-header-right">
-							<button class="btn btn-dark">초기화</button>
-							<button class="btn btn-outline-dark">조회</button>
-						</div>
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">조회조건</h5>
 					</div>
-					<div class="card-body">
+					<div class="card-header-right">
+						<button class="btn btn-dark">초기화</button>
+						<button class="btn btn-outline-dark">조회</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="row mb-2">
 						<div class="row mb-2">
-								<div class="row mb-2">
-								<div class="col-md-3">
-									<label class="form-label">업종</label> <select class="form-select">
-										<option>건설</option>
-										<option>IT</option>
-										<option>제과</option>
-										<option>의류</option>
-									</select>
-								</div>
-									<div class="col-md-3">
-										<label class="form-label">업체규모</label> <input type="text" class="form-control" placeholder="Value">
-									</div>
-									<div class="col-md-3">
-										<label class="form-label">지역/상권</label> <input type="text" class="form-control" placeholder="Value">
-									</div>
-								</div>
-									<div class="col-md-3">
-										<label class="form-label">설립일</label> <input type="date" class="form-control" placeholder="Value">
-									</div>
-									<div class="col-md-3">
-										<label class="form-label"></label> <input type="text" class="form-control" placeholder="Value">
-									</div>
+							<div class="col-md-3">
+								<label class="form-label">업종</label> <select class="form-select">
+									<option>건설</option>
+									<option>IT</option>
+									<option>제과</option>
+									<option>의류</option>
+								</select>
 							</div>
-							
+							<div class="col-md-3">
+								<label class="form-label">업체규모</label> <input type="text"
+									class="form-control" placeholder="Value">
+							</div>
+							<div class="col-md-3">
+								<label class="form-label">지역/상권</label> <input type="text"
+									class="form-control" placeholder="Value">
+							</div>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">설립일</label>
+							<div class="d-flex align-items-center js-date-range">
+								<!-- 시작일 -->
+								<div class="input-group date">
+									<input type="text"
+										class="form-control datepicker js-date-range-start"
+										placeholder="시작일"> <span
+										class="input-group-text js-date-range-icon-start"> <i
+										class="bi bi-calendar"></i>
+									</span>
+								</div>
+
+								<span class="mx-1 fw-bold fs-5">~</span>
+
+								<!-- 종료일 -->
+								<div class="input-group date ms-2">
+									<input type="text"
+										class="form-control datepicker js-date-range-end"
+										placeholder="종료일"> <span
+										class="input-group-text js-date-range-icon-end"> <i
+										class="bi bi-calendar"></i>
+									</span>
+								</div>
+							</div>
+						</div>
+
 					</div>
 				</div>
 			</div>
 		</div>
-		
-		
-		
+	</div>
+
+
 	<!-- 휴먼고객 -->
 	<div class="card mb-3">
 		<div class="card-header">
 			<div class="card-header-left">
-				<h5 class="card-title">휴먼고객목록</h5>
+				<h5 class="card-title">잠재고객목록</h5>
 			</div>
 			<!-- card-header-left end  -->
 			<div class="card-header-right">
@@ -83,11 +137,13 @@
 			</div>
 		</div>
 		<div class="card-body">
-			<div id="dormancygrid" style="margin: 20px;"></div>
+			<div id="potentialgrid" style="margin: 20px;"></div>
 		</div>
 	</div>
-	<script>
-		
+
+
+
+	<script th:inline="javascript">
 		// 휴먼/이탈고객 데이터
 		tui.Grid.applyTheme('default', {
 			cell : {
@@ -113,121 +169,15 @@
 				}
 			}
 		});
-		const dormancygridData = [
-			{
-				rank: "1",
-				custname: "코드예담",
-				custtype: "IT",
-				scale: "중견기업",
-				ceatedate: "1968년",
-				region: "대구광역시",
-				leadscore: "83점"
-			},
-			{
-				rank: "2",
-				custname: "건설예담",
-				custtype: "건설",
-				scale: "중소기업",
-				ceatedate: "1985년",
-				region: "경상북도",
-				leadscore: "68점"
-			},
-			{
-				rank: "3",
-				custname: "푸드예담",
-				custtype: "식품",
-				scale: "중견기업",
-				ceatedate: "1992년",
-				region: "경기도",
-				leadscore: "72점"
-			},
-			{
-				rank: "4",
-				custname: "메디예담",
-				custtype: "의료기기",
-				scale: "중소기업",
-				ceatedate: "2001년",
-				region: "서울특별시",
-				leadscore: "65점"
-			},
-			{
-				rank: "5",
-				custname: "엔지니어링예담",
-				custtype: "제조",
-				scale: "중견기업",
-				ceatedate: "1989년",
-				region: "울산광역시",
-				leadscore: "78점"
-			},
-			{
-				rank: "6",
-				custname: "바이오예담",
-				custtype: "바이오",
-				scale: "중소기업",
-				ceatedate: "2014년",
-				region: "충청북도",
-				leadscore: "61점"
-			},
-			{
-				rank: "7",
-				custname: "패션예담",
-				custtype: "의류",
-				scale: "중견기업",
-				ceatedate: "1999년",
-				region: "부산광역시",
-				leadscore: "74점"
-			},
-			{
-				rank: "8",
-				custname: "모빌리티예담",
-				custtype: "자동차부품",
-				scale: "대기업",
-				ceatedate: "1975년",
-				region: "경상남도",
-				leadscore: "89점"
-			},
-			{
-				rank: "9",
-				custname: "그린예담",
-				custtype: "환경",
-				scale: "중소기업",
-				ceatedate: "2010년",
-				region: "전라북도",
-				leadscore: "57점"
-			},
-			{
-				rank: "10",
-				custname: "스마트예담",
-				custtype: "IT",
-				scale: "중소기업",
-				ceatedate: "2018년",
-				region: "인천광역시",
-				leadscore: "63점"
-			},
-			{
-				rank: "11",
-				custname: "테크예담",
-				custtype: "전자",
-				scale: "중견기업",
-				ceatedate: "1995년",
-				region: "세종특별자치시",
-				leadscore: "76점"
-			},
-			{
-				rank: "12",
-				custname: "로지스예담",
-				custtype: "물류",
-				scale: "중소기업",
-				ceatedate: "2007년",
-				region: "강원도",
-				leadscore: "59점"
-			}
-		];
+		
+		
+		const potentialData = /*[[${list}]]*/ [];
+	    console.log(potentialData);
 
 		// Grid 생성
-		const dormancygrid = new tui.Grid({
-			el : document.getElementById('dormancygrid'),
-			data : dormancygridData,
+		const potentialgrid = new tui.Grid({
+			el : document.getElementById('potentialgrid'),
+			data : potentialData,
 			scrollX : false,
 			scrollY : true,
 			minBodyHeight : 0,
@@ -239,22 +189,26 @@
 				align : 'center'
 			}, {
 				header : '업체명',
-				name : 'custname',
+				name : 'vendNm',
 				editor : 'text'
 			}, {
 				header : '업종',
-				name : 'custtype',
+				name : 'industryType',
 				sortable : 'true',
 				align : 'center'
-			},  {
+			}, {
 				header : '규모',
-				name : 'scale',
+				name : 'companySize',
 				align : 'center'
-			},{
-				header : '설립일',
-				name : 'ceatedate',
-				align : 'center'
-			},{
+			}, {
+	            header: '설립일',
+	            name: 'establishDate',
+	            formatter: ({ value }) => {
+	                const d = new Date(value);
+	                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
+	            },
+	            align : 'center'
+	        }, {
 				header : '지역/상권',
 				name : 'region',
 				align : 'center'

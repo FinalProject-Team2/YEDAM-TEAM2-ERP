@@ -12,6 +12,9 @@ public interface BusinessMapper {
 	//전체조회
 	List<BusinessVO> getList();
 	
+	// 공공데이터 한 건 insert
+    int insertPotential(BusinessVO vo);
+	
 	//등록
 	int insert(BusinessVO business);
 	
