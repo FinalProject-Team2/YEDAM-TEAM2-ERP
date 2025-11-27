@@ -1,17 +1,23 @@
 package store.yd2team.business.service;
 
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Data;
 
 @Data
 public class PriceVO {
 
 	// 조회 결과
-	private Long priceId;
+	private String priceId;
     private String priceName;
     private String type;
     private Double percent;
-    private String beginDt;
-    private String endDt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate beginDt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate endDt;
     private String yn;
     private String rm;
     

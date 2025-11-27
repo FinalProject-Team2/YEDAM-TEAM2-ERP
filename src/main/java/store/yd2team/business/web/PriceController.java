@@ -34,6 +34,9 @@ public class PriceController {
 	@PostMapping("/list")
 	@ResponseBody
 	public List<PriceVO> getPriceList(@RequestBody PriceVO vo) {
+		
+		System.out.println("검색조건 >>> " + vo.toString());
+		
 		return priceService.getPricePolicyList(vo);
 	}
 	
@@ -42,4 +45,5 @@ public class PriceController {
 	public List<CommonCodeVO> getPriceType() {
 	    return priceService.getPriceType();
 	}
+	
 }

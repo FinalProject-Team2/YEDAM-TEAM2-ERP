@@ -59,6 +59,7 @@
 }
 
 </style>
+
 </head>
 
 <body layout:fragment="content">
@@ -103,7 +104,6 @@
 								        <i class="bi bi-calendar"></i>
 								    </span>
 								</div>
-																
 							</div>
 
 						</div>
@@ -251,7 +251,7 @@
 	
 	            // 그리드가 이미 만들어졌다면 다시 그리기
 	            if (window.priceGrid) {
-	                window.priceGrid.refresh();
+	                window.priceGrid.refreshLayout();
 	            }
 	        })
 	        .catch(err => console.error('단가정책유형 코드 조회 오류:', err));
@@ -296,81 +296,17 @@
 
 
     // 2. 더미 데이터
-    const priceData = [
-        {
-        	priceName: '논개',
-            percent: 12,
-            beginDt: '2019-10-28',
-            endDt: '2019-10-30',
-            type: 'p1',
-            rm: '논개가좋아하는믹스커피X2마시고3시에15분담요쓰고기절하기구론산컨피던스박카스'
-        },
-        {
-        	priceName: '구론산',
-            percent: 5,
-            beginDt: '2019-07-14',
-            endDt: '2019-07-21',
-            type: 'p2',
-            rm: '논개최애간식딸기맛마이쮸초콜릿빵쿠키사탕젤리'
-        },
-        {
-        	priceName: '레이',
-            percent: 5,
-            beginDt: '2019-05-02',
-            endDt: '2019-05-05',
-            type: 'p2',
-            rm: '레이주특기제자리에서점프하고땀흘리기'
-        },
-        {
-        	priceName: '논개',
-            percent: 12,
-            beginDt: '2019-05-04',
-            endDt: '2019-05-06',
-            type: 'p1',
-            rm: '논개가좋아하는믹스커피X2구론산컨피던스박카스'
-        },
-        {
-        	priceName: '구론산',
-            percent: 5,
-            beginDt: '2019-07-14',
-            endDt: '2019-07-21',
-            type: 'p1',
-            rm: '논개최애간식딸기맛마이쮸초콜릿빵쿠키사탕젤리'
-        },
-        {
-        	priceName: '레이',
-            percent: 5,
-            beginDt: '2019-05-02',
-            endDt: '2019-05-05',
-            type: 'p1',
-            rm: '레이주특기제자리에서점프하고땀흘리기'
-        },
-        {
-        	priceName: '논개',
-            percent: 12,
-            beginDt: '2019-10-28',
-            endDt: '2019-10-30',
-            type: 'p1',
-            rm: '논개가좋아하는믹스커피X2구론산컨피던스박카스'
-        },
-        {
-        	priceName: '구론산',
-            percent: 5,
-            beginDt: '2019-07-14',
-            endDt: '2019-07-21',
-            type: 'p1',
-            rm: '논개최애간식딸기맛마이쮸초콜릿빵쿠키사탕젤리'
-        },
-        {
-        	priceName: '레이',
-            percent: 5,
-            beginDt: '2019-05-02',
-            endDt: '2019-05-05',
-            type: 'p1',
-            rm: '레이주특기제자리에서점프하고땀흘리기'
-        }
-    ]; // 2. 끝
+    const priceData = []; // 2. 끝
+    
+    
+    // 2-1. 검색조건
+    const searchForm = {
+    		clientName: document.getElementById('clientName'),
+    	    searchPriceType: document.getElementById('searchPriceType'),
+    	    applyDate: document.getElementById('applyDate')
+	};
 
+    
     // 3. Grid 공통 옵션
     const priceGridOptions = {
         bodyHeight: 340,
@@ -382,7 +318,9 @@
             resizable: true
         }
     }; // 3. 끝
-
+    
+ 
+    
     // 4. 단가정책 목록 Grid 생성
     const priceGrid = new tui.Grid({
         el: document.getElementById('priceGrid'),
@@ -401,13 +339,19 @@
                 }
             },
             { header: '거래처설정', name: 'clientSetting', width: 120, align: 'center',
-            	formatter: () => {
-            		return '<button class="grid-btn client-btn">거래처설정</button>';
-            	}
+            	formatter: ({ row }) => {
+                    if (row.type === 'p1') {
+                        return '<button class="grid-btn client-btn">거래처설정</button>';
+                    }
+                    return ''; // 아니면 빈 값
+                }
             },
             { header: '품목설정', name: 'itemSetting', width: 120, align: 'center',
-                formatter: () => {
-                    return '<button class="grid-btn item-btn">품목설정</button>';
+            	formatter: ({ row }) => {
+                    if (row.type === 'p2') {
+                        return '<button class="grid-btn item-btn">품목설정</button>';
+                    }
+                    return '';
                 }
             },
             { header: '비고', name: 'rm', width: 'auto' },
@@ -501,8 +445,56 @@
 	
 	    }); // 7. 끝
  	
+	    
+	    // 8. 초기화버튼 이벤트
+	    const $btnSearchInit = document.getElementById('btnSearchInit');
+	    const $btnInsertInit = document.getElementById('btnInsertInit');
+	    
+	    if ($btnSearchInit) {
+	        $btnSearchInit.addEventListener('click', function () {
+	            Object.values(searchForm).forEach(field => field.value = '');
+	        });
+	    }
+	    
+	    if ($btnInsertInit) {
+	        $btnInsertInit.addEventListener('click', function () {
+	            Object.values(priceForm).forEach(field => field.value = '');
+	        });
+	    }
+	    
+	 // 9. 조회버튼 이벤트
+	    const $btnSearch = document.getElementById('btnSearch');
+
+	    if ($btnSearch) {
+	        $btnSearch.addEventListener('click', function () {
+
+	            const searchName = searchForm.clientName.value.trim();          // 단가정책명
+	            const searchType = searchForm.searchPriceType.value;            // 유형
+	            const applyDate = searchForm.applyDate.value;                   // 적용일
+	            
+	            console.log("조회조건:", searchName, searchType, applyDate);
+
+	            axios.post('/price/list', {
+	                searchPriceName: searchName,
+	                searchType: searchType,
+	                searchApplcDt: applyDate
+	            })
+	            .then(res => {
+	                console.log("조회결과:", res.data);
+
+	                // 결과를 그리드에 반영
+	                priceGrid.resetData(res.data);
+	            })
+	            .catch(err => {
+	                console.error("조회 오류:", err);
+	            });
+
+	        });
+	    }
+	    
 
 </script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <!-- <script th:src="@{/assets/js/priceManage.js}"></script> -->
 </body>
 </html>
