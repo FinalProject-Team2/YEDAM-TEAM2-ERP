@@ -115,8 +115,12 @@
 						<h5 class="card-title">구독 플랜</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark">홈으로</button>
-						<button class="btn btn-outline-dark">다음</button>
+						<a th:href="@{/}">
+							<button class="btn btn-outline-dark" type="button">홈으로</button>
+						</a> <a th:href="@{/Payment}">
+							<button class="btn btn-outline-dark" type="button">다음</button>
+						</a>
+
 					</div>
 				</div>
 				<div class="card-body">
@@ -144,9 +148,90 @@
 								<div class="plan-tag">BASIC</div>
 								<div class="plan-header">베이식 플랜</div>
 								<div class="plan-body">
-									작은 팀이나 테스트용으로 적합한 기본 기능 제공. <br /> 월간 사용량이 많지 않은 경우에 추천합니다.
+									<span class="plan-desc"> 작은 팀이나 테스트용으로 적합한 기본 기능 제공. <br />
+										월간 사용량이 많지 않은 경우에 추천합니다.
+									</span>
+									<div class="mt-2">
+										<!-- BASIC / 월 -->
+										<div class="plan-billing-block" data-plan="BASIC"
+											data-billing="MONTHLY">
+											<div th:each="p : ${planList}"
+												th:if="${p.planNm == 'BASIC' and p.sttlPerd == '월'}">
+												<div>
+													월 API 허용 횟수 : <span
+														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span
+														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+											</div>
+											<div
+												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and sttlPerd == '월'])}">
+												<div>
+													월 API 허용 횟수 : <span>0</span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span>0</span>
+												</div>
+											</div>
+										</div>
+
+										<!-- BASIC / 연 -->
+										<div class="plan-billing-block" data-plan="BASIC"
+											data-billing="YEARLY" style="display: none">
+											<div th:each="p : ${planList}"
+												th:if="${p.planNm == 'BASIC' and p.sttlPerd == '연'}">
+												<div>
+													월 API 허용 횟수 : <span
+														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span
+														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+											</div>
+											<div
+												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and sttlPerd == '연'])}">
+												<div>
+													월 API 허용 횟수 : <span>0</span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span>0</span>
+												</div>
+											</div>
+										</div>
+									</div>
 								</div>
-								<div class="plan-price">₩19,000 / 월</div>
+								<div class="plan-price">
+									<!-- BASIC / 월 -->
+									<div class="plan-billing-block" data-plan="BASIC"
+										data-billing="MONTHLY">
+										<div th:each="p : ${planList}"
+											th:if="${p.planNm == 'BASIC' and p.sttlPerd == '월'}">
+											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
+											₩&nbsp;/ 월
+										</div>
+										<div
+											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and sttlPerd == '월'])}">
+											<span>0</span>&nbsp;/ 월
+										</div>
+									</div>
+
+									<!-- BASIC / 연 -->
+									<div class="plan-billing-block" data-plan="BASIC"
+										data-billing="YEARLY" style="display: none">
+										<div th:each="p : ${planList}"
+											th:if="${p.planNm == 'BASIC' and p.sttlPerd == '연'}">
+											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
+											₩&nbsp;/ 연
+										</div>
+										<div
+											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and sttlPerd == '연'])}">
+											<span>0</span>&nbsp;/ 연
+										</div>
+									</div>
+								</div>
 								<div class="plan-cta">
 									<button type="button"
 										class="btn btn-outline-dark btn-sm plan-select-btn"
@@ -160,9 +245,89 @@
 							<div class="plan-wrapper h-100">
 								<div class="plan-tag">STANDARD</div>
 								<div class="plan-header">스탠다드 플랜</div>
-								<div class="plan-body">일반적인 비즈니스 운영에 필요한 기능을 균형 있게 제공. 추가
-									계정과 API 호출 한도가 포함된 플랜입니다.</div>
-								<div class="plan-price">₩49,000 / 월</div>
+								<div class="plan-body">
+									일반적인 비즈니스 운영에 필요한 기능을 균형 있게 제공. 추가 계정과 API 호출 한도가 포함된 플랜입니다.
+									<div class="mt-2">
+										<!-- STANDARD / 월 -->
+										<div class="plan-billing-block" data-plan="STANDARD"
+											data-billing="MONTHLY">
+											<div th:each="p : ${planList}"
+												th:if="${p.planNm == 'STANDARD' and p.sttlPerd == '월'}">
+												<div>
+													월 API 허용 횟수 : <span
+														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span
+														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+											</div>
+											<div
+												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and sttlPerd == '월'])}">
+												<div>
+													월 API 허용 횟수 : <span>0</span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span>0</span>
+												</div>
+											</div>
+										</div>
+
+										<!-- STANDARD / 연 -->
+										<div class="plan-billing-block" data-plan="STANDARD"
+											data-billing="YEARLY" style="display: none">
+											<div th:each="p : ${planList}"
+												th:if="${p.planNm == 'STANDARD' and p.sttlPerd == '연'}">
+												<div>
+													월 API 허용 횟수 : <span
+														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span
+														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+											</div>
+											<div
+												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and sttlPerd == '연'])}">
+												<div>
+													월 API 허용 횟수 : <span>0</span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span>0</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="plan-price">
+									<!-- STANDARD / 월 -->
+									<div class="plan-billing-block" data-plan="STANDARD"
+										data-billing="MONTHLY">
+										<div th:each="p : ${planList}"
+											th:if="${p.planNm == 'STANDARD' and p.sttlPerd == '월'}">
+											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
+											₩&nbsp;/ 월
+										</div>
+										<div
+											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and sttlPerd == '월'])}">
+											<span>0</span>&nbsp;/ 월
+										</div>
+									</div>
+
+									<!-- STANDARD / 연 -->
+									<div class="plan-billing-block" data-plan="STANDARD"
+										data-billing="YEARLY" style="display: none">
+										<div th:each="p : ${planList}"
+											th:if="${p.planNm == 'STANDARD' and p.sttlPerd == '연'}">
+											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
+											₩&nbsp;/ 연
+										</div>
+										<div
+											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and sttlPerd == '연'])}">
+											<span>0</span>&nbsp;/ 연
+										</div>
+									</div>
+								</div>
 								<div class="plan-cta">
 									<button type="button"
 										class="btn btn-outline-dark btn-sm plan-select-btn"
@@ -176,9 +341,89 @@
 							<div class="plan-wrapper h-100">
 								<div class="plan-tag">PREMIUM</div>
 								<div class="plan-header">프리미엄 플랜</div>
-								<div class="plan-body">고급 기능과 넉넉한 사용량을 제공하는 상위 플랜. 성장 단계
-									이상의 기업에 적합한 구성입니다.</div>
-								<div class="plan-price">₩99,000 / 월</div>
+								<div class="plan-body">
+									고급 기능과 넉넉한 사용량을 제공하는 상위 플랜. 성장 단계 이상의 기업에 적합한 구성입니다.
+									<div class="mt-2">
+										<!-- PREMIUM / 월 -->
+										<div class="plan-billing-block" data-plan="PREMIUM"
+											data-billing="MONTHLY">
+											<div th:each="p : ${planList}"
+												th:if="${p.planNm == 'PREMIUM' and p.sttlPerd == '월'}">
+												<div>
+													월 API 허용 횟수 : <span
+														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span
+														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+											</div>
+											<div
+												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and sttlPerd == '월'])}">
+												<div>
+													월 API 허용 횟수 : <span>0</span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span>0</span>
+												</div>
+											</div>
+										</div>
+
+										<!-- PREMIUM / 연 -->
+										<div class="plan-billing-block" data-plan="PREMIUM"
+											data-billing="YEARLY" style="display: none">
+											<div th:each="p : ${planList}"
+												th:if="${p.planNm == 'PREMIUM' and p.sttlPerd == '연'}">
+												<div>
+													월 API 허용 횟수 : <span
+														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span
+														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
+												</div>
+											</div>
+											<div
+												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and sttlPerd == '연'])}">
+												<div>
+													월 API 허용 횟수 : <span>0</span>
+												</div>
+												<div>
+													계정 생성 제한 수 : <span>0</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="plan-price">
+									<!-- PREMIUM / 월 -->
+									<div class="plan-billing-block" data-plan="PREMIUM"
+										data-billing="MONTHLY">
+										<div th:each="p : ${planList}"
+											th:if="${p.planNm == 'PREMIUM' and p.sttlPerd == '월'}">
+											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
+											₩&nbsp;/ 월
+										</div>
+										<div
+											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and sttlPerd == '월'])}">
+											<span>0</span>&nbsp;/ 월
+										</div>
+									</div>
+
+									<!-- PREMIUM / 연 -->
+									<div class="plan-billing-block" data-plan="PREMIUM"
+										data-billing="YEARLY" style="display: none">
+										<div th:each="p : ${planList}"
+											th:if="${p.planNm == 'PREMIUM' and p.sttlPerd == '연'}">
+											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
+											₩&nbsp;/ 연
+										</div>
+										<div
+											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and sttlPerd == '연'])}">
+											<span>0</span>&nbsp;/ 연
+										</div>
+									</div>
+								</div>
 								<div class="plan-cta">
 									<button type="button"
 										class="btn btn-outline-dark btn-sm plan-select-btn"
@@ -205,8 +450,10 @@
 			});
 		});
 
-		// 월간/연간 요금 토글 active 관리
+		// 월간/연간 요금 토글 active 관리 + 플랜 블록 전환
 		const billingButtons = document.querySelectorAll('.billing-toggle-btn');
+		const billingBlocks = document.querySelectorAll('.plan-billing-block');
+
 		billingButtons.forEach(btn => {
 			btn.addEventListener('click', function() {
 				billingButtons.forEach(b => b.classList.remove('billing-active'));
@@ -216,6 +463,19 @@
 				if (input) {
 					input.checked = true;
 				}
+
+				// 선택된 요금 주기 (MONTHLY / YEARLY)
+				const selectedBilling = this.getAttribute('data-billing');
+
+				// 각 플랜 블록 중 같은 billing 만 보이게
+				billingBlocks.forEach(block => {
+					const blockBilling = block.getAttribute('data-billing');
+					if (blockBilling === selectedBilling) {
+						block.style.display = '';
+					} else {
+						block.style.display = 'none';
+					}
+				});
 			});
 		});
 	});

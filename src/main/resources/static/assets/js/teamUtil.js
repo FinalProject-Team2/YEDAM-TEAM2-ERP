@@ -4,13 +4,6 @@
 $(function () {
 
   // ==========================
-  // 0-0. bootstrap-datepicker 기본 언어를 ko로 통일
-  // ==========================
-  if ($.fn.datepicker) {
-    $.fn.datepicker.defaults.language = 'ko';
-  }
-
-  // ==========================
   // 0. 공통 datepicker 기본 초기화
   // ==========================
 
@@ -199,6 +192,34 @@ $(function () {
 
   // ==========================
   // 3. 시작/종료 기간 datepicker (range, 여러 쌍 가능 / class 기반)
+  //
+  // HTML 예시:
+  //
+  // <div class="d-flex align-items-center js-date-range">
+  //   <!-- 시작일 -->
+  //   <div class="input-group date">
+  //     <input type="text"
+  //            class="form-control datepicker js-date-range-start"
+  //            placeholder="시작일">
+  //     <span class="input-group-text js-date-range-icon-start">
+  //       <i class="bi bi-calendar"></i>
+  //     </span>
+  //   </div>
+  //
+  //   <span class="mx-1 fw-bold fs-5">~</span>
+  //
+  //   <!-- 종료일 -->
+  //   <div class="input-group date ms-2">
+  //     <input type="text"
+  //            class="form-control datepicker js-date-range-end"
+  //            placeholder="종료일">
+  //     <span class="input-group-text js-date-range-icon-end">
+  //       <i class="bi bi-calendar"></i>
+  //     </span>
+  //   </div>
+  // </div>
+  //
+  // 이 블럭 자체를 한 페이지에 여러 번 둬도 각자 독립적으로 동작
   // ==========================
 
   $('.js-date-range').each(function () {
@@ -317,11 +338,15 @@ $(function () {
   // 4. 예전 id 기반 input에도 마스크 적용 (호환용)
   // ==========================
 
+------------------------------------------------------------------------확인
   const $legacyApplyDate = $('#applyDate');
   if ($legacyApplyDate.length) {
     attachDateMask($legacyApplyDate);
     fixDatepickerZIndex($legacyApplyDate);
   }
+
+  attachDateMask($('#applyDate')); // 단일 날짜(예전 패턴)
+------------------------------------------------------------------------확인
 
   // ==========================
   // 5. Toast UI Grid 테마 적용
@@ -366,10 +391,25 @@ $(function () {
 // -------------------------------------------------------------------
 
 (function (global, $) {
+  // 전역 네임스페이스(TeamCommon) 보장
   global.TeamCommon = global.TeamCommon || {};
 
+  // 자동완성 전용 네임스페이스
   const ns = global.TeamCommon.autocomplete = global.TeamCommon.autocomplete || {};
 
+  /**
+   * 자동완성 초기화 함수
+   *
+   * @param {Object} config - 설정 객체
+   *  - inputSelector : (필수) input 요소 selector
+   *  - listSelector  : (필수) 목록 컨테이너(ul 등) selector
+   *  - url           : (필수) 서버 자동완성 API URL
+   *  - paramName     : (선택) 파라미터 이름 (기본 'keyword')
+   *  - minLength     : (선택) 최소 글자 수 (기본 2)
+   *  - delay         : (선택) 디바운스(ms, 기본 300)
+   *  - mapResponse   : (선택) item -> {id, label, value} 변환 함수
+   *  - onSelect      : (선택) 항목 클릭 시 콜백
+   */
   ns.init = function (config) {
     const $input = $(config.inputSelector);
     const $list  = $(config.listSelector);
@@ -477,6 +517,7 @@ $(function () {
 
 // -------------------------------------------------------------------
 // Toast UI Grid 관련 공통 유틸
+// - 필수 컬럼 헤더에 required-header 클래스 붙이기
 // -------------------------------------------------------------------
 
 (function (global) {
@@ -499,6 +540,10 @@ $(function () {
     });
   };
 
+  /**
+   * [2] 여러 Grid를 한 번에 처리
+   * @param {Array<{gridId:string, columns:string[]}>} configs
+   */
   gridNs.markRequiredHeaderMulti = function (configs) {
     if (!Array.isArray(configs)) return;
 
@@ -508,6 +553,11 @@ $(function () {
     });
   };
 
+  /**
+   * [3] 화면에서 쓰기 편한 래퍼
+   *  - Toast Grid 로딩 여부 / setTimeout 까지 내부에서 처리
+   *  - 화면에서는 TeamCommon.grid.applyRequiredHeaders([...]) 한 줄만 호출
+   */
   gridNs.applyRequiredHeaders = function (configs) {
     if (!Array.isArray(configs)) return;
     if (!global.tui || !global.tui.Grid) return;
