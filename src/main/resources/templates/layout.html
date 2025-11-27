@@ -36,7 +36,8 @@
     <link rel="stylesheet" href="/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css">
     <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
     <!-- toast ui chart CDN로드 -->
-    <link rel="stylesheet" href="https://uicdn.toast.com/chart/latest/toastui-chart.min.css" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/chart/latest/toastui-chart.min.css" />    
+	<script src="https://uicdn.toast.com/chart/latest/toastui-chart.min.js"></script>
     <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
     <!-- jQuery 3.7.0 -->
     <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
@@ -211,7 +212,7 @@
               </a>
               <div class="collapse" id="jiwon-elements">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"><a class="nav-link" href="/price-manage">단가관리</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/price/manage">단가관리</a></li>
                   <li class="nav-item"><a class="nav-link" href="/">추가하삼</a></li>
                 </ul>
               </div>
@@ -224,8 +225,10 @@
               </a>
               <div class="collapse" id="minsu-elements">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"><a class="nav-link" href="/SubscriptionPlan">구독 플랜 관리</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/subscription/plan">구독 플랜 관리</a></li>
                   <li class="nav-item"><a class="nav-link" href="/SubscriptionChoice">구독 플랜 선택</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/Payment">결제</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/SignUp">회원가입</a></li>
                 </ul>
               </div>
             </li>
@@ -268,6 +271,7 @@
                 <ul class="nav flex-column sub-menu">
                   <li class="nav-item"><a class="nav-link" href="/custcom-manage">고객관리</a></li>
                   <li class="nav-item"><a class="nav-link" href="/credit">여신관리</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/receivables">채권/미수관리</a></li>
                 </ul>
               </div>
             </li>
@@ -333,10 +337,10 @@
     <!-- <script src="assets/js/Chart.roundedBarCharts.js"></script> -->
     <!-- End custom js for this page-->
     <!-- 팀별로 필요한 유틸 모음-->
-    <!-- toast ui chart CDN로드 -->
-	<script src="https://uicdn.toast.com/chart/latest/toastui-chart.min.js"></script>
+    
 
     <script src="/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.ko.min.js"></script>
     <script src="/assets/js/teamUtil.js"></script>
 
   </body>

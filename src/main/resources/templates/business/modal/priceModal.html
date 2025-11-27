@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- 거래처 모달 fragment -->
+<div th:fragment="clientModal">
+  <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">거래처 설정</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Toast Grid 들어갈 영역 -->
+        <div id="clientGrid" style="height:400px;"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+        <button type="button" class="btn btn-primary" id="btnClientSelect">선택</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- 품목 모달 fragment -->
+<div th:fragment="itemModal">
+  <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
+	  <div class="modal-dialog modal-xl modal-dialog-centered">
+	    <div class="modal-content">
+	
+	      <div class="modal-header">
+	        <h5 class="modal-title">품목 설정</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+	      </div>
+	
+	      <div class="modal-body">
+	        <!-- Toast Grid 들어갈 영역 -->
+	        <div id="itemGrid" style="height:400px;"></div>
+	      </div>
+	
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+	        <button type="button" class="btn btn-primary" id="btnItemSelect">선택</button>
+	      </div>
+	
+	    </div>
+	  </div>
+  </div>
+</div>
+
+</body>
+</html>

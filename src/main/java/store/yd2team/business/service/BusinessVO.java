@@ -6,16 +6,23 @@ import lombok.Data;
 
 @Data
 public class BusinessVO {
-	private String stdrDetailId;
- 	private int potentialInfoNo;
-	private String vendId;
-	private String industryTypeCond;
-	private String companySizeCond;
-	private Date establishDtCond;
-	private String regionCond;
-	private boolean yn;
+	    private Long   potentialInfoNo;   // POTENTIAL_INFO_NO
+	    private Long   potentialCondNo;   // POTENTIAL_COND_NO
+	    private String vendId;            // VEND_ID
+	    private Integer rank;             // RANK
+	    private String vendNm;            // VEND_NM
+	    private String industryType;      // INDUSTRY_TYPE
+	    private String companySize;       // COMPANY_SIZE
+	    private String region;            // REGION
+	    private String establishDate;     // ESTABLISH_DATE (YYYY-MM-DD 형식 문자열)
 	
-	private String stdrId;
-	private String stdrIteamInfo;
-	private String nfoScore;
+	    private Date creaDt;             // CREA_DT  (문자열로 받기)
+	    private String creaBy;           // CREA_BY
+	    private Date updtDt;             // UPDT_DT
+	    private String updtBy;           // UPDT_BY
+	
+	    // 밑에 세 개는 지금 테이블에는 없으니까 일단 안 써도 됨
+	    private String stdrId;
+	    private String stdrIteamInfo;
+	    private String nfoScore;
 }

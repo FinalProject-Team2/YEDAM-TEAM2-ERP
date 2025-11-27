@@ -11,14 +11,16 @@ $(function () {
   $('.datepicker').datepicker({
     format: 'yyyy-mm-dd',
     autoclose: true,
-    todayHighlight: true
+    todayHighlight: true,
+    language: 'ko'
   });
 
   // 특정 id용 (쓰고 있으면) - 예전 코드 호환
   if ($('#datePickerGroup').length) {
     $('#datePickerGroup').datepicker({
       format: 'yyyy-mm-dd',
-      autoclose: true
+      autoclose: true,
+      language: 'ko'
     });
   }
 
@@ -30,13 +32,17 @@ $(function () {
     $input.datepicker({
       format: 'yyyy-mm-dd',
       autoclose: true,
-      todayHighlight: true
+      todayHighlight: true,
+      language: 'ko'
     });
 
     // 아이콘 클릭 → input focus → 달력 열기
     $('#icon-calendar').on('click', function () {
       $('#applyDate').focus();
     });
+
+    // 모달 위로 z-index 강제
+    fixDatepickerZIndex($input);
   }
 
   // ==========================
@@ -127,19 +133,33 @@ $(function () {
   }
 
   // ==========================
+  // 1-2. 모달 위로 datepicker z-index 강제 함수
+  // ==========================
+  function fixDatepickerZIndex($input) {
+    if (!$input || !$input.length) return;
+
+    // bootstrap-datepicker 의 show 이벤트에 걸기
+    $input.on('show', function () {
+      const $self  = $(this);
+      const $modal = $self.closest('.modal');
+
+      // 모달 안이 아니면 의미 없음
+      if (!$modal.length) return;
+
+      // 모달 z-index 읽기 (없으면 기본 1055로 가정)
+      const modalZ = parseInt($modal.css('z-index'), 10) || 1055;
+
+      // datepicker DOM이 생성되는 타이밍 때문에 약간 딜레이
+      setTimeout(function () {
+        $('.datepicker-dropdown').each(function () {
+          this.style.setProperty('z-index', String(modalZ + 10), 'important');
+        });
+      }, 0);
+    });
+  }
+
+  // ==========================
   // 2. 단일 datepicker (여러 개 가능, class 기반)
-  //
-  // HTML 예시:
-  // <div class="input-group date js-date-single">
-  //   <input type="text"
-  //          class="form-control datepicker js-date-input"
-  //          placeholder="날짜 선택">
-  //   <span class="input-group-text js-date-icon">
-  //     <i class="bi bi-calendar"></i>
-  //   </span>
-  // </div>
-  //
-  // 한 화면에 여러 개 복붙 가능 (id 안 씀)
   // ==========================
 
   $('.js-date-single').each(function () {
@@ -149,16 +169,18 @@ $(function () {
 
     if (!$input.length) return;
 
-    // datepicker는 .datepicker 공통 초기화로도 잡히지만,
-    // 혹시 몰라 한 번 더 보정 (중복 초기화해도 크게 문제 없음)
     $input.datepicker({
       format: 'yyyy-mm-dd',
       autoclose: true,
-      todayHighlight: true
+      todayHighlight: true,
+      language: 'ko'
     });
 
     // 숫자/포맷 마스크 적용
     attachDateMask($input);
+
+    // 모달 위로 z-index 강제
+    fixDatepickerZIndex($input);
 
     // 아이콘 클릭 → input focus → 달력 열림
     if ($icon.length) {
@@ -258,7 +280,8 @@ $(function () {
       .datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
-        todayHighlight: true
+        todayHighlight: true,
+        language: 'ko'
       })
       .on('changeDate', function (e) {
         handleStartChange(e.date);
@@ -268,7 +291,8 @@ $(function () {
       .datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
-        todayHighlight: true
+        todayHighlight: true,
+        language: 'ko'
       })
       .on('changeDate', function (e) {
         handleEndChange(e.date);
@@ -277,6 +301,10 @@ $(function () {
     // 숫자/포맷 마스크 적용
     attachDateMask($startInput);
     attachDateMask($endInput);
+
+    // 모달 위로 z-index 강제
+    fixDatepickerZIndex($startInput);
+    fixDatepickerZIndex($endInput);
 
     // 직접 숫자 입력 후 blur 시에도 datepicker 값 + 범위 로직 반영
     $startInput.on('blur', function () {
@@ -310,7 +338,15 @@ $(function () {
   // 4. 예전 id 기반 input에도 마스크 적용 (호환용)
   // ==========================
 
+------------------------------------------------------------------------확인
+  const $legacyApplyDate = $('#applyDate');
+  if ($legacyApplyDate.length) {
+    attachDateMask($legacyApplyDate);
+    fixDatepickerZIndex($legacyApplyDate);
+  }
+
   attachDateMask($('#applyDate')); // 단일 날짜(예전 패턴)
+------------------------------------------------------------------------확인
 
   // ==========================
   // 5. Toast UI Grid 테마 적용
@@ -352,9 +388,6 @@ $(function () {
 
 // -------------------------------------------------------------------
 // 팀 공통 자동완성(autocomplete) 유틸리티
-// - jQuery 기반
-// - 서버에서 JSON(예: [{id, name}, ...])을 받아와서 자동완성 목록을 출력
-// - 화면에서는 TeamCommon.autocomplete.init(config) 형태로 사용
 // -------------------------------------------------------------------
 
 (function (global, $) {
@@ -491,11 +524,6 @@ $(function () {
   global.TeamCommon = global.TeamCommon || {};
   const gridNs = global.TeamCommon.grid = global.TeamCommon.grid || {};
 
-  /**
-   * [1] 단일 Grid 헤더에 required-header 클래스 붙이기
-   * @param {string} gridElementId  - Grid 컨테이너 id (예: 'groupGrid')
-   * @param {string[]} columnNames  - 필수 컬럼 name 배열 (예: ['groupName'])
-   */
   gridNs.markRequiredHeader = function (gridElementId, columnNames) {
     if (!gridElementId || !Array.isArray(columnNames)) return;
 
@@ -538,5 +566,5 @@ $(function () {
       gridNs.markRequiredHeaderMulti(configs);
     }, 0);
   };
-		
+
 })(window);

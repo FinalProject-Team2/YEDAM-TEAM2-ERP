@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.insa.mapper.EmpMapper">
+
+<select id="getListEmpJohoe">
+ select 
+ a.*
+ ,b.dept_nm
+from tb_emp a
+join tb_dept b
+on a.dept_id = b.dept_id
+<where>
+<if test="nm != null">  AND a.nm like '%' || #{nm} || '%'</if>
+<if test="empId != null">  AND a.emp_id like '%' || #{empId} || '%'</if>
+<if test="deptNm != null">  AND b.dept_nm like '%' || #{deptNm} || '%'</if>
+<if test="clsf != null">  AND a.clsf like '%' || #{clsf} || '%'</if>
+</where>
+</select> 
+
+
+
+
+
+</mapper>

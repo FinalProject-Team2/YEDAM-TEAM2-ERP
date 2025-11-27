@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.business.mapper.PriceMapper">
+
+	  <select id="selectPolicy" parameterType="PriceVO"  resultType="PriceVO">
+
+	    SELECT
+	           p.price_policy_id AS priceId
+	         , p.vend_id AS vendId
+	         , p.price_policy_name AS priceName
+	         , p.price_ty AS type
+	         , p.basis_dc_rate AS percent
+	         , p.applc_begin_dt AS beginDt
+	         , p.applc_end_dt AS endDt
+	         , p.yn AS yn
+	         , p.rm AS rm
+	    FROM   tb_price p
+	    WHERE  p.yn = 'Y'
+	    <if test="searchPriceName != null and searchPriceName != ''">
+	      AND  p.price_policy_name LIKE '%' || #{searchPriceName} || '%'
+	    </if>
+	    <if test="searchType != null and searchType != ''">
+	      AND  p.price_ty = #{searchType}
+	    </if>
+	    <if test="searchApplcDt != null and searchApplcDt != ''">
+	      AND  #{searchApplcDt}
+	           BETWEEN p.applc_begin_dt
+	               AND NVL(p.applc_end_dt, TO_DATE('29991231','YYYYMMDD'))
+	    </if>
+	    ORDER BY p.crea_dt DESC
+
+    </select>
+	
+	<select id="selectPriceType" resultType="store.yd2team.business.service.CommonCodeVO">
+        SELECT
+               c.code_id AS codeId
+             , c.grp_id AS grpId
+             , c.vend_id AS vendId
+             , c.code_nm AS codeNm
+             , c.yn AS yn
+        FROM   tb_code c
+        WHERE  c.grp_id = 'pty'
+          AND  c.yn = 'Y'
+        ORDER BY c.code_id
+    </select>
+	
+	
+	
+</mapper>
