@@ -5,12 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class empAcctController {
+public class AuthController {
 	
-	@GetMapping("/empAcct")
-	public String selectall(Model model) {
-		model.addAttribute("test", "testone");
-		return "common/empAcct";
-
-	}
+	
 }

@@ -11,42 +11,20 @@
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<script
+	src="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 <style>
 .lock-account-wrapper .card-title {
 	font-weight: 600;
 }
 
-/* 공통 카드 헤더 (제목 왼쪽, 버튼 오른쪽) */
-.card-header.with-actions {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-.card-header-left h5.card-title {
-	margin: 0;
-	font-size: 1.05rem;
-}
-
-.card-header-right .btn+.btn {
-	margin-left: .25rem;
-}
-
 /* Grid 영역 */
 .lock-account-wrapper #accountGrid {
 	width: 100%;
 	margin-top: 4px;
-}
-
-/* 상단 헤더의 체크박스(행 헤더) 셀만 회색 */
-.tui-grid-header-area .tui-grid-cell-row-header {
-  background-color: #f5f5f5;
-}
-
-/* 데이터 행의 체크박스 셀은 흰색 유지 */
-.tui-grid-body-area .tui-grid-cell-row-header {
-  background-color: #ffffff;
 }
 </style>
 </head>
@@ -94,9 +72,9 @@
 								<label for="status" class="form-label">계정 상태</label> <select
 									id="status" class="form-select">
 									<option value="">전체</option>
-									<option value="LOCKED" selected>LOCKED</option>
-									<option value="ACTIVE">ACTIVE</option>
-									<option value="INACTIVE">INACTIVE</option>
+									<option value="LOCKED" selected>잠금</option>
+									<option value="ACTIVE">활성</option>
+									<option value="TERMINATED">구독 해지</option>
 								</select>
 							</div>
 						</div>
@@ -104,12 +82,33 @@
 						<div class="row g-2 mt-2">
 							<div class="col-md-6">
 								<label class="form-label">잠금 일시</label>
-								<div class="input-group">
-									<input type="date" id="lockFrom" class="form-control">
-										<span class="input-group-text">~</span>
-									<input type="date" id="lockTo" class="form-control">
+								<div class="d-flex align-items-center js-date-range">
+
+									<!-- 시작일 -->
+									<div class="input-group date">
+										<input type="text"
+											class="form-control datepicker js-date-range-start"
+											placeholder="시작일"> <span
+											class="input-group-text js-date-range-icon-start"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+
+									<span class="mx-1 fw-bold fs-5">~</span>
+
+									<!-- 종료일 -->
+									<div class="input-group date ms-2">
+										<input type="text"
+											class="form-control datepicker js-date-range-end"
+											placeholder="종료일"> <span
+											class="input-group-text js-date-range-icon-end"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+
 								</div>
 							</div>
+
 						</div>
 					</div>
 					<!-- /card-body -->
@@ -143,116 +142,117 @@
 	</div>
 
 	<script>
-    // 1. Toast UI Grid 테마
-tui.Grid.applyTheme('default', {
-  cell: {
-    normal: {
-      border: '#dedede',
-      background: '#ffffff',
-      showVerticalBorder: true
-    },
-    header: {
-      border: '#dedede',
-      background: '#f5f5f5',
-      showVerticalBorder: true
-    },
-    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
-    rowHeader: {
-      border: '#dedede',
-      background: '#ffffff',
-      showVerticalBorder: true
-    },
-    editable: {
-      background: '#FFFDF0',
-      text: '#000'
-    },
-    selectedHeader: {
-      background: '#f5f5f5'
-    },
-    selected: {
-      background: '#ffffff'
-    }
-  }
-});
+		document.addEventListener('DOMContentLoaded', function () {
+			// Toast UI Grid 방어 코드
+			if (!window.tui || !tui.Grid) {
+				return;
+			}
 
+			// 2. 더미 데이터
+			const accountData = [
+				{
+					clientName: 'YEDAM',
+					accountId: 'HONG@NON.AC',
+					userName: '홍길동',
+					status: 'LOCKED',
+					lockTime: '2019-05-05 09:12:54'
+				},
+				{
+					clientName: 'YEDAM',
+					accountId: 'KIM@NON.AC',
+					userName: '김영업',
+					status: 'LOCKED',
+					lockTime: '2019-05-06 10:11:22'
+				}
+			];
 
+			// 3. Grid 공통 옵션
+			const commonGridOptions = {
+				bodyHeight: 320,
+				scrollX: false,
+				scrollY: false,
+				rowHeaders: ['checkbox'],     // 좌측 체크박스
+				columnOptions: {
+					minWidth: 80,
+					resizable: true
+				}
+			};
 
-    // 2. 더미 데이터
-    const accountData = [
-        {
-            clientName: 'YEDAM',
-            accountId: 'HONG@NON.AC',
-            userName: '홍길동',
-            status: 'LOCKED',
-            lockTime: '2019-05-05 09:12:54'
-        },
-        {
-            clientName: 'YEDAM',
-            accountId: 'KIM@NON.AC',
-            userName: '김영업',
-            status: 'LOCKED',
-            lockTime: '2019-05-06 10:11:22'
-        }
-    ];
+			// 4. 계정 목록 Grid 생성
+			const accountGrid = new tui.Grid({
+				el: document.getElementById('accountGrid'),
+				data: accountData,
+				...commonGridOptions,
+				columns: [
+					{ header: '거래처 명', name: 'clientName', minWidth: 120, sortable: true },
+					{ header: '계정 ID',   name: 'accountId',  minWidth: 180, sortable: true },
+					{ header: '사용자 명', name: 'userName',   minWidth: 120 },
+					{
+						header: '상태',
+						name: 'status',
+						minWidth: 90,
+						editor: {
+	                        type: 'select',
+	                        options: {
+	                          listItems: [
+	                            { text: '잠금',   value: 'LOCKED' },
+	                            { text: '활성', value: 'ACTIVE' },
+	                            { text: '구독 해지', value: 'TERMINATED' }
+	                          ]
+	                        }
+	                      },
 
-    // 3. Grid 공통 옵션
-    const commonGridOptions = {
-        bodyHeight: 320,
-        scrollX: false,
-        scrollY: false,
-        rowHeaders: ['checkbox'],     // 좌측 체크박스
-        columnOptions: {
-            minWidth: 80,
-            resizable: true
-        }
-    };
+	                      // (선택) 화면에는 한글로 보여주고, 값은 Y/N 저장하고 싶을 때
+	                      formatter: function({ value }) {
+	                        if (value === 'LOCKED') return '잠금';
+	                        if (value === 'ACTIVE') return '활성';
+	                        if (value === 'TERMINATED') return '구독 해지';
+	                        return value;
+	                      }
+					},
+					{
+						header: '잠금 일시',
+						name: 'lockTime',
+						minWidth: 180,
+						align : 'right'
+					}
+				]
+			});
+			
+			TeamCommon.grid.applyRequiredHeaders([
+	              { gridId: 'accountGrid', columns: ['status'] }
+	            ]);
+			
+			// 5. 잠금 해제 버튼 동작
+			const btnUnlock = document.getElementById('btnUnlock');
+			if (btnUnlock) {
+				btnUnlock.addEventListener('click', function () {
+					const checkedRowKeys = accountGrid.getCheckedRowKeys();
 
-    // 4. 계정 목록 Grid 생성
-    const accountGrid = new tui.Grid({
-        el: document.getElementById('accountGrid'),
-        data: accountData,
-        ...commonGridOptions,
-        columns: [
-            { header: '거래처 명', name: 'clientName', minWidth: 120 },
-            { header: '계정 ID', name: 'accountId', minWidth: 180 },
-            { header: '사용자 명', name: 'userName', minWidth: 120 },
-            {
-                header: '상태',
-                name: 'status',
-                minWidth: 90,
-                align: 'center'
-            },
-            {
-                header: '잠금 일시',
-                name: 'lockTime',
-                minWidth: 180
-            }
-        ]
-    });
+					if (checkedRowKeys.length === 0) {
+						alert('선택된 계정이 없습니다.');
+						return;
+					}
 
-    // 5. 잠금 해제 버튼 동작
-    document.getElementById('btnUnlock').addEventListener('click', () => {
-        const checkedRowKeys = accountGrid.getCheckedRowKeys();
+					// LOCKED → ACTIVE 변경
+					checkedRowKeys.forEach(function (rowKey) {
+						const row = accountGrid.getRow(rowKey);
+						if (row && row.status === 'LOCKED') {
+							accountGrid.setValue(rowKey, 'status', 'ACTIVE', false);
+						}
+					});
 
-        // 2. 선택된 행이 없으면 안내 메시지
-        if (checkedRowKeys.length === 0) {
-            alert('선택된 계정이 없습니다.');
-            return;
-        }
+					console.log('선택된 계정에 대해 임시 비밀번호를 발급하고 전송했습니다.');
+					alert('선택된 계정의 잠금이 해제되었으며,\n해당 계정으로 임시 비밀번호를 발급·전송했습니다.');
+				});
+			}
 
-        // 1. 선택된 계정 상태 LOCKED -> ACTIVE 로 변경
-        checkedRowKeys.forEach(rowKey => {
-            const row = accountGrid.getRow(rowKey);
-            if (row && row.status === 'LOCKED') {
-                accountGrid.setValue(rowKey, 'status', 'ACTIVE', false);
-            }
-        });
-
-        // 3. 임시 비밀번호 발급/전송 (실제 구현 대신 콘솔 + 안내)
-        console.log('선택된 계정에 대해 임시 비밀번호를 발급하고 전송했습니다.');
-        alert('선택된 계정의 잠금이 해제되었으며,\n해당 계정으로 임시 비밀번호를 발급·전송했습니다.');
-    });
-</script>
+			// 리사이즈 시 레이아웃 보정
+			window.addEventListener('resize', function () {
+				accountGrid.refreshLayout();
+			});
+		});
+	</script>
 
 </body>
 </html>

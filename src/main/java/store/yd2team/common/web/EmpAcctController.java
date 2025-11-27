@@ -5,12 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class sysLogController {
+public class EmpAcctController {
 	
-	@GetMapping("/sysLog")
-	public String selectall(Model model) {
-		model.addAttribute("test", "testone");
-		return "common/sysLog";
-
-	}
+	
 }

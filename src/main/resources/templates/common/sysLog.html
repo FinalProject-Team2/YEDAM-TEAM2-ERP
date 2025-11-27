@@ -12,28 +12,17 @@
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
+<!-- bootstrap-datepicker (공통 util에서 초기화만 담당) -->
+<script
+	src="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+
+<!-- 아이콘 -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 <style>
 .log-wrapper .card-title {
 	font-weight: 600;
-}
-
-.form-select {
-	color: #000 !important;
-}
-
-/* 공통 카드 헤더(제목 + 버튼) 정렬 */
-.card-header.with-actions {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-.card-header.with-actions .card-title {
-	margin-bottom: 0;
-}
-
-.card-header.with-actions .card-header-right .btn+.btn {
-	margin-left: .25rem;
 }
 
 /* Grid 컨테이너 */
@@ -42,25 +31,7 @@
 	margin-top: 4px;
 }
 
-/* row header(체크박스) 헤더 셀만 회색, 바디는 흰색 */
-.log-wrapper .tui-grid-header .tui-grid-cell-row-header {
-	background-color: #f5f5f5;
-}
-
-.log-wrapper .tui-grid-body .tui-grid-cell-row-header {
-	background-color: #ffffff;
-}
-
-/* 상단 헤더의 체크박스(행 헤더) 셀만 회색 */
-.tui-grid-header-area .tui-grid-cell-row-header {
-  background-color: #f5f5f5;
-}
-
-/* 데이터 행의 체크박스 셀은 흰색 유지 */
-.tui-grid-body-area .tui-grid-cell-row-header {
-  background-color: #ffffff;
-}
-
+/* row header 색상은 style.css 공통(.tui-grid-header-area / body-area) 사용 */
 </style>
 </head>
 
@@ -105,13 +76,34 @@
 							<option value="DELETE">DELETE</option>
 						</select>
 					</div>
+
 					<div class="col-md-3">
-						<label class="form-label">로그 발생 기간</label>
-						<div class="input-group">
-							<input type="date" class="form-control"> <span
-								class="input-group-text">~</span> <input type="date"
-								class="form-control">
+						<label class="form-label">로그 발생 일시</label>
+						<div class="d-flex align-items-center js-date-range">
+
+							<!-- 시작일 -->
+							<div class="input-group date">
+								<input type="text"
+									class="form-control datepicker js-date-range-start"
+									placeholder="시작일"> <span
+									class="input-group-text js-date-range-icon-start"> <i
+									class="bi bi-calendar"></i>
+								</span>
+							</div>
+
+							<span class="mx-1 fw-bold fs-5">~</span>
+
+							<!-- 종료일 -->
+							<div class="input-group date ms-2">
+								<input type="text"
+									class="form-control datepicker js-date-range-end"
+									placeholder="종료일"> <span
+									class="input-group-text js-date-range-icon-end"> <i
+									class="bi bi-calendar"></i>
+								</span>
+							</div>
 						</div>
+
 					</div>
 				</div>
 			</div>
@@ -136,96 +128,87 @@
 	</div>
 
 	<script>
-		// Grid 테마 설정
-		tui.Grid.applyTheme('default', {
-			cell : {
-				normal : {
-					border : '#dedede',
-					background : '#ffffff',
-					showVerticalBorder : true
-				},
-				header : {
-					border : '#dedede',
-					background : '#f5f5f5',
-					showVerticalBorder : true
-				},
-				// ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
-				rowHeader : {
-					border : '#dedede',
-					background : '#ffffff',
-					showVerticalBorder : true
-				},
-				editable : {
-					background : '#FFFDF0',
-					text : '#000'
-				},
-				selectedHeader : {
-					background : '#f5f5f5'
-				},
-				selected : {
-					background : '#ffffff'
-				}
+		document.addEventListener('DOMContentLoaded', function() {
+			// Toast UI Grid가 없으면 종료 (방어코드)
+			if (!window.tui || !tui.Grid) {
+				return;
 			}
-		});
 
-		const logData = [ {
-			occurredAt : '2019-05-05 09:12:54',
-			accountId : 'HONG@NON.AC',
-			module : '공통',
-			action : 'LOGIN',
-			targetTable : '-',
-			targetId : '-',
-			summary : '관리자 로그인'
-		}, {
-			occurredAt : '2019-05-06 10:11:22',
-			accountId : 'KIM@NON.AC',
-			module : '주문',
-			action : 'INSERT',
-			targetTable : 'ORDER',
-			targetId : 'ORD_20240501_001',
-			summary : '주문 등록'
-		} ];
+			// 화면 테스트용 더미 데이터
+			const logData = [ {
+				occurredAt : '2019-05-05 09:12:54',
+				accountId : 'HONG@YEDAM.AC',
+				module : '공통',
+				action : 'LOGIN',
+				targetTable : '-',
+				targetId : '-',
+				summary : '깃 스테이징용'
+			}, {
+				occurredAt : '2019-05-05 09:12:54',
+				accountId : 'HONG@YEDAM.AC',
+				module : '공통',
+				action : 'LOGIN',
+				targetTable : '-',
+				targetId : '-',
+				summary : '관리자 로그인'
+			}, {
+				occurredAt : '2019-05-06 10:11:22',
+				accountId : 'KIM@NON.AC',
+				module : '주문',
+				action : 'INSERT',
+				targetTable : 'ORDER',
+				targetId : 'ORD_20240501_001',
+				summary : '주문 등록'
+			} ];
 
-		const logGrid = new tui.Grid({
-			el : document.getElementById('logGrid'),
-			data : logData,
-			bodyHeight : 320,
-			scrollX : false,
-			scrollY : false,
-			rowHeaders : [ 'checkbox' ],
-			columnOptions : {
-				minWidth : 80,
-				resizable : true
-			},
-			columns : [ {
-				header : '발생 일시',
-				name : 'occurredAt',
-				minWidth : 160
-			}, {
-				header : '계정 ID',
-				name : 'accountId',
-				minWidth : 160
-			}, {
-				header : '모듈',
-				name : 'module',
-				minWidth : 100
-			}, {
-				header : '액션',
-				name : 'action',
-				minWidth : 100
-			}, {
-				header : '대상 테이블',
-				name : 'targetTable',
-				minWidth : 120
-			}, {
-				header : '대상 ID',
-				name : 'targetId',
-				minWidth : 160
-			}, {
-				header : '요약 정보',
-				name : 'summary',
-				minWidth : 200
-			} ]
+			// Grid 생성 (테마, rowHeader 색상은 teamUtil.js + style.css 공통 적용)
+			const logGrid = new tui.Grid({
+				el : document.getElementById('logGrid'),
+				data : logData,
+				bodyHeight : 320,
+				scrollX : false,
+				scrollY : false,
+				rowHeaders : [ 'checkbox' ],
+				columnOptions : {
+					minWidth : 80,
+					resizable : true
+				},
+				columns : [ {
+					header : '발생 일시',
+					name : 'occurredAt',
+					minWidth : 160,
+					align : 'right'
+				}, {
+					header : '계정 ID',
+					name : 'accountId',
+					minWidth : 160
+				}, {
+					header : '모듈',
+					name : 'module',
+					minWidth : 100
+				}, {
+					header : '액션',
+					name : 'action',
+					minWidth : 100
+				}, {
+					header : '대상 테이블',
+					name : 'targetTable',
+					minWidth : 120
+				}, {
+					header : '대상 ID',
+					name : 'targetId',
+					minWidth : 160
+				}, {
+					header : '요약 정보',
+					name : 'summary',
+					minWidth : 200
+				} ]
+			});
+
+			// 필요 시 리사이즈 대응
+			window.addEventListener('resize', function() {
+				logGrid.refreshLayout();
+			});
 		});
 	</script>
 
