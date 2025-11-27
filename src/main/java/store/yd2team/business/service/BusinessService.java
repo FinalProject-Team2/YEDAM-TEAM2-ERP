@@ -5,4 +5,6 @@ import java.util.List;
 public interface BusinessService {
 
 	List<BusinessVO> getList();
+	
+	void fetchAndSaveFromApi();
 }
