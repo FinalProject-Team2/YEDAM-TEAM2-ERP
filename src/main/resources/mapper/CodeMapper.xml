@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.common.mapper.CodeMapper">
+
+	<select id="findGrp">
+     SELECT  grp_id,
+             grp_nm,
+             dc
+     FROM    tb_code_grp
+     WHERE   1 = 1
+     <if test="grpNm != null and grpNm != ''">
+         AND grp_nm LIKE '%' || #{grpNm} || '%'
+     </if>
+    </select>
+	
+	<select id="findCode">
+	 SELECT  code_id,
+	         code_nm,
+	         yn
+	 FROM    tb_code
+	 WHERE   grp_id = #{grpId}
+	</select>
+	
+</mapper>
