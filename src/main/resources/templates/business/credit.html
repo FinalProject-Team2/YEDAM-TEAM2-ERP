@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="http://www.thymeleaf.org"
@@ -13,7 +14,7 @@
 <body layout:fragment="content">
 	<div class="lock-account-wrapper">
 
-		<!-- 고객 조회 -->
+		<!-- 여신 조회 -->
 		<div class="row mb-3">
 			<div class="col-md-12">
 				<div class="card">
@@ -51,11 +52,11 @@
 				</div>
 			</div>
 		</div>
-		
-				<!-- 단가정책목록 카드 -->
+
+		<!-- 여신한도 카드 -->
 		<div class="row">
-			<div class="col-md-12">
-				<div class="card">
+			<div class="col-md-7 d-flex">
+				<div class="card w-100 h-100">
 
 					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
 					<div class="card-header with-actions">
@@ -66,18 +67,84 @@
 							<button type="button" class="btn btn-dark">초기화</button>
 							<button type="button" class="btn btn-outline-dark">저장</button>
 						</div>
+
 					</div>
 
 					<div class="card-body">
-						<div id="accountGrid"></div>
+						<div class="priceGridWrap">
+							<div id="creditGrid"></div>
+						</div>
 					</div>
 				</div>
 			</div>
+
+			<!--업체정보 카드 -->
+			<div class="col-md-5 d-flex">
+				<div class="card w-100 h-100">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">업체정보</h5>
+						</div>
+
+					</div>
+
+					<!-- 업체정보 -->
+					<div class="card-body d-flex flex-column justify-content-between">
+						  <div class="row g-3">
+							    <!-- 위쪽 영역 -->
+							    <div class="col-12">
+							      <label for="workplace" class="form-label">사업장주소</label> 
+							      <input id="workplace" type="text" class="form-control" placeholder="YEDAM">
+							    </div>
+							
+							    <!-- 중간 : 유형 / 할인율 / 적용일 -->
+							    <div class="col-md-6">
+							      <div class="mb-3">
+							        <label for="phoneNum" class="form-label">연락처</label> 
+							        <input id="phoneNum" type="text" class="form-control" placeholder="YEDAM">
+							      </div>
+							    </div>
+							    
+							    <div class="col-md-6">
+							      <div class="mb-3">
+							        <label for="faxNum" class="form-label">Fax번호</label> 
+							        <input id="faxNum" type="text" class="form-control" placeholder="YEDAM">
+							      </div>
+							    </div>
+							    
+							    
+							    <!-- 3번째줄  -->
+							    <div class="col-md-6">
+							      <div class="mb-3">
+							        <label for="manager" class="form-label">담당자</label> 
+							        <input id="manager" type="text" class="form-control" placeholder="YEDAM">
+							      </div>
+							    </div>
+							    
+							    <div class="col-md-6">
+							      <div class="mb-3">
+							        <label for="managerPhone" class="form-label">담당자연락처</label> 
+							        <input id="managerPhone" type="text" class="form-control" placeholder="YEDAM">
+							      </div>
+							    </div>
+
+						  </div>
+						
+						    <!-- 아래 : 비고 (아래쪽에 붙도록) -->
+						    <div class="col-12 mt-auto">
+						      <label for="managerEmail" class="form-label">담당자이메일</label> 
+						      <input id="managerEmail" type="text" class="form-control" placeholder="YEDAM">
+						    </div>
+						  </div>
+					</div> 
+				</div>
+			</div>
+			<!--업체정보 카드 end -->
 		</div>
 
-	</div>
-
-	<script>
+		<script>
 
 
 	
@@ -116,50 +183,56 @@ tui.Grid.applyTheme('default', {
 
 
     // 2. 더미 데이터
-    const accountData = [
+    const creditData = [
         {
-            clientName: 'YEDAM',
-            accountId: 'HONG@NON.AC',
-            userName: '홍길동',
-            status: 'LOCKED',
-            lockTime: '2019-05-05 09:12:54'
+        	custId: '251126-0001',
+        	customer: '무신사',
+        	creditRating: 'A',
+        	loanCheck: 'Y',
+        	collateralLimit: '200,000,000',
+        	creditLimit: '800,000,000',
+        	loanLimit:'1,000,000,000',
+        	maxOut:'N'
         },
         {
-            clientName: 'YEDAM',
-            accountId: 'KIM@NON.AC',
-            userName: '김영업',
-            status: 'LOCKED',
-            lockTime: '2019-05-06 10:11:22'
+        	custId: '251126-0002',
+        	customer: '29cm',
+        	creditRating: 'B',
+        	loanCheck: 'Y',
+        	collateralLimit: '300,000,000',
+        	creditLimit:'500,000,000',
+            loanLimit:'800,000,000',
+            maxOut:'N'
         }
     ];
 
     // 3. Grid 공통 옵션
-    const commonGridOptions = {
-        bodyHeight: 320,
-        scrollX: false,
-        scrollY: false,
-        rowHeaders: ['checkbox'],     // 좌측 체크박스
+    const businessGridOptions = {
+        bodyHeight: 260,
+        scrollX: true,
+        scrollY: true,
+        rowHeaders: ['checkbox'],// 좌측 체크박스
+        rowHeight: 40,
         columnOptions: {
             minWidth: 80,
             resizable: true
         }
     };
 
-    // 4. 계정 목록 Grid 생성
-    const accountGrid = new tui.Grid({
-        el: document.getElementById('accountGrid'),
-        data: accountData,
-        ...commonGridOptions,
+    // 4. 여신한도 목록 Grid 생성
+    const creditGrid = new tui.Grid({
+        el: document.getElementById('creditGrid'),
+        data: creditData,
+        ...businessGridOptions,
         columns: [
-            { header: '단가정책코드', name: 'clientName', minWidth: 120 },
-            { header: '단가정책명', name: 'accountId', minWidth: 180 },
-            { header: '유형', name: 'userName', minWidth: 120 },
-            { header: '할인율(%)', name: 'userName', minWidth: 120 },
-            { header: '정책 적용시작일', name: 'userName', minWidth: 120 },
-            { header: '정책 적용종료일', name: 'userName', minWidth: 120 },
-            { header: '거래처별', name: 'userName', minWidth: 120 },
-            { header: '품목별', name: 'userName', minWidth: 120 },
-            { header: '비고', name: 'userName', minWidth: 120 },
+            { header: '고객코드', name: 'custId', width: 140 },
+            { header: '고객사', name: 'customer', width: 180 },
+            { header: '신용등급', name: 'creditRating', width: 120 },
+            { header: '여신체크', name: 'loanCheck', width: 120 },
+            { header: '담보한도', name: 'collateralLimit', width: 180 },
+            { header: '신용한도', name: 'creditLimit', width: 180 },
+            { header: '여신한도', name: 'loanLimit', width: 180 },
+            { header: '한도초과여부', name: 'maxOut', width: 110 },
         ]
     });
 
@@ -176,6 +249,5 @@ tui.Grid.applyTheme('default', {
         $('#applyDate').focus();
     }); 
 </script>
-
 </body>
 </html>
