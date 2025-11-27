@@ -12,21 +12,6 @@
             font-weight: 600;
         }
 
-        /* 카드 헤더 : 제목 왼쪽, 버튼 오른쪽 */
-        .card-header.with-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-header-left h5 {
-            margin-bottom: 0;
-        }
-
-        .card-header-right .btn {
-            margin-left: 0.25rem;
-        }
-
         /* 숫자 입력 단위(span) 크기 맞추기 */
         .unit-span {
             min-width: 40px;
@@ -93,7 +78,7 @@
                             <div class="mb-3">
                                 <label class="form-label">로그인 실패 허용 횟수</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" value="5">
+                                    <input type="number" class="form-control" value="5" max="10">
                                     <span class="input-group-text unit-span">회</span>
                                 </div>
                             </div>
@@ -101,7 +86,7 @@
                             <div class="mb-3">
                                 <label class="form-label">잠금 유지 시간</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" value="30">
+                                    <input type="number" class="form-control" value="30" max="120">
                                     <span class="input-group-text unit-span">분</span>
                                 </div>
                             </div>
@@ -139,7 +124,7 @@
                             <div class="mb-3">
                                 <label class="form-label">세션 타임 아웃</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" value="30">
+                                    <input type="number" class="form-control" value="30" max="120" min="10">
                                     <span class="input-group-text unit-span">분</span>
                                 </div>
                             </div>
@@ -182,14 +167,14 @@
                                 <div class="col-md-6">
                                     <label class="form-label">최소 길이</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control" value="8">
+                                        <input type="number" class="form-control" value="8" min="8" max="30">
                                         <span class="input-group-text unit-span">자</span>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">최대 길이</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control" value="20">
+                                        <input type="number" class="form-control" value="20" max="30" min="8">
                                         <span class="input-group-text unit-span">자</span>
                                     </div>
                                 </div>

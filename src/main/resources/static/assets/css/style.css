@@ -12853,7 +12853,7 @@ textarea.is-invalid.tt-hint, .select2-container--default .select2-selection--sin
 
 .card-body {
   flex: 1 1 auto;
-  padding: 16px 24px !important;
+  padding: 2px 24px 16px 24px !important;
   color: var(--bs-card-color);
   border-radius: 0 0 var(--bs-card-border-radius) var(--bs-card-border-radius);
 }
@@ -12877,7 +12877,7 @@ textarea.is-invalid.tt-hint, .select2-container--default .select2-selection--sin
 }
 
 .card-header {
-  padding: 16px 24px 4px 24px;
+  padding: 16px 24px 2px 24px;
   display: flex;
   justify-content: space-between;
   background-color: #fff;
@@ -21443,7 +21443,7 @@ code {
 .footer {
   background: #F4F5F7;
   color: color(dark);
-  padding: 30px 2.45rem;
+  padding: 15px 30px;
   transition: all 0.25s ease;
   -moz-transition: all 0.25s ease;
   -webkit-transition: all 0.25s ease;
@@ -30515,6 +30515,10 @@ label.astar::after,
   font-size: 0 !important;
 }
 
+/*=================================
+card-body padding 크기 변경,
+전체 스크롤 잠금  
+===================================*/
 
 /* 전체 스크롤 잠금 */
 /*html, body {
