@@ -1,12 +1,14 @@
 package store.yd2team.business.web;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import store.yd2team.business.service.BusinessVO;
+
+import store.yd2team.business.mapper.BusinessMapper;
 @Controller
 public class BusinessController {
-//	@Autowired
-//	BusinessService businessService;
+	@Autowired
+	BusinessMapper businessMapper;
 	/*
 	 * @GetMapping("/churnRiskStdrRegister") public String insert(Model model) {
 	 *
@@ -32,7 +34,7 @@ public class BusinessController {
 	@GetMapping("/churnRiskList")
 	public String selectall(Model model) {
 		System.out.println("=== BusinessController.selectall() 호출됨 ===");
-		model.addAttribute("test", "testone");
+		  model.addAttribute("test", "testone");
 		return "business/churnRiskList";
 	}
 	
@@ -42,11 +44,12 @@ public class BusinessController {
 		model.addAttribute("test", "testone");
 		return "business/potentialCustRegister";
 	}
-	
+
+	//잠재고객조회
 	@GetMapping("/potentialCustList")
 	public String list(Model model) {
 		System.out.println("=== BusinessController.update() 호출됨 ===");
-		model.addAttribute("test", "testone");
+		model.addAttribute("list", businessMapper.getList());
 		return "business/potentialCustList";
 	}
 	
