@@ -3,13 +3,75 @@
   <!-- ✅ 모달 본체 -->
   <div class="modal-backdrop" id="salyRegistBackdrop"></div>
   <div class="modal" id="salyRegistModal">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 800px;">
       <div class="modal-content">
         <div class="modal-body">
-          <h5 class="modal-title">급여대장 등록</h5>
-          여기에 급여대장 등록 폼 들어갈 예정
-          <br/>어쩌구저쩌구
-          <br/>어쩌구저쩌구
+          <h5 class="modal-title">급여대장 등록/수정</h5>
+          <div class="row">
+        <!-- 검색조건 -->
+        <div class="col-md-12">
+            <div class="card border mb-3">
+            <div class="card-header">
+            <h5 class="card-title">검색조건</h5>
+            <div class="card-header-right">
+            <button class="btn btn-outline-dark">등록/수정</button>
+        </div>
+            </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label astar">급여대장명칭</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">부서명</label>
+                            <select id="dept" class="form-control">
+                            	<option>전체</option>
+                            	<option>인사</option>
+                            	<option>자재</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mt-2">
+                            <label class="form-label astar">귀속연월</label>
+                                <div class="input-group date me-2 js-ym-single">
+                                    <input type="text" class="form-control js-ym-input" id="revs_ym" placeholder="날짜 선택">
+                                    <span class="input-group-text js-ym-icon">
+                                        <i class="bi bi-calendar"></i>
+                                    </span>
+                        </div>
+                                </div>
+                                                        <div class="col-md-6 mt-2">
+                            <label class="form-label astar">지급일자</label>
+                                <div class="input-group date me-2  js-date-single">
+                                    <input type="text" class="form-control js-date-input" id="payDt" placeholder="날짜 선택">
+                                    <span class="input-group-text  js-date-icon">
+                                        <i class="bi bi-calendar"></i>
+                                    </span>
+                        </div>
+                                </div>
+                                
+                                
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사원목록 -->
+            <div class="card border">
+            <div class="card-header">
+                    <h5 class="card-title">사원목록</h5>
+                    <div class="d-flex align-items-center">
+                    <input type="text" class="form-control">
+                    </div>
+                    <div class= "card-header-right">
+                    	<button class="btn btn-outline-dark" id="openSalyRegistModal">등록</button>
+                    </div>
+            </div>
+                <div class="card-body">
+                    <div id="grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
         </div>
       </div>
     </div>

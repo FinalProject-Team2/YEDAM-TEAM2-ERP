@@ -12885,7 +12885,7 @@ textarea.is-invalid.tt-hint, .select2-container--default .select2-selection--sin
   /* border-bottom: var(--bs-card-border-width) solid var(--bs-card-border-color); */
 }
 .card-header:first-child {
-  border-radius: var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius) 0 0;
+  border-radius: var(--bs-card-border-radius) var(--bs-card-border-radius) 0 0;
 }
 
 .card-footer {
@@ -12986,6 +12986,11 @@ textarea.is-invalid.tt-hint, .select2-container--default .select2-selection--sin
   display: flex;
   gap: 8px;
  }
+ 
+ .card.border {
+  box-shadow: none !important;    /* ✅ 그림자 제거 */
+  border: 1px solid #dee2e6 !important;  /* ✅ 테두리만 */
+}
 
 .accordion {
   --bs-accordion-color: var(--bs-body-color);
@@ -30514,7 +30519,6 @@ label.astar::after,
 .tui-select-box-icon {
   font-size: 0 !important;
 }
-
 
 /* 전체 스크롤 잠금 */
 /*html, body {
