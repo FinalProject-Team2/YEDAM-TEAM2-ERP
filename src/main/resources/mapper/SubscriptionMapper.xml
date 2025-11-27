@@ -1,7 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="store.yd2team.common.mapper.SubscriptionMapper">
-	<insert id="insertPlan">
-		SELECT 
+	<!-- Insert subscription plan -->
+	<insert id="insertPlan" parameterType="store.yd2team.common.service.subscriptionPlanVO">
+		INSERT INTO tb_subsp_plan
+		(
+			subsp_plan_id,
+			plan_nm,
+			acct_issu_cnt,
+			api_issu_cnt,
+			amt,
+			sttl_perd,
+			applc_dt,
+			yn
+		)
+		VALUES
+		(
+			#{subspPlanId},
+			#{planNm},
+			#{acctIssuCnt},
+			#{apiIssuCnt},
+			#{amt},
+			#{sttlPerd},
+			#{applcDt},
+			#{yn}
+		)
 	</insert>
+	
+	<!-- Update subscription plan -->
+	<update id="updatePlan" parameterType="store.yd2team.common.service.subscriptionPlanVO">
+		UPDATE tb_subsp_plan
+		SET
+			plan_nm = #{planNm},
+			acct_issu_cnt = #{acctIssuCnt},
+			api_issu_cnt = #{apiIssuCnt},
+			amt = #{amt},
+			sttl_perd = #{sttlPerd},
+			applc_dt = NVL(#{applcDt}, applc_dt),
+			yn = #{yn},
+			updt_dt = SYSDATE
+		WHERE
+			subsp_plan_id = #{subspPlanId}
+	</update>
+	
+	<!-- Get max sequence for current year-month prefix, e.g. 'plan202511' -->
+	<select id="getMaxPlanSeqOfMonth" parameterType="string" resultType="string">
+		SELECT MAX(SUBSTR(subsp_plan_id, LENGTH(#{prefix}) + 1))
+		FROM tb_subsp_plan
+		WHERE subsp_plan_id LIKE CONCAT(#{prefix}, '%')
+	</select>
+	
+	<!-- Select list of subscription plans -->
+	<select id="selectSubscriptionPlans" resultType="store.yd2team.common.service.subscriptionPlanVO">
+		SELECT
+			subsp_plan_id AS subspPlanId,
+			plan_nm AS planNm,
+			acct_issu_cnt AS acctIssuCnt,
+			api_issu_cnt AS apiIssuCnt,
+			amt,
+			sttl_perd AS sttlPerd,
+			applc_dt AS applcDt,
+			yn,
+			crea_dt AS creaDt,
+			crea_by AS creaBy,
+			updt_dt AS updtDt,
+			updt_by AS updtBy
+		FROM tb_subsp_plan
+		ORDER BY subsp_plan_id DESC
+	</select>
 </mapper>

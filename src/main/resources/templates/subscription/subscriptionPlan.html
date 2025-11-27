@@ -46,21 +46,29 @@
 						<h5 class="card-title">구독 플랜 상세</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark">저장</button>
+						<button type="button" id="btnResetPlan"
+							class="btn btn-outline-dark">초기화</button>
+						<button type="submit" form="subscriptionPlanForm"
+							class="btn btn-outline-dark">저장</button>
 					</div>
 				</div>
 				<div class="card-body">
-					<form>
+					<form id="subscriptionPlanForm"
+						th:action="@{/subscription/plan/save}" method="post">
+
+						<!-- 숨겨진 구독 플랜 ID (수정 시 사용) -->
+						<input type="hidden" name="subspPlanId" />
 
 						<!-- 1행: 플랜명, 계정 발급 수 -->
 						<div class="row mb-3">
 							<div class="col-md-6">
 								<label class="form-label">플랜 명</label> <input type="text"
-									class="form-control" name="subspPlanId" placeholder="플랜명을 입력하세요" />
+									class="form-control" name="planNm" placeholder="플랜명을 입력하세요" />
 							</div>
 							<div class="col-md-6">
 								<label class="form-label">최대 계정 생성 수</label> <input
-									type="number" class="form-control" name="acctIssuCnt" placeholder="계정 수를 입력하세요" />
+									type="number" class="form-control" name="acctIssuCnt"
+									placeholder="계정 수를 입력하세요" />
 							</div>
 						</div>
 
@@ -74,10 +82,12 @@
 
 							<div class="col-md-6">
 								<label for="userName" class="form-label">적용 일자</label>
-								<div class="input-group date" id="applyDatePicker">
-									<input type="text" class="form-control" id="applyDate"
-										name="applcDt" placeholder="날짜 선택"> <span class="input-group-text"
-										id="icon-calendar"> <i class="bi bi-calendar"></i>
+								<div class="input-group date js-date-single">
+									<input type="text"
+										class="form-control datepicker js-date-input" name="applcDt"
+										placeholder="       날짜 선택"> <span
+										class="input-group-text js-date-icon"> <i
+											class="bi bi-calendar"></i>
 									</span>
 								</div>
 							</div>
@@ -86,8 +96,12 @@
 						<!-- 3행: 결제주기, 노출 여부 -->
 						<div class="row mb-3">
 							<div class="col-md-6">
-								<label class="form-label">결제 주기</label> <input type="text"
-									class="form-control" name="sttlPerd" placeholder="예: 월, 연" />
+								<label class="form-label">결제 주기</label>
+								<select class="form-select" name="sttlPerd">
+									<option value="" selected>선택</option>
+									<option value="M">월</option>
+									<option value="Y">연</option>
+								</select>
 							</div>
 
 							<div class="col-md-6">
@@ -95,17 +109,16 @@
 									class="form-control" name="amt" placeholder="가격을 입력하세요" />
 							</div>
 						</div>
-						
+
 						<div class="row mb-3">
-						<label class="form-label d-block">노출 여부</label>
-								<div class="d-flex align-items-center">
-									<label class="me-4 mb-0"> Y <input class="ms-1"
-										type="radio" name="YN" id="YN" value="Y"
-										checked>
-									</label> <label class="mb-0"> N <input class="ms-1"
-										type="radio" name="YN" id="YN" value="N">
-									</label>
-								</div>
+							<label class="form-label d-block">노출 여부</label>
+							<div class="d-flex align-items-center">
+								<label class="me-4 mb-0"> Y <input class="ms-1"
+									type="radio" name="yn" value="Y" checked>
+								</label> <label class="mb-0"> N <input class="ms-1" type="radio"
+									name="yn" value="N">
+								</label>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -113,78 +126,37 @@
 		</div>
 	</div>
 
-	<script>
-		// 화면 테스트용 더미 데이터
-		const gridData = [ {
-			planName : 'Basic',
-			exposureYn : 'Y',
-			billingCycle : '월간'
-		}, {
-			planName : 'Standard',
-			exposureYn : 'Y',
-			billingCycle : '월간'
-		}, {
-			planName : 'Premium',
-			exposureYn : 'Y',
-			billingCycle : '연간'
-		}, {
-			planName : 'Enterprise',
-			exposureYn : 'N',
-			billingCycle : '연간'
-		}, {
-			planName : 'Starter',
-			exposureYn : 'Y',
-			billingCycle : '월간'
-		}, {
-			planName : 'Developer',
-			exposureYn : 'Y',
-			billingCycle : '월간'
-		}, {
-			planName : 'Team',
-			exposureYn : 'Y',
-			billingCycle : '월간'
-		}, {
-			planName : 'Business',
-			exposureYn : 'Y',
-			billingCycle : '연간'
-		}, {
-			planName : 'Growth',
-			exposureYn : 'N',
-			billingCycle : '연간'
-		}, {
-			planName : 'Legacy',
-			exposureYn : 'N',
-			billingCycle : '연간'
-		}, {
-			planName : 'Test Plan',
-			exposureYn : 'Y',
-			billingCycle : '월간'
-		}, {
-			planName : 'Legacy1',
-			exposureYn : 'N',
-			billingCycle : '연간'
-		}, {
-			planName : 'Legacy2',
-			exposureYn : 'N',
-			billingCycle : '연간'
-		}, {
-			planName : 'Legacy3',
-			exposureYn : 'N',
-			billingCycle : '연간'
-		}, {
-			planName : 'Legacy4',
-			exposureYn : 'N',
-			billingCycle : '연간'
-		} ];
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		// 서버에서 전달된 구독 플랜 목록을 JavaScript 객체로 변환
+		const planList = /*[[${planList}]]*/ [];
 
+		// planList를 그리드에 맞게 매핑 (폼에 필요한 상세 데이터 포함)
+		const gridData = planList.map(plan => ({
+			// 그리드에 보이는 컬럼용
+			planName : plan.planNm,
+			exposureYn : plan.yn,
+			billingCycle : plan.sttlPerd,
+			// 상세 폼 세팅용 (숨은 데이터 포함)
+			subspPlanId : plan.subspPlanId,
+			planNm : plan.planNm,
+			acctIssuCnt : plan.acctIssuCnt,
+			apiIssuCnt : plan.apiIssuCnt,
+			sttlPerd : plan.sttlPerd,
+			amt : plan.amt,
+			// Date 타입일 수 있으므로 문자열로 변환해서 사용
+			applcDt : plan.applcDt,
+			yn : plan.yn
+		}));
+
+		// Toast UI Grid 생성
 		const subscriptionGrid = new tui.Grid({
 			el : document.getElementById('subscriptionGrid'),
 			data : gridData,
 			scrollX : false,
-			scrollY : true, // 세로 스크롤 활성화
-			bodyHeight : 360, // 약 10행 정도 보이도록 설정
+			scrollY : false,
+			bodyHeight : 360,
 			rowHeight : 36,
-			/* autoWidth : true, */
 			columns : [ {
 				header : '플랜 명',
 				name : 'planName',
@@ -200,21 +172,94 @@
 			} ]
 		});
 		
-		<!-- 그리드 레이아웃 새로고침 (스크롤바 벗어남 해결책) -->
+		// 행 클릭 시 우측 상세 폼에 데이터 바인딩
+		subscriptionGrid.on('click', ev => {
+			const rowData = subscriptionGrid.getRow(ev.rowKey);
+			if (!rowData) return;
+
+			const form = document.getElementById('subscriptionPlanForm');
+
+			// hidden ID
+			form.querySelector('input[name="subspPlanId"]').value = rowData.subspPlanId || '';
+
+			// 텍스트/숫자 필드
+			form.querySelector('input[name="planNm"]').value = rowData.planNm || '';
+			form.querySelector('input[name="acctIssuCnt"]').value = rowData.acctIssuCnt || '';
+			form.querySelector('input[name="apiIssuCnt"]').value = rowData.apiIssuCnt || '';
+
+			// 결제 주기 select 박스 설정 (M/Y 등 코드 값 사용)
+			const sttlPerdSelect = form.querySelector('select[name="sttlPerd"]');
+			if (sttlPerdSelect) {
+				sttlPerdSelect.value = rowData.sttlPerd || '';
+			}
+
+			form.querySelector('input[name="amt"]').value = rowData.amt || '';
+
+			// 적용 일자 (Date -> yyyy-MM-dd 형태로 잘라서 사용)
+			const dateInput = form.querySelector('.js-date-input');
+			if (dateInput) {
+				let dateStr = '';
+				if (rowData.applcDt) {
+					// plan.applcDt가 문자열일 수도 있고, ISO 문자열일 수도 있으므로 10자리까지 자름
+					dateStr = String(rowData.applcDt).substring(0, 10);
+				}
+				dateInput.value = dateStr;
+			}
+
+			// 노출 여부 라디오 버튼 (Y/N)
+			if (rowData.yn) {
+				const radios = form.querySelectorAll('input[name="yn"]');
+				radios.forEach(radio => {
+					radio.checked = (radio.value === rowData.yn);
+				});
+			}
+		});
+		
+		// 초기화 버튼 클릭 시 폼/선택 상태 리셋 (신규 등록 모드)
+		document.getElementById('btnResetPlan').addEventListener('click', function() {
+			const form = document.getElementById('subscriptionPlanForm');
+
+			// 기본 form reset으로 텍스트/숫자/라디오 기본값 초기화
+			form.reset();
+
+			// hidden ID도 비워서 신규 등록 모드로 전환
+			const hiddenId = form.querySelector('input[name="subspPlanId"]');
+			if (hiddenId) {
+				hiddenId.value = '';
+			}
+
+			// datepicker input 값도 비우기
+			const dateInput = form.querySelector('.js-date-input');
+			if (dateInput) {
+				dateInput.value = '';
+			}
+
+			// 결제 주기 select 박스 초기화
+			const sttlPerdSelect = form.querySelector('select[name="sttlPerd"]');
+			if (sttlPerdSelect) {
+				sttlPerdSelect.value = '';
+			}
+
+			// 노출 여부 기본값을 Y로 재설정
+			const ynRadios = form.querySelectorAll('input[name="yn"]');
+			ynRadios.forEach(radio => {
+				radio.checked = (radio.value === 'Y');
+			});
+
+			// 그리드 선택 행도 초기화 (선택 해제)
+			if (subscriptionGrid) {
+				const focused = subscriptionGrid.getFocusedCell();
+				if (focused && typeof focused.rowKey === 'number') {
+					subscriptionGrid.unfocus();
+				}
+			}
+		});
+		
+		// 그리드 레이아웃 새로고침 (스크롤바 벗어남 해결)
 		window.addEventListener('load', function() {
 			subscriptionGrid.refreshLayout();
 		});
-		
-		$('#applyDatePicker input').datepicker({
-	        format: "yyyy-mm-dd",
-	        autoclose: true,
-	        todayHighlight: true
-	    });
-
-	    // 아이콘 클릭 → input focus → 달력 열림
-	    $('#icon-calendar').on('click', function () {
-	        $('#applyDate').focus();
-	    });
+		/*]]>*/
 	</script>
 
 </body>
