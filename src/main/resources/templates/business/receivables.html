@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+    <title>receivables</title>
+    <style>
+        .form-select {
+            color: #000 !important;
+        }
+    </style>
+</head>
+<body layout:fragment="content">
+    <div class="row">
+        <!-- 검색조건 -->
+        <div class="col-md-12">
+            <div class="card mb-3">
+            <div class="card-header">
+            <h5 class="card-title">검색조건</h5>
+            <div class="card-header-right">
+            <button class="btn btn-outline-dark">조회</button>
+        </div>
+            </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">고객코드</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">고객사</label>
+                            <select id="dept" class="form-control">
+                            	<option>전체</option>
+                            	<option>무신사</option>
+                            	<option>29cm</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">담당자</label>
+                            <select id="pay_yn" class="form-control">
+                            	<option>전체</option>
+                            	<option>논개</option>
+                            	<option>구론산</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">기간</label>
+                            <div class="d-flex align-items-center">
+                                <!-- 시작일 -->
+                                <div class="input-group date me-2" id="applyDatePickerStart">
+                                    <input type="text" class="form-control" id="applyDateStart" placeholder="날짜 선택">
+                                    <span class="input-group-text" id="icon-calendar-start">
+                                        <i class="bi bi-calendar"></i>
+                                    </span>
+                                </div>
+
+                                <!-- ~ -->
+                                <span class="mx-1 fw-bold fs-5">~</span>
+
+                                <!-- 종료일 -->
+                                <div class="input-group date ms-2" id="applyDatePickerEnd">
+                                    <input type="text" class="form-control" id="applyDateEnd" placeholder="날짜 선택">
+                                    <span class="input-group-text" id="icon-calendar-end">
+                                        <i class="bi bi-calendar"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사원목록 -->
+            <div class="card">
+            <div class="card-header">
+                    <h5 class="card-title">입출금관리</h5>
+                    <div class= "card-header-right">
+	                    <button class="btn btn-outline-dark" id="openRciptTretModal">입금처리</button>
+	                    <button class="btn btn-outline-dark" id="openDelayModal">연체관리이력</button>
+	                    <button id="addRowBtn" class="btn btn-outline-dark">행추가</button>
+	                    <button type="button" class="btn btn-dark">초기화</button>
+                    	<button class="btn btn-outline-dark" id="openRciptTretModal">저장</button>
+                    </div>
+            </div>
+                <div class="card-body">
+                    <div id="grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:replace="business/modal/rciptTretModal :: rciptTretModal"></div>
+    <div th:replace="business/modal/delayModal :: delayModal"></div>
+    <script>
+    const gridData = [
+    	  {
+    		custcomId: "251126-0001",
+    		custcomName: "무신사",
+    		trnsDate: "2025-01-20",
+    		saleCtnt: "",
+    		salAmt: "",
+    		borwAmt: "",
+    		prinsumBaln: "",
+    		rciptAppoAmt: "",
+    		rciptAppoDt: "2025-11-27",
+    		ltstRciptDt: "2025-11-30"
+    	  },
+    	  {
+    		custcomId: "251126-0002",
+    		custcomName: "29cm",
+    		trnsDate: "2025-02-12",
+    		saleCtnt: "",
+    		salAmt: "",
+    		borwAmt: "",
+    		prinsumBaln: "",
+    		rciptAppoAmt: "",
+    		rciptAppoDt: "2025-11-27",
+    		ltstRciptDt: "2025-11-30"
+    	  },
+    	  {
+    		custcomId: "251126-0003",
+    		custcomName: "에이블리",
+    		trnsDate: "2025-01-11",
+    		saleCtnt: "",
+    		salAmt: "",
+    		borwAmt: "",
+    		prinsumBaln: "",
+    		rciptAppoAmt: "",
+    		rciptAppoDt: "2025-11-27",
+    		ltstRciptDt: "2025-11-30"
+    	  },
+    	  {
+    		custcomId: "251126-0004",
+    		custcomName: "쿠팡",
+    		trnsDate: "2025-01-22",
+    		saleCtnt: "",
+    		salAmt: "",
+    		borwAmt: "",
+    		prinsumBaln: "",
+    		rciptAppoAmt: "",
+    		rciptAppoDt: "2025-11-27",
+    		ltstRciptDt: "2025-11-30"
+    	  },
+    	  {
+    		custcomId: "251126-0005",
+    		custcomName: "스타일난다",
+    		trnsDate: "2025-02-28",
+    		saleCtnt: "",
+    		salAmt: "",
+    		borwAmt: "",
+    		prinsumBaln: "",
+    		rciptAppoAmt: "",
+    		rciptAppoDt: "2025-11-27",
+    		ltstRciptDt: "2025-11-30"
+    	  },
+    	  {
+    		custcomId: "251126-0006",
+    		custcomName: "LF",
+    		trnsDate: "2025-03-10",
+    		saleCtnt: "",
+    		salAmt: "",
+    		borwAmt: "",
+    		prinsumBaln: "",
+    		rciptAppoAmt: "",
+    		rciptAppoDt: "2025-11-27",
+    		ltstRciptDt: "2025-11-30"
+    	  },
+    	  {
+    		custcomId: "251126-0007",
+    		custcomName: "뮈메프",
+    		trnsDate: "2025-03-22",
+    		saleCtnt: "",
+    		salAmt: "",
+    		borwAmt: "",
+    		prinsumBaln: "",
+    		rciptAppoAmt: "",
+    		rciptAppoDt: "2025-11-27",
+    		ltstRciptDt: "2025-11-30"
+    	  }
+    	];
+        // Grid 생성
+        const grid = new tui.Grid({
+            el: document.getElementById('grid'),
+            data: gridData,
+            scrollX: true,
+            scrollY: true,
+            minBodyHeight: 0,
+            autoWidth: true,
+            columns: [
+            	  { header: '고객코드', name: 'custcomId', align: 'center' },
+            	  { header: '고객사', name: 'custcomName', align: 'center' },
+            	  { header: '거래일자', name: 'trnsDate' },
+            	  { header: '매출내역', name: 'saleCtnt', align: 'right' },
+            	  { header: '매출금액', name: 'salAmt', editor: 'text' },
+            	  { header: '대출금액', name: 'borwAmt', editor: 'text' },
+            	  { header: '원금잔액', name: 'prinsumBaln', align: 'right', editor: 'text' },
+            	  { header: '입금약속액', name: 'rciptAppoAmt', editor: 'text' },
+            	  { header: '입금약속일', name: 'rciptAppoDt' },
+            	  { header: '최근납입일', name: 'ltstRciptDt' },
+            	]
+        });
+        
+
+        //행추가버튼
+        const addRowBtn = document.getElementById('addRowBtn');
+
+        addRowBtn.addEventListener('click', () => {
+            // 1) 최상단에 빈 행 추가
+            const { rowKey } = grid.prependRow(
+                {
+                	custcomId: '',
+            		custcomName: '',
+            		trnsDate: '',
+            		saleCtnt: '',
+            		salAmt: '',
+            		borwAmt: '',
+            		prinsumBaln: '',
+            		rciptAppoAmt: '',
+            		rciptAppoDt: '',
+            		ltstRciptDt: ''
+                },
+                { focus: true }      // 새로 추가된 행에 포커스 옵션
+            );
+
+            // 2) 특정 컬럼부터 바로 편집하고 싶으면
+            grid.focus(rowKey, 'custcomId');    
+            grid.startEditing(rowKey, 'custcomName');
+        });
+
+        
+        
+        
+        
+        
+        
+    	// 입금처리 모달창
+        const openRciptTretBtn = document.getElementById("openRciptTretModal");
+        const rciptTretModal = document.getElementById("rciptTretModal");
+        const rciptTretModalClose = document.getElementById("rciptTretModalClose");
+        const rciptTretBackdrop = document.getElementById("rciptTretBackdrop");
+
+        // 입금처리 열기
+        openRciptTretBtn.addEventListener("click", () => {
+        rciptTretModal.classList.add("show");
+        rciptTretModal.style.display = "block";
+        rciptTretBackdrop.style.display = "block";
+        document.body.classList.add("modal-open");
+        });
+        
+       	// 연체이력관리 모달창
+        const openDelayBtn = document.getElementById("openDelayModal");
+        const DelayModal = document.getElementById("delayModal");
+        const DelayModalClose = document.getElementById("delayModalClose");
+        const DelayModalBackdrop = document.getElementById("delayModalBackdrop");
+
+        // 연체이력관리 열기
+        openDelayBtn.addEventListener("click", () => {
+        delayModal.classList.add("show");
+        delayModal.style.display = "block";
+        delayModalBackdrop.style.display = "block";
+        document.body.classList.add("modal-open");
+        });
+        
+        
+    </script>
+</body>
+</html>
