@@ -38,14 +38,13 @@ public class BusineServiceImpl implements BusinessService {
 			
 			RestTemplate restTemplate = new RestTemplate();
 			
-			String urlString = "https://apis.data.go.kr/1160100/service/GetCorpBasicInfoService_V2/getCorpOutline_V2";
+			String urlString = "https://api.odcloud.kr/api/15125657/v1/uddi:46ae6a57-03aa-4eef-9120-f632956d38e5";
 			String serviceKey = "qIWgK5nPmfUmVGffAxfyxZqboQb%2FwSG0TFq8Gu1GwkI2pLB13450nWdVnNDL%2BDjfCIakfDpJwi2yOqppnR%2Fbpw%3D%3D";  //인코딩
 			
 			URI uri = UriComponentsBuilder.fromUriString(urlString)
 			        .queryParam("serviceKey", serviceKey)  
-			        .queryParam("pageNo", 1)
-			        .queryParam("resultType","json")
-			        .queryParam("numOfRows", 10)
+			        .queryParam("page", 1)
+			        .queryParam("perPage", 10)
 			        .build(true)     // 인코딩 여부. 인코딩을 해야하면 false 
 			        .toUri();
 
@@ -54,18 +53,11 @@ public class BusineServiceImpl implements BusinessService {
 
 			// ★★ 핵심 ★★
 			// URL을 RESTTemplate이 다시 인코딩하지 않도록 "ResponseEntity<String>" 로 먼저 받는다
-			String json = restTemplate.getForObject(uri, String.class);
+			PublicDataResponse response = restTemplate.getForObject(uri, PublicDataResponse.class);
 
-			System.out.println("API 원본 응답 = " + json);
+			System.out.println("API 원본 응답 = " + response);
 
 			// JSON → 객체 변환
-			ObjectMapper mapper = new ObjectMapper();
-			PublicDataResponse response = mapper.readValue(json, PublicDataResponse.class);
-
-			if (response == null || response.getData() == null) {
-				System.out.println("응답 없음");
-				return;
-			}
 
 			int rank = 1;
 			for (PublicDataRow row : response.getData()) {
