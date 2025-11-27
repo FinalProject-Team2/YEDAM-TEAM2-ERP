@@ -6,10 +6,8 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<title>vcatn.html</title>
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<title>mlss.html</title>
+
 <style>
 .form-select {
 	color: #000 !important;
@@ -25,8 +23,8 @@
 }
 
 .menu-item {
-    cursor: pointer; /* 마우스 올리면 손가락 모양 */
-  }
+	cursor: pointer; /* 마우스 올리면 손가락 모양 */
+}
 </style>
 </head>
 <body layout:fragment="content">
@@ -90,8 +88,7 @@
 					<div class="card-header-left">
 						<!-- collapse 토글 버튼으로 변경 -->
 						<h5 class="card-title mb-0">
-							<a id="collapseToggle"
-								class="text-dark text-decoration-none"
+							<a id="collapseToggle" class="text-dark text-decoration-none"
 								data-bs-toggle="collapse" href="#selfEvalCollapse" role="button"
 								aria-expanded="false" aria-controls="selfEvalCollapse"> 본인
 								평가 </a>
@@ -119,284 +116,344 @@
 							</div>
 						</div>
 						<div class="row mb-2">
-							<div class="col-md-6">
+							<div class="col-md-12">
 								<label for="userName" class="form-label">기간</label>
-								<div class="input-group date" id="applyDatePicker">
-									<input type="text" class="form-control" id="b_vcatnBegin"
-										placeholder="날짜 선택"> <span class="input-group-text"
-										id="icon-calendar"> <i class="bi bi-calendar"></i>
-									</span>
-								</div>
+								<div class="d-flex align-items-center js-date-range">
+
+										<!-- 시작일 -->
+										<div class="input-group date">
+											<input type="text"
+												class="form-control datepicker js-date-range-start"
+												placeholder="시작일"> <span
+												class="input-group-text js-date-range-icon-start"> <i
+												class="bi bi-calendar"></i>
+											</span>
+										</div>
+
+										<span class="mx-1 fw-bold fs-5">~</span>
+
+										<!-- 종료일 -->
+										<div class="input-group date ms-2">
+											<input type="text"
+												class="form-control datepicker js-date-range-end"
+												placeholder="종료일"> <span
+												class="input-group-text js-date-range-icon-end"> <i
+												class="bi bi-calendar"></i>
+											</span>
+										</div>
+
+									</div>
 							</div>
-							<div class="col-md-6">
-								<label for="userName" class="form-label">　</label>
-								<div class="input-group date" id="applyDatePicker">
-									<input type="text" class="form-control" id="b_vcatnEnd"
-										placeholder="날짜 선택"> <span class="input-group-text"
-										id="icon-calendar"> <i class="bi bi-calendar"></i>
-									</span>
-								</div>
-							</div>
+							
 						</div>
 						<h5 class="card-title">역량 그룹별 평가 항목</h5>
 						<p>직무 역량</p>
-						<div id="toastGrid" style="margin: 20px;"></div>						
+						<div id="toastGrid" style="margin: 20px;"></div>
 						<p>협업 역량</p>
-						<div id="toastGrid2" style="margin: 20px;"></div>						
+						<div id="toastGrid2" style="margin: 20px;"></div>
 						<p>자기관리 역량</p>
 						<div id="toastGrid3" style="margin: 20px;"></div>
 					</div>
 				</div>
 			</div>
 			<div id="mlssResult" class="card stIsShow">
-			<div id="chart"></div>
+				<div class="row mb-2">
+					<div class="col-md-6">
+						<div id="radar" style="width: 400px; height: 400px;"></div>
+					</div>
+					<div class="col-md-6">
+						<div id="pie" style="width: 400px; height: 400px;"></div>
+					</div>
+				</div>
+				<div class="row mb-2">
+				<div class="col-md-12">
+				<div id="toastGrid4" style="margin: 20px;"></div>
+				</div>
+				</div>
+				<div class="row mb-2">
+				<div class="col-md-12">
+				<div id="column" style="width: 900px; height: 400px;"></div>
+				</div>
+				</div>
+
+
+			</div>
 		</div>
 	</div>
-
 	<script>
-	
-	function chTitle(el) {
-	    // div 안의 텍스트 가져오기 (아이콘 제외)
-	    const text = el.innerText.trim();
-	    if(text =="결과지 확인"){
-	    	document.getElementById("mlssUser").classList.add("stIsShow");
-	    	document.getElementById("mlssResult").classList.remove("stIsShow");
-	    }else{
-	    	document.getElementById("mlssUser").classList.remove("stIsShow");
-	    	document.getElementById("mlssResult").classList.add("stIsShow");
-	    }
-	    // a 태그의 텍스트 변경
-	    document.getElementById("collapseToggle").innerText = text;
-	  }
+			function chTitle(el) {
+				 // div 안의 텍스트 가져오기 (아이콘 제외)
+				const text = el.innerText.trim();
+				if (text == "결과지 확인") {					
+					document.getElementById("mlssUser").classList
+							.add("stIsShow");
+					document.getElementById("mlssResult").classList
+							.remove("stIsShow");
+				} else {
+					document.getElementById("mlssUser").classList
+							.remove("stIsShow");
+					document.getElementById("mlssResult").classList
+							.add("stIsShow");
+				}
+				// a 태그의 텍스트 변경
+				document.getElementById("collapseToggle").innerText = text;
 
-	const gridData = [
-		  { id: 1, ability: "업무 이해도" },
-		  { id: 2, ability: "전문성" },
-		  { id: 3, ability: "문제 해결 능력" }
-		];
+				// 📌 div가 화면에 보이는 순간 차트를 생성
+		        if (!radarChart) {
+		            showRadarChart();
+		        } else {		        	
+		        	// 📌 div가 보이는 순간 차트 생성
+		            setTimeout(() => {
+		                showRadarChart();
+		            }, 50); // 화면 갱신 후 실행
+		            // 📌 이미 생성한 차트라면 갱신
+		            radarChart.resize();   // 또는 radarChart.refresh();
+		            pieChart.resize();   // 또는 radarChart.refresh();
+		            columnChart.resize();   // 또는 radarChart.refresh();
+		        }
+				
+			}
 
+			const gridData = [ {
+				id : 1,
+				ability : "업무 이해도"
+			}, {
+				id : 2,
+				ability : "전문성"
+			}, {
+				id : 3,
+				ability : "문제 해결 능력"
+			} ];
+let gridColums = [
+	{
+		header : '평가 항목',
+		name : 'ability',
+		sortable : true
+	},
+	{
+		header : '매우 부족',
+		name : 'score1',
+		align : 'center',
+		formatter : function(props) {
+			return `<input type="radio" name="row-${props.row.id}" value="1">`;
+		}
+	},
+	{
+		header : '부족',
+		name : 'score2',
+		align : 'center',
+		formatter : function(props) {
+			return `<input type="radio" name="row-${props.row.id}" value="2">`;
+		}
+	},
+	{
+		header : '보통',
+		name : 'score3',
+		align : 'center',
+		formatter : function(props) {
+			return `<input type="radio" name="row-${props.row.id}" value="3">`;
+		}
+	},
+	{
+		header : '우수',
+		name : 'score4',
+		align : 'center',
+		formatter : function(props) {
+			return `<input type="radio" name="row-${props.row.id}" value="4">`;
+		}
+	},
+	{
+		header : '매우 우수',
+		name : 'score5',
+		align : 'center',
+		formatter : function(props) {
+			return `<input type="radio" name="row-${props.row.id}" value="5">`;
+		}
+	} ];
+			const grid = new tui.Grid(
+					{
+						el : document.getElementById('toastGrid'),
+						data : gridData,
+						rowKey : 'id',
+						scrollX : false,
+						scrollY : false,
+						minBodyHeight : 0,
+						autoWidth : true,
+						columns : gridColums
+					});
 
-		const grid = new tui.Grid({
-		  el: document.getElementById('toastGrid'),
-		  data: gridData,
-		  rowKey: 'id',
-		  scrollX: false,
-		  scrollY: false,
-		  minBodyHeight: 0,
-		  autoWidth: true,
-		  columns: [
-		    {
-		      header: '평가 항목',
-		      name: 'ability',
-		      sortable: true
-		    },
-		    {
-		      header: '매우 부족',
-		      name: 'score1',
-		      align: 'center',
-		      formatter: function(props) {			    	  
-		        return `<input type="radio" name="row-${props.row.id}" value="1">`;
-		      }
-		    },
-		    {
-		      header: '부족',
-		      name: 'score2',
-		      align: 'center',
-		      formatter: function(props) {
-		        return `<input type="radio" name="row-${props.row.id}" value="2">`;
-		      }
-		    },
-		    {
-		      header: '보통',
-		      name: 'score3',
-		      align: 'center',
-		      formatter: function(props) {
-		        return `<input type="radio" name="row-${props.row.id}" value="3">`;
-		      }
-		    },
-		    {
-		      header: '우수',
-		      name: 'score4',
-		      align: 'center',
-		      formatter: function(props) {
-		        return `<input type="radio" name="row-${props.row.id}" value="4">`;
-		      }
-		    },
-		    {
-		      header: '매우 우수',
-		      name: 'score5',
-		      align: 'center',
-		      formatter: function(props) {
-		        return `<input type="radio" name="row-${props.row.id}" value="5">`;
-		      }
-		    }
-		  ]
-		});
+			// 아코디언 열릴 때 레이아웃 갱신
+			const collapseEl = document.getElementById('selfEvalCollapse');
+			collapseEl.addEventListener('shown.bs.collapse', function() {
+				grid.refreshLayout();
+				grid2.refreshLayout();
+				grid3.refreshLayout();
+			});
 
-		// 아코디언 열릴 때 레이아웃 갱신
-		const collapseEl = document.getElementById('selfEvalCollapse');
-		collapseEl.addEventListener('shown.bs.collapse', function() {
-			grid.refreshLayout();
-			grid2.refreshLayout();
-			grid3.refreshLayout();
-		});
-		
-		const gridData2 = [ {
-			id: 4,
-			ability : "의사소통 능력",
+			const gridData2 = [ {
+				id : 4,
+				ability : "의사소통 능력",
+
+			}, {
+				id : 5,
+				ability : "협력 태도",
+
+			}, {
+				id : 6,
+				ability : "문제해결 및 기여도",
+
+			}, ];
+
+			// Grid 생성
+			const grid2 = new tui.Grid(
+					{
+						el : document.getElementById('toastGrid2'),
+						data : gridData2,
+						scrollX : false,
+						scrollY : false,
+						minBodyHeight : 0,
+						autoWidth : true,
+						columns : gridColums
+					});
+
+			const gridData3 = [ {
+				id : 7,
+				ability : "시간 및  업무관리",
+			}, {
+				id : 8,
+				ability : "자기개발 및 학습태도",
+			}, {
+				id : 9,
+				ability : "책임감 및 규율 준수",
+			}, ];
+
+			// Grid 생성
+			const grid3 = new tui.Grid(
+					{
+						el : document.getElementById('toastGrid3'),
+						data : gridData3,
+						scrollX : false,
+						scrollY : false,
+						minBodyHeight : 0,
+						autoWidth : true,
+						columns : gridColums
+					});
 			
-		}, {
-			id: 5,
-			ability : "협력 태도",
-			
-		}, {
-			id: 6,
-			ability : "문제해결 및 기여도",
-			
-		}, ];
+			let radarChart;   // 전역 변수로 선언하여 어디서든 접근 가능
+			let pieChart;   // 전역 변수로 선언하여 어디서든 접근 가능
+			let columnChart;   // 전역 변수로 선언하여 어디서든 접근 가능
+			let resultGrid;   // 전역 변수로 선언하여 어디서든 접근 가능
 
-		// Grid 생성
-		const grid2 = new tui.Grid({
-			el : document.getElementById('toastGrid2'),
-			data : gridData2,
-			scrollX : false,
-			scrollY : false,
-			minBodyHeight : 0,
-			autoWidth : true,
-			columns : [ {
-			      header: '평가 항목',
-			      name: 'ability',
-			      sortable: true
-			    },
-			    {
-			      header: '매우 부족',
-			      name: 'score1',
-			      align: 'center',
-			      formatter: function(props) {		    	  
-			        return `<input type="radio" name="row-${props.row.id}" value="1">`;
-			      }
-			    },
-			    {
-			      header: '부족',
-			      name: 'score2',
-			      align: 'center',
-			      formatter: function(props) {
-			        return `<input type="radio" name="row-${props.row.id}" value="2">`;
-			      }
-			    },
-			    {
-			      header: '보통',
-			      name: 'score3',
-			      align: 'center',
-			      formatter: function(props) {
-			        return `<input type="radio" name="row-${props.row.id}" value="3">`;
-			      }
-			    },
-			    {
-			      header: '우수',
-			      name: 'score4',
-			      align: 'center',
-			      formatter: function(props) {
-			        return `<input type="radio" name="row-${props.row.id}" value="4">`;
-			      }
-			    },
-			    {
-			      header: '매우 우수',
-			      name: 'score5',
-			      align: 'center',
-			      formatter: function(props) {
-			        return `<input type="radio" name="row-${props.row.id}" value="5">`;
-			      }
-			    } ]
-		});
-		
-		const gridData3 = [ {
-			id: 7,
-			ability : "시간 및  업무관리",			
-		}, {
-			id: 8,
-			ability : "자기개발 및 학습태도",			
-		}, {
-			id: 9,
-			ability : "책임감 및 규율 준수",			
-		}, ];
+			function showRadarChart() {
+				const radarEl = document.getElementById('radar');
+			    const pieEl = document.getElementById('pie');
+			    const columnEl = document.getElementById('column');
+			    const gridEl = document.getElementById('toastGrid4');
+				
+			    if (radarChart) radarChart.destroy(); 
+			    
+			    if (pieChart) pieChart.destroy(); 
+			    
+			    if (resultGrid) resultGrid.destroy(); 
+			    
+			    if (columnChart) columnChart.destroy();
+			    
+			    radarChart = toastui.Chart.radarChart({
+			        el: radarEl,
+			        data: {
+			            categories: ['힘', '지능', '스피드'],
+			            series: [
+			                { name: 'Player', data: [60, 65, 90] },
+			                { name: '상사', data: [80, 35, 20] },
+			                { name: '부하', data: [40, 90, 50] },
+			            ]
+			        },
+			        options: {
+			            series: { showArea: true }
+			        }
+			    });
+			    pieChart = toastui.Chart.pieChart({
+			        el: pieEl,
+			        data: {
+			            series: [
+			                { name: '진단1', data: 60 },
+			                { name: '진단2', data: 65 },
+			                { name: '진단3', data: 90 }
+			            ]
+			        },
+			        options: {
+			            chart: {
+			                title: 'Player 능력 비율'
+			            }
+			        }
+			    });
+			    
+			    columnChart = toastui.Chart.columnChart({
+			        el: columnEl,
+			        data: {
+			        	categories: ['업무 이해도', '전문성', '문제 해결 능력', '의사소통능력', '협력 태도', '문제해결 및 기여도', '시간 및 업무관리', '자기개발 및 학습태도', '책임감 및 규율 준수'],
+			            series: [
+			                { name: '진단4', data: [60, 80, 100, 10, 70, 50, 20, 90, 30] },
+			                { name: '진단5', data: [60, 80, 100, 10, 70, 50, 20, 90, 30] },
+			                { name: '진단6', data: [60, 80, 100, 10, 70, 50, 20, 90, 30] }			                
+			            ]
+			        },
+			        options: {
+			            chart: { title: 'Column 차트 예시' },
+			            yAxis: { title: '점수' },
+			            xAxis: { title: '항목' },
+			            width: 900,
+			            height: 400
+			        }			        
+			    });
+			    
+			    const gridData = [ {
+					id : 7,
+					ability : "시간 및  업무관리",
+				},  ];
 
-		// Grid 생성
-		const grid3 = new tui.Grid({
-			el : document.getElementById('toastGrid3'),
-			data : gridData3,
-			scrollX : false,
-			scrollY : false,
-			minBodyHeight : 0,
-			autoWidth : true,
-			columns : [ {
-			      header: '평가 항목',
-			      name: 'ability',
-			      sortable: true
-			    },
-			    {
-			      header: '매우 부족',
-			      name: 'score1',
-			      align: 'center',
-			      formatter: function(props) {		    	  
-			        return `<input type="radio" name="row-${props.row.id}" value="1">`;
-			      }
-			    },
-			    {
-			      header: '부족',
-			      name: 'score2',
-			      align: 'center',
-			      formatter: function(props) {
-			        return `<input type="radio" name="row-${props.row.id}" value="2">`;
-			      }
-			    },
-			    {
-			      header: '보통',
-			      name: 'score3',
-			      align: 'center',
-			      formatter: function(props) {
-			        return `<input type="radio" name="row-${props.row.id}" value="3">`;
-			      }
-			    },
-			    {
-			      header: '우수',
-			      name: 'score4',
-			      align: 'center',
-			      formatter: function(props) {
-			        return `<input type="radio" name="row-${props.row.id}" value="4">`;
-			      }
-			    },
-			    {
-			      header: '매우 우수',
-			      name: 'score5',
-			      align: 'center',
-			      formatter: function(props) {
-			        return `<input type="radio" name="row-${props.row.id}" value="5">`;
-			      }
-			    } ]
-		});
-		/* namespace */
-		const Chart = toastui.Chart;
-		const el = document.getElementById('chart');
-		const data = {
-		  categories: ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-		  series: [
-		    {
-		      name: 'Budget',
-		      data: [5000, 3000, 5000, 7000, 6000, 4000, 1000],
-		    },
-		    {
-		      name: 'Income',
-		      data: [8000, 4000, 7000, 2000, 6000, 3000, 5000],
-		    },
-		  ],
-		};
-		const options = {
-		  chart: { width: 700, height: 400 },
-		};
+				// Grid 생성
+				resultGrid = new tui.Grid(
+						{
+							el : gridEl,
+							data : gridData,
+							scrollX : false,
+							scrollY : false,
+							minBodyHeight : 0,
+							autoWidth : true,
+							columns : [{
+										header : '다면평가 역량그룹',
+										name : 'ability',
+										sortable : true
+										},
+										{
+											header : '본인',
+											name : 'score1',
+											align : 'left',												
+										},{
+											header : '상사',
+											name : 'score1',
+											align : 'left',												
+										},{
+											header : '부하',
+											name : 'score1',
+											align : 'left',												
+										},{
+											header : '조직평균',
+											name : 'score1',
+											align : 'left',												
+										},{
+											header : '조직대비',
+											name : 'score1',
+											align : 'left',												
+										},]
+						});
 
-		
-	</script>	
+
+			}
+
+		</script>
+
 	<script type="module">
 import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
 
@@ -410,7 +467,11 @@ grid.on('click', function(ev) {
     const dto = formToJson();  
     console.log(dto);
 });
+
+
 </script>
+
+
 </body>
 
 </html>

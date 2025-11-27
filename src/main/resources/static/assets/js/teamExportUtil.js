@@ -17,10 +17,9 @@ export function bindGridToForm(rowData) {
 			document.getElementById("hugadeta").classList.remove("stIsShow");			
 			document.getElementById("hugaSt1").classList.add("stIsShow");			
 			document.getElementById("hugaSt2").classList.remove("stIsShow");
-		}
-			
-			
+		}			
 	}
+	if(("v_" + key) == "v_proofPhoto") input.src = rowData[key];
   });
 }
 

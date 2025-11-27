@@ -8,9 +8,7 @@
 <meta charset="UTF-8">
 
 <title>employee-register</title>
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
 <style>
 .fixed-photo {
 	width: 150px; /* 원하는 가로 크기 */
@@ -35,7 +33,7 @@
 					</div>
 					<div class="card-header-right">
 						<button class="btn btn-dark">초기화</button>
-						<button class="btn btn-outline-dark">조회</button>
+						<button onclick="getList(this)" class="btn btn-outline-dark">조회</button>
 					</div>
 				</div>
 				<div class="card-body">
@@ -43,20 +41,20 @@
 
 					<div class="row mb-2">
 						<div class="col-md-3">
-							<label>이름</label> <input type="text" class="form-control"
-								placeholder="Value">
+							<label class="form-label">이름</label> <input id="nm" type="text"
+								class="form-control empJohoe" placeholder="Value">
 						</div>
 						<div class="col-md-3">
-							<label>사번</label> <input type="text" class="form-control"
-								placeholder="Value">
+							<label class="form-label">사번</label> <input id="empId" type="text"
+								class="form-control empJohoe" placeholder="Value">
 						</div>
 						<div class="col-md-3">
-							<label>부서</label> <input type="text" class="form-control"
-								placeholder="Value">
+							<label class="form-label">부서</label> <input id="deptNm" type="text"
+								class="form-control empJohoe" placeholder="Value">
 						</div>
 						<div class="col-md-3">
-							<label>직급</label> <input type="text" class="form-control"
-								placeholder="Value">
+							<label class="form-label">직급</label> <input id="clsf" type="text"
+								class="form-control empJohoe" placeholder="Value">
 						</div>
 					</div>
 				</div>
@@ -67,7 +65,7 @@
 		<!-- 검색조건 -->
 		<div class="col-md-6">
 			<!-- 사원목록 -->
-			<div class="card" style="height: 818.22px;">
+			<div class="card" style="height: 595.95px;">
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
@@ -88,12 +86,12 @@
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
-						<h5 class="card-title">기본정보</h5>
+						<h5 class="card-title">기본정보&인사정보</h5>
 					</div>
 					<div class="card-header-right">
 						<button class="btn btn-outline-dark ">근로계약서</button>
 						<button class="btn btn-outline-dark ">등록</button>
-						<button class="btn btn-outline-dark ">삭제</button>
+						<button class="btn btn-outline-danger ">삭제</button>
 					</div>
 				</div>
 				<div class="card-body ">
@@ -101,72 +99,81 @@
 
 					<div class="row">
 						<div class="col-md-4 text-center">
-							<img src="/images/faces/face11.jpg" alt="사진"
+							<img id="v_proofPhoto" src="/images/faces/face11.jpg" alt="사진"
 								class="img-thumbnail fixed-photo" />
 						</div>
 						<div class="col-md-8">
 							<div class="row mb-2">
 								<div class="col-md-6">
-									<label>사번</label> <input id="v_empId" type="text"
-										class="form-control" placeholder="사번(자동생성)" />
-								</div>
-							</div>
-							<div class="row mb-2">
-								<div class="col-md-6">
-									<label>이름</label> <input id="v_nm" type="text"
-										class="form-control" placeholder="홍길동" />
+									<label class="form-label">사번</label> <input id="v_empId"
+										type="text" class="form-control" placeholder="사번(자동생성)" />
 								</div>
 								<div class="col-md-6">
-									<label for="userName" class="form-label">생년월일</label>
-									<div class="input-group date" id="applyDatePicker">
-										<input type="text" class="form-control" id="applyDate"
-											placeholder="날짜 선택"> <span class="input-group-text"
-											id="icon-calendar"> <i class="bi bi-calendar"></i>
+									<label for="userName" class="form-label">입사일</label>
+									<div class="input-group date js-date-single">
+										<input id="v_encpn" type="text"
+											class="form-control datepicker js-date-input"
+											placeholder="날짜 선택"> <span
+											class="input-group-text js-date-icon"> <i
+											class="bi bi-calendar"></i>
 										</span>
 									</div>
 								</div>
 							</div>
 							<div class="row mb-2">
 								<div class="col-md-6">
-									<label>연락처</label> <input id="v_cttpc" type="text"
-										class="form-control" placeholder="010-1234-1234" />
+									<label class="form-label">이름</label> <input id="v_nm"
+										type="text" class="form-control" placeholder="홍길동" />
 								</div>
 								<div class="col-md-6">
-									<label>이메일</label> <input id="v_email" type="email"
-										class="form-control" placeholder="abc@mail.com" />
+									<label for="userName" class="form-label">생년월일</label>
+									<div class="input-group date js-date-single">
+										<input id="v_brthdy"
+										    type="text"
+											class="form-control datepicker js-date-input"
+											placeholder="날짜 선택"> <span
+											class="input-group-text js-date-icon"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="row mb-2">
+								<div class="col-md-6">
+									<label class="form-label">연락처</label> <input id="v_cttpc"
+										type="text" class="form-control" placeholder="010-1234-1234" />
+								</div>
+								<div class="col-md-6">
+									<label class="form-label">이메일</label> <input id="v_email"
+										type="email" class="form-control" placeholder="abc@mail.com" />
 								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			</div>
-
-			<!-- 인사정보 -->
-			<div class="card">
-				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-				<div class="card-header">
-					<div class="card-header-left">
-						<h5 class="card-title">인사정보</h5>
-					</div>
-				</div>
-				<div class="card-body">
 
 					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>부서</label> <select id="v_deptNm" class="form-select">
+
+						<div class="col-md-2">
+							<label class="form-label">부서</label> <select id="v_deptNm"
+								class="form-select">
 								<option>인사</option>
 								<option>영업</option>
 								<option>생산</option>
 							</select>
 						</div>
-						<div class="col-md-6">
-							<label>직무</label> <input id="v_dty" type="text"
-								class="form-control" placeholder="HRM(인적자원관리)" />
+						<div class="col-md-3">
+							<label class="form-label">직책</label> <select id="v_rspofc"
+								class="form-select">
+								<option>팀원</option>
+								<option>팀장</option>
+								<option>관리자</option>
+								<option>임원</option>
+							</select>
 						</div>
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>직급</label> <select id="v_clsf" class="form-select">
+
+						<div class="col-md-2">
+							<label class="form-label">직급</label> <select id="v_clsf"
+								class="form-select">
 								<option>사원</option>
 								<option>대리</option>
 								<option>과장</option>
@@ -174,290 +181,101 @@
 								<option>이사</option>
 							</select>
 						</div>
-						<div class="col-md-6">
-							<label>직책</label> <select id="v_rspofc" class="form-select">
-								<option>팀원</option>
-								<option>팀장</option>
-								<option>관리자</option>
-								<option>임원</option>
-							</select>
-						</div>
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label>고용형태</label> <select class="form-select">
-								<option>정직원</option>
+
+						<div class="col-md-3">
+							<label class="form-label">고용형태</label> <select
+							    id="v_emplymTy"
+								class="form-select">
+								<option value="">정직원</option>
 								<option>계약직</option>
 								<option>일용직</option>
 							</select>
 						</div>
-						<div class="col-md-6">
-							<label>계좌번호</label> <input type="text" class="form-control"
-								placeholder="계좌번호입력" />
+
+						<div class="col-md-2">
+							<label class="form-label">재직상태</label> <select
+							    id="v_hffcSt"
+								class="form-select">
+								<option value="hffcStTest_001">재직</option>
+								<option value="hffcStTest_002">퇴직</option>
+								<option value="hffcStTest_003">휴직</option>
+								<option value="hffcStTest_004">퇴사</option>
+							</select>
 						</div>
+
 					</div>
+
 					<div class="row mb-2">
+						<div class="col-md-4">
+							<label class="form-label">직무</label>
+							<input id="v_dty" type="text" class="form-control" placeholder="HRM(인적자원관리)" />
+						</div>
+
+
+						<div class="col-md-4">
+							<label class="form-label">계좌번호</label>
+							<input id="acnutno" type="text" class="form-control" placeholder="계좌번호입력" />
+						</div>
+
+						<div class="col-md-4">
+							<label class="form-label">근무형태</label>
+							<select id="basi_id" class="form-select">
+								<option value="basiIdTest_001">인사팀 기준근무</option>
+								<option value="basiIdTest_002">생산팀 교대근무</option>
+							</select>
+						</div>
+
+					</div>
+
+					<div class="row mb-2">
+
 						<div class="col-md-6">
-							<label>급여 방식</label> <select id="salaryType" class="form-select">
+							<label class="form-label">급여 방식</label> <select id="salaryType"
+								class="form-select">
 								<option value="bslry">기본급</option>
 								<option value="pymhr">시급</option>
 							</select>
 						</div>
 						<div class="col-md-6">
-							<label>기본급/시급</label> <input type="text" id="salaryInput"
-								class="form-control" placeholder="금액입력" name="monthlySalary" />
+							<label class="form-label">기본급/시급</label> <input type="text"
+								id="salaryInput" class="form-control" placeholder="금액입력"
+								name="monthlySalary" />
 						</div>
-					</div>
-					<div class="row mb-2">
 
-						<div class="col-md-6">
-							<label for="userName" class="form-label">입사일</label>
-							<div class="input-group date" id="applyDatePicker">
-								<input type="text" class="form-control" id="applyDate"
-									placeholder="날짜 선택"> <span class="input-group-text"
-									id="icon-calendar"> <i class="bi bi-calendar"></i>
-								</span>
-							</div>
-						</div>
-						<div class="col-md-6">
-							<label>재직상태</label> <select class="form-select">
-								<option>재직</option>
-								<option>퇴직</option>
-								<option>휴직</option>
-								<option>퇴사</option>
-							</select>
-						</div>
 					</div>
-					<div class="row"></div>
+
 				</div>
 			</div>
+
+
 		</div>
 	</div>
 	<script>
-		// 화면 테스트용 데이터
-		tui.Grid.applyTheme('default', {
-			cell : {
-				normal : { // 일반 셀(본문)
-					border : '#ccc',
-					background : "#fff",
-					showVerticalBorder : true, // 세로 라인 표시
-				},
-				header : { // 헤더 셀
-					border : '#ccc',
-					background : '#E3E6ED',
-					showVerticalBorder : true,
-				},
-				editable : { // ★ 편집 가능한 셀 공통 스타일
-					background : '#FFFDF0', // 연노랑 같은 색으로 표시
-					text : '#000'
-				},
-				selectedHeader : { // 헤더 클릭했을 때 색
-					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-				},
-				selected : { // 선택된 셀 색
-					background : '#ffffff' // 필요하면 여기도 조정
-				}
-			}
-		});
-
-		const gridData = [ {
-			nm : "아이유",
-			empId : "com001",
-			deptId : "영업",
-			clsf : "사원",
-			brthdy : "1993-05-16",
-			cttpc : "010-1234-5678",
-			email : "IU@email.com",
-			deptNm : "영업",
-			dty : "영업 관리자",
-			rspofc : "팀원",
-			bslry : "2,000,000"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "뉴진스",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "총16개",
-			empId : "com002",
-			deptId : "인사",
-			clsf : "과장",
-			brthdy : "2005-04-11",
-			cttpc : "010-2345-6789",
-			email : "NewJeans@email.com",
-			deptNm : "인사",
-			dty : "HRM(인적자원관리)",
-			rspofc : "팀장",
-			pymhr : "10,030"
-		}, {
-			nm : "임영웅",
-			empId : "com003",
-			deptId : "생산",
-			clsf : "이사",
-			brthdy : "1991-06-16",
-			cttpc : "010-3456-7890",
-			email : "ImYoungWoong@email.com",
-			deptNm : "생산",
-			dty : "생산관리",
-			rspofc : "관리자",
-			bslry : "3,000,000"
-		} ];
+	
+	
+	
+	function getList(el) {
+		let keyword = document.querySelectorAll('.empJohoe');
+		
+		let datas = {};
+		
+		for(let val of keyword){
+			datas[val.id] = val.value;
+		}
+		
+		fetch(`/empJohoe?nm=${datas.nm}&empId=${datas.empId}&deptNm=${datas.deptNm}&clsf=${datas.clsf}`)
+		.then(response => response.json())
+		.then((result) => {			
+			console.log(result);
+			grid.resetData(result);
+		})
+	}
+	
 
 		// Grid 생성
 		const grid = new tui.Grid({
 			el : document.getElementById('employeeGrid'),
-			data : gridData,
+			data : [],
 			scrollX : false,
 			scrollY : true,
 			minBodyHeight : 0,
@@ -477,7 +295,7 @@
 				name : 'clsf',
 				align : 'center'
 			} ],
-			bodyHeight : 640, // 본문 높이 고정
+			bodyHeight : 440, // 본문 높이 고정
 		});
 
 		//급여 경우의수 처리
