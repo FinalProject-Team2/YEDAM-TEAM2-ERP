@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>allowDuc</title>
+    <style>
+	/* ===========================
+	 * 탭 스타일 (입체감 / 그림자 버전)
+	 * =========================== */
+	.nav-tabs {
+	    display: flex;
+	    gap: 0;
+	    margin-bottom: 0;
+	}
+	
+	/* 탭 위치 */
+	.nav-tabs .nav-item {
+	    margin-bottom: -1px;
+	}
+	
+	/* 비활성 탭 (뒤로 간 느낌) */
+	.nav-tabs .nav-link {
+	    border-radius: 10px 10px 0 0;
+	    padding: 8px 20px;
+	    background-color: #f7f8fa;       /* ✅ 더 연한 회색 */
+	    color: #a1a6ad;                 /* ✅ 존재감 낮춤 */
+	    font-weight: 500;
+	    border: 1px solid #d1d5db;
+	    border-bottom-color: #d1d5db;
+	    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.03); /* ✅ 눌려있는 느낌 */
+	    transition: background-color 0.15s ease,
+	                color 0.15s ease,
+	                box-shadow 0.15s ease;
+	}
+	
+	/* 탭 사이 이중선 제거 */
+	.nav-tabs .nav-item + .nav-item .nav-link {
+	    margin-left: -1px;
+	}
+	
+	/* 비활성 hover */
+	.nav-tabs .nav-link:not(.active):hover {
+	    background-color: #eff1f4;
+	    color: #7a7f87;
+	}
+	
+	/* 활성 탭 (앞으로 튀어나온 느낌) */
+	.nav-tabs .nav-link.active {
+	    background-color: #ffffff;      /* ✅ 완전 흰색 */
+	    color: #111111;                 /* ✅ 선명 */
+	    font-weight: 600;
+	    border-color: #d1d5db;
+	    border-bottom-color: #ffffff;   /* ✅ 내용과 자연스럽게 연결 */
+	    box-shadow: 0 4px 10px rgba(0,0,0,0.06);  /* ✅ 위로 뜨는 효과 */
+	    z-index: 2;                     /* ✅ 비활성보다 앞으로 */
+	}
+	
+	/* 탭 내용 영역 */
+	.tab-pane {
+	    display: none;
+	    margin-top: 0;
+	    padding-top: 0;
+	}
+	
+	.tab-pane.active {
+	    display: block;
+	}
+	
+	/* 카드 바디 안 여백 제거 */
+	.card-body > .mt-3 {
+	    margin-top: 0 !important;
+	}
+	
+	/* 하단 불필요한 선 제거 */
+	.nav-tabs {
+	    border-bottom: none !important;
+	}
+	
+    </style>
+</head>
+<body layout:fragment="content">
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title">수당/공제 항목 관리</h5>
+                <div class="card-header-right">
+                    <button class="btn btn-danger">삭제</button>
+                    <button class="btn btn-outline-dark" id="openGuideModal">가이드</button>
+                    <button class="btn btn-outline-dark">저장</button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <!-- 탭 헤더 -->
+                <ul class="nav nav-tabs" id="allowDucTab">
+                    <li class="nav-item">
+                        <button class="nav-link active" type="button" data-target="#tab-allow">
+                            수당
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" type="button" data-target="#tab-duc">
+                            공제
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- 탭별 그리드 영역 -->
+                <div class="mt-3">
+                    <!-- 수당 탭 -->
+                    <div id="tab-allow" class="tab-pane active">
+                        <div id="gridAllow"></div>
+                    </div>
+
+                    <!-- 공제 탭 -->
+                    <div id="tab-duc" class="tab-pane">
+                        <div id="gridDuc"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="insa/modal/guideModal :: guideModal"></div>
+<script>
+    /* =====================================================
+     * 1. Grid 옵션
+     * ===================================================== */
+    const GridOptions = {
+        bodyHeight: 320,
+        scrollX: false,
+        scrollY: false,
+        rowHeaders: ["checkbox"],
+        columnOptions: {
+            minWidth: 80,
+            resizable: true
+        }
+    };
+
+    /* =====================================================
+     * 2. 더미 데이터 (camelCase)
+     * ===================================================== */
+    const allowGridData = [
+        { allowId: "ALW001", allowNm: "기본급",     dispNo: 1,  calFmlt: "FIXED",          calMthd: "정액",     yn: "Y" },
+        { allowId: "ALW002", allowNm: "직책수당",   dispNo: 2,  calFmlt: "FIXED",          calMthd: "정액",     yn: "Y"},
+        { allowId: "ALW003", allowNm: "연장수당",   dispNo: 3,  calFmlt: "WORK_HOUR*1.5",  calMthd: "근태연동", yn: "Y" },
+        { allowId: "ALW004", allowNm: "야간수당",   dispNo: 4,  calFmlt: "WORK_HOUR*2",    calMthd: "근태연동", yn: "Y" },
+        { allowId: "ALW005", allowNm: "휴일수당",   dispNo: 5,  calFmlt: "WORK_HOUR*1.5",  calMthd: "근태연동", yn: "Y" },
+        { allowId: "ALW006", allowNm: "성과급",     dispNo: 6,  calFmlt: "BASIC_PAY*0.1",  calMthd: "비율",     yn: "Y" },
+        { allowId: "ALW007", allowNm: "식대",       dispNo: 7,  calFmlt: "FIXED",          calMthd: "정액",     yn: "Y" },
+        { allowId: "ALW008", allowNm: "교통비",     dispNo: 8,  calFmlt: "FIXED",          calMthd: "정액",     yn: "N" },
+        { allowId: "ALW009", allowNm: "자격수당",   dispNo: 9,  calFmlt: "FIXED",          calMthd: "정액",     yn: "Y" },
+        { allowId: "ALW010", allowNm: "특별보너스", dispNo: 10, calFmlt: "MANUAL",         calMthd: "수기입력", yn: "Y" }
+    ];
+
+    const ducGridData = [
+        { ducId: "DUC001", ducNm: "소득세",     dispNo: 1,  calFmlt: "INCOME*0.1",  calMthd: "비율",     yn: "Y" },
+        { ducId: "DUC002", ducNm: "지방세",     dispNo: 2,  calFmlt: "INCOME*0.02", calMthd: "비율",     yn: "Y" },
+        { ducId: "DUC003", ducNm: "국민연금",   dispNo: 3,  calFmlt: "PAY*0.045",   calMthd: "비율",     yn: "Y" },
+        { ducId: "DUC004", ducNm: "건강보험",   dispNo: 4,  calFmlt: "PAY*0.035",   calMthd: "비율",     yn: "Y" },
+        { ducId: "DUC005", ducNm: "고용보험",   dispNo: 5,  calFmlt: "PAY*0.009",   calMthd: "비율",     yn: "Y" },
+        { ducId: "DUC006", ducNm: "노조비",     dispNo: 6,  calFmlt: "FIXED",       calMthd: "정액",     yn: "N" },
+        { ducId: "DUC007", ducNm: "상조회비",   dispNo: 7,  calFmlt: "FIXED",       calMthd: "정액",     yn: "Y" },
+        { ducId: "DUC008", ducNm: "대출상환금", dispNo: 8,  calFmlt: "FIXED",       calMthd: "정액",     yn: "Y" },
+        { ducId: "DUC009", ducNm: "식대공제",   dispNo: 9,  calFmlt: "FIXED",       calMthd: "정액",     yn: "N" },
+        { ducId: "DUC010", ducNm: "기타공제",   dispNo: 10, calFmlt: "MANUAL",      calMthd: "수기입력", yn: "Y" }
+    ];
+
+    /* =====================================================
+     * 3. Grid 생성
+     * ===================================================== */
+    const allowGrid = new tui.Grid({
+        el: document.getElementById("gridAllow"),
+        data: allowGridData,
+        ...GridOptions,
+        editingType: 'cell',
+        columns: [
+            { header: "수당ID",   name: "allowId" },
+            { header: "수당명",   name: "allowNm", editor: "text" },
+            { header: "표시번호", name: "dispNo", editor: "text" },
+            { header: "계산식",   name: "calFmlt", editor: "text" },
+            { header: "산출방법", name: "calMthd", editor: "text" },
+            {
+                header: "사용여부",
+                name: "yn",
+                editor: {
+                    type: 'select',
+                    options: {
+                        listItems: [
+                            { text: '사용', value: 'Y' },
+                            { text: '미사용', value: 'N' }
+                        ]
+                    }
+                }
+            }
+        ]
+    });
+
+    const ducGrid = new tui.Grid({
+        el: document.getElementById("gridDuc"),
+        data: ducGridData,
+        ...GridOptions,
+        editingType: 'cell',
+        columns: [
+            { header: "공제ID",   name: "ducId" },
+            { header: "공제명",   name: "ducNm" },
+            { header: "표시번호", name: "dispNo", editor: "text" },
+            { header: "계산식",   name: "calFmlt" },
+            { header: "산출방법", name: "calMthd" },
+            {
+                header: "사용여부",
+                name: "yn",
+                editor: {
+                    type: 'select',
+                    options: {
+                        listItems: [
+                            { text: '사용', value: 'Y' },
+                            { text: '미사용', value: 'N' }
+                        ]
+                    }
+                }
+            }
+        ]
+    });
+
+    /* =====================================================
+     * 4. 탭 동작
+     * ===================================================== */
+    const tabButtons = document.querySelectorAll("#allowDucTab .nav-link");
+    const tabPanes = {
+        "#tab-allow": document.getElementById("tab-allow"),
+        "#tab-duc": document.getElementById("tab-duc")
+    };
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const target = this.getAttribute("data-target");
+
+            tabButtons.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+
+            Object.keys(tabPanes).forEach(key => {
+                if (key === target) {
+                    tabPanes[key].classList.add("active");
+                } else {
+                    tabPanes[key].classList.remove("active");
+                }
+            });
+
+            if (target === "#tab-allow") {
+                allowGrid.refreshLayout();
+            } else if (target === "#tab-duc") {
+                ducGrid.refreshLayout();
+            }
+        });
+    });
+    /* =====================================================
+     * 5. 모달
+     * ===================================================== */
+     const openBtn = document.getElementById("openGuideModal");
+     const modal   = document.getElementById("guideModal");
+     const back    = document.getElementById("guideBackdrop");
+
+     function openModal() {
+         if (!modal || !back) return;
+         modal.classList.add("show");
+         modal.style.display = "block";
+         back.style.display = "block";
+         grid2.refreshLayout();
+     }
+
+     if (openBtn) {
+         openBtn.addEventListener("click", openModal);
+     }
+
+     
+</script>
+</body>
+</html>

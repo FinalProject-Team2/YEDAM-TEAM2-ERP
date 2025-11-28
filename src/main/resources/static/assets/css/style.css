@@ -30520,6 +30520,9 @@ label.astar::after,
   font-size: 0 !important;
 }
 
+.form-select {
+  color: #000 !important;
+}
 
 /* 전체 스크롤 잠금 */
 /*html, body {
