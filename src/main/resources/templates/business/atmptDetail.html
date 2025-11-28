@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>미수상세관리</title>
+
+
+<style>
+/* 위 리스트 카드 아래쪽 여백 */
+.arrear-list-area {
+  margin-bottom: 16px;   /* 적당한 값으로 조절 (px, rem 모두 가능) */
+}
+
+/* 아래 상세 카드 위쪽 여백 (필요하면) */
+.arrear-detail-area {
+  margin-top: 0;         /* 기본 간격 없애고 싶으면 0, 더 띄우고 싶으면 값 조정 */
+}
+
+
+.lock-account-wrapper .card-title {
+	font-weight: 600;
+}
+
+/* 공통 카드 헤더 (제목 왼쪽, 버튼 오른쪽) */
+.card-header.with-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.card-header-left h5.card-title {
+	margin: 0;
+	font-size: 1.05rem;
+}
+
+.card-header-right .btn+.btn {
+	margin-left: .25rem;
+}
+
+/* Grid 영역 */
+.lock-account-wrapper #accountGrid {
+	width: 100%;
+	margin-top: 4px;
+}
+
+/* 상단 헤더의 체크박스(행 헤더) 셀만 회색 */
+.tui-grid-header-area .tui-grid-cell-row-header {
+	background-color: #f5f5f5;
+}
+
+/* 데이터 행의 체크박스 셀은 흰색 유지 */
+.tui-grid-body-area .tui-grid-cell-row-header {
+	background-color: #ffffff;
+}
+
+/* 그리드 버튼 스타일 */
+.grid-btn {
+	padding: 4px 10px;
+	border: 1px solid #bbb;
+	background-color: #fff;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.grid-btn:hover {
+	background-color: #eee;
+}
+</style>
+</head>
+
+<body layout:fragment="content">
+	<div class="lock-account-wrapper">
+
+		<!-- 미수상세 조회 -->
+		<div class="row mb-3">
+			<div class="col-md-12">
+				<div class="card">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">조회 조건</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark">초기화</button>
+							<button type="button" class="btn btn-outline-dark">조회</button>
+						</div>
+					</div>
+
+					<!-- /card-body start -->
+					<div class="card-body">
+						<div class="row g-2">
+							<div class="col-md-3">
+								<label>고객코드</label> <select class="form-select">
+									<option>251125-001</option>
+									<option>251125-002</option>
+								</select>
+							</div>
+							<div class="col-md-3">
+								<label>고객사</label> <select class="form-select">
+									<option>무신사</option>
+									<option>29cm</option>
+								</select>
+							</div>
+							<div class="col-md-3">
+								<label>신용등급</label> <select class="form-select">
+									<option>A</option>
+									<option>B</option>
+									<option>C</option>
+									<option>D</option>
+								</select>
+							</div>
+							<div class="col-md-3">
+								<label>연체구분</label> <select class="form-select">
+									<option>정상</option>
+									<option>연체</option>
+									<option>장기연체</option>
+									<option>대손처리</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					<!-- /card-body end -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 미수/연체리스트 카드 -->
+	<div class="row arrear-list-area">
+
+		<!-- 미수/연체리스트 그리드 -->
+		<div class="col-md-12 d-flex">
+			<div class="card w-100 h-100">
+
+				<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
+				<div class="card-header with-actions">
+					<div class="card-header-left">
+						<h5 class="card-title">미수/연체리스트</h5>
+					</div>
+
+				</div>
+
+				<div class="card-body">
+					<div class="priceGridWrap">
+						<div id="detailGrid"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 미수 처리 상세 -->
+	<div class="card arrear-detail-area">
+		<div class="card-header">
+			<h5 class="card-title">미수 처리 상세</h5>
+		</div>
+
+		<div class="card-body">
+			<!-- 1행 : 금액 / 수금구분 -->
+			<div class="row g-2">
+				<!-- 매출금액 -->
+				<div class="col-md-3">
+					<label for="saleAmt" class="form-label">매출금액</label> <input
+						type="text" id="saleAmt" class="form-control text-end"
+						placeholder="0" />
+				</div>
+
+				<!-- 수금누계금액 -->
+				<div class="col-md-3">
+					<label for="rcvTotalAmt" class="form-label">수금누계금액</label> <input
+						type="text" id="rcvTotalAmt" class="form-control text-end"
+						placeholder="0" />
+				</div>
+
+				<!-- 미수금액 -->
+				<div class="col-md-3">
+					<label for="arrearAmt" class="form-label">미수금액</label> <input
+						type="text" id="arrearAmt" class="form-control text-end"
+						placeholder="0" />
+				</div>
+
+				<!-- 수금구분 -->
+				<div class="col-md-3">
+					<label for="rcvType" class="form-label">수금구분</label> <select
+						id="rcvType" class="form-select">
+						<option value="">선택</option>
+						<option value="CASH">현금</option>
+						<option value="BANK">계좌이체</option>
+						<option value="CARD">카드</option>
+						<option value="NOTE">어음</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- 2행 : 수금예정일 / 연체구분 / 상환여부 -->
+			<div class="row g-2 mt-3">
+				<!-- 수금예정일 -->
+				<div class="col-md-3">
+					<label for="planRcvDt" class="form-label">수금예정일</label>
+					<div class="input-group">
+						<input type="text" id="planRcvDt" class="form-control"
+							placeholder="YYYY-MM-DD" /> <span class="input-group-text">
+							<i class="bi bi-calendar"></i>
+						</span>
+					</div>
+				</div>
+
+				<!-- 연체구분 -->
+				<div class="col-md-3">
+					<label for="delayType" class="form-label">연체구분</label> <select
+						id="delayType" class="form-select">
+						<option value="">선택</option>
+						<option value="NORM">정상</option>
+						<option value="SHORT">단기연체</option>
+						<option value="LONG">장기연체</option>
+						<option value="LOSS">대손처리</option>
+					</select>
+				</div>
+
+				<!-- 상환여부 -->
+				<div class="col-md-3 ms-4">
+					<label class="form-label d-block mb-1">상환여부</label>
+
+					<div class="d-flex align-items-center gap-3">
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="repayYn"
+								id="repayY" value="Y" checked /> <label
+								class="form-check-label" for="repayY">Y</label>
+						</div>
+
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="repayYn"
+								id="repayN" value="N" /> <label class="form-check-label"
+								for="repayN">N</label>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<script>
+
+
+	
+    // 1. Toast UI Grid 테마
+tui.Grid.applyTheme('default', {
+  cell: {
+    normal: {
+      border: '#dedede',
+      background: '#ffffff',
+      showVerticalBorder: true
+    },
+    header: {
+      border: '#dedede',
+      background: '#f5f5f5',
+      showVerticalBorder: true
+    },
+    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
+    rowHeader: {
+      border: '#dedede',
+      background: '#ffffff',
+      showVerticalBorder: true
+    },
+    editable: {
+      background: '#FFFDF0',
+      text: '#000'
+    },
+    selectedHeader: {
+      background: '#f5f5f5'
+    },
+    selected: {
+      background: '#ffffff'
+    }
+  }
+});
+
+
+
+    // 2. 더미 데이터
+    const detailData = [
+        {
+        	custcomId: '251126-0001',
+        	custcomName: '무신사',
+        	creditGrade: 'A',
+        	delayFg: 'Y',
+        	monthSaleAmt: '200,000,000',
+        	basisAtmptBlce: '800,000,000',
+        	recpt:'1,000,000,000',
+        	atmptAmt:'N'
+        },
+        {
+        	custcomId: '251126-0002',
+        	custcomName: '29cm',
+        	creditGrade: 'B',
+        	delayFg: 'Y',
+        	monthSaleAmt: '300,000,000',
+        	basisAtmptBlce:'500,000,000',
+        	recpt:'800,000,000',
+        	atmptAmt:'N'
+        }
+    ];
+
+    // 3. Grid 공통 옵션
+    const businessGridOptions = {
+        bodyHeight: 180,
+        scrollX: false,
+        scrollY: true,
+        rowHeight: 40,
+        autoWidth: true,
+        columnOptions: {
+            minWidth: 80,
+            resizable: true
+        }
+    };
+
+    // 4. 미수상세 목록 Grid 생성
+    const detailGrid = new tui.Grid({
+        el: document.getElementById('detailGrid'),
+        data: detailData,
+        ...businessGridOptions,
+        columns: [
+            { header: '고객코드', name: 'custcomId' },
+            { header: '고객사', name: 'custcomName' },
+            { header: '신용등급', name: 'creditGrade' },
+            { header: '연체구분', name: 'delayFg' },
+            { header: '당월매출금액', name: 'monthSaleAmt' },
+            { header: '기초미수잔액', name: 'basicAtmptBlce' },
+            { header: '수금', name: 'recpt' },
+            { header: '미수금액', name: 'atmptAmt' },
+        ]
+    });
+
+    
+    
+
+</script>
+</body>
+</html>
