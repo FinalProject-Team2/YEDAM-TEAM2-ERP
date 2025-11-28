@@ -14,6 +14,12 @@
 	width: 150px; /* 원하는 가로 크기 */
 	height: 200px; /* 원하는 세로 크기 */
 	object-fit: cover; /* 비율 유지하며 영역에 맞게 채움 */
+	cursor: pointer;
+}
+
+.readonly-input[readonly] {
+	background-color: #e9ecef; /* Bootstrap 기본 disabled 색상 */
+	cursor: not-allowed; /* 마우스 커서도 입력 불가 느낌 */
 }
 
 .form-select {
@@ -89,8 +95,8 @@
 						<h5 class="card-title">기본정보&인사정보</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark ">근로계약서</button>
-						<button class="btn btn-outline-dark ">등록</button>
+						<button class="btn btn-outline-dark">근로계약서</button>
+						<button class="btn btn-outline-dark" id="btn-save">등록</button>
 						<button class="btn btn-outline-danger ">삭제</button>
 					</div>
 				</div>
@@ -99,19 +105,26 @@
 
 					<div class="row">
 						<div class="col-md-4 text-center">
-							<img id="v_proofPhoto" src="/images/faces/face11.jpg" alt="사진"
+							<img id="v_proofPhoto" src="/images/profil/nonUser.jpeg" alt="사진"
 								class="img-thumbnail fixed-photo" />
+								<input type="file"
+								       id="photoInput"
+								       accept="image/*"
+								       style="display: none;">								
 						</div>
 						<div class="col-md-8">
 							<div class="row mb-2">
 								<div class="col-md-6">
-									<label class="form-label">사번</label> <input id="v_empId"
-										type="text" class="form-control" placeholder="사번(자동생성)" />
+									<label class="form-label ">사번</label> <input id="v_empId"
+										type="text" class="form-control readonly-input" readonly="readonly"  placeholder="사번(자동생성)" />
+										<input id="v_deptId" type="text" style="display: none;">
+										<input id="v_basiId" type="text" style="display: none;">
+										<input id="v_vendId" type="text" style="display: none;">
 								</div>
 								<div class="col-md-6">
 									<label for="userName" class="form-label">입사일</label>
 									<div class="input-group date js-date-single">
-										<input id="v_encpn" type="text"
+										<input id="v_encpn" type="text"										    
 											class="form-control datepicker js-date-input"
 											placeholder="날짜 선택"> <span
 											class="input-group-text js-date-icon"> <i
@@ -156,9 +169,11 @@
 						<div class="col-md-2">
 							<label class="form-label">부서</label> <select id="v_deptNm"
 								class="form-select">
-								<option>인사</option>
-								<option>영업</option>
-								<option>생산</option>
+								<option>인사팀</option>
+								<option>재무팀</option>
+								<option>개발팀</option>
+								<option>영업팀</option>
+								<option>마케팅팀</option>
 							</select>
 						</div>
 						<div class="col-md-3">
@@ -186,7 +201,7 @@
 							<label class="form-label">고용형태</label> <select
 							    id="v_emplymTy"
 								class="form-select">
-								<option value="">정직원</option>
+								<option>정직원</option>
 								<option>계약직</option>
 								<option>일용직</option>
 							</select>
@@ -196,10 +211,10 @@
 							<label class="form-label">재직상태</label> <select
 							    id="v_hffcSt"
 								class="form-select">
-								<option value="hffcStTest_001">재직</option>
-								<option value="hffcStTest_002">퇴직</option>
-								<option value="hffcStTest_003">휴직</option>
-								<option value="hffcStTest_004">퇴사</option>
+								<option >재직</option>
+								<option >퇴직</option>
+								<option >휴직</option>
+								<option >퇴사</option>
 							</select>
 						</div>
 
@@ -214,7 +229,7 @@
 
 						<div class="col-md-4">
 							<label class="form-label">계좌번호</label>
-							<input id="acnutno" type="text" class="form-control" placeholder="계좌번호입력" />
+							<input id="v_acnutno" type="text" class="form-control" placeholder="계좌번호입력" />
 						</div>
 
 						<div class="col-md-4">
@@ -230,7 +245,7 @@
 					<div class="row mb-2">
 
 						<div class="col-md-6">
-							<label class="form-label">급여 방식</label> <select id="salaryType"
+							<label class="form-label">급여 방식</label> <select id="v_salaryType"
 								class="form-select">
 								<option value="bslry">기본급</option>
 								<option value="pymhr">시급</option>
@@ -238,7 +253,7 @@
 						</div>
 						<div class="col-md-6">
 							<label class="form-label">기본급/시급</label> <input type="text"
-								id="salaryInput" class="form-control" placeholder="금액입력"
+								id="v_salaryInput" class="form-control" placeholder="금액입력"
 								name="monthlySalary" />
 						</div>
 
@@ -250,27 +265,35 @@
 
 		</div>
 	</div>
-	<script>
-	
-	
-	
+	<script>	
 	function getList(el) {
-		let keyword = document.querySelectorAll('.empJohoe');
-		
+		//jquery형식 db요청방식
+		// .empJohoe 클래스 가진 input 값들을 객체로 수집
 		let datas = {};
-		
-		for(let val of keyword){
-			datas[val.id] = val.value;
-		}
-		
-		fetch(`/empJohoe?nm=${datas.nm}&empId=${datas.empId}&deptNm=${datas.deptNm}&clsf=${datas.clsf}`)
-		.then(response => response.json())
-		.then((result) => {			
-			console.log(result);
-			grid.resetData(result);
+		$('.empJohoe').each(function() {
+		    datas[this.id] = $(this).val();
+		});
+
+		// jQuery AJAX 호출
+		$.ajax({
+		    url: "/empJohoe",                // 요청 URL
+		    type: "get",                     // GET 방식 (fetch 코드와 동일)
+		    data: {                          // 쿼리 파라미터 자동 변환
+		        nm: datas.nm,
+		        empId: datas.empId,
+		        deptNm: datas.deptNm,
+		        clsf: datas.clsf
+		    }
 		})
-	}
-	
+		.done((result) => {
+		    console.log(result);
+		    grid.resetData(result);          // 결과를 grid에 반영
+		})
+		.fail((error) => {
+		    console.error(error);
+		    alert("데이터 요청 중 오류 발생");
+		});
+	}	
 
 		// Grid 생성
 		const grid = new tui.Grid({
@@ -298,19 +321,36 @@
 			bodyHeight : 440, // 본문 높이 고정
 		});
 
-		//급여 경우의수 처리
-		function bindSalary(rowData) {
-			if (rowData.bslry) {
-				salaryType.value = "bslry";
-				salaryInput.value = rowData.bslry;
-			} else if (rowData.pymhr) {
-				salaryType.value = "pymhr";
-				salaryInput.value = rowData.pymhr;
-			} else {
-				salaryType.value = "";
-				salaryInput.value = "";
-			}
-		}
+				
+		//사진 업로드
+		$(document).ready(function () {
+
+			  // ✅ 이미지 클릭 → 파일 선택창 열기
+			  $("#v_proofPhoto").on("click", function () {
+			    $("#photoInput").trigger("click");
+			  });
+			
+			  // ✅ 파일 선택 시 이미지 미리보기
+			  $("#photoInput").on("change", function (e) {
+			    const file = e.target.files[0];
+			    if (!file) return;
+			
+			    // ✅ 이미지 파일만 허용
+			    if (!file.type.startsWith("image/")) {
+			      alert("이미지 파일만 업로드 가능합니다.");
+			      $(this).val(""); // 파일 입력 초기화
+			      return;
+			    }
+			
+			    const reader = new FileReader();
+			    reader.onload = function (event) {
+			      $("#v_proofPhoto").attr("src", event.target.result); // ✅ 즉시 미리보기
+			    };
+			    reader.readAsDataURL(file);
+			  });
+			
+			});
+		
 	</script>
 	<script type="module">
 import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
@@ -319,12 +359,57 @@ grid.on('click', function(ev) {
     const rowData = grid.getRow(ev.rowKey);
     if (!rowData) return;
 
-    bindGridToForm(rowData);
-    bindSalary(rowData); // 급여 처리
+    bindGridToForm(rowData);    
     
     const dto = formToJson();  
     console.log(dto);
 });
+
+function setDbAdd(el) {		
+		let empchk = $("#v_empId").val();
+		if(empchk) {
+			console.log("기존사원");
+			let datas = formToJson();
+			datas["bslry"] = null;
+			datas["pymhr"] = null;	
+			datas[$("#v_salaryType").val()] = $("#v_salaryInput").val();
+
+			const file = $("#photoInput")[0].files[0];
+
+			const formData = new FormData();
+
+			formData.append("empVO", new Blob(
+				[JSON.stringify(datas)],
+				{ type: "application/json" }
+				));
+			
+			if (file) {formData.append("photo", file);}
+			
+			console.log(datas);
+			console.log(formData);
+			// jQuery AJAX - POST 방식으로 JSON 전송
+			 $.ajax({
+			    url: "/empEdit",                 // 요청 URL
+			    type: "post",                      // POST 방식
+			    contentType: false,   // JSON 전송
+			    data: formData,        // 객체를 JSON 문자열로 변환
+				processData: false				
+			})
+			.done((result) => {
+			    console.log(result);
+			    grid.resetData(result);            // 결과를 grid에 반영
+			})
+			.fail((error) => {
+			    console.error(error);
+			    alert("등록 중 오류 발생");
+			}); 
+
+		}else{
+			console.log("신규사원");
+		}		
+	}//end of setDbAdd(el)
+
+$("#btn-save").on("click", (e) =>{setDbAdd(e);});
 </script>
 </body>
 </html>

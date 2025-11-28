@@ -5,20 +5,97 @@
 	<select id="findGrp">
      SELECT  grp_id,
              grp_nm,
-             dc
+             dc,
+             oprtr_yn
      FROM    tb_code_grp
      WHERE   1 = 1
      <if test="grpNm != null and grpNm != ''">
          AND grp_nm LIKE '%' || #{grpNm} || '%'
      </if>
+     <if test="oprtrYn != null and oprtrYn != ''">
+        AND oprtr_yn = #{oprtrYn}
+    </if>
     </select>
 	
 	<select id="findCode">
-	 SELECT  code_id,
-	         code_nm,
-	         yn
-	 FROM    tb_code
-	 WHERE   grp_id = #{grpId}
+	 SELECT  code_id,                          
+             SUBSTR(code_id, 2) AS code_id_no_prefix, 
+             code_nm,
+             yn
+     FROM    tb_code
+     WHERE   grp_id = #{grpId}
+     AND     (vend_id IS NULL OR vend_id = #{vendId})
+     ORDER BY SUBSTR(code_id, 2) ASC
 	</select>
+	
+	<select id="regYn">
+	  SELECT COUNT(grp_id)
+	  FROM   tb_code_grp
+	  WHERE  oprtr_yn = 'N'
+	  AND    grp_id = #{grpId}
+	</select>
+	
+	
+	<select id="existsCode" resultType="int">
+        SELECT COUNT(*)
+        FROM   tb_code
+        WHERE  grp_id  = #{grpId}
+        AND    code_nm = #{codeNm}
+    </select>
+	
+	<insert id="regCode">
+	 <selectKey keyProperty="codeId" resultType="String" order="BEFORE">
+      SELECT
+       CASE
+         WHEN EXISTS (
+           SELECT 1
+           FROM tb_code
+           WHERE grp_id = #{grpId}
+             AND code_id LIKE SUBSTR(#{grpId}, 1, 1) || '%'
+         )
+         THEN
+           SUBSTR(#{grpId}, 1, 1) ||
+           TO_CHAR(max_num + 1)
+         ELSE
+           TO_CHAR(max_num + 1)
+       END AS next_code_id
+      FROM (
+            SELECT NVL(
+                       MAX(
+                           TO_NUMBER(REGEXP_REPLACE(code_id, '[^0-9]', ''))
+                       ), 0) AS max_num
+            FROM tb_code
+            WHERE grp_id = #{grpId})
+     </selectKey>
+	 INSERT INTO tb_code (code_id,
+                          grp_id,
+                          code_nm,
+                          yn,
+                          vend_id)
+     SELECT
+			#{codeId},            
+            #{grpId},
+            #{codeNm},
+            #{yn},
+            #{vendId}
+     FROM dual
+     WHERE (#{vendId} IS NULL OR EXISTS (
+           SELECT 1
+           FROM   tb_vend v
+           WHERE  v.vend_id = #{vendId}))
+     AND  EXISTS (
+                  SELECT 1
+                  FROM   tb_code_grp g
+                  WHERE  g.grp_id = #{grpId})
+	</insert>
+	
+	<update id="modifyCode">
+     UPDATE tb_code
+     SET    code_nm = #{codeNm},
+            yn      = #{yn},
+            updt_dt = SYSDATE
+     WHERE  grp_id  = #{grpId}
+     AND    code_id = #{codeId}   
+    </update>
 	
 </mapper>

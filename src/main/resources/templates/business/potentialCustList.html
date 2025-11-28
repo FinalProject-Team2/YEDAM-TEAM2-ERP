@@ -27,36 +27,42 @@
 	<form th:action="@{/potential/sync}" method="post" class="mb-2">
 		<button class="btn btn-primary">공공데이터 동기화</button>
 	</form>
-	<table class="table">
-		<thead>
-			<tr>
-				<th>잠재정보번호</th>
-				<th>조건번호</th>
-				<th>거래처ID</th>
-				<th>순위</th>
-				<th>거래처명</th>
-				<th>업종</th>
-				<th>규모</th>
-				<th>지역</th>
-				<th>설립일</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr th:each="row : ${list}">
-				<td th:text="${row.potentialInfoNo}"></td>
-				<td th:text="${row.potentialCondNo}"></td>
-				<td th:text="${row.vendId}"></td>
-				<td th:text="${row.rank}"></td>
-				<td th:text="${row.vendNm}"></td>
-				<td th:text="${row.industryType}"></td>
-				<td th:text="${row.companySize}"></td>
-				<td th:text="${row.region}"></td>
-				<td th:text="${row.establishDate.substring(0,4) + '년 ' 
+	<div
+		style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;">
+		<table class="table" style="height: 300px;"> 연습테이블
+			<thead>
+				<tr>
+					<th>잠재정보번호</th>
+					<th>조건번호</th>
+					<th>거래처ID</th>
+					<th>순위</th>
+					<th>거래처명</th>
+					<th>업종</th>
+					<th>규모</th>
+					<th>지역</th>
+					<th>설립일</th>
+					<th>리드점수</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="row : ${list}">
+					<td th:text="${row.potentialInfoNo}"></td>
+					<td th:text="${row.potentialCondNo}"></td>
+					<td th:text="${row.vendId}"></td>
+					<td th:text="${row.rank}"></td>
+					<td th:text="${row.vendNm}"></td>
+					<td th:text="${row.industryType}"></td>
+					<td th:text="${row.companySize}"></td>
+					<td th:text="${row.region}"></td>
+					<td
+						th:text="${row.establishDate.substring(0,4) + '년 ' 
 					            + row.establishDate.substring(5,7) + '월 ' 
 					            + row.establishDate.substring(8,10) + '일'}"></td>
-			</tr>
-		</tbody>
-	</table>
+					<td th:text="${leadScore}"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
 	<div class="row">
 		<div class="col-md-12 mb-3">
 			<div class="card">
@@ -116,7 +122,6 @@
 								</div>
 							</div>
 						</div>
-
 					</div>
 				</div>
 			</div>
@@ -178,7 +183,7 @@
 		const potentialgrid = new tui.Grid({
 			el : document.getElementById('potentialgrid'),
 			data : potentialData,
-			scrollX : false,
+			scrollX : true,
 			scrollY : true,
 			minBodyHeight : 0,
 			autoWidth : true,

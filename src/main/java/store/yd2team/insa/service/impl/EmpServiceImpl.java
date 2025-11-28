@@ -21,4 +21,10 @@ public class EmpServiceImpl implements EmpService{
 		return empMapper.getListEmpJohoe();
 	}
 
+	@Override
+	public int setDbEdit(EmpVO emp) {
+		
+		return empMapper.setDbEdit();
+	}
+
 }

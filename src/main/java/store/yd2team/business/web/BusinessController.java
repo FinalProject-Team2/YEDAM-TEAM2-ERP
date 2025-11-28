@@ -55,7 +55,15 @@ public class BusinessController {
 		model.addAttribute("list", businessService.getList());
 		return "business/potentialCustList";
 	}
-
+	
+	// 잠재고객조건조회처리
+	@PostMapping("/potentialCustStdrList")
+	public String stdrlist(Model model) {
+		System.out.println("=== BusinessController.list() 호출됨 ===");
+		model.addAttribute("list", businessService.getList());
+		return "redirect:/potentialCustStdrList";
+	}
+	// 잠재고객데이터매핑
 	@PostMapping("/potential/sync")
 	public String sync() {
 		businessService.fetchAndSaveFromApi();

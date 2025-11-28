@@ -14,6 +14,6 @@ public class OrgChartController {
 				
 				
 				model.addAttribute("test", "testone");
-				return "orgtest";
+				return "/insa/orgtest";
 			}
 }

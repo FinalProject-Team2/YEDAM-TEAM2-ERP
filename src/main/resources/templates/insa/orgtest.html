@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
@@ -9,7 +12,7 @@ a[data-add-more-fields-btn] {
 }
 </style>
 </head>
-<body>
+<body layout:fragment="content">
 <div id="tree"></div>
 <script src="https://cdn.balkan.app/orgchart.js"></script>
 <script>
