@@ -9,7 +9,7 @@
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
-<title>receivables</title>
+<title>출하관리</title>
 <style>
 .form-select {
 	color: #000 !important;
@@ -24,14 +24,16 @@
 				<div class="card-header">
 					<h5 class="card-title">검색조건</h5>
 					<div class="card-header-right">
+					    <button type="button" class="btn btn-dark">초기화</button>
 						<button class="btn btn-outline-dark">조회</button>
 					</div>
 				</div>
 				<div class="card-body">
 					<div class="row">
 						<div class="col-md-3">
-							<label class="form-label">고객코드</label> <input type="text"
-								class="form-control">
+							<label class="form-label">고객코드</label> 
+							<input type="text" class="form-control">
+						
 						</div>
 						<div class="col-md-3">
 							<label class="form-label">고객사</label> <select id="dept"
@@ -50,7 +52,7 @@
 							</select>
 						</div>
 						<div class="col-md-4">
-							<label class="form-label">기간</label>
+							<label class="form-label">요청출하일</label>
 							<div class="d-flex align-items-center">
 								<!-- 시작일 -->
 								<div class="input-group date me-2" id="applyDatePickerStart">
@@ -79,129 +81,69 @@
 			<!-- 사원목록 -->
 			<div class="card">
 				<div class="card-header">
-					<h5 class="card-title">입출금관리</h5>
+					<h5 class="card-title">출하완료목록</h5>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark" id="openRciptTretModal">입금처리</button>
-						<button class="btn btn-outline-dark" id="openDelayModal">연체관리이력</button>
+
 						<button id="addRowBtn" class="btn btn-outline-dark">행추가</button>
-						<button type="button" class="btn btn-dark">초기화</button>
-						<button class="btn btn-outline-dark" id="openRciptTretModal">저장</button>
+						<button type="button" class="btn btn-dark">반려</button>
+						<button class="btn btn-outline-dark" id="openRciptTretModal">출하처리</button>
 					</div>
 				</div>
 				<div class="card-body">
-					<div id="grid"></div>
+					<div id="oustGrid"></div>
 				</div>
 			</div>
 		</div>
 	</div>
-	<div th:replace="business/modal/rciptTretModal :: rciptTretModal"></div>
+	<!--<div th:replace="business/modal/rciptTretModal :: rciptTretModal"></div>
 	<div th:replace="business/modal/delayModal :: delayModal"></div>
+	-->
 	<script>
-    const gridData = [
+    const oustData = [
     	  {
-    		custcomId: "251126-0001",
+    		oustId: "251126-0001",
     		custcomName: "무신사",
-    		trnsDate: "2025-01-20",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
+    		cttpc: "02-111-2222",
+    		shipmntDt: "2025-11-28",
+    		dmndShipDt: "2025-12-02",
+    		productName: "롱패딩외2종",
+    		ttPrice: "680,000",
+    		ttSoQy: "10",
+    		currStockQy: "100",
+    		empId: "논개"
     	  },
     	  {
-    		custcomId: "251126-0002",
+    		oustId: "251126-0002",
     		custcomName: "29cm",
-    		trnsDate: "2025-02-12",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
+    		cttpc: "02-777-8888",
+    		shipmntDt: "2025-11-20",
+    		dmndShipDt: "2025-11-28",
+    		productName: "거위털패딩외2종",
+    		ttPrice: "5,000,000",
+    		ttSoQy: "10",
+    		currStockQy: "50",
+    		empId: "구론산"
     	  },
-    	  {
-    		custcomId: "251126-0003",
-    		custcomName: "에이블리",
-    		trnsDate: "2025-01-11",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  },
-    	  {
-    		custcomId: "251126-0004",
-    		custcomName: "쿠팡",
-    		trnsDate: "2025-01-22",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  },
-    	  {
-    		custcomId: "251126-0005",
-    		custcomName: "스타일난다",
-    		trnsDate: "2025-02-28",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  },
-    	  {
-    		custcomId: "251126-0006",
-    		custcomName: "LF",
-    		trnsDate: "2025-03-10",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  },
-    	  {
-    		custcomId: "251126-0007",
-    		custcomName: "뮈메프",
-    		trnsDate: "2025-03-22",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  }
     	];
         // Grid 생성
-        const grid = new tui.Grid({
-            el: document.getElementById('grid'),
-            data: gridData,
+        const oustGrid = new tui.Grid({
+            el: document.getElementById('oustGrid'),
+            data: oustData,
             scrollX: true,
             scrollY: true,
             minBodyHeight: 0,
             autoWidth: true,
             columns: [
-            	  { header: '고객코드', name: 'custcomId', align: 'center' },
+            	  { header: '출고의뢰번호', name: 'oustId', align: 'center' },
             	  { header: '고객사', name: 'custcomName', align: 'center' },
-            	  { header: '거래일자', name: 'trnsDate' },
-            	  { header: '매출내역', name: 'saleCtnt', align: 'right' },
-            	  { header: '매출금액', name: 'salAmt', editor: 'text' },
-            	  { header: '대출금액', name: 'borwAmt', editor: 'text' },
-            	  { header: '원금잔액', name: 'prinsumBaln', align: 'right', editor: 'text' },
-            	  { header: '입금약속액', name: 'rciptAppoAmt', editor: 'text' },
-            	  { header: '입금약속일', name: 'rciptAppoDt' },
-            	  { header: '최근납입일', name: 'ltstRciptDt' },
+            	  { header: '연락처', name: 'cttpc' },
+            	  { header: '출고완료일', name: 'shipmntDt', align: 'right' },
+            	  { header: '요청출하일', name: 'dmndShipDt', editor: 'text' },
+            	  { header: '상품명', name: 'productName', editor: 'text' },
+            	  { header: '금액합계(원)', name: 'ttPrice', align: 'right', editor: 'text' },
+            	  { header: '주문수량(EA)', name: 'ttSoQy', editor: 'text' },
+            	  { header: '재고수량(EA)', name: 'currStockQy' },
+            	  { header: '작업자', name: 'empId' },
             	]
         });
         
