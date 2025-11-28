@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class BusinessVO {
 	    private Long   potentialInfoNo;   // POTENTIAL_INFO_NO
-	    private Long   potentialCondNo;   // POTENTIAL_COND_NO
+	    private int   potentialCondNo;   // POTENTIAL_COND_NO
 	    private String vendId;            // VEND_ID
 	    private Integer rank;             // RANK
 	    private String vendNm;            // VEND_NM
