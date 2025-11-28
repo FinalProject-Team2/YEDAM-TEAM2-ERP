@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="store.yd2team.business.mapper.PriceMapper">
 
+<!-- 조회 -->
 	  <select id="selectPolicy" parameterType="PriceVO"  resultType="PriceVO">
 
 	    SELECT
@@ -27,10 +28,11 @@
 	           BETWEEN p.applc_begin_dt
 	               AND NVL(p.applc_end_dt, TO_DATE('29991231','YYYYMMDD'))
 	    </if>
-	    ORDER BY p.crea_dt DESC
+	    ORDER BY p.price_policy_id
 
     </select>
 	
+<!-- 정책유형 공통코드 불러옴 -->
 	<select id="selectPriceType" resultType="store.yd2team.business.service.CommonCodeVO">
         SELECT
                c.code_id AS codeId
@@ -43,7 +45,73 @@
           AND  c.yn = 'Y'
         ORDER BY c.code_id
     </select>
+
+<!-- 저장버튼 insert update 머지문 -->
+	<update id="savePricePolicy" parameterType="PriceVO">
+	    MERGE INTO tb_price t
+	    USING (
+	        SELECT 
+	            #{priceId} AS price_policy_id,
+	            #{priceName} AS price_policy_name,
+	            #{type} AS price_ty,
+	            #{percent} AS basis_dc_rate,
+	            #{beginDt} AS applc_begin_dt,
+	            #{endDt} AS applc_end_dt,
+	            #{yn} AS yn,
+	            #{rm} AS rm,
+	            #{creaBy} AS crea_by,
+	            #{updtBy} AS updt_by
+	        FROM dual
+	    ) s
+	    ON (t.price_policy_id = s.price_policy_id)
+	
+	    WHEN MATCHED THEN
+	        UPDATE SET
+	            t.price_policy_name = s.price_policy_name,
+	            t.price_ty          = s.price_ty,
+	            t.basis_dc_rate     = s.basis_dc_rate,
+	            t.applc_begin_dt    = s.applc_begin_dt,
+	            t.applc_end_dt      = s.applc_end_dt,
+	            t.yn                = s.yn,
+	            t.rm                = s.rm,
+	            t.updt_dt           = SYSDATE,
+	            t.updt_by           = s.updt_by
+	
+	    WHEN NOT MATCHED THEN
+	        INSERT (
+	            price_policy_id,
+	            price_policy_name,
+	            price_ty,
+	            basis_dc_rate,
+	            applc_begin_dt,
+	            applc_end_dt,
+	            yn,
+	            rm,
+	            crea_dt,
+	            crea_by
+	        ) VALUES (
+	            fn_price_policy_id(),  -- 신규 생성
+	            s.price_policy_name,
+	            s.price_ty,
+	            s.basis_dc_rate, 
+	            s.applc_begin_dt, 
+	            s.applc_end_dt,
+	            'Y', 
+	            s.rm, 
+	            SYSDATE,
+	            s.crea_by
+	        )
+	</update>
+	
+<!-- 삭제 -->	
+	<delete id="deletePricePolicy" parameterType="java.util.List">
+	    DELETE FROM tb_price
+	    WHERE price_policy_id IN
+	    <foreach item="id" index="index" collection="list" open="(" separator="," close=")">
+	        #{id}
+	    </foreach>
+	</delete>
 	
 	
-	
+
 </mapper>

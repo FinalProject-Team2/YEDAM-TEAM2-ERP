@@ -4,7 +4,7 @@
   <!-- 목록 조회 -->
     <select id="getList" resultType="store.yd2team.business.service.BusinessVO">
         SELECT
-	            potential_info_no  as potentialinfoNo,
+	            potential_info_no  as potentialInfoNo,
 	            potential_cond_no  as potentialCondNo,
 	            vend_id            as vendId,
 	            rank               as rank,
@@ -15,6 +15,12 @@
 	             establish_date AS establishDate
         FROM 	tb_potential_cust_list
        ORDER BY potential_info_no desc
+    </select>
+    
+    <select id="existsPotentialInfoNo">
+	    SELECT COUNT(*)
+	    FROM tb_potential_cust_list
+	    WHERE potential_info_no = #{potentialInfoNo}
     </select>
 
     <!-- 공공데이터 insert -->
@@ -30,10 +36,10 @@
             region,
             establish_date
         ) VALUES (
-            seq_potential_info_no.nextval,
             #{potentialInfoNo},
-            #{vendId},
-            #{rank},
+            seq_potential_cond_no.nextval,   <!-- ★ 여기 수정 -->
+           'CUST' || LPAD(seq_vend_id.NEXTVAL, 3, '0'),
+            seq_rank.nextval,
             #{vendNm},
             #{industryType},
             #{companySize},
@@ -41,5 +47,43 @@
             to_date(#{establishDate}, 'yyyy-mm-dd')
         )
     </insert>
+    
+    <select id="getBusinessList" parameterType="store.yd2team.business.service.BusinessVO"> 
+    SELECT
+	        potential_info_no,
+	        potential_cond_no,
+	        vend_id,
+	        rank,
+	        vend_nm,
+	        industry_type,
+	        company_size,
+	        region,
+	        establish_date,
+	        crea_dt,
+	        crea_by,
+	        updt_dt,
+	        updt_by
+    FROM
+      	  	tb_potential_cust_list
+    WHERE 1 = 1
+	    <if test="industryType != null and industryType != ''">
+	        AND industry_type LIKE '%' || #{industryType} || '%'
+	    </if>
+	    <if test="companySize != null and companySize != ''">
+	        AND company_size = #{companySize}
+	    </if>
+	    <if test="region != null and region != ''">
+	        AND region LIKE '%' || #{region} || '%'
+	    </if>
+	    <if test="startDate != null and startDate != ''">
+	        AND establish_date &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+	    </if>
+	    <if test="endDate != null and endDate != ''">
+	        AND establish_date &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+	    </if>
+    ORDER BY rank DESC
+</select>
+    
+    
 
 </mapper>
