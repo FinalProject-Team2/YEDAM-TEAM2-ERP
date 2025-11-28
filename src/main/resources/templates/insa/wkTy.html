@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>wkTy</title>
+
+  <!-- ✅ Toast UI 공통 유틸 -->
+  <script src="https://uicdn.toast.com/tui-code-snippet/latest/tui-code-snippet.js"></script>
+
+  <!-- ✅ Date / Time Picker -->
+  <link rel="stylesheet"
+        href="https://uicdn.toast.com/tui-date-picker/latest/tui-date-picker.css">
+  <link rel="stylesheet"
+        href="https://uicdn.toast.com/tui-time-picker/latest/tui-time-picker.css">
+
+  <script src="https://uicdn.toast.com/tui-time-picker/latest/tui-time-picker.js"></script>
+  <script src="https://uicdn.toast.com/tui-date-picker/latest/tui-date-picker.js"></script>
+
+  <!-- ✅ Grid (여기서 한 번 더 로드해도 됨) -->
+  <link rel="stylesheet"
+        href="https://uicdn.toast.com/grid/latest/tui-grid.css">
+  <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+</head>
+<body layout:fragment="content">
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title">휴일 기준 관리</h5>
+                <div class="card-header-right">
+                    <button class="btn btn-danger">삭제</button>
+					<button class="btn btn-outline-dark" id="btnHldyAdd">행추가</button>
+                    <button class="btn btn-outline-dark">저장</button>
+                </div>
+            </div>
+            <div class="card-body">
+           	  <div id="gridHldy" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+        <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title">근무형태 기준 관리</h5>
+                <div class="card-header-right">
+                    <button class="btn btn-dark">초기화</button>
+                    <button class="btn btn-danger">삭제</button>
+                    <button class="btn btn-outline-dark">저장</button>
+                    <button class="btn btn-outline-dark" id="openGuideModal">조회</button>
+                </div>
+            </div>
+            <div class="card-body">
+                </div>
+            </div>
+        </div>
+</div>
+<div th:replace="insa/modal/guideModal :: guideModal"></div>
+<script>
+    /* =====================================================
+     * 1. Grid 옵션
+     * ===================================================== */
+    const GridOptions = {
+        bodyHeight: 320,
+        scrollX: false,
+        scrollY: false,
+        rowHeaders: ["checkbox"],
+        columnOptions: {
+            minWidth: 80,
+            resizable: true
+        }
+    };
+
+    /* =====================================================
+     * 2. 더미 데이터 (camelCase)
+     * ===================================================== */
+    const hldyGridData = [
+    	  { hldyMmdd: "01-01", hldyNm: "신정",           yn: "Y" },
+    	  { hldyMmdd: "02-10", hldyNm: "설날",           yn: "Y" },
+    	  { hldyMmdd: "03-01", hldyNm: "삼일절",         yn: "Y" },
+    	  { hldyMmdd: "05-05", hldyNm: "어린이날",       yn: "Y" },
+    	  { hldyMmdd: "06-06", hldyNm: "현충일",         yn: "Y" },
+    	  { hldyMmdd: "08-15", hldyNm: "광복절",         yn: "Y" },
+    	  { hldyMmdd: "09-17", hldyNm: "추석",           yn: "Y" },
+    	  { hldyMmdd: "10-03", hldyNm: "개천절",         yn: "Y" },
+    	  { hldyMmdd: "10-09", hldyNm: "한글날",         yn: "Y" },
+    	  { hldyMmdd: "12-25", hldyNm: "성탄절",         yn: "N" }
+    ];
+
+    /* =====================================================
+     * 3. Grid 생성
+     * ===================================================== */
+     const hldyGrid = new tui.Grid({
+    	  el: document.getElementById("gridHldy"),
+    	  data: hldyGridData,
+    	  ...GridOptions,
+    	  editingType: 'cell',
+    	  columns: [
+    	    {
+    	      header: "월일",
+    	      name: "hldyMmdd",
+    	      editor: {
+    	        type: 'datePicker',
+    	        options: {
+    	          format: 'MM-dd'   // ✅ 여기서 mm-dd 형식 지정
+    	        }
+    	      }
+    	    },
+    	    { header: "휴일명", name: "hldyNm", editor: "text" },
+    	    {
+    	      header: "사용여부",
+    	      name: "yn",
+    	      editor: {
+    	        type: 'select',
+    	        options: {
+    	          listItems: [
+    	            { text: '사용', value: 'Y' },
+    	            { text: '미사용', value: 'N' }
+    	          ]
+    	        }
+    	      }
+    	    }
+    	  ]
+    	});
+    /* =====================================================
+     * 5. 모달
+     * ===================================================== */
+     const openBtn = document.getElementById("openGuideModal");
+     const modal   = document.getElementById("guideModal");
+     const back    = document.getElementById("guideBackdrop");
+
+     function openModal() {
+         if (!modal || !back) return;
+         modal.classList.add("show");
+         modal.style.display = "block";
+         back.style.display = "block";
+         grid2.refreshLayout();
+     }
+
+     if (openBtn) {
+         openBtn.addEventListener("click", openModal);
+     }
+
+     
+</script>
+</body>
+</html>

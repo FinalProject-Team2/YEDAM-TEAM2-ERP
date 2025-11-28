@@ -338,7 +338,6 @@ $(function () {
   // 4. 예전 id 기반 input에도 마스크 적용 (호환용)
   // ==========================
 
-------------------------------------------------------------------------확인
   const $legacyApplyDate = $('#applyDate');
   if ($legacyApplyDate.length) {
     attachDateMask($legacyApplyDate);
@@ -346,7 +345,6 @@ $(function () {
   }
 
   attachDateMask($('#applyDate')); // 단일 날짜(예전 패턴)
-------------------------------------------------------------------------확인
 
   // ==========================
   // 5. Toast UI Grid 테마 적용
@@ -370,16 +368,22 @@ $(function () {
           background: '#ffffff',
           showVerticalBorder: true
         },
-        editable: {
-          background: '#FFFDF0',
-          text: '#000'
-        },
+	    editable: {
+	      background: '#FFFDF0',   // 연한 아이보리
+	      text: '#000',
+	      border: '#E1DBB8',       // 테두리
+	      showVerticalBorder: true // 칸 구분 더 또렷
+	    },
         selectedHeader: {
           background: '#f5f5f5'
         },
-        selected: {
-          background: '#ffffff'
-        }
+	    selected: {
+	      background: '#FFF7C2',
+	      border: '#C9A93F'
+	    },
+	    focused: {
+	      border: '#9E812A'
+	    },
       }
     });
   }
@@ -568,3 +572,110 @@ $(function () {
   };
 
 })(window);
+
+
+// -------------------------------------------------------------------
+// 모달 공통 유틸 - 모달이 닫힐 때 내부 폼/날짜/체크박스 초기화
+// -------------------------------------------------------------------
+(function (global, $) {
+  global.TeamCommon = global.TeamCommon || {};
+  const ns = global.TeamCommon.modal = global.TeamCommon.modal || {};
+
+  /**
+   * 모달 내부 폼 요소 초기화
+   * @param {HTMLElement | string | jQuery} modalEl - 모달 엘리먼트 또는 selector
+   */
+  ns.reset = function (modalEl) {
+    const $modal = $(modalEl);
+    if (!$modal.length) return;
+
+    // 1) 텍스트 input / textarea 초기화 (hidden, checkbox, radio 제외)
+    $modal
+      .find('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), textarea')
+      .each(function () {
+        $(this).val('');
+      });
+
+    // 2) select 박스는 첫 옵션으로
+    $modal.find('select').each(function () {
+      this.selectedIndex = 0;
+      $(this).trigger('change'); // 필요하면 change 이벤트 발생
+    });
+
+    // 3) checkbox / radio 해제
+    $modal.find('input[type="checkbox"], input[type="radio"]').prop('checked', false);
+
+    // 4) datepicker / 팀 공통 날짜 input 정리
+    $modal
+      .find('.datepicker, .js-date-input, .js-ym-input, .js-date-range-start, .js-date-range-end')
+      .each(function () {
+        const $input = $(this);
+
+        // bootstrap-datepicker가 붙어있는 경우
+        if ($input.data('datepicker')) {
+          // 값 지우기
+          $input.datepicker('clearDates').datepicker('setDate', null);
+
+          // 시작/종료 제한도 초기화 (필요 없으면 주석)
+          $input.datepicker('setStartDate', null);
+          $input.datepicker('setEndDate', null);
+        } else {
+          // 단순 input 인 경우
+          $input.val('');
+        }
+      });
+
+    // 5) 유효성 표시 같은 클래스 정리 (원하면)
+    $modal.find('.is-invalid, .is-valid').removeClass('is-invalid is-valid');
+
+    // 6) Toast UI Grid 관련: 선택만 지울지, 데이터까지 초기화할지는 팀 컨벤션에 맞게 선택
+    if (global.tui && global.tui.Grid && typeof tui.Grid.getInstance === 'function') {
+      // 이 모달 안에 있는 그리드 컨테이너 찾기
+      $modal.find('.tui-grid-container, .tui-grid').each(function () {
+        const inst = tui.Grid.getInstance(this);
+        if (!inst) return;
+
+        // (A) 데이터까지 비우고 싶으면
+        // inst.clear();
+
+        // (B) 데이터는 두고 선택만 지우고 싶으면
+        try {
+          inst.uncheckAll(); // rowHeaders에 checkbox 있을 때
+          inst.clearSelection();
+        } catch (e) {
+          console.warn('Grid reset 중 오류', e);
+        }
+      });
+    }
+  };
+
+  /**
+   * Bootstrap 모달을 쓰는 페이지라면, 자동으로 hidden.bs.modal 에 묶어서 쓸 수도 있음
+   * (지금은 수동으로 closeModal에서 호출할 거라, 옵션 느낌으로만 둠)
+   */
+  $(function () {
+    $(document).on('hidden.bs.modal', '.modal', function () {
+      // Bootstrap 모달을 쓴다면, 모달이 완전히 닫힌 시점에 자동 초기화
+      ns.reset(this);
+    });
+  });
+
+})(window, jQuery);
+
+function closeModal() {
+  if (!modal || !back) return;
+  // 🔹 모달 닫기 전에 공통 초기화 호출
+  if (window.TeamCommon && TeamCommon.modal && typeof TeamCommon.modal.reset === 'function') {
+    TeamCommon.modal.reset(modal);
+  }  
+  modal.classList.remove("show");
+  modal.style.display = "none";
+  back.style.display = "none";
+}
+        if (modal) {
+            modal.addEventListener("click", (event) => {
+                if (!event.target.closest(".modal-content")) {
+                    closeModal();
+                }
+            });
+        }
