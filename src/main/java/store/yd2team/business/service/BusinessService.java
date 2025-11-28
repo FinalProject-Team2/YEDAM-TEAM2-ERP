@@ -7,4 +7,7 @@ public interface BusinessService {
 	List<BusinessVO> getList();
 	
 	void fetchAndSaveFromApi();
+	
+	//번호조회
+    int existsPotentialInfoNo(Long potentialInfoNo);
 }
