@@ -6,6 +6,10 @@
  select 
  a.*
  ,b.dept_nm
+ ,CASE WHEN bslry is not null THEN 'bslry'            
+            ELSE 'pymhr'
+       END AS salary_type
+ ,nvl(bslry, pymhr) salary_input
 from tb_emp a
 join tb_dept b
 on a.dept_id = b.dept_id
@@ -15,7 +19,46 @@ on a.dept_id = b.dept_id
 <if test="deptNm != null">  AND b.dept_nm like '%' || #{deptNm} || '%'</if>
 <if test="clsf != null">  AND a.clsf like '%' || #{clsf} || '%'</if>
 </where>
-</select> 
+</select>
+
+
+
+<!-- <insert id="setDbAdd">
+<selectKey keyProperty="empId" order="BEFORE" resultType="string">
+SELECT 'emp' || TO_CHAR(SYSDATE, 'YYMM') ||
+       LPAD(NVL(MAX(SUBSTR(emp_id, LENGTH(emp_id)-2, 3)), 0) + 1, 3, '0') AS emp_id
+FROM tb_emp
+WHERE SUBSTR(emp_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
+FOR UPDATE
+</selectKey>
+</insert> -->
+
+<update id="setDbEdit">
+    UPDATE tb_emp
+    SET
+        dept_id     = #{deptId},
+        basi_id     = #{basiId},
+        vend_id     = #{vendId},
+        nm          = #{nm},
+        brthdy      = #{brthdy},
+        cttpc       = #{cttpc},
+        email       = #{email},
+        dty         = #{dty},
+        clsf        = #{clsf},
+        rspofc      = #{rspofc},
+        emplym_ty   = #{emplymTy},
+        bslry       = #{bslry},
+        pymhr       = #{pymhr},
+        acnutno     = #{acnutno},
+        encpn       = #{encpn},
+        hffc_st     = #{hffcSt},
+        updt_dt     = SYSDATE,       <!-- 수정날짜는 현재시간 -->
+        updt_by     = 'myk',
+        proof_photo = #{proofPhoto}
+    WHERE emp_id   = #{empId}
+</update>
+
+
 
 
 
