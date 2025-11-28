@@ -20,6 +20,8 @@ public class PriceVO {
     private LocalDate endDt;
     private String yn;
     private String rm;
+    private String creaBy;
+    private String updtBy;
     
     
     // 조회조건
