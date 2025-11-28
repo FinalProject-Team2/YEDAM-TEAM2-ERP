@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import store.yd2team.common.dto.CodeRegResponseDto;
 import store.yd2team.common.service.CodeService;
 import store.yd2team.common.service.CodeVO;
 
@@ -21,8 +22,8 @@ public class CodeController {
 
 	// 공통 코드 그룹 조회
 	@PostMapping("/code/grpNm")
-	public List<CodeVO> commonCodeGrp(@RequestBody CodeVO grpNm) {
-		return codeService.findGrp(grpNm);
+	public List<CodeVO> commonCodeGrp(@RequestBody CodeVO vo) {
+		return codeService.findGrp(vo);
 	}
 
 	// 공통 코드 목록 조회
@@ -38,6 +39,49 @@ public class CodeController {
 		CodeVO cond = new CodeVO();
 		cond.setGrpNm(keyword);
 		return codeService.findGrp(cond);
+	}
+
+	// 공통 코드 등록
+	@PostMapping("/code/regCode")
+	public CodeRegResponseDto regCode(@RequestBody CodeVO vo) {
+		
+		String chkId = vo.getGrpId();
+
+		int chk = codeService.regYn(chkId);
+
+		if (chk == 0) {
+			return CodeRegResponseDto.fail("등록이 불가능한 코드 그룹입니다.");
+		}
+
+		int result = codeService.regCode(vo);
+
+		// 중복 or 실패(데이터 무결성 catch)
+		if (result == 0) {
+			return CodeRegResponseDto.fail("이미 존재하는 코드입니다.");
+		}
+
+		// 성공 (vo.getCodeId() 에 값 세팅해두었다고 가정)
+		return CodeRegResponseDto.ok(vo.getCodeId());
+	}
+	
+	// 공통 코드 수정
+	@PostMapping("/code/modCode")
+	public CodeRegResponseDto modifyCode(@RequestBody CodeVO vo) {
+
+	    // grpId / codeId 둘 다 들어왔는지 최소 체크
+	    if (vo.getGrpId() == null || vo.getCodeId() == null) {
+	        return CodeRegResponseDto.fail("그룹 ID 또는 코드 ID가 없습니다.");
+	    }
+
+	    int result = codeService.modifyCode(vo);
+
+	    if (result == 0) {
+	        // WHERE 조건에 해당하는 행이 없을 때 (이미 삭제됐거나 잘못된 ID)
+	        return CodeRegResponseDto.fail("수정할 코드가 없습니다.");
+	    }
+
+	    // 성공
+	    return CodeRegResponseDto.ok(vo.getCodeId());
 	}
 
 }
