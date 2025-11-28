@@ -338,7 +338,6 @@ $(function () {
   // 4. 예전 id 기반 input에도 마스크 적용 (호환용)
   // ==========================
 
-
   const $legacyApplyDate = $('#applyDate');
   if ($legacyApplyDate.length) {
     attachDateMask($legacyApplyDate);
@@ -346,7 +345,6 @@ $(function () {
   }
 
   attachDateMask($('#applyDate')); // 단일 날짜(예전 패턴)
-
 
   // ==========================
   // 5. Toast UI Grid 테마 적용
