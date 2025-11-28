@@ -1,0 +1,90 @@
+<!-- /templates/insa/modal/edcRegistModal.html -->
+<div th:fragment="registModal">
+  <!-- ✅ 모달 본체 -->
+  <div class="modal-backdrop" id="registBackdrop"></div>
+  <div class="modal" id="registModal">
+    <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 800px;">
+      <div class="modal-content">
+        <!-- 바디 -->
+				<div class="modal-body">
+					<div class="row mb-2">
+						<div class="col-md-10">
+							<h5 class="modal-title">법정의무교육 등록</h5>
+						</div>
+						<div class="col-md-2">
+							<button class="btn btn-outline-dark">등록</button>
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">교육명</label> <input type="text"
+								class="form-control" />
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">교육구분</label> <input type="text"
+								class="form-control" />
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">기관명</label> <input type="text"
+								class="form-control" />
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">강사</label> <input type="text"
+								class="form-control" />
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">교육 시작날짜</label> <input type="date"
+								class="form-control" />
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">교육 종료날짜</label> <input type="date"
+								class="form-control" />
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">수료기준</label> <input type="text"
+								value="" class="form-control" />
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">교육대상자 선정범위</label> <select
+								class="form-select">
+								<option value="전체">전체</option>
+								<optgroup label="직무">
+									<option>HRM(인적자원관리)</option>
+									<th:block th:each="job : ${jobs}">
+										<option th:value="${job.id}" th:text="${job.name}"></option>
+									</th:block>
+								</optgroup>
+								<optgroup label="직급">
+									<option>사원</option>
+									<option>대리</option>
+									<option>과장</option>
+									<option>부장</option>
+									<option>이사</option>
+								</optgroup>
+								<optgroup label="부서">
+									<option>팀원</option>
+									<option>팀장</option>
+									<option>관리자</option>
+									<option>임원</option>
+								</optgroup>
+							</select>
+						</div>
+					</div>
+					<div class="row mb-2">
+						<div class="col-md-6">
+							<label class="form-label">교육명</label> <input type="text"
+								class="form-control" />
+						</div>
+
+					</div>
+				</div>
+      </div>
+    </div>
+  </div>
+</div>
