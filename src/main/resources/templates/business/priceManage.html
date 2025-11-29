@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -127,8 +127,8 @@
 							<h5 class="card-title">단가정책 목록</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark" id="custcomBtn">거래처설정</button>
-							<button type="button" class="btn btn-outline-dark" id="itemBtn">품목설정</button>
+<!-- 							<button type="button" class="btn btn-outline-dark" id="custcomBtn">거래처설정</button>
+							<button type="button" class="btn btn-outline-dark" id="itemBtn">품목설정</button> -->
 							<button type="button" class="btn btn-danger" id="btnDelete">삭제</button>
 						</div>
 					</div>
@@ -224,6 +224,7 @@
 
 	
 <div th:replace="business/modal/custcomModal :: custcomModal"></div>
+<div th:replace="business/modal/productModal :: productModal"></div>
 
 <script>
 	// 0. 단가정책유형 공통코드 매핑
@@ -349,6 +350,17 @@
            	    return `<button class="grid-btn open-client-modal-btn" ${disabled}>거래처선택</button>`;
            	  }
            	},
+           	{
+           	  header: '품목선택',
+           	  name: 'productSelect',
+           	  width: 120,
+           	  align: 'center',
+           	  formatter: ({ row }) => {
+           	    // row.type 이 p2일 때만 활성 버튼
+           	    const disabled = row.type === 'p2' ? '' : 'disabled style="opacity:0.5;cursor:not-allowed;"';
+           	    return `<button class="grid-btn open-product-modal-btn" ${disabled}>품목선택</button>`;
+           	  }
+           	},
             { header: '할인율(%)', name: 'percent', width: 80, align: 'right' },
             { header: '적용시작일', name: 'beginDt', width: 120, align: 'right' },
             { header: '적용종료일', name: 'endDt', width: 120, align: 'right' },
@@ -405,13 +417,13 @@
     
     // 7. 모달 호출 버튼
     
-    // 거래처 선택 모달
+    // 7-1 거래처 선택 모달
 	const openBtn = document.getElementById("custcomBtn");
 	const modal   = document.getElementById("custcomModal");
 	const back    = document.getElementById("custcomBackdrop");
 	
-	
-	function openModal() {
+/*	
+ 	function openModal() {
 	  if (!modal || !back) return;
 	  modal.classList.add("show");
 	  modal.style.display = "block";
@@ -423,43 +435,127 @@
 	  } else {
 	    window.custcomGrid.refreshLayout();
 	  }
-	}
+	} // end openModal
 	
 	function closeModal() {
 	  if (!modal || !back) return;
 	  modal.classList.remove("show");
 	  modal.style.display = "none";
 	  back.style.display = "none";
+	} // end closeModal
+*/	
+	
+	function openCustcomModal() {
+		modal.classList.add("show");
+		modal.style.display = "block";
+		back.style.display = "block";
+		
+		if (!window.custcomGrid) {
+		  loadCustcomGrid();
+		} else {
+		  window.custcomGrid.refreshLayout();
+		}
 	}
 	
-	if (openBtn) {
-	  openBtn.addEventListener("click", openModal);
-	}
-	if (modal) {
-	  modal.addEventListener("click", (event) => {
-	    if (!event.target.closest(".modal-content")) {
-	      closeModal();
-	    }
-	  });
+	function closeCustcomModal() {
+		modal.classList.remove("show");
+		modal.style.display = "none";
+		back.style.display = "none";
 	}
 	
+	// 바깥 클릭 시 닫기
+	modal.addEventListener("click", (event) => {
+		if (!event.target.closest(".modal-content")) {
+		  closeCustcomModal();
+		}
+	});
+	
+	document.addEventListener('click', (e) => {
+
+	  if (e.target.classList.contains('open-client-modal-btn')) {
+
+	    const cell = priceGrid.getFocusedCell();
+	    const row = cell ? priceGrid.getRow(cell.rowKey) : null;
+	    if (!row) return;
+
+	    // 유형이 p1일 때만 오픈
+	    if (row.type !== 'p1') return;
+
+	    // 바깥 버튼과 동일하게 모달 열기
+	    openCustcomModal();
+	  }
+	}); // end 거래처모달
+	
+
+	// 7-2 상품 선택 모달
+	const openProductBtn = document.getElementById("productBtn");
+	const productModal   = document.getElementById("productModal");
+	const productBack    = document.getElementById("productBackdrop");
+	
+/*	
+ 	function openModal() {
+	  if (!productModal || !productBack) return;
+	  productModal.classList.add("show");
+	  productModal.style.display = "block";
+	  productBack.style.display = "block";
+	
+	  // 👇 모달 열때 최초 로딩 시 빈 데이터로 그리드 생성
+	  if (!window.productGrid) {
+	    loadProductGrid();
+	  } else {
+	    window.productGrid.refreshLayout();
+	  }
+	} // end openModal
+	
+	function closeModal() {
+	  if (!productModal || !productBack) return;
+	  productModal.classList.remove("show");
+	  productModal.style.display = "none";
+	  productBack.style.display = "none";
+	} // end closeModal
+*/	
+	
+	function openProductModal() {
+		productModal.classList.add("show");
+		productModal.style.display = "block";
+		productBack.style.display = "block";
+		
+		if (!window.productGrid) {
+		  loadProductGrid();
+		} else {
+		  window.productGrid.refreshLayout();
+		}
+	}
+	
+	function closeProductModal() {
+		productModal.classList.remove("show");
+		productModal.style.display = "none";
+		productBack.style.display = "none";
+	}
+	
+	productModal.addEventListener("click", (event) => {
+		if (!event.target.closest(".modal-content")) {
+		  closeProductModal();
+		}
+	});
 	
 	
 	document.addEventListener('click', (e) => {
 
-		  if (e.target.classList.contains('open-client-modal-btn')) {
+	  if (e.target.classList.contains('open-product-modal-btn')) {
 
-		    const cell = priceGrid.getFocusedCell();
-		    const row = cell ? priceGrid.getRow(cell.rowKey) : null;
-		    if (!row) return;
+	    const cell = priceGrid.getFocusedCell();
+	    const row = cell ? priceGrid.getRow(cell.rowKey) : null;
+	    if (!row) return;
 
-		    // 유형이 p1일 때만 오픈
-		    if (row.type !== 'p1') return;
+	    // 유형이 p2일 때만 오픈
+	    if (row.type !== 'p2') return;
 
-		    // 바깥 버튼과 동일하게 모달 열기
-		    openModal();
-		  }
-		});
+	    // 바깥 버튼과 동일하게 모달 열기
+	    openProductModal();
+	  }
+	}); // end 상품모달
+
 	 
     
     // 8. 초기화버튼 이벤트
@@ -476,7 +572,7 @@
         $btnInsertInit.addEventListener('click', function () {
             Object.values(priceForm).forEach(field => field.value = '');
         });
-    }
+    } 
 	    
     
  	// 9. 조회버튼 이벤트
@@ -628,7 +724,7 @@
 	    document.getElementById('formPriceType').value = "";
 	}
 	
-// ---------------------------- 모달 스크립트
+// ---------------------------- 거래처 모달 스크립트
 	//1. 그리드 생성
 	window.custcomGrid = null;
 
@@ -679,6 +775,60 @@
 	  console.log("선택된 거래처 목록:", checkedRows);
 
 	  bootstrap.Modal.getInstance(document.getElementById('custcomModal')).hide();
+	});
+	
+	
+	
+// ---------------------------- 상품 모달 스크립트
+	//1. 그리드 생성
+	window.productGrid = null;
+
+	function loadProductGrid(data = []) {
+	  if (window.productGrid) {
+	    window.productGrid.resetData(data);
+	    return;
+	  }
+	
+	  window.productGrid = new tui.Grid({
+	    el: document.getElementById('productGrid'),
+	    scrollX: false,
+	    scrollY: true,
+	    bodyHeight: 350,
+	    rowHeaders: ['checkbox'],
+	    columns: [
+	      { header: '상품명', name: 'productName', width: 300 },
+	      { header: '단위', name: 'unit', width: 152 },
+	      { header: '판매단가', name: 'basisSaleAmt', width: 240, align: 'right' },
+	    ]
+	  });
+	}
+
+	// 2. 조회버튼 거래처 조회
+	document.getElementById('searchProductBtn').addEventListener('click', () => {
+	  const keyword = document.getElementById('productName').value;
+	
+	  fetch('/product/list', {
+	    method: 'POST',
+	    headers: { 'Content-Type': 'application/json' },
+	    body: JSON.stringify({ productName: keyword })
+	  })
+	    .then(res => res.json())
+	    .then(data => loadProductGrid(data))
+	    .catch(err => console.error('상품 조회 오류:', err));
+	});
+
+	// 3. 입력버튼 거래처 입력
+	document.getElementById('insertProductBtn').addEventListener('click', () => {
+	  const checkedRows = window.productGrid.getCheckedRows();  // window 사용
+
+	  if (!checkedRows.length) {
+	    alert("선택된 상품이 없습니다.");
+	    return;
+	  }
+
+	  console.log("선택된 상품 목록:", checkedRows);
+
+	  bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
 	});
 	
 	
