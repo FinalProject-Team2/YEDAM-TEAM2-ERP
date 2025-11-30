@@ -5,439 +5,484 @@
       layout:decorate="~{layout}">
 <head>
     <meta charset="UTF-8">
+
+    <!-- Toast UI Grid -->
     <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
     <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
     <title>salyLedg</title>
+
+    <style>
+        /* 그리드/테이블 안 작은 버튼 공통 스타일 */
+        .grid-btn {
+            padding: 4px 10px;
+            border: 1px solid #bbb;
+            background-color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .grid-btn:hover {
+            background-color: #eee;
+        }
+        .grid-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+        .grid-btn:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* 한 셀 안 버튼 세로 정렬 + 중앙정렬 */
+        .grid-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        #grid {
+            width: 100%;
+        }
+    </style>
 </head>
 <body layout:fragment="content">
-    <div class="row">
-        <!-- 검색조건 -->
-        <div class="col-md-12">
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5 class="card-title">검색조건</h5>
-                    <div class="card-header-right">
-                        <button class="btn btn-outline-dark">조회</button>
-                    </div>
+<div class="row">
+    <!-- 검색조건 -->
+    <div class="col-md-12">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title">검색조건</h5>
+                <div class="card-header-right">
+                    <button class="btn btn-outline-dark" id="btnSearch">조회</button>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label class="form-label">급여대장명칭</label>
-                            <input type="text" class="form-control">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">부서명</label>
-                            <select id="dept" class="form-select">
-                                <option>전체</option>
-                                <option>인사</option>
-                                <option>자재</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">급여확정여부</label>
-                            <select id="pay_yn" class="form-select">
-                                <option>전체</option>
-                                <option>확정</option>
-                                <option>미확정</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">지급일자</label>
-                            <div class="d-flex align-items-center js-date-range">
-                                <!-- 시작일 -->
-                                <div class="input-group date me-2">
-                                    <input type="text"
-                                           class="form-control js-date-range-start"
-                                           id="payDtStart"
-                                           placeholder="날짜 선택">
-                                    <span class="input-group-text js-date-range-icon-start">
-                                        <i class="bi bi-calendar"></i>
-                                    </span>
-                                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">급여대장명칭</label>
+                        <input type="text" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">부서명</label>
+                        <select id="dept" class="form-select">
+                            <option>전체</option>
+                            <option>인사</option>
+                            <option>자재</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">급여확정여부</label>
+                        <select id="pay_yn" class="form-select">
+                            <option>전체</option>
+                            <option>확정</option>
+                            <option>미확정</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">지급일자</label>
+                        <div class="d-flex align-items-center js-date-range">
+                            <!-- 시작일 -->
+                            <div class="input-group date me-2">
+                                <input type="text"
+                                       class="form-control js-date-range-start"
+                                       id="payDtStart"
+                                       placeholder="날짜 선택">
+                                <span class="input-group-text js-date-range-icon-start">
+                                    <i class="bi bi-calendar"></i>
+                                </span>
+                            </div>
 
-                                <!-- ~ -->
-                                <span class="mx-1 fw-bold fs-5">~</span>
+                            <!-- ~ -->
+                            <span class="mx-1 fw-bold fs-5">~</span>
 
-                                <!-- 종료일 -->
-                                <div class="input-group date ms-2">
-                                    <input type="text"
-                                           class="form-control js-date-range-end"
-                                           id="payDtEnd"
-                                           placeholder="날짜 선택">
-                                    <span class="input-group-text js-date-range-icon-end">
-                                        <i class="bi bi-calendar"></i>
-                                    </span>
-                                </div>
+                            <!-- 종료일 -->
+                            <div class="input-group date ms-2">
+                                <input type="text"
+                                       class="form-control js-date-range-end"
+                                       id="payDtEnd"
+                                       placeholder="날짜 선택">
+                                <span class="input-group-text js-date-range-icon-end">
+                                    <i class="bi bi-calendar"></i>
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- 사원목록 -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">급여목록</h5>
-                    <div class="card-header-right">
-                        <button class="btn btn-outline-dark" id="openSalyRegistModal">등록</button>
-                    </div>
+        <!-- 급여목록 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">급여목록</h5>
+                <div class="card-header-right">
+                    <button class="btn btn-outline-dark" id="openSalyRegistModal">등록</button>
                 </div>
-                <div class="card-body">
-                    <div id="grid" class="mt-3"></div>
-                </div>
+            </div>
+            <div class="card-body">
+                <div id="grid" class="mt-3"></div>
             </div>
         </div>
     </div>
+</div>
 
-    <div th:replace="insa/modal/salyRegistModal :: salyRegistModal"></div>
+<!-- 등록 모달 (안에 grid2 있음) -->
+<div th:replace="insa/modal/salyRegistModal :: salyRegistModal"></div>
 
-    <script>
-        /* =====================================================
-         * 1. Grid (그리드 그대로 유지)
-         * ===================================================== */
-        const gridData = [
+<script>
+    /***********************
+     * 1. 메인 그리드 데이터
+     ***********************/
+    const gridData = [
+        {
+            revsMmdd: "2025.07",
+            payDt: "2025.08.15",
+            salyLedgNm: "인사 7월 급여대장",
+            deptNm: "인사",
+            rcnt: 2.00,
+            status: "BEFORE_CONFIRM",
+            ttPayAmt: 133830.00
+        },
+        {
+            revsMmdd: "2025.07",
+            payDt: "2025.08.15",
+            salyLedgNm: "생산 7월 급여대장",
+            deptNm: "생산",
+            rcnt: 30.00,
+            status: "CONFIRMED",
+            ttPayAmt: 123133830.00
+        },
+        {
+            revsMmdd: "2025.05",
+            payDt: "2025.06.15",
+            salyLedgNm: "총무 5월 급여대장",
+            deptNm: "총무",
+            rcnt: 15.00,
+            status: "PAID",
+            ttPayAmt: 43133830.00
+        }
+    ];
+
+    /***************************
+     * 2. 메인 급여대장 TUI Grid
+     ***************************/
+    const grid = new tui.Grid({
+        el: document.getElementById("grid"),
+        data: gridData,
+        bodyHeight: 320,     // 🔥 그리드 안에서만 스크롤, 320px 고정
+        scrollX: false,
+        scrollY: true,
+        rowHeaders: [],      // 🔥 체크박스 완전 제거
+        columns: [
+            { header: "귀속연월",     name: "revsMmdd",  align: "center" },
+            { header: "지급일",       name: "payDt",     align: "center" },
+            { header: "급여대장명칭", name: "salyLedgNm" },
+            { header: "부서명",       name: "deptNm" },
+            { header: "인원수",       name: "rcnt",      align: "right" },
+
             {
-                revsMmdd: "2025-01",
-                payDt: "2025-01-25",
-                salyLedgNm: "2025년 1월 급여대장",
-                deptNm: "개발팀",
-                rcnt: 8,
-                preWork: "완료",
-                salyLedg: "작성완료",
-                ttPayAmt: 3500000,
-                salySpec: "출력"
+                header: "사전작업",
+                name: "preWork",
+                align: "center",
+                formatter: ({ row }) => {
+                    const label = (row.status === "BEFORE_CONFIRM")
+                        ? "급여계산"
+                        : "급여계산조회";
+                    return `<button class="grid-btn btn-prework" data-action="prework">${label}</button>`;
+                }
             },
+
             {
-                revsMmdd: "2025-01",
-                payDt: "2025-01-25",
-                salyLedgNm: "2025년 1월 급여대장",
-                deptNm: "인사팀",
-                rcnt: 3,
-                preWork: "완료",
-                salyLedg: "확정",
-                ttPayAmt: 2800000,
-                salySpec: "출력"
+                header: "급여대장",
+                name: "salyLedg",
+                align: "center",
+                formatter: ({ row }) => {
+                    let buttons = [];
+
+                    if (row.status === "BEFORE_CONFIRM") {
+                        buttons.push(`<button class="grid-btn btn-saly" data-action="view">급여대장 조회</button>`);
+                        buttons.push(`<button class="grid-btn btn-saly" data-action="edit">급여대장 수정</button>`);
+                        buttons.push(`<button class="grid-btn btn-saly" data-action="delete">급여대장 삭제</button>`);
+                        buttons.push(`<button class="grid-btn btn-saly" data-action="confirm">급여대장 확정</button>`);
+                    } else if (row.status === "CONFIRMED") {
+                        buttons.push(`<button class="grid-btn btn-saly" data-action="view">급여대장 조회</button>`);
+                        buttons.push(`<button class="grid-btn btn-saly" data-action="cancel-confirm">급여대장 확정취소</button>`);
+                    } else if (row.status === "PAID") {
+                        buttons.push(`<button class="grid-btn btn-saly" data-action="view">급여대장 조회</button>`);
+                    }
+
+                    return `<div class="grid-btn-group">${buttons.join("")}</div>`;
+                }
             },
+
             {
-                revsMmdd: "2025-01",
-                payDt: "2025-01-25",
-                salyLedgNm: "2025년 1월 급여대장",
-                deptNm: "영업팀",
-                rcnt: 10,
-                preWork: "미완료",
-                salyLedg: "작성중",
-                ttPayAmt: 4200000,
-                salySpec: "미출력"
+                header: "지급총액",
+                name: "ttPayAmt",
+                align: "right",
+                formatter: ({ value }) => {
+                    if (value == null || value === "") return "";
+                    return Number(value).toLocaleString("ko-KR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
             },
+
             {
-                revsMmdd: "2025-02",
-                payDt: "2025-02-25",
-                salyLedgNm: "2025년 2월 급여대장",
-                deptNm: "개발팀",
-                rcnt: 9,
-                preWork: "완료",
-                salyLedg: "작성완료",
-                ttPayAmt: 3600000,
-                salySpec: "출력"
-            },
-            {
-                revsMmdd: "2025-02",
-                payDt: "2025-02-25",
-                salyLedgNm: "2025년 2월 급여대장",
-                deptNm: "인사팀",
-                rcnt: 3,
-                preWork: "완료",
-                salyLedg: "확정",
-                ttPayAmt: 2750000,
-                salySpec: "출력"
-            },
-            {
-                revsMmdd: "2025-02",
-                payDt: "2025-02-25",
-                salyLedgNm: "2025년 2월 급여대장",
-                deptNm: "영업팀",
-                rcnt: 11,
-                preWork: "완료",
-                salyLedg: "작성완료",
-                ttPayAmt: 4300000,
-                salySpec: "출력"
-            },
-            {
-                revsMmdd: "2025-03",
-                payDt: "2025-03-25",
-                salyLedgNm: "2025년 3월 급여대장",
-                deptNm: "총무팀",
-                rcnt: 4,
-                preWork: "완료",
-                salyLedg: "확정",
-                ttPayAmt: 3000000,
-                salySpec: "출력"
+                header: "명세서",
+                name: "salySpec",
+                align: "center",
+                formatter: () =>
+                    `<button class="grid-btn btn-spec" data-action="spec">명세서 조회</button>`
             }
-        ];
+        ]
+    });
 
-        const gridData2 = [
-            {
-                empId: "EMP001",
-                nm: "김철수",
-                emplymTy: "정규직",
-                deptNm: "개발팀"
-            },
-            {
-                empId: "EMP002",
-                nm: "이영희",
-                emplymTy: "정규직",
-                deptNm: "인사팀"
-            },
-            {
-                empId: "EMP003",
-                nm: "박민수",
-                emplymTy: "계약직",
-                deptNm: "영업팀"
-            },
-            {
-                empId: "EMP004",
-                nm: "최지연",
-                emplymTy: "정규직",
-                deptNm: "총무팀"
-            },
-            {
-                empId: "EMP005",
-                nm: "정우성",
-                emplymTy: "알바",
-                deptNm: "물류팀"
-            },
-            {
-                empId: "EMP006",
-                nm: "한지민",
-                emplymTy: "정규직",
-                deptNm: "재무팀"
-            },
-            {
-                empId: "EMP007",
-                nm: "오상진",
-                emplymTy: "계약직",
-                deptNm: "개발팀"
-            },
-            {
-                empId: "EMP008",
-                nm: "유소라",
-                emplymTy: "정규직",
-                deptNm: "마케팅팀"
+    /************************
+     * 3. 상태 변경 관련 함수
+     ************************/
+    function setSalyStatus(rowKey, status) {
+        grid.setValue(rowKey, "status", status, false);
+        grid.refreshLayout();  // 여기서만 레이아웃 갱신
+    }
+
+    function confirmSaly(rowKey) {
+        setSalyStatus(rowKey, "CONFIRMED");
+    }
+
+    function cancelConfirm(rowKey) {
+        setSalyStatus(rowKey, "BEFORE_CONFIRM");
+    }
+
+    function completePay(rowKey) {
+        setSalyStatus(rowKey, "PAID");
+    }
+
+    function autoUpdatePaidStatus() {
+        const today = new Date();
+
+        grid.getData().forEach(row => {
+            const raw = row.payDt;
+            if (!raw) return;
+            const payStr  = raw.replace(/\./g, "-");
+            const payDate = new Date(payStr);
+
+            if (row.status === "CONFIRMED" && !isNaN(payDate) && payDate <= today) {
+                grid.setValue(row.rowKey, "status", "PAID", false);
             }
-        ];
-
-        const GridOptions = {
-            bodyHeight: 320,
-            scrollX: false,
-            scrollY: false,
-            rowHeaders: ["checkbox"], // 좌측 체크박스
-            columnOptions: {
-                minWidth: 80,
-                resizable: true
-            }
-        };
-
-        const grid = new tui.Grid({
-            el: document.getElementById("grid"),
-            data: gridData,
-            scrollX: true,
-            scrollY: true,
-            minBodyHeight: 0,
-            autoWidth: true,
-            columns: [
-                { header: "귀속연월",   name: "revsMmdd",  align: "center" },
-                { header: "지급일",     name: "payDt",     align: "center" },
-                { header: "급여대장명칭", name: "salyLedgNm" },
-                { header: "부서명",     name: "deptNm" },
-                { header: "인원수",     name: "rcnt",      align: "right" },
-                { header: "사전작업",   name: "preWork" },
-                { header: "급여대장",   name: "salyLedg" },
-                { header: "총지급액",   name: "ttPayAmt",  align: "right" },
-                { header: "명세서",     name: "salySpec" }
-            ]
         });
 
-        const grid2 = new tui.Grid({
-            el: document.getElementById("grid2"),
-            data: gridData2,
-            ...GridOptions,
-            scrollX: true,
-            scrollY: true,
-            minBodyHeight: 0,
-            autoWidth: true,
-            columns: [
-                { header: "사원번호", name: "empId" },
-                { header: "사원명",   name: "nm" },
-                { header: "고용형태", name: "emplymTy" },
-                { header: "부서명",   name: "deptNm" }
-            ]
-        });
+        grid.refreshLayout();
+    }
 
-        /* =====================================================
-         * 2. 모달 열고/닫기
-         * ===================================================== */
-        const openBtn = document.getElementById("openSalyRegistModal");
-        const modal   = document.getElementById("salyRegistModal");
-        const back    = document.getElementById("salyRegistBackdrop");
+    document.getElementById("btnSearch")?.addEventListener("click", () => {
+        autoUpdatePaidStatus();
+    });
 
-        function openModal() {
-            if (!modal || !back) return;
-            modal.classList.add("show");
-            modal.style.display = "block";
-            back.style.display = "block";
-            grid2.refreshLayout();
+    /*************************
+     * 4. 메인 그리드 버튼 클릭
+     *************************/
+    grid.on("click", ev => {
+        if (ev.rowKey === null || ev.rowKey === undefined) return;
+        const row = grid.getRow(ev.rowKey);
+        if (!row) return;
+
+        const target = ev.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        const action = target.dataset.action;
+        if (!action) return;
+
+        console.log("clicked action:", action, "row:", row);
+
+        if (action === "confirm") {
+            confirmSaly(ev.rowKey);
+        } else if (action === "cancel-confirm") {
+            cancelConfirm(ev.rowKey);
+        } else if (action === "prework") {
+            // 급여계산 / 급여계산조회
+        } else if (action === "view") {
+            // 급여대장 조회
+        } else if (action === "edit") {
+            // 급여대장 수정
+        } else if (action === "delete") {
+            // 급여대장 삭제
+        } else if (action === "spec") {
+            // 명세서 조회
+        }
+    });
+
+    /***********************
+     * 5. 모달 안 grid2
+     ***********************/
+    const gridData2 = [
+        { empId: "EMP001", nm: "김철수", emplymTy: "정규직", deptNm: "개발팀" },
+        { empId: "EMP002", nm: "이영희", emplymTy: "정규직", deptNm: "인사팀" },
+        { empId: "EMP003", nm: "박민수", emplymTy: "계약직", deptNm: "영업팀" },
+        { empId: "EMP004", nm: "최지연", emplymTy: "정규직", deptNm: "총무팀" },
+        { empId: "EMP005", nm: "정우성", emplymTy: "알바",   deptNm: "물류팀" },
+        { empId: "EMP006", nm: "한지민", emplymTy: "정규직", deptNm: "재무팀" },
+        { empId: "EMP007", nm: "오상진", emplymTy: "계약직", deptNm: "개발팀" },
+        { empId: "EMP008", nm: "유소라", emplymTy: "정규직", deptNm: "마케팅팀" }
+    ];
+
+    const grid2 = new tui.Grid({
+        el: document.getElementById("grid2"),
+        data: gridData2,
+        bodyHeight: 320,
+        scrollX: false,
+        scrollY: true,
+        rowHeaders: [],
+        columns: [
+            { header: "사원번호", name: "empId" },
+            { header: "사원명",   name: "nm" },
+            { header: "고용형태", name: "emplymTy" },
+            { header: "부서명",   name: "deptNm" }
+        ]
+    });
+
+    /***********************
+     * 6. 모달 열기
+     ***********************/
+    const openBtn = document.getElementById("openSalyRegistModal");
+    const modal   = document.getElementById("salyRegistModal");
+    const back    = document.getElementById("salyRegistBackdrop");
+
+    function openModal() {
+        if (!modal || !back) return;
+        modal.classList.add("show");
+        modal.style.display = "block";
+        back.style.display = "block";
+        grid2.refreshLayout();
+    }
+
+    if (openBtn) {
+        openBtn.addEventListener("click", openModal);
+    }
+
+    /***********************
+     * 7. revs_ym / payDt 연동 (기존)
+     ***********************/
+    $(function () {
+        const $revsYm = $("#revs_ym");
+        const $payDt  = $("#payDt");
+
+        if (!$revsYm.length || !$payDt.length) return;
+
+        const $ymGroup = $revsYm.closest(".js-ym-single");
+        const $ymIcon  = $ymGroup.find(".js-ym-icon");
+
+        if ($ymIcon.length) {
+            $ymIcon.on("click", function () {
+                $revsYm.focus();
+            });
         }
 
-        if (openBtn) {
-            openBtn.addEventListener("click", openModal);
+        $revsYm
+            .datepicker({
+                format: "yyyy-mm",
+                autoclose: true,
+                minViewMode: 1,
+                language: "ko"
+            })
+            .on("show", function () {
+                const $self  = $(this);
+                const $modal = $self.closest(".modal");
+                if (!$modal.length) return;
+
+                const modalZ = parseInt($modal.css("z-index"), 10) || 1055;
+                setTimeout(function () {
+                    $(".datepicker-dropdown").each(function () {
+                        this.style.setProperty("z-index", String(modalZ + 10), "important");
+                    });
+                }, 0);
+            });
+
+        function ymToFirstDay(ym) {
+            if (!ym) return null;
+            const m = /^(\d{4})-(\d{2})$/.exec(ym);
+            if (!m) return null;
+            const y  = parseInt(m[1], 10);
+            const mo = parseInt(m[2], 10) - 1;
+            const d  = new Date(y, mo, 1);
+            if (d.getFullYear() !== y || d.getMonth() !== mo) return null;
+            return d;
         }
 
-        /* =====================================================
-         * 3. 귀속연월(revs_ym) ↔ 지급일(payDt) 연계 로직
-         *    - teamUtil.js는 건드리지 않고, 이 화면에서만 처리
-         *    - payDt 쪽은 datepicker를 새로 만들지 않는다!!!
-         * ===================================================== */
-        $(function () {
-            const $revsYm = $("#revs_ym"); // 귀속연월 input (.js-ym-input)
-            const $payDt  = $("#payDt");   // 지급일 input (.js-date-input, teamUtil에서 datepicker 붙음)
+        function dateToYm(date) {
+            if (!date) return "";
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, "0");
+            return y + "-" + m;
+        }
 
-            if (!$revsYm.length || !$payDt.length) return;
+        function hasDatepicker($el) {
+            return !!$el.data("datepicker");
+        }
 
-            // 🔹 아이콘 요소 찾기
-            const $ymGroup = $revsYm.closest(".js-ym-single");
-            const $ymIcon  = $ymGroup.find(".js-ym-icon");
+        function syncFromRevsYm() {
+            if (!hasDatepicker($payDt)) return;
 
-            // 🔹 아이콘 클릭 시 input focus → datepicker 열림
-            if ($ymIcon.length) {
-                $ymIcon.on("click", function () {
-                    $revsYm.focus();
-                });
+            const ymStr = $revsYm.val().trim();
+            if (!ymStr) {
+                $payDt.datepicker("setStartDate", null);
+                return;
             }
 
-            // 3-1. 귀속연월 datepicker 초기화 (월 단위) + 모달 위로 z-index 보정
-            $revsYm
-                .datepicker({
-                    format: "yyyy-mm",
-                    autoclose: true,
-                    minViewMode: 1, // 월 단위
-                    language: "ko"
-                })
-                .on("show", function () {
-                    // 모달 뒤에 가려지는 문제 방지
-                    const $self  = $(this);
-                    const $modal = $self.closest(".modal");
-
-                    if (!$modal.length) return;
-
-                    const modalZ = parseInt($modal.css("z-index"), 10) || 1055;
-
-                    setTimeout(function () {
-                        $(".datepicker-dropdown").each(function () {
-                            this.style.setProperty("z-index", String(modalZ + 10), "important");
-                        });
-                    }, 0);
-                });
-
-            // yyyy-mm → 해당 월 1일 Date
-            function ymToFirstDay(ym) {
-                if (!ym) return null;
-                const m = /^(\d{4})-(\d{2})$/.exec(ym);
-                if (!m) return null;
-
-                const y  = parseInt(m[1], 10);
-                const mo = parseInt(m[2], 10) - 1;
-                const d  = new Date(y, mo, 1);
-
-                if (d.getFullYear() !== y || d.getMonth() !== mo) return null;
-                return d;
+            const startDate = ymToFirstDay(ymStr);
+            if (!startDate) {
+                $payDt.datepicker("setStartDate", null);
+                return;
             }
 
-            // Date → yyyy-mm
-            function dateToYm(date) {
-                if (!date) return "";
-                const y = date.getFullYear();
-                const m = String(date.getMonth() + 1).padStart(2, "0");
-                return y + "-" + m;
+            $payDt.datepicker("setStartDate", startDate);
+
+            const curPay = $payDt.datepicker("getDate");
+            if (curPay && curPay < startDate) {
+                $payDt.datepicker("setDate", startDate);
+            }
+        }
+
+        function syncFromPayDt() {
+            if (!hasDatepicker($revsYm)) return;
+
+            const payDate = $payDt.datepicker("getDate");
+            if (!payDate) {
+                $revsYm.datepicker("setEndDate", null);
+                return;
             }
 
-            // 현재 input에 datepicker 인스턴스가 있는지 체크
-            function hasDatepicker($el) {
-                return !!$el.data("datepicker");
+            const maxYmDate = new Date(payDate.getFullYear(), payDate.getMonth(), 1);
+            $revsYm.datepicker("setEndDate", maxYmDate);
+
+            const curYmStr  = $revsYm.val().trim();
+            const curYmDate = ymToFirstDay(curYmStr);
+
+            if (curYmDate && curYmDate > maxYmDate) {
+                $revsYm.datepicker("setDate", maxYmDate);
+                $revsYm.val(dateToYm(maxYmDate));
             }
+        }
 
-            // 3-2. 귀속연월 변경 → 지급일 최소일(startDate) 갱신
-            function syncFromRevsYm() {
-                if (!hasDatepicker($payDt)) return; // 아직 teamUtil에서 안 붙었으면 조용히 무시
-
-                const ymStr = $revsYm.val().trim();
-
-                if (!ymStr) {
-                    // 귀속연월이 비면 지급일 하한 해제
-                    $payDt.datepicker("setStartDate", null);
-                    return;
-                }
-
-                const startDate = ymToFirstDay(ymStr);
-                if (!startDate) {
-                    $payDt.datepicker("setStartDate", null);
-                    return;
-                }
-
-                // 지급일은 귀속연월 1일 이후만 선택 가능
-                $payDt.datepicker("setStartDate", startDate);
-
-                const curPay = $payDt.datepicker("getDate");
-                if (curPay && curPay < startDate) {
-                    $payDt.datepicker("setDate", startDate);
-                }
-            }
-
-            // 3-3. 지급일 변경 → 귀속연월 최대월(endDate) 갱신
-            function syncFromPayDt() {
-                if (!hasDatepicker($revsYm)) return; // 혹시 모를 안전장치
-
-                const payDate = $payDt.datepicker("getDate");
-                if (!payDate) {
-                    // 지급일이 비면 귀속연월 상한 해제
-                    $revsYm.datepicker("setEndDate", null);
-                    return;
-                }
-
-                // 지급일이 속한 yyyy-mm까지만 선택 가능
-                const maxYmDate = new Date(payDate.getFullYear(), payDate.getMonth(), 1);
-                $revsYm.datepicker("setEndDate", maxYmDate);
-
-                const curYmStr  = $revsYm.val().trim();
-                const curYmDate = ymToFirstDay(curYmStr);
-
-                if (curYmDate && curYmDate > maxYmDate) {
-                    $revsYm.datepicker("setDate", maxYmDate);
-                    $revsYm.val(dateToYm(maxYmDate));
-                }
-            }
-
-            // 3-4. 이벤트 연결
-            // 귀속연월 선택 / 직접 입력 후 포커스 아웃
-            $revsYm.on("changeDate", function () {
-                syncFromRevsYm();
-            });
-            $revsYm.on("blur", function () {
-                syncFromRevsYm();
-            });
-
-            // 지급일 선택 / 직접 입력 후 포커스 아웃
-            $payDt.on("changeDate", function () {
-                syncFromPayDt();
-            });
-            $payDt.on("blur", function () {
-                syncFromPayDt();
-            });
-
-            // ❗ 여기서는 더 이상 처음에 syncFromRevsYm(), syncFromPayDt()를 강제로 호출하지 않는다.
-            //    (초기 서버값이 있다면, 첫 변경 시점부터 제약이 걸리도록 동작)
+        $revsYm.on("changeDate", function () {
+            syncFromRevsYm();
         });
-    </script>
+        $revsYm.on("blur", function () {
+            syncFromRevsYm();
+        });
+
+        $payDt.on("changeDate", function () {
+            syncFromPayDt();
+        });
+        $payDt.on("blur", function () {
+            syncFromPayDt();
+        });
+    });
+</script>
 </body>
 </html>
+	
