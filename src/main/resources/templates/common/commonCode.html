@@ -200,7 +200,7 @@
         { header: '그룹 ID', name: 'groupId' },
         { header: '코드 그룹 명', name: 'groupName' },
         { header: '설명', name: 'description' },
-        { header: '코드 등록 여부', name: 'oprtrYn' }
+        { header: '코드 등록 여부', name: 'oprtrYn', sortable: true }
       ]
     });
 
@@ -250,7 +250,18 @@
             if (value === 'N') return '미사용';
             return value;
           }
-        }
+        },
+        {
+            header: '수정 가능 여부',
+            name: 'modifyYn',      // 데이터 필드 이름
+            align: 'center',
+            sortable: true,
+            formatter: ({ value }) => {
+              if (value === 'Y') return '수정 가능';
+              if (value === 'N') return '수정 불가능';
+              return value || '';
+            }
+          }
       ]
     });
 
@@ -295,7 +306,8 @@
           {
             codeId: '',
             codeName: '',
-            useYn: ''
+            useYn: '',
+            modifyYn: 'Y'
           },
           { focus: true }
         );
@@ -404,7 +416,8 @@
             return {
               codeId: row.codeId,
               codeName: row.codeNm,
-              useYn: row.yn
+              useYn: row.yn,
+              modifyYn: row.vendId ? 'Y' : 'N'
             };
           });
 
@@ -439,7 +452,7 @@
     const insertBtn = document.getElementById('insertBtn');
 
     if (insertBtn) {
-      insertBtn.addEventListener('click', function () {
+      insertBtn.addEventListener('click', async function () {
         if (!currentGrpId) {
           alert('왼쪽에서 코드 그룹을 먼저 선택한 후, 행을 추가/수정하고 저장하세요.');
           return;
@@ -476,103 +489,106 @@
           }
         }
 
-        // 서버에 보낼 요청들 만들기
-        const requests = targetRows.map(function (row, idx) {
+        // 🔹 여기부터: 순차로 한 건씩 서버 호출
+        const results = [];
+
+        for (let i = 0; i < targetRows.length; i++) {
+          const row = targetRows[i];
           const isUpdate = row._type === 'update';
           const url = isUpdate ? '/code/modCode' : '/code/regCode';
 
           const payload = {
             grpId: currentGrpId,
-            // 수정일 때만 codeId 전달, 등록일 때는 null(or 생략)
+            // 수정일 때만 codeId 전달, 등록일 때는 null
             codeId: isUpdate ? row.codeId : null,
             codeNm: row.codeName,
             yn: row.useYn,
             vendId: null   // TODO: 거래처별 코드 필요하면 나중에 세팅
           };
 
-          return fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-          })
-            .then(function (res) {
-              if (!res.ok) {
-                return {
-                  success: false,
-                  message: '서버 오류: ' + res.status,
-                  _type: row._type,
-                  _rowIndex: idx
-                };
-              }
-              // CodeRegResponseDto {success, message, codeId} 라고 가정
-              return res.json().then(function (data) {
-                data._type = row._type;
-                data._rowIndex = idx;
-                return data;
-              });
-            })
-            .catch(function (err) {
-              console.error('코드 저장 요청 중 오류', err);
-              return {
+          try {
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+
+            let data;
+            if (!res.ok) {
+              data = {
                 success: false,
-                message: '통신 오류가 발생했습니다.',
-                _type: row._type,
-                _rowIndex: idx
+                message: '서버 오류: ' + res.status
               };
+            } else {
+              data = await res.json();   // CodeRegResponseDto {success, message, codeId}
+            }
+
+            data._type = row._type;
+            data._rowIndex = i;
+            results.push(data);
+
+          } catch (err) {
+            console.error('코드 저장 요청 중 오류', err);
+            results.push({
+              success: false,
+              message: '통신 오류가 발생했습니다.',
+              _type: row._type,
+              _rowIndex: i
             });
-        });
+          }
+        }
 
-        Promise.all(requests)
-          .then(function (results) {
-            let insertCount = 0;
-            let updateCount = 0;
-            const failMessages = [];
+        // 🔹 여기부터는 기존 Promise.all 결과 처리 로직 그대로 재사용
+        try {
+          let insertCount = 0;
+          let updateCount = 0;
+          const failMessages = [];
 
-            results.forEach(function (res) {
-              const isUpdate = res && res._type === 'update';
-              const rowNo = (res && typeof res._rowIndex === 'number')
-                ? res._rowIndex + 1
-                : '?';
-              const typeLabel = isUpdate ? '수정' : '등록';
+          results.forEach(function (res) {
+            const isUpdate = res && res._type === 'update';
+            const rowNo = (res && typeof res._rowIndex === 'number')
+              ? res._rowIndex + 1
+              : '?';
+            const typeLabel = isUpdate ? '수정' : '등록';
 
-              if (res && res.success) {
-                if (isUpdate) {
-                  updateCount++;
-                } else {
-                  insertCount++;
-                }
+            if (res && res.success) {
+              if (isUpdate) {
+                updateCount++;
               } else {
-                const msg = (res && res.message) ? res.message : '알 수 없는 오류';
-                failMessages.push(`행 ${rowNo} (${typeLabel}): ${msg}`);
+                insertCount++;
               }
-            });
-
-            let alertMsg = '';
-            if (insertCount > 0) {
-              alertMsg += insertCount + '건의 코드가 등록되었습니다.\n';
+            } else {
+              const msg = (res && res.message) ? res.message : '알 수 없는 오류';
+              failMessages.push(`행 ${rowNo} (${typeLabel}): ${msg}`);
             }
-            if (updateCount > 0) {
-              alertMsg += updateCount + '건의 코드가 수정되었습니다.\n';
-            }
-            if (failMessages.length > 0) {
-              alertMsg += '\n실패한 행이 있습니다.\n' + failMessages.join('\n');
-            }
-
-            alert(alertMsg || '처리된 내용이 없습니다.');
-
-            if (insertCount > 0 || updateCount > 0) {
-              // 저장 후 목록 새로고침
-              loadCodeListByGrpId(currentGrpId);
-            }
-          })
-          .catch(function (err) {
-            console.error('코드 저장 처리 중 오류', err);
-            alert('코드 저장 중 알 수 없는 오류가 발생했습니다.\n관리자에게 문의해주세요.');
           });
+
+          let alertMsg = '';
+          if (insertCount > 0) {
+            alertMsg += insertCount + '건의 코드가 등록되었습니다.\n';
+          }
+          if (updateCount > 0) {
+            alertMsg += updateCount + '건의 코드가 수정되었습니다.\n';
+          }
+          if (failMessages.length > 0) {
+            alertMsg += '\n실패한 행이 있습니다.\n' + failMessages.join('\n');
+          }
+
+          alert(alertMsg || '처리된 내용이 없습니다.');
+
+          if (insertCount > 0 || updateCount > 0) {
+            // 저장 후 목록 새로고침
+            loadCodeListByGrpId(currentGrpId);
+          }
+        } catch (err) {
+          console.error('코드 저장 처리 중 오류', err);
+          alert('코드 저장 중 알 수 없는 오류가 발생했습니다.\n관리자에게 문의해주세요.');
+        }
       });
     }
+
 
 
   }); // end DOMContentLoaded

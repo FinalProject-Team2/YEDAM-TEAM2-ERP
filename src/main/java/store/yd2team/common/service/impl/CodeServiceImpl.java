@@ -52,7 +52,7 @@ public class CodeServiceImpl implements CodeService{
 	public int regCode(CodeVO vo) {
 		// 공통 코드 중복 체크 있으면 스킵
 	    if (codeMapper.existsCode(vo) > 0) {
-	        return 0;
+	        return -1;
 	    }
 	    // 공통 코드 등록
 	    try {
@@ -67,6 +67,11 @@ public class CodeServiceImpl implements CodeService{
 	@Override
 	@Transactional
 	public int modifyCode(CodeVO vo) {
+		
+		if (codeMapper.existsCode(vo) > 0) {
+	        return -1; 
+	    }
+		
 		try {
 	        return codeMapper.modifyCode(vo);   
 	    } catch (DataIntegrityViolationException e) {

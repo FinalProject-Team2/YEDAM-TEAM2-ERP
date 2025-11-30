@@ -42,4 +42,10 @@ public class CommonPageController {
 		return "common/unlockAcct";
 	}
 	
+	// 로그인 페이지
+	@GetMapping("/logIn")
+	public String login() {
+		return "common/logIn";
+	}
+	
 }

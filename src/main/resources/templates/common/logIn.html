@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>ERP 로그인</title>
+
+<style>
+.login-wrapper {
+	min-height: calc(100vh - 80px);
+	display: flex;
+	align-items: flex-start; /* 위쪽 기준으로 붙이기 */
+	justify-content: center; /* 가로 가운데 유지 */
+	padding-top: 0px; /* 위에서 약간 내려오게 (숫자 조절 가능) */
+}
+
+/* 로그인 카드 박스 */
+.login-card {
+	width: 380px;
+	border: 1px solid #ddd;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
+	padding: 36px 40px 28px;
+	position: relative;
+	background-color: #ffffff;
+}
+
+.login-card-title {
+	font-size: 1.5rem;
+	font-weight: 700;
+	text-align: center;
+	margin-bottom: 28px;
+}
+
+/* 오른쪽 상단 X 버튼 */
+.login-card-close {
+	position: absolute;
+	right: 10px;
+	top: 8px;
+	font-size: 18px;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+}
+
+.login-card-close:hover {
+	opacity: .7;
+}
+
+/* 에러 메시지 영역 */
+.login-error {
+	min-height: 18px;
+	font-size: 0.78rem;
+	color: #dc3545;
+	margin-top: 4px;
+}
+
+/* reCAPTCHA 영역 (모양만 구현) */
+.recaptcha-box {
+	border: 1px solid #dee2e6;
+	border-radius: 4px;
+	height: 78px;
+	display: flex;
+	align-items: center;
+	padding: 10px 14px;
+	margin: 16px 0 24px;
+	background-color: #f8f9fa;
+}
+
+.recaptcha-check {
+	width: 20px;
+	height: 20px;
+	border: 1px solid #adb5bd;
+	border-radius: 2px;
+	margin-right: 12px;
+	background-color: #ffffff;
+}
+
+.recaptcha-text {
+	font-size: 0.9rem;
+	color: #495057;
+}
+
+.btn-login, .btn-find-pwd {
+	min-width: 120px;
+}
+</style>
+</head>
+
+<body layout:fragment="content">
+
+	<div class="login-wrapper">
+		<div class="login-card">
+
+			<!-- 닫기 버튼 (필요 없으면 제거) -->
+			<button type="button" class="login-card-close" aria-label="Close">&times;</button>
+
+			<h1 class="login-card-title">ERP 로그인</h1>
+
+			<!-- 실제 로그인 처리 시 th:action, th:field 등을 붙이면 됨 -->
+			<form id="loginForm" method="post" action="#" novalidate>
+				<!-- 회사 코드 -->
+				<div class="mb-3">
+					<label for="companyCode" class="form-label">회사 코드</label> <input
+						type="text" class="form-control" id="companyCode"
+						name="companyCode" placeholder="회사 코드를 입력하세요">
+				</div>
+
+				<!-- 아이디 -->
+				<div class="mb-3">
+					<label for="loginId" class="form-label">아이디</label> <input
+						type="text" class="form-control" id="loginId" name="loginId"
+						placeholder="아이디를 입력하세요">
+				</div>
+
+				<!-- 비밀번호 -->
+				<div class="mb-1">
+					<label for="password" class="form-label">비밀번호</label> <input
+						type="password" class="form-control" id="password" name="password"
+						placeholder="비밀번호를 입력하세요">
+				</div>
+
+				<!-- 에러 메시지 영역 (검증/로그인 실패 시 서버나 JS에서 세팅해서 사용) -->
+				<div id="loginError" class="login-error">
+					<!-- 예: 아이디 또는 비밀번호가 올바르지 않습니다. -->
+				</div>
+
+				<!-- reCAPTCHA 영역 (지금은 자리만 잡아둠, 추후 실제 스크립트 연동) -->
+				<div class="recaptcha-box">
+					<div class="recaptcha-check"></div>
+					<div class="recaptcha-text">
+						I'm not a robot<br> <small class="text-muted">reCAPTCHA
+							영역 (추후 연동)</small>
+					</div>
+				</div>
+
+				<!-- 버튼 영역 -->
+				<div class="d-flex justify-content-center gap-2">
+					<button type="submit" class="btn btn-dark btn-login">로그인</button>
+					<button type="button"
+						class="btn btn-outline-secondary btn-find-pwd">비밀번호 찾기</button>
+				</div>
+			</form>
+
+		</div>
+	</div>
+
+</body>
+</html>
