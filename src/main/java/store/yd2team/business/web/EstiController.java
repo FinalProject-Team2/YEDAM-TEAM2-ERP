@@ -15,7 +15,7 @@ public class EstiController {
 
 	/* private final PriceService priceService; */
 
-	@GetMapping("/main")
+	@GetMapping("/estiMain")
 	public String selectall(Model model) {
 
 		model.addAttribute("test", "testone");

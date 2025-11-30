@@ -5,7 +5,7 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<title>단가관리</title>
+<title>견적서 관리</title>
 </head>
 <body layout:fragment="content">
 	<div class="esti-manage-wrapper">
@@ -17,13 +17,14 @@
 					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 					<div class="card-header">
 						<div class="card-header-left">
-							<h5 class="card-title">잠금 계정 조회</h5>
+							<h5 class="card-title">견적서 조회</h5>
 						</div>
 						<div class="card-header-right">
 							<button type="button" class="btn btn-dark">초기화</button>
 							<button type="button" class="btn btn-outline-dark">조회</button>
 						</div>
-					</div> <!-- end card-header -->
+					</div>
+					<!-- end card-header -->
 
 					<div class="card-body">
 						<div class="row g-2">
@@ -61,13 +62,149 @@
 
 								</div>
 							</div>
-							
+
 						</div>
-					</div> <!-- card-body -->
-				</div>  <!-- end card -->
+					</div>
+					<!-- card-body -->
+				</div>
+				<!-- end card -->
 			</div>
-		</div>  <!-- end row -->
-	</div>  <!-- end esti-manage-wrapper -->
+		</div>
+		<!-- end row -->
+
+		<!-- 견적서목록 카드 -->
+		<div class="row">
+
+			<!-- 견적서목록 그리드 -->
+			<div class="col-md-12 d-flex">
+				<div class="card w-100 h-100">
+
+					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">견적서 목록</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-outline-dark"
+								id="insertEstiBtn">신규</button>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div class="estiGridWrap">
+							<div id="estiGrid"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- end 견적서목록 카드 -->
+	</div>
+	<!-- end esti-manage-wrapper -->
+
+	<script>
+	// 0. 데이터
+	const estiData = [];
+
+	// 1-1. Grid 공통 옵션
+	const estiGridOptions = {
+	    bodyHeight: 340,
+	    scrollX: true,
+	    scrollY: true,  // 세로
+	    /* rowHeaders: ['checkbox'],     // 좌측 체크박스 */
+	    columnOptions: {
+	        minWidth: 80,
+	        resizable: true
+	    }
+	}; // 1-1. 끝
+
+	// 1-2. 견적서 목록 그리드 생성
+	const estiGrid = new tui.Grid({
+		el: document.getElementById('estiGrid'),
+		data: estiData,
+		...estiGridOptions,
+		columns: [
+			{ header: '견적서코드', name: 'estiId' },
+			{ header: '버전', name: 'version' },
+			{ header: '고객사명', name: 'custcomName' },
+			{ header: '여신한도', name: 'cdtlnLmt' },
+			{ header: '금액합계(원)', name: 'ttSupplyAmt' },
+			{ header: '상품명', name: 'productName' },
+			{ header: '납기일', name: 'dueDt' },
+			{
+			    header: '승인 / 반려',
+			    name: 'apRj',
+			    formatter: ({ row }) => {
+			      return `
+			        <button class="btn btn-success approve-btn" data-id="${row.estiId}">승인</button>
+			        <button class="btn btn-danger reject-btn" data-id="${row.estiId}">반려</button>
+			      `;
+			    }
+			  },
+			{ header: '상태', name: 'st' },
+		]
+	}); // 1-2. 견적서목록 그리드 생성 끝
+	
+	// 2. 버튼 이벤트
+	// 2-1. 초기화 버튼 이벤트
+	// 2-2. 조회 버튼 이벤트
+	
+	// 2-3. 승인 / 반려 버튼 이벤트
+	document.addEventListener('click', async (e) => {
+	  const approveBtn = e.target.closest('.approve-btn');
+	  const rejectBtn = e.target.closest('.reject-btn');
+	
+	  // 승인 버튼 클릭
+	  if (approveBtn) {
+	    const estiId = approveBtn.dataset.id;
+	    const row = estiGrid.getRow(estiGrid.getIndexOfRow(estiId));
+	
+	    const limit = Number(row.cdtlnLmt);
+	    const total = Number(row.ttSupplyAmt);
+	
+	    // 여신한도 < 금액
+	    if (limit < total) {
+	      const confirmed = confirm("여신한도가 부족합니다.\n그래도 승인하시겠습니까?");
+	      if (!confirmed) return; // 취소 시 종료
+	    }
+	
+	    applyApprove(estiId);
+	  }
+	
+	  // 반려 버튼 클릭
+	  if (rejectBtn) {
+	    const estiId = rejectBtn.dataset.id;
+	    applyReject(estiId);
+	  }
+	}); // 2-3 승인 / 반려 버튼 이벤트 끝
+	
+	// 2-4. 승인 / 반려 이벤트 서버 통신
+	function applyApprove(estiId) {
+	  fetch("/estimate/approve", {
+	    method: 'POST',
+	    headers: { 'Content-Type': 'application/json' },
+	    body: JSON.stringify({ estiId })
+	  })
+	    .then(res => res.json())
+	    .then(() => {
+	      alert("승인이 완료되었습니다.");
+	      estiGrid.refreshLayout(); // 또는 reload() API 호출
+	    });
+	}
+	
+	function applyReject(estiId) {
+	  fetch("/estimate/reject", {
+	    method: 'POST',
+	    headers: { 'Content-Type': 'application/json' },
+	    body: JSON.stringify({ estiId })
+	  })
+	    .then(res => res.json())
+	    .then(() => {
+	      alert("반려 처리되었습니다.");
+	      estiGrid.refreshLayout();
+	    });
+	} // 2-4. 승인 반려 이벤트 서버통신 끝
+</script>
 
 </body>
 </html>
