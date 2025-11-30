@@ -44,4 +44,10 @@ public class EmpVO {
 	private Date updtDt;         // 수정날짜
 	private String updtBy;       // 수정자
 	private String proofPhoto;   // 사진위치
+	
+	//join에 필요한 컬럼
+	private String clsfNm;   // 직급
+	private String rspofcNm;   // 급여타입
+	private String emplymTyNm;   // 급여타입
+	private String hffcStNm;   // 급여타입
 }

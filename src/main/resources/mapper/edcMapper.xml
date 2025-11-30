@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.insa.mapper.EdcMapper">
+
+<select id="getListEdcJohoe">
+ select 
+ a.*
+ ,b.*
+from tb_edc a
+join (SELECT 
+            edc_id,
+            COUNT(*) AS edc_cnt,
+            SUM(CASE WHEN compl_st = '수료' THEN 1 ELSE 0 END) AS compl_cnt,
+            ROUND(
+                (SUM(CASE WHEN compl_st = '수료' THEN 1 ELSE 0 END) / COUNT(*)) * 100,
+                2
+            ) || '%' AS compl
+        FROM tb_edc_trgter
+        GROUP BY edc_id) b
+on a.edc_id = b.edc_id
+<where>
+<if test="edcNm != null">  AND a.edc_nm like '%' || #{edcNm} || '%'</if>
+<if test="edcTy != null">  AND a.edc_ty = #{edcTy}</if>
+<if test="edcBeginDt != null">  AND TO_CHAR(a.edc_begin_dt, 'YYYY') = #{edcBeginDt}</if>
+</where>
+</select>
+
+<select id="getListEdcDetaJohoe">
+select 
+ a.*
+ ,b.nm
+ ,c.dept_nm
+from tb_edc_trgter a
+join tb_emp b
+on a.emp_id = b.emp_id
+join tb_dept c
+on b.dept_id = c.dept_id
+where edc_id = #{edcId}
+</select>
+
+<select id="setDbEdcAddId">
+SELECT 'edc' || TO_CHAR(SYSDATE, 'YYMM') ||
+       LPAD(NVL(MAX(SUBSTR(edc_id, LENGTH(edc_id)-2, 3)), 0) + 1, 3, '0') AS edc_id
+FROM tb_edc
+WHERE SUBSTR(edc_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM');
+</select>
+
+<insert id="setDbEdcAdd">
+INSERT INTO tb_edc (
+        edc_id,
+        vend_id,
+        edc_ty,
+        edc_begin_dt,
+        edc_end_dt,
+        edc_nm,
+        crea_dt,
+        crea_by
+    ) VALUES (
+        #{edcId},
+        #{vendId},
+        #{edcTy},
+        #{edcBeginDt},
+        #{edcEndDt},
+        #{edcNm},
+        SYSDATE,
+        #{creaBy}
+    )
+</insert>
+
+<select id="getEdcPickList">
+select *
+from tb_emp
+<where>
+<if test="deptId != null">  AND dept_id = #{deptId}</if>
+<if test="clsf != null">  AND clsf = #{clsf}</if>
+<if test="rspofc != null">  AND rspofc = #{rspofc}</if>
+</where>
+</select>
+
+<select id="setDbEdcTTAddId">
+SELECT 'edcTT' || TO_CHAR(SYSDATE, 'YYMM') ||
+       LPAD(NVL(MAX(SUBSTR(edc_trgter_id, LENGTH(edc_trgter_id)-2, 3)), 0) + 1, 3, '0') AS edc_trgter_id
+FROM tb_edc_trgter
+WHERE SUBSTR(edc_trgter_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
+</select>
+
+<insert id="insertEdcTrgterList">
+    INSERT INTO tb_edc_trgter (
+        edc_trgter_id,
+        edc_id,
+        emp_id,
+        compl_st,
+        crea_dt,
+        crea_by
+    )
+    VALUES
+    <foreach collection="list" item="item" separator=",">
+        (
+            #{item.edcTrgterId},
+            #{item.edcId},
+            #{item.empId},
+            '미수료',
+            SYSDATE,
+            'myk'
+        )
+    </foreach>
+</insert>
+
+</mapper>

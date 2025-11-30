@@ -12,6 +12,12 @@ public interface EmpMapper {
 	//다중조건 조회
 	List<EmpVO> getListEmpJohoe();
 	
+	//저장(업데이트)
+	int setDbEdit(EmpVO emp);
+	
+	//저장 인서트전 empId생성
+	EmpVO setDbAddId();
+	
 	//저장(인서트)
-	int setDbEdit();
+	int setDbAdd(EmpVO emp);
 }

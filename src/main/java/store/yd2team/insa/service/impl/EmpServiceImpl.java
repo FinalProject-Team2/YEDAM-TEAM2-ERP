@@ -24,7 +24,19 @@ public class EmpServiceImpl implements EmpService{
 	@Override
 	public int setDbEdit(EmpVO emp) {
 		
-		return empMapper.setDbEdit();
+		return empMapper.setDbEdit(emp);
+	}
+
+	@Override
+	public EmpVO setDbAddId() {
+		
+		return empMapper.setDbAddId();
+	}
+	
+	@Override
+	public int setDbAdd(EmpVO emp) {
+		
+		return empMapper.setDbAdd(emp);
 	}
 
 }

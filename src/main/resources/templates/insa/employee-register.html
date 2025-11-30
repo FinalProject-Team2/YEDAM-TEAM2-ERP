@@ -38,7 +38,7 @@
 						<h5 class="card-title">조회</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-dark">초기화</button>
+						<button class="btn btn-dark" id="empReset">초기화</button>
 						<button onclick="getList(this)" class="btn btn-outline-dark">조회</button>
 					</div>
 				</div>
@@ -116,10 +116,8 @@
 							<div class="row mb-2">
 								<div class="col-md-6">
 									<label class="form-label ">사번</label> <input id="v_empId"
-										type="text" class="form-control readonly-input" readonly="readonly"  placeholder="사번(자동생성)" />
-										<input id="v_deptId" type="text" style="display: none;">
-										<input id="v_basiId" type="text" style="display: none;">
-										<input id="v_vendId" type="text" style="display: none;">
+										type="text" class="form-control readonly-input" readonly="readonly"  placeholder="사번(자동생성)" />																				
+										<input id="v_vendId" value="V001" type="text" style="display: none;">
 								</div>
 								<div class="col-md-6">
 									<label for="userName" class="form-label">입사일</label>
@@ -167,27 +165,28 @@
 					<div class="row mb-2">
 
 						<div class="col-md-2">
-							<label class="form-label">부서</label> <select id="v_deptNm"
+							<label class="form-label">부서</label> <select id="v_deptId"
 								class="form-select">
-								<option>인사팀</option>
-								<option>재무팀</option>
-								<option>개발팀</option>
-								<option>영업팀</option>
-								<option>마케팅팀</option>
+								<option value="D001">인사팀</option>
+								<option value="D002">재무팀</option>
+								<option value="D003">개발팀</option>
+								<option value="D004">영업팀</option>
+								<option value="D005">마케팅팀</option>
 							</select>
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">직책</label> <select id="v_rspofc"
+							<label class="form-label">직책</label> <select id="v_rspofcNm"
 								class="form-select">
 								<option>팀원</option>
 								<option>팀장</option>
 								<option>관리자</option>
 								<option>임원</option>
 							</select>
+							<input id="v_rspofc" type="text" style="display: none;">
 						</div>
 
 						<div class="col-md-2">
-							<label class="form-label">직급</label> <select id="v_clsf"
+							<label class="form-label">직급</label> <select id="v_clsfNm"
 								class="form-select">
 								<option>사원</option>
 								<option>대리</option>
@@ -195,27 +194,30 @@
 								<option>부장</option>
 								<option>이사</option>
 							</select>
+							<input id="v_clsf" type="text" style="display: none;">
 						</div>
 
 						<div class="col-md-3">
 							<label class="form-label">고용형태</label> <select
-							    id="v_emplymTy"
+							    id="v_emplymTyNm"
 								class="form-select">
 								<option>정직원</option>
 								<option>계약직</option>
 								<option>일용직</option>
 							</select>
+							<input id="v_emplymTy" type="text" style="display: none;">
 						</div>
 
 						<div class="col-md-2">
 							<label class="form-label">재직상태</label> <select
-							    id="v_hffcSt"
+							    id="v_hffcStNm"
 								class="form-select">
 								<option >재직</option>
 								<option >퇴직</option>
 								<option >휴직</option>
 								<option >퇴사</option>
 							</select>
+							<input id="v_hffcSt" type="text" style="display: none;">
 						</div>
 
 					</div>
@@ -234,9 +236,12 @@
 
 						<div class="col-md-4">
 							<label class="form-label">근무형태</label>
-							<select id="basi_id" class="form-select">
-								<option value="basiIdTest_001">인사팀 기준근무</option>
-								<option value="basiIdTest_002">생산팀 교대근무</option>
+							<select id="v_basiId" class="form-select">
+								<option value="B001">인사팀 기준근무</option>
+								<option value="B002">생산1팀 교대근무</option>
+								<option value="B003">생산2팀 교대근무</option>
+								<option value="B004">생산3팀 교대근무</option>
+								<option value="B005">생산4팀 교대근무</option>
 							</select>
 						</div>
 
@@ -265,6 +270,9 @@
 
 		</div>
 	</div>
+	
+	<!-- 모달 -->
+	<div th:replace="insa/modal/empRegistModal :: registModal"></div>
 	<script>	
 	function getList(el) {
 		//jquery형식 db요청방식
@@ -315,7 +323,7 @@
 				name : 'deptNm'
 			}, {
 				header : '직급',
-				name : 'clsf',
+				name : 'clsfNm',
 				align : 'center'
 			} ],
 			bodyHeight : 440, // 본문 높이 고정
@@ -351,6 +359,89 @@
 			
 			});
 		
+		//초기화버튼 눌러서 입력칸 초기화
+		$("#empReset").on("click", () => {
+			$("[id^='v_']").each(function() {
+			    console.log($(this).attr("id")); // 해당 id 출력
+			    $(this).val("");
+			    if($(this).attr("id") == "v_proofPhoto") {
+			    	$(this).attr("src", "/images/profil/nonUser.jpeg");
+			    }
+			});
+		})
+		
+		
+		/* =====================================================
+		 * 2. 모달 열고/닫기 
+		 * ===================================================== */
+		
+		 const modal = document.getElementById("registModal");
+		 const back  = document.getElementById("registBackdrop");
+		 function syncParentToModal() {
+			  const parentInputs = document.querySelectorAll("[id^='v_']");
+
+			  parentInputs.forEach(el => {
+			    const key = el.id.replace("v_", "m_");
+			    const target = document.getElementById(key);
+
+			    if (!target) return;
+
+			    if (el.type === "checkbox" || el.type === "radio") {
+			      target.checked = el.checked;
+			    } 
+			    else if (el.tagName === "SELECT") {
+			      target.value = el.value;
+			    } 
+			    else {
+			      target.value = el.value;
+			    }
+			  });
+
+			  // ✅ 이미지도 복사
+			  const parentImg = document.getElementById("v_proofPhoto");
+			  const modalImg  = document.getElementById("m_proofPhoto");
+			  if (parentImg && modalImg) {
+			    modalImg.src = parentImg.src;
+			  }
+			}
+
+		
+		 function openModal() {
+			  if (!modal || !back) return;
+			  syncParentToModal();
+			  modal.classList.add("show");
+			  modal.style.display = "block";
+			  back.style.display = "block";
+			  grid.refreshLayout();			  
+			}
+
+			function closeModal() {
+			  if (!modal || !back) return;
+			  modal.classList.remove("show");
+			  modal.style.display = "none";
+			  back.style.display = "none";
+			}
+
+			// ✅ 모달 바깥 클릭 시 닫기
+			modal.addEventListener("click", function (event) {
+			  if (!event.target.closest(".modal-content")) {
+			    closeModal();
+			  }
+			});
+			
+			//모달페이지 안에서 메소드
+			$(document).ready(function() {
+			  $("#agreeCheck").on("change", function() {
+			    if ($(this).is(":checked")) {
+			      $("#registBtn").show();   // 체크되면 버튼 보이기
+			    } else {
+			      $("#registBtn").hide();   // 체크 해제되면 버튼 숨기기
+			    }
+			  });
+			});
+			
+			
+			
 	</script>
 	<script type="module">
 import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
@@ -365,49 +456,64 @@ grid.on('click', function(ev) {
     console.log(dto);
 });
 
+function dbregist(url) {
+				let datas = formToJson();
+				datas["bslry"] = null;
+				datas["pymhr"] = null;	
+				datas[$("#v_salaryType").val()] = $("#v_salaryInput").val();
+
+				const file = $("#photoInput")[0].files[0];
+
+				const formData = new FormData();
+
+				formData.append("empVO", new Blob(
+					[JSON.stringify(datas)],
+					{ type: "application/json" }
+					));
+				
+				if (file) {formData.append("photo", file);}
+				
+				console.log(datas);
+				console.log(formData);
+				// jQuery AJAX - POST 방식으로 JSON 전송
+				 $.ajax({
+				    url: url,                 // 요청 URL
+				    type: "post",                      // POST 방식
+				    contentType: false,   // JSON 전송
+				    data: formData,        // 객체를 JSON 문자열로 변환
+					processData: false				
+				})
+				.done((result) => {
+				    console.log(result);
+				    grid.resetData(result);            // 결과를 grid에 반영
+				})
+				.fail((error) => {
+				    console.error(error);
+				    alert("등록 중 오류 발생");
+				}); 
+			}
+
 function setDbAdd(el) {		
 		let empchk = $("#v_empId").val();
 		if(empchk) {
 			console.log("기존사원");
-			let datas = formToJson();
-			datas["bslry"] = null;
-			datas["pymhr"] = null;	
-			datas[$("#v_salaryType").val()] = $("#v_salaryInput").val();
-
-			const file = $("#photoInput")[0].files[0];
-
-			const formData = new FormData();
-
-			formData.append("empVO", new Blob(
-				[JSON.stringify(datas)],
-				{ type: "application/json" }
-				));
-			
-			if (file) {formData.append("photo", file);}
-			
-			console.log(datas);
-			console.log(formData);
-			// jQuery AJAX - POST 방식으로 JSON 전송
-			 $.ajax({
-			    url: "/empEdit",                 // 요청 URL
-			    type: "post",                      // POST 방식
-			    contentType: false,   // JSON 전송
-			    data: formData,        // 객체를 JSON 문자열로 변환
-				processData: false				
-			})
-			.done((result) => {
-			    console.log(result);
-			    grid.resetData(result);            // 결과를 grid에 반영
-			})
-			.fail((error) => {
-			    console.error(error);
-			    alert("등록 중 오류 발생");
-			}); 
+			let url = "/empEdit";
+			dbregist(url);
 
 		}else{
 			console.log("신규사원");
+			openModal();
 		}		
 	}//end of setDbAdd(el)
+
+$("#registBtn").on("click", (event)=>{
+				let url = "/empRegist";
+				console.log("찐 신규등록");
+				dbregist(url);
+				if (event.target.closest(".modal-content")) {
+			    closeModal();
+			  }
+			});
 
 $("#btn-save").on("click", (e) =>{setDbAdd(e);});
 </script>
