@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>출고의뢰</title>
+</head>
+<body layout:fragment="content">
+	<div class="esti-manage-wrapper">
+		<!-- 주문서 조회 카드 -->
+		<div class="row mb-3">
+			<div class="col-md-12">
+				<div class="card">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header">
+						<div class="card-header-left">
+							<h5 class="card-title">주문서 조회</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark">초기화</button>
+							<button type="button" class="btn btn-outline-dark">조회</button>
+						</div>
+					</div>
+					<!-- end card-header -->
+
+					<div class="card-body">
+						<div class="row g-2">
+							<div class="col-md-3">
+								<label for="clientName" class="form-label">거래처 명</label> <input
+									id="clientName" type="text" class="form-control"
+									placeholder="YEDAM">
+							</div>
+
+							<div class="col-md-6">
+								<label class="form-label">납기일</label>
+								<div class="d-flex align-items-center js-date-range">
+
+									<!-- 시작일 -->
+									<div class="input-group date">
+										<input type="text"
+											class="form-control datepicker js-date-range-start"
+											placeholder="시작일"> <span
+											class="input-group-text js-date-range-icon-start"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+
+									<span class="mx-1 fw-bold fs-5">~</span>
+
+									<!-- 종료일 -->
+									<div class="input-group date ms-2">
+										<input type="text"
+											class="form-control datepicker js-date-range-end"
+											placeholder="종료일"> <span
+											class="input-group-text js-date-range-icon-end"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+
+								</div>
+							</div>
+
+						</div>
+					</div>
+					<!-- card-body -->
+				</div>
+				<!-- end card -->
+			</div>
+		</div>
+		<!-- end row -->
+
+		<!-- 주문서 목록 카드 -->
+		<div class="row">
+
+			<!-- 주문서 목록 그리드 -->
+			<div class="col-md-12 d-flex">
+				<div class="card w-100 h-100">
+
+					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">주문서 목록</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-outline-dark"
+								id="newOustBtn">출고의뢰생성</button>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div class="soGridWrap">
+							<div id="soGrid"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div> <!-- end 주문서 목록 카드 -->
+		
+		<!-- 출고의뢰 목록 카드 -->
+		<div class="row">
+
+			<!-- 출고의뢰 목록 그리드 -->
+			<div class="col-md-12 d-flex">
+				<div class="card w-100 h-100">
+
+					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">출고의뢰 목록</h5>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div class="oustGridWrap">
+							<div id="oustGrid"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div> <!-- end 출고의뢰 목록 카드 -->
+	</div>
+	<!-- end oust-manage-wrapper -->
+
+	<script>
+	// 0. 데이터
+	const soData = [];
+	const oustData = [];
+
+	// 1. 주문서 목록 그리드
+	// 1-1. Grid 공통 옵션
+	const soGridOptions = {
+	    bodyHeight: 240,
+	    scrollX: true,
+	    scrollY: true,  // 세로
+	    /* rowHeaders: ['checkbox'],     // 좌측 체크박스 */
+	    columnOptions: {
+	        minWidth: 80,
+	        resizable: true
+	    }
+	}; // 1-1. 끝
+
+	// 1-2. 주문서 목록 그리드 생성
+	const soGrid = new tui.Grid({
+		el: document.getElementById('soGrid'),
+		data: soData,
+		...soGridOptions,
+		columns: [
+			{ header: '주문서코드', name: 'soId' },
+			{ header: '고객사명', name: 'custcomName' },
+			{ header: '담당자', name: 'psch' },
+			{ header: '연락처', name: 'pschTel' },
+			{ header: '납기일', name: 'dueDt' },
+			{ header: '상품명', name: 'productName' },
+			{ header: '금액합계(원)', name: 'ttSupplyAmt' },
+			{ header: '총주문수량', name: 'ttSoQy' },
+			{ header: '재고수량', name: 'currStockQy' },
+		]
+	}); // 1-2. 주문서 목록 그리드 생성 끝
+	
+	// 2. 출고의뢰 목록 그리드
+	// 2-1. Grid 공통 옵션
+	const oustGridOptions = {
+	    bodyHeight: 240,
+	    scrollX: true,
+	    scrollY: true,  // 세로
+	    /* rowHeaders: ['checkbox'],     // 좌측 체크박스 */
+	    columnOptions: {
+	        minWidth: 80,
+	        resizable: true
+	    }
+	}; // 1-1. 끝
+
+	// 2-2. 출고의뢰 목록 그리드 생성
+	const oustGrid = new tui.Grid({
+		el: document.getElementById('oustGrid'),
+		data: oustData,
+		...oustGridOptions,
+		columns: [
+			{ header: '출고의뢰번호', name: 'oustId' },
+			{ header: '고객사명', name: 'custcomName' },
+			{ header: '담당자', name: 'psch' },
+			{ header: '연락처', name: 'pschTel' },
+			{ header: '출고요청일', name: 'dueDt' },
+			{ header: '비고(포장조건)', name: 'productName' },
+			{ header: '요청사항', name: 'ttSupplyAmt' },
+			{ header: '출고의뢰진행상태', name: 'currStockQy' },
+		]
+	}); // 1-2. 출고의뢰 목록 그리드 생성 끝
+	
+	
+	// 2. 버튼 이벤트
+	// 2-1. 초기화 버튼 이벤트
+	// 2-2. 조회 버튼 이벤트
+	
+</script>
+
+</body>
+</html>

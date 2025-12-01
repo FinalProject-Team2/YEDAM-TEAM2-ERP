@@ -1,38 +1,28 @@
 package store.yd2team.business.web;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
-import store.yd2team.business.service.CommonCodeVO;
-import store.yd2team.business.service.PriceService;
-import store.yd2team.business.service.PriceVO;
 
 
 @Controller
-@RequestMapping("/price")
+@RequestMapping("/esti")
 @RequiredArgsConstructor
-public class PriceController {
+public class EstiController {
 
-	private final PriceService priceService;
+	/* private final PriceService priceService; */
 
-	@GetMapping("/priceMain")
+	@GetMapping("/estiMain")
 	public String selectall(Model model) {
 
 		model.addAttribute("test", "testone");
-		return "business/priceManage";
+		return "business/estiManage";
 
 	}
-
+/*
 	// 조회
 	@PostMapping("/list")
 	@ResponseBody
@@ -94,4 +84,6 @@ public class PriceController {
 
 	    return result;
 	}
+*/	
+	
 }
