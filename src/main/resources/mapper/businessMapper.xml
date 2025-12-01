@@ -70,20 +70,29 @@
 	        AND industry_type LIKE '%' || #{industryType} || '%'
 	    </if>
 	    <if test="companySize != null and companySize != ''">
-	        AND company_size = #{companySize}
+	        AND company_size LIKE '%' || #{companySize} || '%'
 	    </if>
 	    <if test="region != null and region != ''">
-	        AND region LIKE '%' || #{region} || '%'
+	        AND region 			LIKE '%' || #{region} || '%'
 	    </if>
-	    <if test="startDate != null and startDate != ''">
-	        AND establish_date &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+	    <if test="startEstablishDate != null and startEstablishDate != ''">
+	        AND establish_date &gt;= TO_DATE(#{startEstablishDate}, 'YYYY-MM-DD')
 	    </if>
-	    <if test="endDate != null and endDate != ''">
-	        AND establish_date &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+	    <if test="endEstablishDate != null and endEstablishDate != ''">
+	        AND establish_date &lt;= TO_DATE(#{endEstablishDate}, 'YYYY-MM-DD')
 	    </if>
-    ORDER BY rank DESC
+    ORDER BY rank
+</select>
+
+<select id="getStdrDetailAll" parameterType="store.yd2team.business.service.PotentialStdrVO">
+	SELECT
+	        STDR_DETAIL_ID   AS stdrDetailId,
+	        STDR_ID          AS stdrId,
+	        VEND_ID          AS vendId,
+	        STDR_ITEAM_INFO  AS stdrIteamInfo,
+	        INFO_SCORE       AS infoScore
+    FROM 	TB_POTENTIAL_STDR_DETAIL
+    ORDER BY INFO_SCORE DESC
 </select>
     
-    
-
 </mapper>
