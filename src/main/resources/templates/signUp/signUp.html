@@ -1,10 +1,372 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+    <style>
+        /* 회원가입 카드 레이아웃 - subscription 페이지 느낌 유지 */
+        .signup-card {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .signup-card .card-body {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .signup-section-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .signup-label {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .signup-terms-box {
+            border-top: 1px solid #e0e0e0;
+            margin-top: 1.5rem;
+            padding-top: 1.0rem;
+        }
+
+        /* 한 줄에 두 개씩 배치 + 가운데 정렬 */
+        .signup-terms-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            text-align: center;
+        }
+
+        .signup-terms-item {
+            margin: 0;
+        }
+
+        /* 체크박스와 텍스트 사이 간격 강제로 줄이기 */
+        .signup-terms-item.form-check .form-check-input {
+            margin-right: 0.2rem !important; /* 기본 마진 덮어쓰기 */
+            margin-left: 0 !important;       /* 왼쪽 여백 제거 (inline 체크박스 기본값 방지) */
+        }
+
+        /* 버튼 영역: 두 버튼 가운데 정렬 */
+        .signup-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;  /* 전체를 가운데 정렬 */
+            gap: 0.75rem;             /* 버튼 사이 간격 */
+        }
+
+        .signup-actions > a,
+        .signup-actions > button {
+            max-width: 180px;         /* 버튼 최대 너비 제한 */
+            width: 100%;
+        }
+
+        /* 비밀번호 일치 여부 점 표시용 래퍼 */
+        .password-check-wrapper {
+            position: relative;
+        }
+
+        .password-match-indicator {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: none; /* 기본은 숨김 */
+        }
+
+        .password-match-indicator.match {
+            display: inline-block;
+            background-color: #28a745; /* 초록색 */
+        }
+
+        .password-match-indicator.mismatch {
+            display: inline-block;
+            background-color: #dc3545; /* 빨간색 */
+        }
+
+        @media (max-width: 576px) {
+            .signup-actions {
+                flex-direction: column;
+                align-items: center;  /* 모바일에서도 가운데 */
+            }
+
+            .signup-terms-row {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+        }
+    </style>
 </head>
-<body>
-회원가입
+<body layout:fragment="content">
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-3 signup-card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <h5 class="card-title">회원가입</h5>
+                </div>
+            </div>
+            <div class="card-body">
+                <form id="signUpForm" th:action="@{/signUp}" method="post">
+                    <!-- 기본 정보 -->
+                    <div class="signup-section mb-3">
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">아이디</label>
+                                <div class="row g-2">
+                                    <div class="col-8 col-sm-9">
+                                        <input type="text" id="userId" name="userId" class="form-control" placeholder="아이디를 입력하세요" required>
+                                    </div>
+                                    <div class="col-4 col-sm-3 d-grid">
+                                        <button type="button" id="btnIdCheck" class="btn btn-outline-dark">중복확인</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">비밀번호</label>
+                                <div class="password-check-wrapper">
+                                    <input type="password" id="password" name="password" class="form-control" placeholder="비밀번호를 입력하세요" required>
+                                    <span id="passwordIndicator" class="password-match-indicator"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">비밀번호 확인</label>
+                                <div class="password-check-wrapper">
+                                    <input type="password" id="passwordConfirm" name="passwordConfirm" class="form-control" placeholder="비밀번호를 다시 입력하세요" required>
+                                    <span id="passwordConfirmIndicator" class="password-match-indicator"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">상호명</label>
+                                <input type="text" name="bizName" class="form-control" placeholder="상호명을 입력하세요" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">대표자 이름</label>
+                                <input type="text" name="ownerName" class="form-control" placeholder="대표자 이름을 입력하세요" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">사업자등록번호</label>
+                                <div class="row g-2">
+                                    <div class="col-8 col-sm-9">
+                                        <input type="text" id="bizRegNo" name="bizRegNo" class="form-control" placeholder="숫자만 입력" maxlength="12">
+                                    </div>
+                                    <div class="col-4 col-sm-3 d-grid">
+                                        <button type="button" id="btnBizNoCheck" class="btn btn-outline-dark">중복확인</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">휴대폰번호</label>
+                                <input type="text" name="mobileNo" class="form-control" placeholder="010-0000-0000" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">대표 전화번호</label>
+                                <input type="text" name="telNo" class="form-control" placeholder="대표 전화번호를 입력하세요" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">대표 이메일</label>
+                                <input type="email" name="email" class="form-control" placeholder="example@company.com" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">대표 사업장 주소</label>
+                                <input type="text" name="addr" class="form-control" placeholder="주소를 입력하세요" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-1">
+                            <div class="col-12">
+                                <label class="form-label">업태/업종</label>
+                                <select name="bizType" class="form-select" required>
+                                    <option value="" selected>선택</option>
+                                    <option th:each="code : ${bizTypeList}"
+                                            th:value="${code.codeNm}"
+                                            th:text="${code.codeNm}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 약관 동의 -->
+                    <div class="signup-terms-box">
+                        <div class="signup-terms-row">
+                            <div class="signup-terms-item form-check">
+                                <input class="form-check-input" type="checkbox" id="termsService" name="termsService" required>
+                                <label class="form-check-label" for="termsService">
+                                    서비스 이용약관 동의 <span class="text-muted">(필수)</span>
+                                </label>
+                            </div>
+                            <div class="signup-terms-item form-check">
+                                <input class="form-check-input" type="checkbox" id="termsPrivacy" name="termsPrivacy" required>
+                                <label class="form-check-label" for="termsPrivacy">
+                                    개인정보 처리방침 동의 <span class="text-muted">(필수)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 버튼 영역 -->
+                    <div class="signup-actions">
+                        <a th:href="@{/}">
+                            <button type="button" class="btn btn-outline-dark w-100">홈으로</button>
+                        </a>
+                        <button type="submit" class="btn btn-outline-dark w-100">회원가입</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+        window.addEventListener('DOMContentLoaded', function() {
+            // 아이디 중복 확인
+            var btn = document.getElementById('btnIdCheck');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    var userIdInput = document.getElementById('userId');
+                    var loginId = userIdInput.value.trim();
+
+                    if (!loginId) {
+                        alert('아이디를 입력해주세요.');
+                        userIdInput.focus();
+                        return;
+                    }
+
+                    var xhr = new XMLHttpRequest();
+                    var url = /*[[@{/signUp/idCheck}]]*/ '/signUp/idCheck';
+                    xhr.open('GET', url + '?loginId=' + encodeURIComponent(loginId));
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                var isDuplicated = (xhr.responseText === 'true');
+                                if (isDuplicated) {
+                                    alert('중복된 아이디 입니다.');
+                                    userIdInput.focus();
+                                    userIdInput.select();
+                                } else {
+                                    alert('사용 가능한 아이디 입니다.');
+                                }
+                            } else {
+                                alert('아이디 중복 확인 중 오류가 발생했습니다.');
+                            }
+                        }
+                    };
+                    xhr.send();
+                });
+            }
+
+            // 사업자등록번호 중복 확인
+            var bizBtn = document.getElementById('btnBizNoCheck');
+            if (bizBtn) {
+                bizBtn.addEventListener('click', function() {
+                    var bizInput = document.getElementById('bizRegNo');
+                    var bizNo = bizInput.value.trim();
+
+                    if (!bizNo) {
+                        alert('사업자등록번호를 입력해주세요.');
+                        bizInput.focus();
+                        return;
+                    }
+
+                    var xhr2 = new XMLHttpRequest();
+                    var url2 = /*[[@{/signUp/bizNoCheck}]]*/ '/signUp/bizNoCheck';
+                    xhr2.open('GET', url2 + '?bizNo=' + encodeURIComponent(bizNo));
+                    xhr2.onreadystatechange = function() {
+                        if (xhr2.readyState === XMLHttpRequest.DONE) {
+                            if (xhr2.status === 200) {
+                                var isDuplicated = (xhr2.responseText === 'true');
+                                if (isDuplicated) {
+                                    alert('중복된 사업자등록번호 입니다.');
+                                    bizInput.focus();
+                                    bizInput.select();
+                                } else {
+                                    alert('사용 가능한 사업자등록번호 입니다.');
+                                }
+                            } else {
+                                alert('사업자등록번호 중복 확인 중 오류가 발생했습니다.');
+                            }
+                        }
+                    };
+                    xhr2.send();
+                });
+            }
+
+            // 비밀번호/비밀번호 확인 일치 여부 표시
+            var pwInput = document.getElementById('password');
+            var pwConfirmInput = document.getElementById('passwordConfirm');
+            var pwIndicator = document.getElementById('passwordIndicator');
+            var pwConfirmIndicator = document.getElementById('passwordConfirmIndicator');
+
+            function updatePasswordIndicators() {
+                var pw = pwInput.value;
+                var pwc = pwConfirmInput.value;
+
+                // 둘 다 비어있으면 표시 안 함
+                if (!pw && !pwc) {
+                    pwIndicator.className = 'password-match-indicator';
+                    pwConfirmIndicator.className = 'password-match-indicator';
+                    return;
+                }
+
+                if (pw && pwc && pw === pwc) {
+                    // 둘 다 있고, 일치할 때 - 초록색 점
+                    pwIndicator.className = 'password-match-indicator match';
+                    pwConfirmIndicator.className = 'password-match-indicator match';
+                } else {
+                    // 하나라도 있고, 서로 다를 때 - 빨간 점
+                    pwIndicator.className = 'password-match-indicator mismatch';
+                    pwConfirmIndicator.className = 'password-match-indicator mismatch';
+                }
+            }
+
+            pwInput.addEventListener('input', updatePasswordIndicators);
+            pwConfirmInput.addEventListener('input', updatePasswordIndicators);
+        });
+    /*]]>*/
+    </script>
+</th:block>
+
 </body>
 </html>
