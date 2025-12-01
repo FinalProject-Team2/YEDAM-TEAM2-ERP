@@ -4,5 +4,7 @@ import store.yd2team.common.dto.LoginResultDto;
 
 public interface EmpAcctService {
 	
-	LoginResultDto login(String vendId, String loginId, String rawPassword);
+	LoginResultDto login(String vendId,
+						 String loginId,
+						 String password);
 }

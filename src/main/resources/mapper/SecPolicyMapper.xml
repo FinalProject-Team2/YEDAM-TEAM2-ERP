@@ -13,6 +13,8 @@
                 use_lower_yn,
                 use_num_yn,
                 use_spcl_yn,
+                captcha_yn,
+                captcha_fail_cnt,
                 crea_dt,
                 crea_by,
                 updt_dt,
