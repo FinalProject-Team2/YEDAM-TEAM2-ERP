@@ -18,6 +18,7 @@ public class EdcVO {
 	private String edcId;       // 주식별자
     private String vendId;      // 구독시 생성된ID FK
     private String edcTy;       // 법정의무교육/직무교육/소양교육/사내교육
+    private String edcDt;       // 년도검색용
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date edcBeginDt;    // 법정교육 시작날짜
     @DateTimeFormat(pattern = "yyyy-MM-dd")

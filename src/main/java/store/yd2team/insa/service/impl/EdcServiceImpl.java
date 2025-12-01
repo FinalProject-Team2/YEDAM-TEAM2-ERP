@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import store.yd2team.common.mapper.CodeMapper;
@@ -28,7 +29,7 @@ public class EdcServiceImpl implements EdcService{
 	@Override
 	public List<EdcVO> getListEdcJohoe(EdcVO edc) {
 		
-		return edcMapper.getListEdcJohoe();
+		return edcMapper.getListEdcJohoe(edc);
 	}
 
 	@Override
@@ -55,14 +56,16 @@ public class EdcServiceImpl implements EdcService{
 		return result;
 	}
 
+	@Transactional
 	@Override
 	public int setDbEdcAdd(EdcVO edc) {
 		//edc Id생성
 		edc.setEdcId(edcMapper.setDbEdcAddId());
+		edc.setVendId("V001"); //임시로 넣는값 나중에 거래처 로그인하게되면 세선에서 받아올거임
 		edcMapper.setDbEdcAdd(edc);
 		EmpVO empVal = new EmpVO();		
 		switch (edc.getEdcSel().charAt(0)) {
-				    case 'd' -> empVal.setDeptId(edc.getEdcSel());
+				    case 'D' -> empVal.setDeptId(edc.getEdcSel());
 				    case 'k' -> empVal.setClsf(edc.getEdcSel());
 				    default  -> empVal.setRspofc(edc.getEdcSel());
 				}
@@ -72,12 +75,13 @@ public class EdcServiceImpl implements EdcService{
 
 		for (int i = 0; i < gradeList.size(); i++) {
 		    EdcVO vo = gradeList.get(i);
+		    System.out.println("몇번째행인지 보여조"+vo);
 		    String newId = "edcTT" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyMM"))
 		                 + String.format("%03d", seq + i);
 		    vo.setEdcTrgterId(newId);
 		    vo.setEdcId(edc.getEdcId()); // FK로 edcId도 같이 세팅
-		}
-		edcMapper.insertEdcTrgterList(gradeList);
+		}		
+		
 
 
 		return edcMapper.insertEdcTrgterList(gradeList);

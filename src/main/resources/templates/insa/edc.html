@@ -49,14 +49,15 @@
 						<div class="col-md-3">
 							<label class="form-label">교육구분</label> <select id="edcTy"
 								class="form-select edcJohoe">
-								<option>법정의무교육</option>
-								<option>직무교육</option>
-								<option>소양교육</option>
-								<option>사내교육</option>
+								<option value="">전체</option>
+								<option value="법정의무교육">법정의무교육</option>
+								<option value="직무교육">직무교육</option>
+								<option value="소양교육">소양교육</option>
+								<option value="사내교육">사내교육</option>
 							</select>
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">연도</label> <select id="edcBeginDt"
+							<label class="form-label">연도</label> <select id="edcDt"
 								class="form-select edcJohoe"></select>
 						</div>
 					</div>
@@ -187,12 +188,12 @@
 	
 
 	<script>
-	const $yearr = $("#edcBeginDt");   // select 요소 가져오기
+	const $yearr = $("#edcDt");   // select 요소 가져오기
 	const currentYear = new Date().getFullYear(); // 현재 연도
 	const startYear = 1980; // 시작 연도
 
 	for (let y = currentYear; y >= startYear; y--) {
-	  const valueDate = y + "-01-01"; // 서버로 넘길 값 (yyyy-MM-dd)
+	  const valueDate = y; // 서버로 넘길 값 (yyyy-MM-dd)
 	  
 	  $yearr.append($("<option>", {
 	    value: valueDate, // 실제 전달 값

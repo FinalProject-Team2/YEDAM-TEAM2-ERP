@@ -8,7 +8,7 @@ import store.yd2team.insa.service.EmpVO;
 public interface EdcMapper {
 
 	//다중조건 조회
-		List<EdcVO> getListEdcJohoe();
+		List<EdcVO> getListEdcJohoe(EdcVO keyword);
 		
 	//교육별 선정된 대상자 목록조회
 		List<EdcVO> getListEdcDetaJohoe(EdcVO keyword);

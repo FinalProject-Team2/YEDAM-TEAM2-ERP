@@ -7,7 +7,7 @@
  a.*
  ,b.*
 from tb_edc a
-join (SELECT 
+left join (SELECT 
             edc_id,
             COUNT(*) AS edc_cnt,
             SUM(CASE WHEN compl_st = '수료' THEN 1 ELSE 0 END) AS compl_cnt,
@@ -19,10 +19,17 @@ join (SELECT
         GROUP BY edc_id) b
 on a.edc_id = b.edc_id
 <where>
-<if test="edcNm != null">  AND a.edc_nm like '%' || #{edcNm} || '%'</if>
-<if test="edcTy != null">  AND a.edc_ty = #{edcTy}</if>
-<if test="edcBeginDt != null">  AND TO_CHAR(a.edc_begin_dt, 'YYYY') = #{edcBeginDt}</if>
-</where>
+    <if test="edcNm != null and edcNm != ''">
+      AND a.edc_nm LIKE '%'|| #{edcNm}|| '%'
+    </if>
+    <if test="edcTy != null and edcTy != ''">
+      AND a.edc_ty = #{edcTy}
+    </if>
+    <if test="edcDt != null">
+  AND TO_CHAR(a.edc_begin_dt, 'YYYY') = #{edcDt}
+</if>
+  </where>
+
 </select>
 
 <select id="getListEdcDetaJohoe">
@@ -42,7 +49,7 @@ where edc_id = #{edcId}
 SELECT 'edc' || TO_CHAR(SYSDATE, 'YYMM') ||
        LPAD(NVL(MAX(SUBSTR(edc_id, LENGTH(edc_id)-2, 3)), 0) + 1, 3, '0') AS edc_id
 FROM tb_edc
-WHERE SUBSTR(edc_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM');
+WHERE SUBSTR(edc_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
 </select>
 
 <insert id="setDbEdcAdd">
@@ -63,7 +70,7 @@ INSERT INTO tb_edc (
         #{edcEndDt},
         #{edcNm},
         SYSDATE,
-        #{creaBy}
+        'myk'
     )
 </insert>
 
@@ -81,29 +88,19 @@ from tb_emp
 SELECT 'edcTT' || TO_CHAR(SYSDATE, 'YYMM') ||
        LPAD(NVL(MAX(SUBSTR(edc_trgter_id, LENGTH(edc_trgter_id)-2, 3)), 0) + 1, 3, '0') AS edc_trgter_id
 FROM tb_edc_trgter
-WHERE SUBSTR(edc_trgter_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
+WHERE SUBSTR(edc_trgter_id, 6, 4) = TO_CHAR(SYSDATE, 'YYMM')
 </select>
 
 <insert id="insertEdcTrgterList">
-    INSERT INTO tb_edc_trgter (
-        edc_trgter_id,
-        edc_id,
-        emp_id,
-        compl_st,
-        crea_dt,
-        crea_by
+  INSERT ALL
+  <foreach collection="list" item="item">
+    INTO tb_edc_trgter (
+      edc_trgter_id, edc_id, emp_id, compl_st, crea_dt, crea_by
+    ) VALUES (
+      #{item.edcTrgterId}, #{item.edcId}, #{item.empId}, '미수료', SYSDATE, 'myk'
     )
-    VALUES
-    <foreach collection="list" item="item" separator=",">
-        (
-            #{item.edcTrgterId},
-            #{item.edcId},
-            #{item.empId},
-            '미수료',
-            SYSDATE,
-            'myk'
-        )
-    </foreach>
+  </foreach>
+  SELECT 1 FROM DUAL
 </insert>
 
 </mapper>
