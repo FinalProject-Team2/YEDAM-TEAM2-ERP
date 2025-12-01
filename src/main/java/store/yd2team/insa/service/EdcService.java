@@ -20,4 +20,7 @@ public interface EdcService {
 	//법정교육 사용자용 쿼리 밑에 모음
 	//다중조건조회(사용자용)
 		List<EdcVO> getListEdcUserJohoe(EdcVO edc);
+		
+	//유저법정교육대상자 pdf등록할때 쓰는 update쿼리
+		int edcUserRegistChk(EdcVO edc);
 }

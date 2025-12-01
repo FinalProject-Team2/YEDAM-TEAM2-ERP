@@ -32,5 +32,8 @@ public interface EdcMapper {
 	//User전용 쿼리모음
 	//유저전용 다중검색 조회
 		List<EdcVO> getListEdcUserJohoe(EdcVO keyword);
+		
+	//유저법정교육대상자 pdf등록할때 쓰는 update쿼리
+		int edcUserRegistChk(EdcVO keyword);
 	
 }

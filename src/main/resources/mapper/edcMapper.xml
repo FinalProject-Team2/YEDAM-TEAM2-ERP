@@ -144,4 +144,16 @@ on a.edc_id = c.edc_id
 
 </select>
 
+<update id="edcUserRegistChk">
+UPDATE tb_edc_trgter
+    SET 
+        compl_st   = #{complSt},
+        compl_dt   = SYSDATE,
+        updt_dt    = SYSDATE,
+        updt_by    = 'myk',
+        compl_file = #{complFile}
+    WHERE edc_id = #{edcId}
+      AND emp_id = #{empId}
+</update>
+
 </mapper>

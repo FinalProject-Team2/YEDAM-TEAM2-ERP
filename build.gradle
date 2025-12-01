@@ -48,7 +48,8 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.3.0'
-	
+	//윤기가 추가함 pdf내용 확인할 수 있는 라이브러리임-25/12/01
+	implementation 'org.apache.pdfbox:pdfbox:2.0.29'
 }
 
 dependencyManagement {

@@ -81,11 +81,9 @@ public class EmpController {
 		// ✅ 파일 업로드 처리
 		handleFileUpload(empVO, photo);
 
-
 	    // ✅ 사원 정보 DB 저장	      
 	    empService.setDbEdit(empVO);
-	    EmpVO johoeKeyword = new EmpVO();
-		
+	    EmpVO johoeKeyword = new EmpVO();		
 		
 		return empService.getListEmpJohoe(johoeKeyword);
 
