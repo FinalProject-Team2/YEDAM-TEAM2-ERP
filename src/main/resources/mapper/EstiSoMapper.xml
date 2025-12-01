@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.business.mapper.EstiSoMapper">
+<!-- 견적서 조회 -->
+	  <select id="selectEsti" parameterType="EstiSoVO"  resultType="EstiSoVO">
+		SELECT
+	           x.esti_id AS estiId          <!-- 견적서 코드 -->
+	         , x.version AS version         <!-- 버전 -->
+	         , x.custcom_name AS custcomNameResult     <!-- 고객사명 -->
+	         , x.cdtln_lmt AS cdtlnLmt         <!-- 여신한도 -->
+	         , x.total_amount AS totalAmount     <!-- 금액합계(원) -->
+	         , CASE                                       <!-- 대표상품명 + "외 n건" -->
+	             WHEN x.item_cnt > 1 THEN
+	                  x.main_product_name || ' 외 ' || (x.item_cnt - 1) || '건'
+	             ELSE
+	                  x.main_product_name
+	           END                    AS productName
+	         , x.due_dt               AS dueDt           <!-- 납기일 -->
+	         , x.esti_st              AS estiSt          <!-- 상태코드 (승인/반려 버튼에서 사용) -->
+	         , c.code_nm              AS estiStNm        <!-- 공통코드명(대기/승인/반려) -->
+	    FROM (
+	            SELECT
+	                   e.esti_id                           AS esti_id
+	                 , e.version                           AS version
+	                 , e.custcom_name                      AS custcom_name
+	                 , e.cdtln_lmt                          AS cdtln_lmt
+	                 , SUM(d.supply_amt)                  AS total_amount      -- 상세 공급가 합계
+	                 , COUNT(DISTINCT d.product_id)       AS item_cnt          -- 상품 종류 수
+	                 , MIN(p.product_name)
+	                     KEEP (DENSE_RANK FIRST ORDER BY d.esti_detail_no)
+	                                                      AS main_product_name -- 대표 상품명(첫 라인 기준)
+	                 , e.due_dt                            AS due_dt
+	                 , e.esti_st                           AS esti_st          -- 상태 코드
+	            FROM   tb_esti        e
+	            JOIN   tb_esti_detail d
+	                   ON d.esti_id = e.esti_id
+	                  AND d.version = e.version
+	            LEFT JOIN tb_product  p
+	                   ON p.product_id = d.product_id
+	            
+	            <where>
+	                <!-- 거래처 명(=고객사명) 검색 -->
+	                <if test="custcomName != null and custcomName != ''">
+	                    AND e.custcom_name LIKE '%' || #{custcomName} || '%'
+	                </if>
+	
+	                <!-- 납기일 시작일 : EstiSoVO.dueStart (LocalDate) -->
+	                <if test="dueStart != null">
+	                    AND e.due_dt &gt;= #{dueStart}
+	                </if>
+	
+	                <!-- 납기일 종료일 : EstiSoVO.dueEnd (LocalDate) -->
+	                <if test="dueEnd != null">
+	                    AND e.due_dt &lt;= #{dueEnd}
+	                </if>
+	            </where>
+	            GROUP BY
+	                   e.esti_id
+	                 , e.version
+	                 , e.custcom_name
+	                 , e.cdtln_lmt
+	                 , e.due_dt
+	                 , e.esti_st
+	         ) x
+	         LEFT JOIN tb_code c
+	           ON c.grp_id  = 'esti'
+	          AND c.code_id = x.esti_st
+	    ORDER BY
+	           x.esti_id DESC,
+	           x.version DESC
+	</select>
+
+<!-- 승인 반려 상태값 업데이트 -->
+	<update id="updateStatus" parameterType="EstiSoVO">
+	    UPDATE tb_esti
+	       SET esti_st = #{estiSt}
+	         , updt_dt = SYSDATE
+	         , updt_by = 'Admin'
+	     WHERE esti_id = #{estiId}
+	       AND version = #{version}
+	</update>
+</mapper>

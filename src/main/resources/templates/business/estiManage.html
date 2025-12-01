@@ -20,8 +20,8 @@
 							<h5 class="card-title">견적서 조회</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-dark">초기화</button>
-							<button type="button" class="btn btn-outline-dark">조회</button>
+							<button type="button" class="btn btn-dark" id="btnReset">초기화</button>
+							<button type="button" class="btn btn-outline-dark" id="btnSearch">조회</button>
 						</div>
 					</div>
 					<!-- end card-header -->
@@ -29,8 +29,8 @@
 					<div class="card-body">
 						<div class="row g-2">
 							<div class="col-md-3">
-								<label for="clientName" class="form-label">거래처 명</label> <input
-									id="clientName" type="text" class="form-control"
+								<label for="custcomName" class="form-label">고객사 명</label> <input
+									id="custcomName" type="text" class="form-control"
 									placeholder="YEDAM">
 							</div>
 
@@ -105,6 +105,11 @@
 	<script>
 	// 0. 데이터
 	const estiData = [];
+	let searchForm = {
+		    custcomName: "",
+		    dueStart: "",
+		    dueEnd: ""
+	};
 
 	// 1-1. Grid 공통 옵션
 	const estiGridOptions = {
@@ -126,11 +131,11 @@
 		columns: [
 			{ header: '견적서코드', name: 'estiId' },
 			{ header: '버전', name: 'version' },
-			{ header: '고객사명', name: 'custcomName' },
-			{ header: '여신한도', name: 'cdtlnLmt' },
-			{ header: '금액합계(원)', name: 'ttSupplyAmt' },
+			{ header: '고객사명', name: 'custcomNameResult' },
+			{ header: '여신한도', name: 'cdtlnLmt', align: 'right' },
+			{ header: '금액합계(원)', name: 'totalAmount', align: 'right'  },
 			{ header: '상품명', name: 'productName' },
-			{ header: '납기일', name: 'dueDt' },
+			{ header: '납기일', name: 'dueDt', align: 'right'  },
 			{
 			    header: '승인 / 반려',
 			    name: 'apRj',
@@ -141,69 +146,131 @@
 			      `;
 			    }
 			  },
-			{ header: '상태', name: 'st' },
+			{ header: '상태', name: 'estiStNm' },
 		]
 	}); // 1-2. 견적서목록 그리드 생성 끝
 	
 	// 2. 버튼 이벤트
 	// 2-1. 초기화 버튼 이벤트
+	document.getElementById("btnReset").addEventListener("click", function () {
+	
+	    // 1) searchForm 객체 초기화
+	    searchForm = {
+	        custcomName: "",
+	        dueStart: "",
+	        dueEnd: ""
+	    };
+	
+	    // 2) 화면 Input 값 초기화
+	    document.querySelector("#custcomName").value = "";
+	    document.querySelector(".js-date-range-start").value = "";
+	    document.querySelector(".js-date-range-end").value = "";
+	
+	    // datepicker 를 쓰는 경우 UI 리프레시
+	    $('.js-date-range-start').datepicker('update', '');
+	    $('.js-date-range-end').datepicker('update', '');
+	
+	    console.log("검색조건 초기화:", searchForm);
+	});
+	
 	// 2-2. 조회 버튼 이벤트
+	document.getElementById("btnSearch").addEventListener("click", function () {
 	
-	// 2-3. 승인 / 반려 버튼 이벤트
-	document.addEventListener('click', async (e) => {
-	  const approveBtn = e.target.closest('.approve-btn');
-	  const rejectBtn = e.target.closest('.reject-btn');
+	    // 1) 화면 입력값 → searchForm 에 세팅
+	    searchForm.custcomName = document.querySelector("#custcomName").value.trim();
+	    searchForm.dueStart = document.querySelector(".js-date-range-start").value;
+	    searchForm.dueEnd = document.querySelector(".js-date-range-end").value;
 	
-	  // 승인 버튼 클릭
-	  if (approveBtn) {
-	    const estiId = approveBtn.dataset.id;
-	    const row = estiGrid.getRow(estiGrid.getIndexOfRow(estiId));
+	    console.log("보낼 searchForm >>> ", searchForm);
 	
-	    const limit = Number(row.cdtlnLmt);
-	    const total = Number(row.ttSupplyAmt);
+	    // 2) 백엔드 조회 요청 (POST /esti/list)
+	    axios.post("/esti/list", searchForm)
+	        .then(res => {
+	            console.log("조회결과 >>> ", res.data);
 	
-	    // 여신한도 < 금액
-	    if (limit < total) {
-	      const confirmed = confirm("여신한도가 부족합니다.\n그래도 승인하시겠습니까?");
-	      if (!confirmed) return; // 취소 시 종료
-	    }
+	            // 3) 그리드 데이터 반영
+	            estiGrid.resetData(res.data);
+	        })
+	        .catch(err => console.error("조회 중 오류:", err));
+	});
 	
-	    applyApprove(estiId);
+	
+	
+	// 2-3. 승인 버튼 이벤트
+	$(document).on('click', '.approve-btn', function () {
+	
+	  const estiId = $(this).data('id');   // data-id
+	  const row = estiGrid.getData().find(r => r.estiId == estiId);  // rowKey = estiId 가정
+	
+	  if (!row) {
+	    console.warn('행을 찾을 수 없습니다. estiId =', estiId);
+	    return;
 	  }
 	
-	  // 반려 버튼 클릭
-	  if (rejectBtn) {
-	    const estiId = rejectBtn.dataset.id;
-	    applyReject(estiId);
+	  const limit = Number(row.cdtlnLmt ?? 0);      // 여신한도
+	  const total = Number(row.totalAmount ?? 0);  // 금액합계
+	
+	  console.log("row : " , row)
+	  console.log("limit : " + limit);
+	  console.log("total : " + total);
+	  
+	  
+	  if (limit < total) {
+	    const confirmed = confirm("여신한도가 부족합니다.\n그래도 승인하시겠습니까?");
+	    if (!confirmed) return;
 	  }
-	}); // 2-3 승인 / 반려 버튼 이벤트 끝
 	
-	// 2-4. 승인 / 반려 이벤트 서버 통신
-	function applyApprove(estiId) {
-	  fetch("/estimate/approve", {
+	  // jQuery AJAX로 상태 업데이트 호출
+	  $.ajax({
+	    url: '/esti/updateStatus',
 	    method: 'POST',
-	    headers: { 'Content-Type': 'application/json' },
-	    body: JSON.stringify({ estiId })
+	    contentType: 'application/json',
+	    data: JSON.stringify({
+	      estiId: estiId,
+	      version: version,
+	      estiSt: 'es02'   // 승인 코드
+	    })
 	  })
-	    .then(res => res.json())
-	    .then(() => {
-	      alert("승인이 완료되었습니다.");
-	      estiGrid.refreshLayout(); // 또는 reload() API 호출
-	    });
-	}
+	  .done(function () {
+	    alert('승인 처리되었습니다.');
+	    // 그리드 상태 갱신
+	    estiGrid.setValue(estiId, 'estiSt', 'es02');
+	    estiGrid.setValue(estiId, 'estiStNm', '승인');
+	  })
+	  .fail(function (xhr, status, err) {
+	    console.error('승인 오류:', err);
+	    alert('승인 처리 중 오류가 발생했습니다.');
+	  });
+	}); // 2-3 승인 버튼 이벤트 끝
 	
-	function applyReject(estiId) {
-	  fetch("/estimate/reject", {
+	
+	
+	// 2-4. 반려 버튼 이벤트
+	$(document).on('click', '.reject-btn', function () {
+	
+	  const estiId = $(this).data('id');
+	
+	  $.ajax({
+	    url: '/esti/updateStatus',
 	    method: 'POST',
-	    headers: { 'Content-Type': 'application/json' },
-	    body: JSON.stringify({ estiId })
+	    contentType: 'application/json',
+	    data: JSON.stringify({
+	      estiId: estiId,
+	      estiSt: 'es03'   // 반려 코드
+	    })
 	  })
-	    .then(res => res.json())
-	    .then(() => {
-	      alert("반려 처리되었습니다.");
-	      estiGrid.refreshLayout();
-	    });
-	} // 2-4. 승인 반려 이벤트 서버통신 끝
+	  .done(function () {
+	    alert('반려되었습니다.');
+	    estiGrid.setValue(estiId, 'estiSt', 'es03');
+	    estiGrid.setValue(estiId, 'estiStNm', '반려');
+	  })
+	  .fail(function (xhr, status, err) {
+	    console.error('반려 오류:', err);
+	    alert('반려 처리 중 오류가 발생했습니다.');
+	  });
+	}); // 2-4. 반려 버튼 이벤트 끝
+	
+	
 </script>
 
 </body>
