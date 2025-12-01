@@ -16,7 +16,14 @@ public interface BusinessMapper {
 	
 	//잠재고객조건상세목록조회
 	 List<PotentialStdrVO> getStdrDetailAll();
-	
+	 
+	//잠재고객조건상세목록수정
+    List<BusinessVO> selectByCondGb(String condGb);
+
+    int insertDetail(BusinessVO vo);
+
+    int updateDetail(BusinessVO vo);
+
 	// 공공데이터 한 건 insert
     int insertPotential(BusinessVO vo);
     

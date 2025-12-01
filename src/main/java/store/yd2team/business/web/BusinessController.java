@@ -1,13 +1,17 @@
 package store.yd2team.business.web;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
@@ -106,6 +110,23 @@ public class BusinessController {
 		model.addAttribute("stdrvo", vo);
 		return "business/potentialCustList";
 	}
+	//
+	//잠재고객조건상세목록수정
+	@PostMapping("/potentialCustRegister")
+	@ResponseBody
+	public Map<String, List<BusinessVO>> saveAll(
+	        @RequestBody List<BusinessVO> list) {
+
+		businessService.saveAll(list);
+
+	    Map<String, List<BusinessVO>> result = new HashMap<>();
+	    result.put("industryList",  businessService.getListByCond("IND"));
+	    result.put("sizeList",      businessService.getListByCond("SIZE"));
+	    result.put("establishList", businessService.getListByCond("EST"));
+	    result.put("regionList",    businessService.getListByCond("REG"));
+
+	    return result;
+	}
 
 	// 잠재고객데이터매핑
 	@PostMapping("/potential/sync")
@@ -113,6 +134,8 @@ public class BusinessController {
 		businessService.fetchAndSaveFromApi();
 		return "redirect:/potentialCustList";
 	}
+	//
+	
 
 	@GetMapping("/salesActivity")
 	public String update1(Model model) {

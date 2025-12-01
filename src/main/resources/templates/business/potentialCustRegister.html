@@ -25,7 +25,9 @@
 </head>
 <body layout:fragment="content">
 
-	
+	<div class="d-flex justify-content-end mb-2">
+		<button class="btn btn-outline-dark" id="btnSaveAll">전체 저장</button>
+	</div>
 
 	<div class="row">
 		<div class="col-md-6">
@@ -37,15 +39,15 @@
 						<h5 class="card-title">업종</h5>
 					</div>
 					<div class="card-header-right">
-							<button class="btn btn-outline-dark">추가</button>
-							<button class="btn btn-outline-dark">등록</button>
+						<button class="btn btn-outline-dark">추가</button>
+						<button class="btn btn-outline-dark">등록</button>
 					</div>
 				</div>
 				<div class="card-body">
 					<div id="custtypegrid" style="margin: 20px;"></div>
 				</div>
 			</div>
-			
+
 			<!-- 설립 -->
 			<div class="card" style="height: 500px;">
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
@@ -54,8 +56,8 @@
 						<h5 class="card-title">설립</h5>
 					</div>
 					<div class="card-header-right">
-							<button class="btn btn-outline-dark">추가</button>
-							<button class="btn btn-outline-dark">등록</button>
+						<button class="btn btn-outline-dark">추가</button>
+						<button class="btn btn-outline-dark">등록</button>
 					</div>
 				</div>
 				<div class="card-body">
@@ -66,39 +68,39 @@
 
 		<!-- 우측 패널 -->
 		<div class="col-md-6">
-				<!-- 규모 -->
-				<div class="card mb-3" style="height: 500px;">
-					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">규모</h5>
-						</div>
-						<div class="card-header-right">
-							<button class="btn btn-outline-dark">추가</button>
-							<button class="btn btn-outline-dark">등록</button>
-						</div>
+			<!-- 규모 -->
+			<div class="card mb-3" style="height: 500px;">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">규모</h5>
 					</div>
-					<div class="card-body">
-						<div id="sizegrid" style="margin: 20px;"></div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark">추가</button>
+						<button class="btn btn-outline-dark">등록</button>
 					</div>
 				</div>
+				<div class="card-body">
+					<div id="sizegrid" style="margin: 20px;"></div>
+				</div>
+			</div>
 
 			<!-- 지역/상권 -->
-				<div class="card mb-3" style="height: 500px;">
-					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">지역/상권</h5>
-						</div>
-						<div class="card-header-right">
-							<button class="btn btn-outline-dark">추가</button>
-							<button class="btn btn-outline-dark">등록</button>
-						</div>
+			<div class="card mb-3" style="height: 500px;">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div class="card-header">
+					<div class="card-header-left">
+						<h5 class="card-title">지역/상권</h5>
 					</div>
-					<div class="card-body">
-						<div id="regiongrid" style="margin: 20px;"></div>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark">추가</button>
+						<button class="btn btn-outline-dark">등록</button>
 					</div>
 				</div>
+				<div class="card-body">
+					<div id="regiongrid" style="margin: 20px;"></div>
+				</div>
+			</div>
 		</div>
 	</div>
 	<script th:inline="javascript">
@@ -146,6 +148,11 @@
 	    minBodyHeight : 0,
 	    autoWidth : true,
 	    columns : [
+	    	{
+	            header : 'ID',
+	            name   : 'stdrId',        // PK
+	            hidden : true             // 화면에는 안보이게
+	          },
 	        {
 	            header : '상세',
 	            name   : 'stdrIteamInfo',  // VO 필드명
@@ -157,7 +164,8 @@
 	            header : '점수',
 	            name   : 'infoScore',      // VO 필드명
 	            sortable : true,
-	            formatter: ({ value }) => value > 0 ? '+' + value : value
+	            formatter: ({ value }) => value > 0 ? '+' + value : value,
+	            editor:'text' 
 	        }
 	    ]
 	});
@@ -183,7 +191,8 @@
 	            header : '점수',
 	            name   : 'infoScore',
 	            sortable : true,
-	            formatter: ({ value }) => value > 0 ? '+' + value : value
+	            formatter: ({ value }) => value > 0 ? '+' + value : value,
+	            editor:'text'
 	        }
 	    ]
 	});
@@ -209,7 +218,8 @@
 	            header : '점수',
 	            name   : 'infoScore',
 	            sortable : true,
-	            formatter: ({ value }) => value > 0 ? '+' + value : value
+	            formatter: ({ value }) => value > 0 ? '+' + value : value,
+	            editor:'text'
 	        }
 	    ]
 	});
@@ -236,12 +246,52 @@
 	            header : '점수',
 	            name   : 'infoScore',
 	            sortable : true,
-	            formatter: ({ value }) => value > 0 ? '+' + value : value
+	            formatter: ({ value }) => value > 0 ? '+' + value : value,
+	            editor:'text'
 	        }
 	    ]
 	});
 		
-		
+	 // ========== 전체 저장 버튼 ==========
+
+	  document.getElementById('btnSaveAll').addEventListener('click', () => {
+	    // 1) 각 그리드 데이터 가져오기
+	    const indList  = custTypeGrid.getData().map(r => ({ ...r, condGb:'IND' }));
+	    const sizeList = sizeGrid.getData().map(r => ({ ...r, condGb:'SIZE' }));
+	    const estList  = createGrid.getData().map(r => ({ ...r, condGb:'EST' }));
+	    const regList  = regionGrid.getData().map(r => ({ ...r, condGb:'REG' }));
+
+	    // 2) 네 종류를 하나의 배열로 합치기
+	    let all = [...indList, ...sizeList, ...estList, ...regList];
+
+	    // 3) 상세/점수 둘 다 비어있는 건 날려버리기 (값 없으면 넘어가고)
+	    all = all.filter(r => {
+	      const info  = r.stdrIteamInfo ? r.stdrIteamInfo.trim() : '';
+	      const score = r.infoScore;
+	      return info !== '' || (score !== null && score !== '' && score !== undefined);
+	    });
+
+	    // 4) 서버로 전송
+	    fetch('/potentialCustRegister', {
+	      method: 'POST',
+	      headers: { 'Content-Type':'application/json' },
+	      body: JSON.stringify(all)
+	    })
+	    .then(res => res.json())
+	    .then(result => {
+	      alert('저장 완료');
+
+	      // 서버에서 네 목록 다시 돌려준다고 가정
+	      custTypeGrid.resetData(result.industryList);
+	      sizeGrid.resetData(result.sizeList);
+	      createGrid.resetData(result.establishList);
+	      regionGrid.resetData(result.regionList);
+	    })
+	    .catch(err => {
+	      console.error(err);
+	      alert('저장 중 오류가 발생했다.');
+	    });
+	  });
 		
 		
 	
