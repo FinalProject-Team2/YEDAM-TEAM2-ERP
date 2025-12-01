@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import store.yd2team.common.service.SignUpService;
 import store.yd2team.common.dto.SignUpRequestDTO;
@@ -43,10 +42,12 @@ public class SignUpController {
 	
 	// 회원가입 처리
 	@PostMapping
-	public String register(SignUpRequestDTO dto, Model model, RedirectAttributes redirectAttributes) throws Exception {
+	public String register(SignUpRequestDTO dto, Model model) throws Exception {
+		// 실제 회원가입 처리 로직 호출 (tb_vend, tb_vend_acct 저장)
 		String vendId = signUpService.registerVendor(dto);
-		// 성공 메시지 플래그를 로그인 페이지에 전달
-		redirectAttributes.addAttribute("signUpSuccess", "true");
+		// TODO: vendId가 null 이거나 예외가 발생하면 에러 페이지로 보내는 로직을 추후 보완 가능
+		
+		// 회원가입 성공 시 로그인 페이지로 이동
 		return "redirect:/logIn";
 	}
 	
