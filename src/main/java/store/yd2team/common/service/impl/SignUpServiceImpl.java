@@ -1,10 +1,17 @@
 package store.yd2team.common.service.impl;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import store.yd2team.common.dto.SignUpRequestDTO;
 import store.yd2team.common.mapper.SignUpMapper;
 import store.yd2team.common.service.SignUpService;
+import store.yd2team.common.service.VendAcctVO;
+import store.yd2team.common.service.VendVO;
 
 @Service
 public class SignUpServiceImpl implements SignUpService {
@@ -30,6 +37,97 @@ public class SignUpServiceImpl implements SignUpService {
 		}
 		int count = signUpMapper.countBizNo(bizNo);
 		return count > 0;
+	}
+	
+	// 회원가입 처리: tb_vend, tb_vend_acct에 데이터 저장 후 생성된 vendId 반환
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public String registerVendor(SignUpRequestDTO dto) throws Exception {
+		if (dto == null) {
+			throw new IllegalArgumentException("SignUpRequestDTO must not be null");
+		}
+		
+		// 1. vend_id, vend_acct_id PK 생성 (yyyyMM 기준 3자리 시퀀스)
+		LocalDate today = LocalDate.now();
+		String yyyymm = today.format(DateTimeFormatter.ofPattern("yyyyMM"));
+		
+		String vendPrefix = "vend_" + yyyymm;
+		String vendAcctPrefix = "vend_acct_" + yyyymm;
+		
+		String vendSeq = signUpMapper.getMaxVendSeqOfMonth(vendPrefix);
+		int vendNext = 1;
+		if (vendSeq != null && !vendSeq.isEmpty()) {
+			try {
+				vendNext = Integer.parseInt(vendSeq) + 1;
+			} catch (NumberFormatException e) {
+				vendNext = 1;
+			}
+		}
+		String vendId = vendPrefix + String.format("%03d", vendNext);
+		
+		String vendAcctSeq = signUpMapper.getMaxVendAcctSeqOfMonth(vendAcctPrefix);
+		int vendAcctNext = 1;
+		if (vendAcctSeq != null && !vendAcctSeq.isEmpty()) {
+			try {
+				vendAcctNext = Integer.parseInt(vendAcctSeq) + 1;
+			} catch (NumberFormatException e) {
+				vendAcctNext = 1;
+			}
+		}
+		String vendAcctId = vendAcctPrefix + String.format("%03d", vendAcctNext);
+		
+		// 2. tb_vend 데이터 매핑 (상호명, 대표자, 사업자등록번호, 휴대폰, 대표전화, 이메일, 주소, 업태/업종)
+		VendVO vend = new VendVO();
+		vend.setVendId(vendId);
+		vend.setVendNm(dto.getBizName());
+		vend.setRpstrNm(dto.getOwnerName());
+		
+		// 숫자형 컬럼(Long)으로 매핑 - 숫자만 들어온다는 가정하에 파싱, 실패 시 null
+		vend.setBizno(parseLongSafe(dto.getBizRegNo()));
+		vend.setHp(parseLongSafe(dto.getMobileNo()));
+		vend.setTel(parseLongSafe(dto.getTelNo()));
+		
+		vend.setEmail(dto.getEmail());
+		vend.setAddr(dto.getAddr()); // 화면에서 도로명+상세로 조합된 값
+		vend.setBizcnd(dto.getBizType());
+		
+		// 상태(st)는 tb_vend 컬럼 기본값을 사용하므로 명시적으로 세팅하지 않음
+		vend.setCreaBy("SYSTEM");
+		vend.setUpdtBy("SYSTEM");
+		
+		int vendInsertCount = signUpMapper.insertVend(vend);
+		if (vendInsertCount != 1) {
+			throw new IllegalStateException("Failed to insert tb_vend record");
+		}
+		
+		// 3. tb_vend_acct 데이터 매핑 (아이디, 비밀번호, vend_id 등)
+		VendAcctVO vendAcct = new VendAcctVO();
+		vendAcct.setVendAcctId(vendAcctId);
+		vendAcct.setVendId(vendId);
+		vendAcct.setLoginId(dto.getUserId());
+		vendAcct.setLoginPwd(dto.getPassword());
+		
+		// st 컬럼은 tb_vend_acct 테이블의 기본값을 사용하므로 명시적으로 세팅하지 않음
+		vendAcct.setCreaBy("SYSTEM");
+		vendAcct.setUpdtBy("SYSTEM");
+		
+		int vendAcctInsertCount = signUpMapper.insertVendAcct(vendAcct);
+		if (vendAcctInsertCount != 1) {
+			throw new IllegalStateException("Failed to insert tb_vend_acct record");
+		}
+		
+		return vendId;
+	}
+	
+	private Long parseLongSafe(String value) {
+		if (value == null) return null;
+		String trimmed = value.trim();
+		if (trimmed.isEmpty()) return null;
+		try {
+			return Long.parseLong(trimmed);
+		} catch (NumberFormatException e) {
+			return null;
+		}
 	}
 
 }// end class
