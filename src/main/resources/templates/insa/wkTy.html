@@ -12,138 +12,417 @@
 
   <!-- ✅ Date / Time Picker -->
   <link rel="stylesheet"
-        href="https://uicdn.toast.com/tui-date-picker/latest/tui-date-picker.css">
+        href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
   <link rel="stylesheet"
-        href="https://uicdn.toast.com/tui-time-picker/latest/tui-time-picker.css">
+        href="https://uicdn.toast.com/tui.time-picker/latest/tui.time-picker.css">
 
-  <script src="https://uicdn.toast.com/tui-time-picker/latest/tui-time-picker.js"></script>
-  <script src="https://uicdn.toast.com/tui-date-picker/latest/tui-date-picker.js"></script>
+  <script src="https://uicdn.toast.com/tui.date-picker/latest/tui.date-picker.js"></script>
+  <script src="https://uicdn.toast.com/tui.time-picker/latest.tui-time-picker.js"></script>
 
-  <!-- ✅ Grid (여기서 한 번 더 로드해도 됨) -->
+  <!-- ✅ Grid -->
   <link rel="stylesheet"
         href="https://uicdn.toast.com/grid/latest/tui-grid.css">
   <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+  <style>
+    .wk-panel {
+      border: 1px solid #dedede;
+      border-radius: 18px;
+      padding: 24px 26px;
+      background-color: #fff;
+    }
+    .wk-panel .form-label {
+      font-weight: 500;
+    }
+    .wk-time-range .form-control {
+      height: 36px;
+      padding-top: 4px;
+      padding-bottom: 4px;
+    }
+    .wk-time-range .input-group-text {
+      font-size: 0.85rem;
+    }
+    .wk-dot {
+      display: inline-block;
+      margin: 0 8px;
+      font-size: 18px;
+      line-height: 36px;
+    }
+    .wk-day-buttons .btn {
+      min-width: 38px;
+      padding: 4px 0;
+      font-size: 0.85rem;
+      border-radius: 0;        /* 가운데 버튼들 사각형 */
+    }
+    .wk-day-buttons .btn:first-child {
+      border-radius: 10px 0 0 10px;
+    }
+    .wk-day-buttons .btn:last-child {
+      border-radius: 0 10px 10px 0;
+    }
+    /* 요일 선택된 상태 */
+    .wk-day-buttons .btn.selected {
+      background-color: #0d6efd;
+      color: #fff;
+      border-color: #0d6efd;
+    }
+
+    /* 근무유형 라디오 버튼 정렬 */
+    .wk-radio-group {
+      display: flex;
+      align-items: center;
+      gap: 24px;          /* 요일 / 주기 사이 간격 */
+      margin-top: 4px;
+    }
+
+    .wk-radio {
+      display: flex;
+      align-items: center;
+      gap: 6px;           /* 동그라미랑 텍스트 사이 간격 */
+      margin: 0;
+    }
+
+    .wk-radio input[type="radio"] {
+      margin: 0;          /* 기본 왼쪽 여백 제거 */
+    }
+  </style>
 </head>
 <body layout:fragment="content">
 <div class="row">
-    <div class="col-md-6">
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5 class="card-title">휴일 기준 관리</h5>
-                <div class="card-header-right">
-                    <button class="btn btn-danger">삭제</button>
-					<button class="btn btn-outline-dark" id="btnHldyAdd">행추가</button>
-                    <button class="btn btn-outline-dark">저장</button>
-                </div>
-            </div>
-            <div class="card-body">
-           	  <div id="gridHldy" class="mt-3"></div>
-            </div>
+
+  <!-- ================== 휴일 기준 관리 ================== -->
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h5 class="card-title">휴일 기준 관리</h5>
+        <div class="card-header-right">
+          <button class="btn btn-danger" id="btnHldyDel">삭제</button>
+          <button class="btn btn-outline-dark" id="btnHldyAdd">행추가</button>
+          <button class="btn btn-outline-dark" id="btnHldySave">저장</button>
         </div>
+      </div>
+      <div class="card-body">
+        <div id="gridHldy" class="mt-3"></div>
+      </div>
     </div>
-        <div class="col-md-6">
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5 class="card-title">근무형태 기준 관리</h5>
-                <div class="card-header-right">
-                    <button class="btn btn-dark">초기화</button>
-                    <button class="btn btn-danger">삭제</button>
-                    <button class="btn btn-outline-dark">저장</button>
-                    <button class="btn btn-outline-dark" id="openGuideModal">조회</button>
-                </div>
-            </div>
-            <div class="card-body">
-                </div>
-            </div>
+  </div>
+
+  <!-- ================== 근무형태 기준 관리 ================== -->
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header mb-3">
+        <h5 class="card-title">근무형태 기준 관리</h5>
+        <div class="card-header-right">
+          <button class="btn btn-dark">초기화</button>
+          <button class="btn btn-danger">삭제</button>
+          <button class="btn btn-outline-dark">저장</button>
+          <button class="btn btn-outline-dark" id="openGuideModal">조회</button>
         </div>
+      </div>
+
+      <div class="card-body">
+        <div class="wk-panel">
+          <!-- 기준명 / 부서명 -->
+          <div class="row mb-3">
+            <div class="col-6">
+              <label for="stdNm" class="form-label">기준명</label>
+              <input type="text" id="stdNm" class="form-control" />
+            </div>
+            <div class="col-6">
+              <label for="deptNm" class="form-label">부서명</label>
+              <select id="deptNm" class="form-select">
+                <option value="">선택</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 출근시간 / 퇴근시간 -->
+          <div class="row mb-4 wk-time-range">
+            <div class="col-5">
+              <label for="startTime" class="form-label">출근시간</label>
+              <div class="input-group">
+                <input type="time" id="startTime" class="form-control">
+                <span class="input-group-text">⏱</span>
+              </div>
+            </div>
+            <div class="col-2 d-flex align-items-end justify-content-center">
+              <span class="wk-dot">~</span>
+            </div>
+            <div class="col-5">
+              <label for="endTime" class="form-label">퇴근시간</label>
+              <div class="input-group">
+                <input type="time" id="endTime" class="form-control">
+                <span class="input-group-text">⏱</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 근무유형 (요일 / 주기) -->
+          <div class="mb-2">
+            <label class="form-label d-block">근무유형</label>
+            <div class="wk-radio-group">
+              <label class="wk-radio">
+                <input type="radio" name="wkType" id="wkTypeDay" value="DAY" checked>
+                <span>요일</span>
+              </label>
+              <label class="wk-radio">
+                <input type="radio" name="wkType" id="wkTypeCycle" value="CYCLE">
+                <span>주기</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 요일 버튼 영역 (요일 선택 시) -->
+          <div id="weekdaySection" class="wk-day-buttons mb-4">
+            <div class="btn-group" role="group" aria-label="weekday">
+              <button type="button" class="btn btn-outline-primary btn-sm" data-day="MON">월</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-day="TUE">화</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-day="WED">수</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-day="THU">목</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-day="FRI">금</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-day="SAT">토</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-day="SUN">일</button>
+            </div>
+          </div>
+
+          <!-- 주기 영역 (주기 선택 시) -->
+          <div id="cycleSection" class="row g-3 mb-2 d-none">
+            <div class="col-6">
+              <label for="workDays" class="form-label">근무일</label>
+              <div class="input-group">
+                <input type="number" id="workDays" class="form-control" min="0">
+                <span class="input-group-text">일</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <label for="offDays" class="form-label">휴일</label>
+              <div class="input-group">
+                <input type="number" id="offDays" class="form-control" min="0">
+                <span class="input-group-text">일</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- (필요하면 hidden 필드로 선택 요일 저장 가능) -->
+          <input type="hidden" id="selectedWeekdays" name="selectedWeekdays" value="">
+        </div><!-- /.wk-panel -->
+      </div><!-- /.card-body -->
+    </div>
+  </div>
 </div>
+
 <div th:replace="insa/modal/guideModal :: guideModal"></div>
+
 <script>
-    /* =====================================================
-     * 1. Grid 옵션
-     * ===================================================== */
-    const GridOptions = {
-        bodyHeight: 320,
-        scrollX: false,
-        scrollY: false,
-        rowHeaders: ["checkbox"],
-        columnOptions: {
-            minWidth: 80,
-            resizable: true
+  /* =====================================================
+   * 1. Grid 공통 옵션
+   * ===================================================== */
+  const GridOptions = {
+    bodyHeight: 600,
+    scrollX: false,
+    scrollY: false,
+    rowHeaders: ['checkbox'],
+    columnOptions: {
+      minWidth: 80,
+      resizable: true
+    }
+  };
+
+  /* =====================================================
+   * 2. 휴일 데이터
+   * ===================================================== */
+  const hldyGridData = [
+    { hldyDt: '2025-01-01', hldyNm: '신정', yn: 'Y' },
+    { hldyDt: '2025-02-10', hldyNm: '설날', yn: 'Y' },
+    { hldyDt: '2025-03-01', hldyNm: '삼일절', yn: 'Y' },
+    { hldyDt: '2025-05-05', hldyNm: '어린이날', yn: 'Y' },
+    { hldyDt: '2025-06-06', hldyNm: '현충일', yn: 'Y' },
+    { hldyDt: '2025-08-15', hldyNm: '광복절', yn: 'Y' },
+    { hldyDt: '2025-09-17', hldyNm: '추석', yn: 'Y' },
+    { hldyDt: '2025-10-03', hldyNm: '개천절', yn: 'Y' },
+    { hldyDt: '2025-10-09', hldyNm: '한글날', yn: 'Y' },
+    { hldyDt: '2025-12-25', hldyNm: '성탄절', yn: 'N' }
+  ];
+
+  /* =====================================================
+   * 3. 그리드 생성
+   * ===================================================== */
+  const hldyGrid = new tui.Grid({
+    el: document.getElementById('gridHldy'),
+    data: hldyGridData,
+    ...GridOptions,
+    editingType: 'cell',
+    columns: [
+      {
+        header: '월일',
+        name: 'hldyDt',
+        align: 'center',
+        editor: {
+          type: 'datePicker',
+          options: {
+            format: 'yyyy-MM-dd',
+            language: 'ko'
+          }
+        },
+        formatter: ({ value }) => {
+          if (!value) return '';
+          return value.slice(5);
         }
-    };
+      },
+      {
+        header: '휴일명',
+        name: 'hldyNm',
+        editor: 'text'
+      },
+      {
+        header: '사용여부',
+        name: 'yn',
+        editor: {
+          type: 'select',
+          options: {
+            listItems: [
+              { text: '사용', value: 'Y' },
+              { text: '미사용', value: 'N' }
+            ]
+          }
+        },
+        formatter: ({ value }) => value === 'Y' ? '사용' : '미사용'
+      }
+    ]
+  });
 
-    /* =====================================================
-     * 2. 더미 데이터 (camelCase)
-     * ===================================================== */
-    const hldyGridData = [
-    	  { hldyMmdd: "01-01", hldyNm: "신정",           yn: "Y" },
-    	  { hldyMmdd: "02-10", hldyNm: "설날",           yn: "Y" },
-    	  { hldyMmdd: "03-01", hldyNm: "삼일절",         yn: "Y" },
-    	  { hldyMmdd: "05-05", hldyNm: "어린이날",       yn: "Y" },
-    	  { hldyMmdd: "06-06", hldyNm: "현충일",         yn: "Y" },
-    	  { hldyMmdd: "08-15", hldyNm: "광복절",         yn: "Y" },
-    	  { hldyMmdd: "09-17", hldyNm: "추석",           yn: "Y" },
-    	  { hldyMmdd: "10-03", hldyNm: "개천절",         yn: "Y" },
-    	  { hldyMmdd: "10-09", hldyNm: "한글날",         yn: "Y" },
-    	  { hldyMmdd: "12-25", hldyNm: "성탄절",         yn: "N" }
-    ];
+  /* =====================================================
+   * 4. 맨 위로 행추가
+   * ===================================================== */
+  document.getElementById('btnHldyAdd').addEventListener('click', () => {
+    hldyGrid.prependRow({
+      hldyDt: '',
+      hldyNm: '',
+      yn: 'Y'
+    }, { focus: true });
+  });
 
-    /* =====================================================
-     * 3. Grid 생성
-     * ===================================================== */
-     const hldyGrid = new tui.Grid({
-    	  el: document.getElementById("gridHldy"),
-    	  data: hldyGridData,
-    	  ...GridOptions,
-    	  editingType: 'cell',
-    	  columns: [
-    	    {
-    	      header: "월일",
-    	      name: "hldyMmdd",
-    	      editor: {
-    	        type: 'datePicker',
-    	        options: {
-    	          format: 'MM-dd'   // ✅ 여기서 mm-dd 형식 지정
-    	        }
-    	      }
-    	    },
-    	    { header: "휴일명", name: "hldyNm", editor: "text" },
-    	    {
-    	      header: "사용여부",
-    	      name: "yn",
-    	      editor: {
-    	        type: 'select',
-    	        options: {
-    	          listItems: [
-    	            { text: '사용', value: 'Y' },
-    	            { text: '미사용', value: 'N' }
-    	          ]
-    	        }
-    	      }
-    	    }
-    	  ]
-    	});
-    /* =====================================================
-     * 5. 모달
-     * ===================================================== */
-     const openBtn = document.getElementById("openGuideModal");
-     const modal   = document.getElementById("guideModal");
-     const back    = document.getElementById("guideBackdrop");
+  /* =====================================================
+   * 5. 선택 삭제
+   * ===================================================== */
+  document.getElementById('btnHldyDel').addEventListener('click', () => {
+    const checked = hldyGrid.getCheckedRowKeys();
+    hldyGrid.removeRows(checked);
+  });
 
-     function openModal() {
-         if (!modal || !back) return;
-         modal.classList.add("show");
-         modal.style.display = "block";
-         back.style.display = "block";
-         grid2.refreshLayout();
-     }
+  /* =====================================================
+   * 6. 저장 (콘솔 확인용)
+   * ===================================================== */
+  document.getElementById('btnHldySave').addEventListener('click', () => {
+    const modified = hldyGrid.getModifiedRows();
+    console.log('변경 데이터', modified);
+  });
 
-     if (openBtn) {
-         openBtn.addEventListener("click", openModal);
-     }
+  /* =====================================================
+   * 7. 모달
+   * ===================================================== */
+  const openBtn = document.getElementById('openGuideModal');
+  const modal   = document.getElementById('guideModal');
+  const back    = document.getElementById('guideBackdrop');
 
-     
+  function openModal() {
+    if (!modal || !back) return;
+
+    modal.classList.add('show');
+    modal.style.display = 'block';
+    back.style.display = 'block';
+
+    if (typeof grid2 !== 'undefined' && grid2?.refreshLayout) {
+      grid2.refreshLayout();
+    }
+  }
+
+  openBtn?.addEventListener('click', openModal);
+
+  /* =====================================================
+   * 8. 근무유형 라디오에 따라 영역 토글
+   * ===================================================== */
+  const rdDay        = document.getElementById('wkTypeDay');
+  const rdCycle      = document.getElementById('wkTypeCycle');
+  const weekdaySec   = document.getElementById('weekdaySection');
+  const cycleSec     = document.getElementById('cycleSection');
+
+  function updateWorkTypeView() {
+    if (rdDay.checked) {
+      weekdaySec.classList.remove('d-none');
+      cycleSec.classList.add('d-none');
+    } else {
+      weekdaySec.classList.add('d-none');
+      cycleSec.classList.remove('d-none');
+    }
+  }
+
+  rdDay.addEventListener('change', updateWorkTypeView);
+  rdCycle.addEventListener('change', updateWorkTypeView);
+  updateWorkTypeView();
+
+  /* =====================================================
+   * 9. 요일 버튼 선택 토글
+   * ===================================================== */
+  const dayButtons = document.querySelectorAll('#weekdaySection button');
+  const hiddenWeekdays = document.getElementById('selectedWeekdays');
+
+  function updateHiddenWeekdays() {
+    const selectedDays = [];
+    dayButtons.forEach(btn => {
+      if (btn.classList.contains('selected')) {
+        selectedDays.push(btn.dataset.day);  // MON,TUE,...
+      }
+    });
+    hiddenWeekdays.value = selectedDays.join(',');
+  }
+
+  dayButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('selected');   // 시각적 토글
+      updateHiddenWeekdays();             // hidden 값 업데이트
+    });
+  });
+
+  /* =====================================================
+   * 10. 주기: 근무일 + 휴일 합 최대 7 제한
+   * ===================================================== */
+  const workDaysInput = document.getElementById('workDays');
+  const offDaysInput  = document.getElementById('offDays');
+
+  function applyCycleLimit(changed) {
+    let work = parseInt(workDaysInput.value || 0, 10);
+    let off  = parseInt(offDaysInput.value  || 0, 10);
+
+    if (isNaN(work)) work = 0;
+    if (isNaN(off))  off  = 0;
+    if (work < 0) work = 0;
+    if (off  < 0) off  = 0;
+
+    let total = work + off;
+
+    if (total > 7) {
+      if (changed === 'work') {
+        off = 7 - work;
+        if (off < 0) {
+          off = 0;
+          work = 7;
+        }
+      } else {
+        work = 7 - off;
+        if (work < 0) {
+          work = 0;
+          off = 7;
+        }
+      }
+    }
+
+    workDaysInput.value = work;
+    offDaysInput.value  = off;
+  }
+
+  workDaysInput.addEventListener('input', () => applyCycleLimit('work'));
+  offDaysInput.addEventListener('input',  () => applyCycleLimit('off'));
 </script>
 </body>
 </html>
