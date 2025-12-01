@@ -188,28 +188,68 @@
                         <div class="row mb-3">
                             <div class="col-12">
                                 <label class="form-label">휴대폰번호</label>
-                                <input type="text" name="mobileNo" class="form-control" placeholder="010-0000-0000" required>
+                                <input type="text" name="mobileNo" class="form-control" placeholder="숫자만 입력" required>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-12">
                                 <label class="form-label">대표 전화번호</label>
-                                <input type="text" name="telNo" class="form-control" placeholder="대표 전화번호를 입력하세요" required>
+                                <input type="text" name="telNo" class="form-control" placeholder="숫자만 입력" required>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-12">
                                 <label class="form-label">대표 이메일</label>
-                                <input type="email" name="email" class="form-control" placeholder="example@company.com" required>
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-5 col-sm-6">
+                                        <!-- 사용자 입력 부분 (local-part) -->
+                                        <input type="text" id="emailLocal" class="form-control" placeholder="이메일 아이디" required>
+                                    </div>
+                                    <div class="col-5 col-sm-6">
+                                        <!-- 도메인 선택 -->
+                                        <select id="emailDomain" class="form-select" required>
+                                            <option value="" selected>선택</option>
+                                            <option value="naver.com">@naver.com</option>
+                                            <option value="gmail.com">@gmail.com</option>
+                                            <option value="daum.net">@daum.net</option>
+                                            <option value="kakao.com">@kakao.com</option>
+                                            <option value="hotmail.com">@hotmail.com</option>
+                                            <option value="nate.com">@nate.com</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- 실제 서버 전송용 전체 이메일 -->
+                                <input type="hidden" id="email" name="email" required>
                             </div>
                         </div>
 
+                        <!-- 대표 사업장 주소 - 다음 우편번호 검색 적용 -->
                         <div class="row mb-3">
                             <div class="col-12">
                                 <label class="form-label">대표 사업장 주소</label>
-                                <input type="text" name="addr" class="form-control" placeholder="주소를 입력하세요" required>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6 col-sm-9">
+                                        <input type="text" id="postcode" class="form-control" placeholder="우편번호" required readonly>
+                                    </div>
+                                    <div class="col-4 col-sm-3 d-grid">
+                                        <button type="button" class="btn btn-outline-dark" onclick="execDaumPostcode()">우편번호 찾기</button>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <input type="text" id="roadAddress" class="form-control mb-2" placeholder="도로명주소" required readonly>
+                                    <input type="text" id="jibunAddress" class="form-control mb-2" placeholder="지번주소" required readonly>
+                                    <span id="guide" style="color:#999;display:none"></span>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <!-- 실제 대표 사업장 주소: 도로명주소 + 참고항목 + 상세주소를 합쳐서 addr에 저장 -->
+                                        <input type="text" id="detailAddress" class="form-control" placeholder="상세주소를 입력하세요" required>
+                                        <input type="hidden" id="extraAddress">
+                                        <input type="hidden" id="addr" name="addr" required>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -258,9 +298,129 @@
 </div>
 
 <th:block layout:fragment="script">
+    <!-- 다음 우편번호 서비스 스크립트 -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
     <script th:inline="javascript">
     /*<![CDATA[*/
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var roadAddr = data.roadAddress; // 도로명 주소
+                    var extraRoadAddr = ''; // 참고 항목
+
+                    if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                        extraRoadAddr += data.bname;
+                    }
+                    if (data.buildingName !== '' && data.apartment === 'Y') {
+                        extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    if (extraRoadAddr !== '') {
+                        extraRoadAddr = ' (' + extraRoadAddr + ')';
+                    }
+
+                    document.getElementById('postcode').value = data.zonecode;
+                    document.getElementById('roadAddress').value = roadAddr;
+                    document.getElementById('jibunAddress').value = data.jibunAddress;
+                    document.getElementById('extraAddress').value = extraRoadAddr;
+
+                    var guideTextBox = document.getElementById('guide');
+                    if (data.autoRoadAddress) {
+                        var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
+                        guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
+                        guideTextBox.style.display = 'block';
+
+                    } else if (data.autoJibunAddress) {
+                        var expJibunAddr = data.autoJibunAddress;
+                        guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
+                        guideTextBox.style.display = 'block';
+                        // 예상 지번 주소를 지번주소 인풋에도 자동 반영
+                        document.getElementById('jibunAddress').value = expJibunAddr;
+                    } else {
+                        guideTextBox.innerHTML = '';
+                        guideTextBox.style.display = 'none';
+
+                        // 자동/선택된 지번 주소가 모두 없으면 인풋도 비워준다
+                        if (!data.jibunAddress) {
+                            document.getElementById('jibunAddress').value = '';
+                        }
+                    }
+
+                    // 도로명주소 + 참고항목을 addr의 기본값으로 설정 (상세주소는 사용자가 입력 후 합산)
+                    updateFullAddr();
+                }
+            }).open();
+        }
+
+        function updateFullAddr() {
+            var road = document.getElementById('roadAddress').value || '';
+            var extra = document.getElementById('extraAddress').value || '';
+            var detail = document.getElementById('detailAddress').value || '';
+
+            var full = road;
+            if (extra) {
+                full += ' ' + extra;
+            }
+            if (detail) {
+                full += ' ' + detail;
+            }
+            document.getElementById('addr').value = full.trim();
+        }
+
         window.addEventListener('DOMContentLoaded', function() {
+            // 상세주소 입력 시 전체 addr 갱신
+            var detailInput = document.getElementById('detailAddress');
+            if (detailInput) {
+                detailInput.addEventListener('input', updateFullAddr);
+            }
+
+            // 이메일 로컬/도메인 변경 시 전체 이메일 갱신
+            var emailLocal = document.getElementById('emailLocal');
+            var emailDomain = document.getElementById('emailDomain');
+            function updateEmail() {
+                var local = (emailLocal && emailLocal.value || '').trim();
+                var domain = (emailDomain && emailDomain.value || '').trim();
+                var full = '';
+                if (local && domain) {
+                    full = local + '@' + domain;
+                }
+                document.getElementById('email').value = full;
+            }
+            if (emailLocal) {
+                emailLocal.addEventListener('input', updateEmail);
+            }
+            if (emailDomain) {
+                emailDomain.addEventListener('change', updateEmail);
+            }
+
+            // 폼 submit 시 이메일 유효성 최종 체크
+            var signUpForm = document.getElementById('signUpForm');
+            if (signUpForm) {
+                signUpForm.addEventListener('submit', function(e) {
+                    updateEmail();
+                    var fullEmail = document.getElementById('email').value;
+                    if (!fullEmail) {
+                        alert('대표 이메일을 정확히 입력/선택해 주세요.');
+                        e.preventDefault();
+                        if (emailLocal && !emailLocal.value.trim()) {
+                            emailLocal.focus();
+                        } else if (emailDomain && !emailDomain.value.trim()) {
+                            emailDomain.focus();
+                        }
+                        return;
+                    }
+
+                    // 상세 주소까지 포함된 전체 주소를 addr hidden 필드에 갱신
+                    updateFullAddr();
+                    var fullAddr = document.getElementById('addr').value;
+                    if (!fullAddr) {
+                        alert('대표 사업장 주소를 입력해 주세요.');
+                        e.preventDefault();
+                        return;
+                    }
+                });
+            }
+
             // 아이디 중복 확인
             var btn = document.getElementById('btnIdCheck');
             if (btn) {
