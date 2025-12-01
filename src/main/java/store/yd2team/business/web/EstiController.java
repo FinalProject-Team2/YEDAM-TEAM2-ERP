@@ -1,11 +1,18 @@
 package store.yd2team.business.web;
 
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
+import store.yd2team.business.service.EstiSoService;
+import store.yd2team.business.service.EstiSoVO;
 
 
 @Controller
@@ -13,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EstiController {
 
-	/* private final PriceService priceService; */
+	private final EstiSoService estiSoService;
 
 	@GetMapping("/estiMain")
 	public String selectall(Model model) {
@@ -22,16 +29,27 @@ public class EstiController {
 		return "business/estiManage";
 
 	}
-/*
-	// 조회
+	
 	@PostMapping("/list")
+    @ResponseBody
+    public List<EstiSoVO> estiList(@RequestBody EstiSoVO cond) {
+
+        System.out.println("검색조건 >>> " + cond);
+
+        // 서비스 호출
+        List<EstiSoVO> estiList = estiSoService.selectEstiList(cond);
+
+        // JSON 으로 반환 (뷰 이름 X)
+        return estiList;
+    }
+	
+	@PostMapping("/updateStatus")
 	@ResponseBody
-	public List<PriceVO> getPriceList(@RequestBody PriceVO vo) {
-		
-		System.out.println("검색조건 >>> " + vo.toString());
-		
-		return priceService.getPricePolicyList(vo);
+	public int updateStatus(@RequestBody EstiSoVO vo) {
+	    return estiSoService.updateStatus(vo);
 	}
+	
+/*
 	
 	// 공통코드로 정책유형
 	@GetMapping("/type-codes")
