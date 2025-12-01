@@ -27,5 +27,10 @@ public interface EdcMapper {
 		
 	//edcTT다중인서트문
 		int insertEdcTrgterList(List<EdcVO> keyword);
+		
+	
+	//User전용 쿼리모음
+	//유저전용 다중검색 조회
+		List<EdcVO> getListEdcUserJohoe(EdcVO keyword);
 	
 }
