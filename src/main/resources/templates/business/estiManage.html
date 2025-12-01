@@ -6,6 +6,23 @@
 <head>
 <meta charset="UTF-8">
 <title>견적서 관리</title>
+<style>
+.approve-btn,
+.reject-btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 1;
+  min-width: 50px;
+  border-radius: 4px;
+}
+
+/* 버튼 사이 간격 */
+.approve-btn + .reject-btn {
+  margin-left: 4px; 
+}
+
+</style>
+
 </head>
 <body layout:fragment="content">
 	<div class="esti-manage-wrapper">
@@ -139,14 +156,31 @@
 			{
 			    header: '승인 / 반려',
 			    name: 'apRj',
+			    align: 'center',
 			    formatter: ({ row }) => {
-			      return `
-			        <button class="btn btn-success approve-btn" data-id="${row.estiId}">승인</button>
-			        <button class="btn btn-danger reject-btn" data-id="${row.estiId}">반려</button>
-			      `;
+		    	  // estiSt === 'es1'이면 활성
+		    	  const disabledAttr = row.estiSt === 'es1' ? '' : 'disabled style="opacity:0.5; cursor:not-allowed;"';
+		    	  return ` <button class="btn btn-success approve-btn" data-id="${row.estiId}" ${disabledAttr} >승인</button>
+		    	           <button class="btn btn-danger reject-btn" data-id="${row.estiId}" ${disabledAttr}>반려</button>`;
 			    }
-			  },
-			{ header: '상태', name: 'estiStNm' },
+	    	},
+			{ 
+	    		header: '상태', 
+	    		name: 'estiStNm', 
+	    		align: 'center',
+	    		formatter: ({ row }) => {
+	    		    // 반려일 경우 비고도 보여줌
+	    		    if (row.estiSt === 'es3') {
+	    		      return `
+	    		        <div style="line-height:1.2;">
+	    		          <div>${row.estiStNm}</div>              <!-- 반려 -->
+	    		          <div style="color:#dc3545; font-size:12px;">${row.recallResn || ''}</div>
+	    		        </div>
+	    		      `;
+	    		    }
+	    		  return row.estiStNm;   // 승인/대기 등은 원래 그대로
+    		    } 
+			},
 		]
 	}); // 1-2. 견적서목록 그리드 생성 끝
 	
@@ -209,12 +243,8 @@
 	
 	  const limit = Number(row.cdtlnLmt ?? 0);      // 여신한도
 	  const total = Number(row.totalAmount ?? 0);  // 금액합계
+	  const version = row.version;
 	
-	  console.log("row : " , row)
-	  console.log("limit : " + limit);
-	  console.log("total : " + total);
-	  
-	  
 	  if (limit < total) {
 	    const confirmed = confirm("여신한도가 부족합니다.\n그래도 승인하시겠습니까?");
 	    if (!confirmed) return;
@@ -228,13 +258,13 @@
 	    data: JSON.stringify({
 	      estiId: estiId,
 	      version: version,
-	      estiSt: 'es02'   // 승인 코드
+	      estiSt: 'es2'   // 승인 코드
 	    })
 	  })
 	  .done(function () {
 	    alert('승인 처리되었습니다.');
 	    // 그리드 상태 갱신
-	    estiGrid.setValue(estiId, 'estiSt', 'es02');
+	    estiGrid.setValue(estiId, 'estiSt', 'es2');
 	    estiGrid.setValue(estiId, 'estiStNm', '승인');
 	  })
 	  .fail(function (xhr, status, err) {
@@ -249,6 +279,13 @@
 	$(document).on('click', '.reject-btn', function () {
 	
 	  const estiId = $(this).data('id');
+	  const row = estiGrid.getData().find(r => r.estiId == estiId);
+	
+	  if (!row) return;
+	
+	  // 반려 사유 입력
+	  const reason = prompt("반려 사유를 입력하세요:");
+	  if (!reason) return;
 	
 	  $.ajax({
 	    url: '/esti/updateStatus',
@@ -256,18 +293,25 @@
 	    contentType: 'application/json',
 	    data: JSON.stringify({
 	      estiId: estiId,
-	      estiSt: 'es03'   // 반려 코드
+	      estiSt: 'es3',
+	      version: row.version,     // ★ version 포함해야 함
+	      recallResn: reason        // ★ 반려 사유 필드
 	    })
 	  })
 	  .done(function () {
-	    alert('반려되었습니다.');
-	    estiGrid.setValue(estiId, 'estiSt', 'es03');
-	    estiGrid.setValue(estiId, 'estiStNm', '반려');
+	    alert('반려 처리되었습니다.');
+	
+	    // 그리드 즉시 갱신
+	    estiGrid.setValue(row.rowKey ?? estiId, 'estiSt', 'es3');
+	    estiGrid.setValue(row.rowKey ?? estiId, 'estiStNm', '반려');
+	    estiGrid.setValue(row.rowKey ?? estiId, 'recallResn', reason);
 	  })
-	  .fail(function (xhr, status, err) {
-	    console.error('반려 오류:', err);
+	  .fail(function (xhr) {
+	    console.error(xhr);
 	    alert('반려 처리 중 오류가 발생했습니다.');
 	  });
+	  
+	  /* console.log("row.rowKey : ", row.rowKey); */
 	}); // 2-4. 반려 버튼 이벤트 끝
 	
 	
