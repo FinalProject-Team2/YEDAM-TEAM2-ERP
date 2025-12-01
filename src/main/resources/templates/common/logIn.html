@@ -3,6 +3,7 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
+
 <head>
   <meta charset="UTF-8">
   <title>ERP 로그인</title>
@@ -56,30 +57,31 @@
       margin-top: 4px;
     }
 
-    /* reCAPTCHA 영역 (모양만 구현) */
-    .recaptcha-box {
+    /* === 캡챠 영역 === */
+    .captcha-box {
       border: 1px solid #dee2e6;
       border-radius: 4px;
-      height: 78px;
-      display: flex;
-      align-items: center;
-      padding: 10px 14px;
+      padding: 10px 12px;
       margin: 16px 0 24px;
       background-color: #f8f9fa;
     }
 
-    .recaptcha-check {
-      width: 20px;
-      height: 20px;
-      border: 1px solid #adb5bd;
-      border-radius: 2px;
-      margin-right: 12px;
-      background-color: #ffffff;
+    .captcha-top-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
     }
 
-    .recaptcha-text {
+    .captcha-image {
+      width: 120px;
+      height: 40px;
+      border: 1px solid #ced4da;
+      background-color: #ffffff;
+      margin-right: 8px;
+    }
+
+    .captcha-input {
       font-size: 0.9rem;
-      color: #495057;
     }
 
     .btn-login,
@@ -100,8 +102,7 @@
     <h1 class="login-card-title">ERP 로그인</h1>
 
     <!-- 로그인 폼 -->
-    <form id="loginForm" method="post" action="" novalidate
-          autocomplete="on">
+    <form id="loginForm" method="post" action="" novalidate autocomplete="on">
       <!-- 회사 코드 -->
       <div class="mb-3">
         <label for="vendId" class="form-label">회사 코드</label>
@@ -138,13 +139,25 @@
       <!-- 에러 메시지 영역 -->
       <div id="loginError" class="login-error"></div>
 
-      <!-- reCAPTCHA 영역 (지금은 자리만 잡아둠, 추후 실제 스크립트 연동) -->
-      <div class="recaptcha-box">
-        <div class="recaptcha-check"></div>
-        <div class="recaptcha-text">
-          I'm not a robot<br>
-          <small class="text-muted">reCAPTCHA 영역 (추후 연동)</small>
+      <!-- ✅ 실제 캡챠 영역 -->
+      <div class="captcha-box" id="captchaBox">
+        <div class="captcha-top-row">
+          <img id="captchaImg"
+               class="captcha-image"
+               src="/logIn/captcha"
+               alt="보안문자 이미지">
+          <button type="button"
+                  class="btn btn-outline-secondary btn-sm"
+                  id="btnRefreshCaptcha">
+            새로고침
+          </button>
         </div>
+        <input type="text"
+               class="form-control captcha-input"
+               id="captchaValue"
+               name="captchaValue"
+               placeholder="위에 보이는 문자를 입력하세요.">
+        <div id="captchaError" class="login-error"></div>
       </div>
 
       <!-- 버튼 영역 -->
@@ -164,20 +177,61 @@
     const loginBtn = document.getElementById('loginBtn');
     const errorDiv = document.getElementById('loginError');
 
+    const captchaBox = document.getElementById('captchaBox');
+    const captchaImg = document.getElementById('captchaImg');
+    const captchaInput = document.getElementById('captchaValue');
+    const captchaError = document.getElementById('captchaError');
+    const btnRefreshCaptcha = document.getElementById('btnRefreshCaptcha');
+
     if (!form) return;
+
+    // ✅ 캡챠 이미지 새로고침 함수
+    function refreshCaptcha() {
+      if (!captchaImg) return;
+      // 캐시 방지를 위해 쿼리 파라미터에 timestamp 추가
+      const baseUrl = '/logIn/captcha';
+      captchaImg.src = baseUrl + '?ts=' + new Date().getTime();
+      if (captchaInput) {
+        captchaInput.value = '';
+      }
+      if (captchaError) {
+        captchaError.textContent = '';
+      }
+    }
+
+    // 페이지 로드 시 한 번 호출 (초기 캡챠 표시)
+    refreshCaptcha();
+
+    // 새로고침 버튼 클릭 시 캡챠 재생성
+    if (btnRefreshCaptcha) {
+      btnRefreshCaptcha.addEventListener('click', function () {
+        refreshCaptcha();
+      });
+    }
 
     form.addEventListener('submit', function (e) {
       e.preventDefault(); // 기본 폼 제출 막기
 
       errorDiv.textContent = '';
+      if (captchaError) captchaError.textContent = '';
 
       const vendId = form.vendId.value.trim();
       const loginId = form.loginId.value.trim();
       const password = form.password.value.trim();
+      const captchaValue = captchaInput ? captchaInput.value.trim() : '';
 
       if (!vendId || !loginId || !password) {
         errorDiv.textContent = '회사 코드, 아이디, 비밀번호를 모두 입력해주세요.';
         return;
+      }
+
+      // (정책에 따라) 캡챠를 항상 필수로 쓰고 싶으면 이 검증 유지
+      // 나중에 "captchaRequired" 플래그에 따라 조건부로 바꿀 수도 있음
+      if (captchaBox && captchaBox.style.display !== 'none') {
+        if (!captchaValue) {
+          captchaError.textContent = '보안문자를 입력해주세요.';
+          return;
+        }
       }
 
       loginBtn.disabled = true;
@@ -188,6 +242,10 @@
       formData.append('vendId', vendId);
       formData.append('loginId', loginId);
       formData.append('password', password);
+      // ✅ 캡챠 값도 함께 전송
+      if (captchaValue) {
+        formData.append('captchaValue', captchaValue);
+      }
 
       fetch('/logIn/login', {
         method: 'POST',
@@ -203,12 +261,31 @@
           if (data.success) {
             window.location.href = '/';
           } else {
+            // 공통 에러 메시지
             errorDiv.textContent = data.message || '아이디 또는 비밀번호가 올바르지 않습니다.';
+
+            // ✅ 서버에서 captchaRequired 플래그 내려줄 경우 처리 (선택)
+            if (typeof data.captchaRequired !== 'undefined') {
+              if (data.captchaRequired) {
+                // 캡챠가 필요한 상태 → 보여주고 새로고침
+                if (captchaBox) {
+                  captchaBox.style.display = '';
+                }
+                refreshCaptcha();
+              } else {
+                // 필요 없다면 숨길 수도 있음 (원하면 유지)
+                // captchaBox.style.display = 'none';
+              }
+            } else {
+              // 플래그가 없더라도, 캡챠 실패 등으로 다시 그려주는 편이 안전
+              refreshCaptcha();
+            }
           }
         })
         .catch(function (err) {
           console.error(err);
           errorDiv.textContent = '로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+          refreshCaptcha();
         })
         .finally(function () {
           loginBtn.disabled = false;
