@@ -18,14 +18,16 @@
     </select>
 	
 	<select id="findCode">
-	 SELECT  code_id,                          
-             SUBSTR(code_id, 2) AS code_id_no_prefix, 
-             code_nm,
-             yn
-     FROM    tb_code
-     WHERE   grp_id = #{grpId}
-     AND     (vend_id IS NULL OR vend_id = #{vendId})
-     ORDER BY SUBSTR(code_id, 2) ASC
+	 SELECT   code_id,                          
+              code_nm,
+              yn,
+              vend_id
+     FROM     tb_code
+     WHERE    grp_id = #{grpId}
+     AND      (vend_id IS NULL OR vend_id = #{vendId})
+     ORDER BY TO_NUMBER(
+                        REGEXP_REPLACE(code_id, '^[^0-9]*', '')
+                        ) ASC
 	</select>
 	
 	<select id="regYn">
@@ -41,6 +43,9 @@
         FROM   tb_code
         WHERE  grp_id  = #{grpId}
         AND    code_nm = #{codeNm}
+        <if test="codeId != null and codeId != ''">
+          AND code_id != #{codeId}
+        </if>
     </select>
 	
 	<insert id="regCode">

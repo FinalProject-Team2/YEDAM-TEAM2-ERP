@@ -54,10 +54,15 @@ public class CodeController {
 		}
 
 		int result = codeService.regCode(vo);
-
+		
+		if (result == -1) {
+	        // 코드명 중복
+	        return CodeRegResponseDto.fail("이미 존재하는 코드 명입니다.");
+	    }
+		
 		// 중복 or 실패(데이터 무결성 catch)
 		if (result == 0) {
-			return CodeRegResponseDto.fail("이미 존재하는 코드입니다.");
+			return CodeRegResponseDto.fail("코드 등록 중 오류가 발생했습니다.");
 		}
 
 		// 성공 (vo.getCodeId() 에 값 세팅해두었다고 가정)
@@ -74,7 +79,12 @@ public class CodeController {
 	    }
 
 	    int result = codeService.modifyCode(vo);
-
+	    
+	    if (result == -1) {
+	        // 코드명 중복
+	        return CodeRegResponseDto.fail("이미 존재하는 코드 명입니다.");
+	    }
+	    
 	    if (result == 0) {
 	        // WHERE 조건에 해당하는 행이 없을 때 (이미 삭제됐거나 잘못된 ID)
 	        return CodeRegResponseDto.fail("수정할 코드가 없습니다.");
