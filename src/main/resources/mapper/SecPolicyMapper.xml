@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.common.mapper.SecPolicyMapper">
+	
+	<select id="selectByVendId">
+        SELECT  policy_id,
+                vend_id,
+                pw_fail_cnt,
+                auto_unlock_tm,
+                pw_len_min,
+                pw_len_max,
+                use_upper_yn,
+                use_lower_yn,
+                use_num_yn,
+                use_spcl_yn,
+                crea_dt,
+                crea_by,
+                updt_dt,
+                updt_by
+        FROM    tb_sec_policy
+        WHERE   vend_id = #{vendId}
+        AND     ROWNUM = 1
+    </select>
+	
+</mapper>

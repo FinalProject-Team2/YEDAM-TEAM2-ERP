@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.common.mapper.EmpLoginMapper">
+	
+    <select id="selectByLogin">
+        SELECT  a.EMP_ACCT_ID,
+                a.VEND_ID,
+                a.EMP_ID,
+                a.LOGIN_ID,
+                a.LOGIN_PWD,
+                a.ST,
+                a.FAIL_CNT,
+                a.LOCK_DTTM,
+                a.LAST_LOGIN,
+                a.YN,
+                a.CREA_DT,
+                a.CREA_BY,
+                a.UPDT_DT,
+                a.UPDT_BY,
+                a.TEMP_YN,
+                e.NM        AS empNm,
+                e.DEPT_ID   AS deptId,
+                d.DEPT_NM   AS deptNm 
+        FROM TB_EMP_ACCT a
+        LEFT JOIN TB_EMP e
+               ON a.EMP_ID = e.EMP_ID
+              AND a.VEND_ID = e.VEND_ID
+        LEFT JOIN TB_DEPT d
+               ON e.DEPT_ID = d.DEPT_ID
+              AND e.VEND_ID = d.VEND_ID
+        WHERE a.VEND_ID  = #{vendId}
+        AND a.LOGIN_ID = #{loginId}
+        AND a.YN = 'Y'
+    </select>
+    
+    <update id="updateLoginSuccess">
+        UPDATE tb_emp_acct
+           SET fail_cnt   = 0,
+               last_login = SYSDATE
+         WHERE emp_acct_id = #{empAcctId}
+    </update>
+
+    <update id="updateLoginFail">
+        UPDATE tb_emp_acct
+           SET fail_cnt = fail_cnt + 1,
+               st       = CASE
+                            WHEN fail_cnt + 1 >= #{maxFailCnt}
+                            THEN 'LOCKED'
+                            ELSE st
+                          END,
+               lock_dttm = CASE
+                             WHEN fail_cnt + 1 >= #{maxFailCnt}
+                             THEN SYSDATE
+                             ELSE lock_dttm
+                           END
+         WHERE emp_acct_id = #{empAcctId}
+    </update>
+
+    <update id="unlock">
+        UPDATE tb_emp_acct
+           SET st        = 'ACTIVE',
+               fail_cnt  = 0,
+               lock_dttm = NULL,
+               updt_dt   = SYSDATE,
+               updt_by   = #{updtBy}
+         WHERE emp_acct_id = #{empAcctId}
+    </update>
+    	
+</mapper>
