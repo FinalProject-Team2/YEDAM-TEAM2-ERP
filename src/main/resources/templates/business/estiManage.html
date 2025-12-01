@@ -8,7 +8,8 @@
 <title>견적서 관리</title>
 <style>
 .approve-btn,
-.reject-btn {
+.reject-btn,
+.order-btn {
   padding: 4px 8px;
   font-size: 12px;
   line-height: 1;
@@ -19,6 +20,37 @@
 /* 버튼 사이 간격 */
 .approve-btn + .reject-btn {
   margin-left: 4px; 
+}
+
+/* 모달창 css  */
+.compact-input .form-control,
+.compact-input .icon-btn,
+.compact-input .input-group-text {
+  height: 32px !important;
+  font-size: 0.85rem !important;
+  padding: 4px 8px !important;
+}
+
+.compact-input .icon-btn {
+  width: 34px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compact-input i {
+  font-size: 15px !important;
+}
+
+/* Label size */
+.form-label {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+/* Grid spacing top */
+#newEstiGrid {
+  margin-top: 6px;
 }
 
 </style>
@@ -102,8 +134,7 @@
 							<h5 class="card-title">견적서 목록</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark"
-								id="insertEstiBtn">신규</button>
+							<button type="button" class="btn btn-outline-dark" id="newEstiBtn">신규</button>
 						</div>
 					</div>
 
@@ -119,7 +150,11 @@
 	</div>
 	<!-- end esti-manage-wrapper -->
 
-	<script>
+
+<div th:replace="business/modal/newEstiModal :: newEstiModal"></div>
+
+
+<script>
 	// 0. 데이터
 	const estiData = [];
 	let searchForm = {
@@ -158,10 +193,27 @@
 			    name: 'apRj',
 			    align: 'center',
 			    formatter: ({ row }) => {
-		    	  // estiSt === 'es1'이면 활성
-		    	  const disabledAttr = row.estiSt === 'es1' ? '' : 'disabled style="opacity:0.5; cursor:not-allowed;"';
-		    	  return ` <button class="btn btn-success approve-btn" data-id="${row.estiId}" ${disabledAttr} >승인</button>
-		    	           <button class="btn btn-danger reject-btn" data-id="${row.estiId}" ${disabledAttr}>반려</button>`;
+			    	if (row.estiSt === 'es1') {
+		    	      return `
+		    	        <button class="btn btn-success approve-btn" data-id="${row.estiId}">승인</button>
+		    	        <button class="btn btn-danger reject-btn" data-id="${row.estiId}">반려</button>
+		    	      `;
+		    	    }
+
+		    	    if (row.estiSt === 'es2') {
+		    	      return `
+		    	        <button class="btn btn-primary order-btn" data-id="${row.estiId}">주문서 등록</button>
+		    	      `;
+		    	    }
+		    	    
+		    	    if (row.estiSt === 'es3') {
+		    	      return `
+		    	        <button class="btn btn-success approve-btn" disabled style="opacity:0.5; cursor:not-allowed;">승인</button>
+		    	        <button class="btn btn-danger reject-btn" disabled style="opacity:0.5; cursor:not-allowed;">반려</button>
+		    	      `;
+		    	    }
+		    	    
+		    	    return "";
 			    }
 	    	},
 			{ 
@@ -264,12 +316,12 @@
 	  .done(function () {
 	    alert('승인 처리되었습니다.');
 	    // 그리드 상태 갱신
-	    estiGrid.setValue(estiId, 'estiSt', 'es2');
-	    estiGrid.setValue(estiId, 'estiStNm', '승인');
+	    const rowKey = row.rowKey ?? estiId;
+	    estiGrid.setValue(rowKey, 'estiSt', 'es2');
+	    estiGrid.setValue(rowKey, 'estiStNm', '승인');
 	  })
-	  .fail(function (xhr, status, err) {
-	    console.error('승인 오류:', err);
-	    alert('승인 처리 중 오류가 발생했습니다.');
+	  .fail(function () {
+    	alert('승인 처리 중 오류가 발생했습니다.');
 	  });
 	}); // 2-3 승인 버튼 이벤트 끝
 	
@@ -313,7 +365,70 @@
 	  
 	  /* console.log("row.rowKey : ", row.rowKey); */
 	}); // 2-4. 반려 버튼 이벤트 끝
+
 	
+	
+// ---------------------------- 신규 견적서 모달 스크립트
+	//1. 그리드 생성
+	window.newEstiGrid = null;
+
+	function loadNewEstiGrid(data = []) {
+	  if (window.newEstiGrid) {
+	    window.newEstiGrid.resetData(data);
+	    return;
+	  }
+	
+	  window.newEstiGrid = new tui.Grid({
+	    el: document.getElementById('newEstiGrid'),
+	    scrollX: false,
+	    scrollY: true,
+	    bodyHeight: 350,
+	    rowHeaders: ['checkbox'],
+	    columns: [
+	      { header: '상품명', name: 'productName', width: 300 },
+	      { header: '단위', name: 'unit', width: 152 },
+	      { header: '판매단가', name: 'basisSaleAmt', width: 240, align: 'right' },
+	    ]
+	  });
+	}
+// -------------------------------- 모달오픈 버튼이벤트
+	// 신규 버튼 클릭 이벤트
+	$(document).on("click", "#newEstiBtn", function () {
+	  openNewEstiModal();
+	});
+
+
+    // 1-1 신규 견적서 모달
+	const openBtn = document.getElementById("newEstiBtn");
+	const modal   = document.getElementById("newEstiModal");
+	const back    = document.getElementById("newEstiBackdrop");
+	
+	function openNewEstiModal() {
+		modal.classList.add("show");
+		modal.style.display = "block";
+		back.style.display = "block";
+		
+		if (!window.newEstiGrid) {
+		  loadNewEstiGrid();
+		} else {
+		  window.newEstiGrid.refreshLayout();
+		}
+	}
+	
+	function closeNewEstiModal() {
+		modal.classList.remove("show");
+		modal.style.display = "none";
+		back.style.display = "none";
+	}
+	
+	// 바깥 클릭 시 닫기
+	modal.addEventListener("click", (event) => {
+		if (!event.target.closest(".modal-content")) {
+		  closeNewEstiModal();
+		}
+	});
+
+// end 거래처모달
 	
 </script>
 
