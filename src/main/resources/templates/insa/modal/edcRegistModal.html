@@ -21,8 +21,13 @@
 								id="m_edcNm" class="form-control" />
 						</div>
 						<div class="col-md-6">
-							<label class="form-label">교육구분</label> <input type="text"
-								id="m_edcTy" class="form-control" />
+							<label class="form-label">교육구분</label> <select id="m_edcTy"
+								class="form-select edcJohoe">								
+								<option value="법정의무교육">법정의무교육</option>
+								<option value="직무교육">직무교육</option>
+								<option value="소양교육">소양교육</option>
+								<option value="사내교육">사내교육</option>
+							</select>
 						</div>
 					</div>
 					<!-- <div class="row mb-2">
@@ -48,7 +53,7 @@
 					<div class="row mb-2">
 						<div class="col-md-6">
 							<label class="form-label">수료기준</label> <input type="text" readonly="readonly"
-								value="영상 80% 이상 시 수료" class="form-control readonly-input" />
+								value="영상 80% 이상 시 수료" class="form-control " />
 						</div>
 						<div class="col-md-6">
 							<label class="form-label">교육대상자 선정범위</label> <select

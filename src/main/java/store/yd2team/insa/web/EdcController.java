@@ -57,7 +57,7 @@ public class EdcController {
 	@ResponseBody
 	public List<EdcVO> edcJohoe(EdcVO johoeKeyword) {
 		
-		System.out.println("모나오니");
+		System.out.println("모나오니 다중입력조회"+johoeKeyword);
 		/*
 		 * EdcVO johoeKeyword = new EdcVO(); 
 		 * johoeKeyword.setEdcNm(edcNm);

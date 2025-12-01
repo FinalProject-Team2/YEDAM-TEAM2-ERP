@@ -28,7 +28,7 @@ public class EmpController {
 	// ✅ 공통 파일 업로드 처리 메소드
     private void handleFileUpload(EmpVO empVO, MultipartFile photo) throws IOException {
         if (photo != null && !photo.isEmpty()) {
-            String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/profil/";
+            String uploadDir = System.getProperty("user.dir") + "/upload/images/profil/";
             File dir = new File(uploadDir);
             if (!dir.exists()) dir.mkdirs();
 
