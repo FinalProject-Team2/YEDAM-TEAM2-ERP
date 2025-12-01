@@ -18,6 +18,7 @@
 	         , x.due_dt               AS dueDt           <!-- 납기일 -->
 	         , x.esti_st              AS estiSt          <!-- 상태코드 (승인/반려 버튼에서 사용) -->
 	         , c.code_nm              AS estiStNm        <!-- 공통코드명(대기/승인/반려) -->
+	         , x.recall_resn  AS recallResn
 	    FROM (
 	            SELECT
 	                   e.esti_id                           AS esti_id
@@ -31,6 +32,7 @@
 	                                                      AS main_product_name -- 대표 상품명(첫 라인 기준)
 	                 , e.due_dt                            AS due_dt
 	                 , e.esti_st                           AS esti_st          -- 상태 코드
+	                 , e.recall_resn  AS recall_resn
 	            FROM   tb_esti        e
 	            JOIN   tb_esti_detail d
 	                   ON d.esti_id = e.esti_id
@@ -61,6 +63,7 @@
 	                 , e.cdtln_lmt
 	                 , e.due_dt
 	                 , e.esti_st
+	                 , e.recall_resn
 	         ) x
 	         LEFT JOIN tb_code c
 	           ON c.grp_id  = 'esti'
@@ -73,9 +76,10 @@
 <!-- 승인 반려 상태값 업데이트 -->
 	<update id="updateStatus" parameterType="EstiSoVO">
 	    UPDATE tb_esti
-	       SET esti_st = #{estiSt}
-	         , updt_dt = SYSDATE
-	         , updt_by = 'Admin'
+	       SET esti_st     = #{estiSt}
+	         , recall_resn = #{recallResn}
+	         , updt_dt     = SYSDATE
+	         , updt_by     = 'Admin'
 	     WHERE esti_id = #{estiId}
 	       AND version = #{version}
 	</update>

@@ -24,6 +24,7 @@ public class EstiSoVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dueDt;
     private String estiSt;
+    private String recallResn;
     
     // ===== 공통코드 부분 =====
     private String estiStNm;  // 공통코드명(대기/승인/반려)
