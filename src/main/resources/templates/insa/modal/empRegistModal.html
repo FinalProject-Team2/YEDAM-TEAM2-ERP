@@ -1,90 +1,210 @@
-<!-- /templates/insa/modal/edcRegistModal.html -->
+<!-- /templates/insa/modal/empRegistModal.html -->
 <div th:fragment="registModal">
-  <!-- ✅ 모달 본체 -->
-  <div class="modal-backdrop" id="registBackdrop"></div>
-  <div class="modal" id="registModal">
-    <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 800px;">
-      <div class="modal-content">
-        <!-- 바디 -->
+	<!-- ✅ 모달 본체 -->
+	<div class="modal-backdrop" id="registBackdrop"></div>
+	<div class="modal" id="registModal">
+		<div class="modal-dialog modal-dialog-centered"
+			style="--bs-modal-width: 800px;">
+			<div class="modal-content">
+				<!-- 바디 -->
 				<div class="modal-body">
-					<div class="row mb-2">
-						<div class="col-md-10">
-							<h5 class="modal-title">법정의무교육 등록</h5>
+					<div class="row align-items-center mb-2">
+						<!-- 왼쪽 제목 -->
+						<div class="col">
+							<h5 class="modal-title mb-0">근로계약서</h5>
 						</div>
+						<!-- 오른쪽 버튼들 -->
+						<div class="col-auto text-end">
+							<button id="registBtn" class="btn btn-outline-dark" style="display:none;">등록</button>
+							<button class="btn btn-outline-dark">PDF</button>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-4 text-center">
+							<img id="m_proofPhoto" src="/images/profil/nonUser.jpeg" alt="사진"
+								class="img-thumbnail fixed-photo" /> 
+						</div>
+						<div class="col-md-8">
+							<div class="row mb-2">
+								<div class="col-md-6">
+									<label class="form-label ">사번</label> <input id="m_empId"
+										type="text" class="form-control readonly-input"
+										readonly="readonly" placeholder="사번(자동생성)" /> <input
+										id="m_vendId" value="V001" type="text" style="display: none;">
+								</div>
+								<div class="col-md-6">
+									<label for="userName" class="form-label">입사일</label>
+									<div class="input-group date js-date-single">
+										<input id="m_encpn" type="date"
+											class="form-control "
+											placeholder="날짜 선택"
+											readonly="readonly"> <span
+											class="input-group-text js-date-icon"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="row mb-2">
+								<div class="col-md-6">
+									<label class="form-label">이름</label> <input id="m_nm"
+										type="text" class="form-control" placeholder="홍길동" readonly="readonly"/>
+								</div>
+								<div class="col-md-6">
+									<label for="userName" class="form-label">생년월일</label>
+									<div class="input-group date js-date-single">
+										<input id="m_brthdy" type="date"
+											class="form-control "
+											placeholder="날짜 선택"
+											readonly="readonly"> <span
+											class="input-group-text js-date-icon"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="row mb-2">
+								<div class="col-md-6">
+									<label class="form-label">연락처</label> <input id="m_cttpc"
+										type="text" class="form-control" readonly="readonly" placeholder="010-1234-1234" />
+								</div>
+								<div class="col-md-6">
+									<label class="form-label">이메일</label> <input id="m_email"
+										type="email" class="form-control" readonly="readonly" placeholder="abc@mail.com" />
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="row mb-2">
+
 						<div class="col-md-2">
-							<button class="btn btn-outline-dark">등록</button>
-						</div>
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label class="form-label">교육명</label> <input type="text"
-								class="form-control" />
-						</div>
-						<div class="col-md-6">
-							<label class="form-label">교육구분</label> <input type="text"
-								class="form-control" />
-						</div>
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label class="form-label">기관명</label> <input type="text"
-								class="form-control" />
-						</div>
-						<div class="col-md-6">
-							<label class="form-label">강사</label> <input type="text"
-								class="form-control" />
-						</div>
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label class="form-label">교육 시작날짜</label> <input type="date"
-								class="form-control" />
-						</div>
-						<div class="col-md-6">
-							<label class="form-label">교육 종료날짜</label> <input type="date"
-								class="form-control" />
-						</div>
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-6">
-							<label class="form-label">수료기준</label> <input type="text"
-								value="" class="form-control" />
-						</div>
-						<div class="col-md-6">
-							<label class="form-label">교육대상자 선정범위</label> <select
-								class="form-select">
-								<option value="전체">전체</option>
-								<optgroup label="직무">
-									<option>HRM(인적자원관리)</option>
-									<th:block th:each="job : ${jobs}">
-										<option th:value="${job.id}" th:text="${job.name}"></option>
-									</th:block>
-								</optgroup>
-								<optgroup label="직급">
-									<option>사원</option>
-									<option>대리</option>
-									<option>과장</option>
-									<option>부장</option>
-									<option>이사</option>
-								</optgroup>
-								<optgroup label="부서">
-									<option>팀원</option>
-									<option>팀장</option>
-									<option>관리자</option>
-									<option>임원</option>
-								</optgroup>
+							<label class="form-label">부서</label> <select id="m_deptId"
+								class="form-select" disabled>
+								<option value="D001">인사팀</option>
+								<option value="D002">재무팀</option>
+								<option value="D003">개발팀</option>
+								<option value="D004">영업팀</option>
+								<option value="D005">마케팅팀</option>
 							</select>
 						</div>
+						<div class="col-md-3">
+							<label class="form-label">직책</label> <select id="m_rspofc"
+								class="form-select" disabled>
+								<option>팀원</option>
+								<option>팀장</option>
+								<option>관리자</option>
+								<option>임원</option>
+							</select>
+						</div>
+
+						<div class="col-md-2">
+							<label class="form-label">직급</label> <select id="m_clsf"
+								class="form-select" disabled>
+								<option>사원</option>
+								<option>대리</option>
+								<option>과장</option>
+								<option>부장</option>
+								<option>이사</option>
+							</select>
+						</div>
+
+						<div class="col-md-3">
+							<label class="form-label">고용형태</label> <select id="m_emplymTy"
+								class="form-select" disabled>
+								<option>정직원</option>
+								<option>계약직</option>
+								<option>일용직</option>
+							</select>
+						</div>
+
+						<div class="col-md-2">
+							<label class="form-label">재직상태</label> <select id="m_hffcSt"
+								class="form-select" disabled>
+								<option>재직</option>
+								<option>퇴직</option>
+								<option>휴직</option>
+								<option>퇴사</option>
+							</select>
+						</div>
+
+					</div>
+
+					<div class="row mb-2">
+						<div class="col-md-4">
+							<label class="form-label">직무</label> <input id="m_dty"
+								type="text" class="form-control" readonly="readonly" placeholder="HRM(인적자원관리)" />
+						</div>
+
+
+						<div class="col-md-4">
+							<label class="form-label">계좌번호</label> <input id="m_acnutno"
+								type="text" class="form-control" readonly="readonly" placeholder="계좌번호입력" />
+						</div>
+
+						<div class="col-md-4">
+							<label class="form-label">근무형태</label> <select id="m_basiId"
+								 class="form-select" disabled="disabled">
+								<option value="B001">인사팀 기준근무</option>
+								<option value="B002">생산1팀 교대근무</option>
+								<option value="B003">생산2팀 교대근무</option>
+								<option value="B004">생산3팀 교대근무</option>
+								<option value="B005">생산4팀 교대근무</option>
+							</select>
+						</div>
+
+					</div>
+
+					<div class="row mb-2">
+
+						<div class="col-md-6">
+							<label class="form-label">급여 방식</label> <select id="m_salaryType"
+								class="form-select" disabled="disabled">
+								<option value="bslry">기본급</option>
+								<option value="pymhr">시급</option>
+							</select>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">기본급/시급</label> <input type="text"
+								id="m_salaryInput" class="form-control" readonly="readonly" placeholder="금액입력"
+								name="monthlySalary" />
+						</div>
+
+					</div>
+
+					<div class="row mb-2">
+						<h5 class="modal-title">근로조건</h5>
+						<div class="col-md-6">
+							<label class="form-label">휴일/휴가</label> <input type="text"
+								value="회사 규정 및 근로기준법 적용" class="form-control"
+								readonly="readonly" /> 
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">급여 지급일</label>
+							<input type="text" value="매월 13일" class="form-control"
+								readonly="readonly" />
+						</div>
 					</div>
 					<div class="row mb-2">
+						<h5 class="modal-title">기타</h5>
 						<div class="col-md-6">
-							<label class="form-label">교육명</label> <input type="text"
-								class="form-control" />
+							<p>규정 준수 및 비밀유지 의무를 따른다.</p>
+							<p>명시되지 않은 사람은 회사 규정 및 근로기준법을 따른다.</p>
+						</div>
+					</div>
+					<div class="row mb-2 align-items-center">
+						<div class="col-auto">
+							<input type="checkbox" id="agreeCheck" />
+						</div>
+						<div class="col">
+							<label for="agreeCheck" class="mb-0"> 위 내용을 모두 확인하였으며 등록
+								버튼 클릭은 전자서명에 동의함을 의미합니다. </label>
 						</div>
 
 					</div>
 				</div>
-      </div>
-    </div>
-  </div>
+			</div>
+		</div>
+	</div>
 </div>

@@ -25,6 +25,24 @@ public class EmpController {
 	
 	@Autowired EmpService empService;
 	
+	// ✅ 공통 파일 업로드 처리 메소드
+    private void handleFileUpload(EmpVO empVO, MultipartFile photo) throws IOException {
+        if (photo != null && !photo.isEmpty()) {
+            String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/profil/";
+            File dir = new File(uploadDir);
+            if (!dir.exists()) dir.mkdirs();
+
+            // ✅ 사번 기반 파일명 생성
+            String fileName = empVO.getEmpId().toLowerCase() + ".jpg";
+            File saveFile = new File(uploadDir, fileName);
+            photo.transferTo(saveFile);
+
+            // ✅ DB에 저장할 경로 세팅
+            empVO.setProofPhoto("/images/profil/" + fileName);
+        }
+    }
+
+	
 	@GetMapping("/emp-register")
 	public String empRender(Model model) {
 		
@@ -59,28 +77,31 @@ public class EmpController {
 	public List<EmpVO> empRegist(@RequestPart("empVO") EmpVO empVO,
 	        @RequestPart(value = "photo", required = false) MultipartFile photo) throws IOException {
 		System.out.println("환경설정불러온값"+uploadDir);
+		
 		// ✅ 파일 업로드 처리
-	    if (photo != null && !photo.isEmpty()) {
-	        String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/profil/";
-	        File dir = new File(uploadDir);
-	        if (!dir.exists()) dir.mkdirs();
+		handleFileUpload(empVO, photo);
 
-	        // ✅ 사번 기반 파일명 생성
-	        String fileName = empVO.getEmpId().toLowerCase() + ".jpg";
-	        File saveFile = new File(uploadDir, fileName);
-	        photo.transferTo(saveFile);
 
-	        // ✅ DB에 저장할 경로 세팅
-	        empVO.setProofPhoto("/images/profil/" + fileName);
-	    }
-
-	    // ✅ 사원 정보 DB 저장
-	    System.out.println("이엠프브이오 나와라"+empVO);	    
+	    // ✅ 사원 정보 DB 저장	      
 	    empService.setDbEdit(empVO);
 	    EmpVO johoeKeyword = new EmpVO();
 		
 		
 		return empService.getListEmpJohoe(johoeKeyword);
 
+	}
+	
+	@PostMapping("/empRegist")
+	@ResponseBody
+	public List<EmpVO> empRegistAdd(@RequestPart("empVO") EmpVO empVO,
+			@RequestPart(value = "photo", required = false) MultipartFile photo) throws IOException {
+		empVO.setEmpId(empService.setDbAddId().getEmpId());
+		// ✅ 파일 업로드 처리
+		handleFileUpload(empVO, photo);
+
+		empService.setDbAdd(empVO);
+		
+		EmpVO johoeKeyword = new EmpVO();
+		return empService.getListEmpJohoe(johoeKeyword);
 	}
 }

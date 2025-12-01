@@ -3,35 +3,82 @@
 <mapper namespace="store.yd2team.insa.mapper.EmpMapper">
 
 <select id="getListEmpJohoe">
- select 
+ SELECT 
  a.*
- ,b.dept_nm
+ ,b.code_nm AS clsf_nm
+ ,c.code_nm AS rspofc_nm
+ ,d.code_nm AS emplymTy_nm
+ ,e.code_nm AS hffcSt_nm
+ ,f.dept_nm
  ,CASE WHEN bslry is not null THEN 'bslry'            
             ELSE 'pymhr'
        END AS salary_type
  ,nvl(bslry, pymhr) salary_input
-from tb_emp a
-join tb_dept b
-on a.dept_id = b.dept_id
+FROM tb_emp a
+LEFT JOIN tb_code b ON a.clsf = b.code_id
+LEFT JOIN tb_code c ON a.rspofc = c.code_id
+LEFT JOIN tb_code d ON a.emplym_ty = d.code_id
+LEFT JOIN tb_code e ON a.hffc_st = e.code_id
+LEFT JOIN tb_dept f on a.dept_id = f.dept_id
 <where>
 <if test="nm != null">  AND a.nm like '%' || #{nm} || '%'</if>
 <if test="empId != null">  AND a.emp_id like '%' || #{empId} || '%'</if>
-<if test="deptNm != null">  AND b.dept_nm like '%' || #{deptNm} || '%'</if>
+<if test="deptNm != null">  AND f.dept_nm like '%' || #{deptNm} || '%'</if>
 <if test="clsf != null">  AND a.clsf like '%' || #{clsf} || '%'</if>
 </where>
 </select>
 
-
-
-<!-- <insert id="setDbAdd">
-<selectKey keyProperty="empId" order="BEFORE" resultType="string">
+<select id="setDbAddId">
 SELECT 'emp' || TO_CHAR(SYSDATE, 'YYMM') ||
        LPAD(NVL(MAX(SUBSTR(emp_id, LENGTH(emp_id)-2, 3)), 0) + 1, 3, '0') AS emp_id
 FROM tb_emp
 WHERE SUBSTR(emp_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
-FOR UPDATE
-</selectKey>
-</insert> -->
+</select>
+
+
+<insert id="setDbAdd">
+    INSERT INTO tb_emp (
+        emp_id,
+        dept_id,
+        basi_id,
+        vend_id,
+        nm,
+        brthdy,
+        cttpc,
+        email,
+        dty,
+        clsf,
+        rspofc,
+        emplym_ty,
+        bslry,
+        pymhr,
+        acnutno,
+        encpn,
+        hffc_st,        
+        crea_by,        
+        proof_photo
+    ) VALUES (
+	    #{empId},
+	    #{deptId},
+	    #{basiId},
+	    #{vendId},
+	    #{nm},
+	    #{brthdy},
+	    #{cttpc},
+	    #{email},
+	    #{dty},
+	    #{clsf},
+	    #{rspofc},
+	    #{emplymTy},
+	    #{bslry},
+	    #{pymhr},
+	    #{acnutno},
+	    #{encpn},
+	    #{hffcSt},	    
+	    'myk',	    
+	    #{proofPhoto}
+	)
+</insert>
 
 <update id="setDbEdit">
     UPDATE tb_emp

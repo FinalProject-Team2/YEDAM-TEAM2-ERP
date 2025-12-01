@@ -9,4 +9,10 @@ public interface EmpService {
 	
 	//db저장
 	int setDbEdit(EmpVO emp);
+	
+	//db저장Id생성
+	EmpVO setDbAddId();
+	
+	//db저장추가
+	int setDbAdd(EmpVO emp);
 }

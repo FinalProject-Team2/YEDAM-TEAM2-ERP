@@ -35,7 +35,7 @@
 					</div>
 					<div class="card-header-right">
 						<button type="button" class="btn btn-dark">초기화</button>
-						<button type="button" class="btn btn-outline-dark">조회</button>
+						<button id="joHoe" type="button" class="btn btn-outline-dark">조회</button>
 					</div>
 				</div>
 				<div class="card-body">
@@ -43,20 +43,21 @@
 					<div class="row mb-2">
 						<div class="col-md-3">
 							<label class="form-label">교육명</label> <input type="text"
-								class="form-control" placeholder="Value">
+								id="edcNm" class="form-control edcJohoe" placeholder="Value">
 						</div>
 
 						<div class="col-md-3">
-							<label class="form-label">휴가유형</label> <select
-								class="form-select">
-								<option>연차</option>
-								<option>병가</option>
-								<option>특별휴가</option>
+							<label class="form-label">교육구분</label> <select id="edcTy"
+								class="form-select edcJohoe">
+								<option>법정의무교육</option>
+								<option>직무교육</option>
+								<option>소양교육</option>
+								<option>사내교육</option>
 							</select>
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">연도</label> <select id="year"
-								class="form-select"></select>
+							<label class="form-label">연도</label> <select id="edcBeginDt"
+								class="form-select edcJohoe"></select>
 						</div>
 					</div>
 				</div>
@@ -67,7 +68,7 @@
 		<!-- 검색조건 -->
 		<div class="col-md-6">
 			<!-- 사원목록 -->
-			<div class="card" style="height: 710px;">
+			<div class="card" style="height: 580px;">
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header with-actions">
 					<div class="card-header-left">
@@ -100,34 +101,34 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="row mb-2">
-								<div class="col-md-6">
+								<div class="col-md-5">
 									<label class="form-label">교육명</label> <input type="text"
-										class="form-control" />
+										id="v_edcNm" class="form-control" />
+										<input id="v_edcId" type="text" style="display: none;">
 								</div>
-								<div class="col-md-6">
+								<div class="col-md-5">
 									<label class="form-label">교육구분</label> <input type="text"
+										id="v_edcTy" class="form-control" />
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">대상자 수</label> <input id="v_edcCnt"
 										class="form-control" />
 								</div>
 							</div>
-							<div class="row mb-2">
-								<div class="col-md-6">
-									<label class="form-label">대상자 수</label> <input id="v_vcatnTy"
-										class="form-control" />
-								</div>
-								<div class="col-md-6">
+							<div class="row mb-2">								
+								<div class="col-md-4">
 									<label for="userName" class="form-label">등록일</label>
 									<div class="input-group date js-date-single">
 										<input type="text"
 											class="form-control datepicker js-date-input"
-											placeholder="날짜 선택"> <span
+											placeholder="날짜 선택"
+											id="v_creaDt"> <span
 											class="input-group-text js-date-icon"> <i
 											class="bi bi-calendar"></i>
 										</span>
 									</div>
 								</div>
-							</div>
-							<div class="row mb-2">
-								<div class="col-md-12">
+								<div class="col-md-8">
 									<label for="userName" class="form-label">기간</label>
 									<div class="d-flex align-items-center js-date-range">
 
@@ -135,7 +136,8 @@
 										<div class="input-group date">
 											<input type="text"
 												class="form-control datepicker js-date-range-start"
-												placeholder="시작일"> <span
+												placeholder="시작일"
+												id="v_edcBeginDt"> <span
 												class="input-group-text js-date-range-icon-start"> <i
 												class="bi bi-calendar"></i>
 											</span>
@@ -147,7 +149,8 @@
 										<div class="input-group date ms-2">
 											<input type="text"
 												class="form-control datepicker js-date-range-end"
-												placeholder="종료일"> <span
+												placeholder="종료일"
+												id="v_edcEndDt"> <span
 												class="input-group-text js-date-range-icon-end"> <i
 												class="bi bi-calendar"></i>
 											</span>
@@ -155,8 +158,8 @@
 
 									</div>
 								</div>
-
 							</div>
+							
 						</div>
 					</div>
 				</div>
@@ -169,7 +172,7 @@
 						<h5 class="card-title">대상자 목록</h5>
 					</div>
 				</div>
-				<div class="card-body " style="height: 345.45px;">
+				<div class="card-body " style="height: 260px;">
 
 
 					<div id="toastGrid2" style="margin: 20px;"></div>
@@ -184,105 +187,48 @@
 	
 
 	<script>
-		const select = document.getElementById("year");
-		const currentYear = new Date().getFullYear(); // 현재 연도
-		const startYear = 1980; // 시작 연도
+	const $yearr = $("#edcBeginDt");   // select 요소 가져오기
+	const currentYear = new Date().getFullYear(); // 현재 연도
+	const startYear = 1980; // 시작 연도
 
-		for (let y = currentYear; y >= startYear; y--) {
-			const option = document.createElement("option");
-			option.value = y;
-			option.textContent = y;
-			select.appendChild(option);
-		}
+	for (let y = currentYear; y >= startYear; y--) {
+	  const valueDate = y + "-01-01"; // 서버로 넘길 값 (yyyy-MM-dd)
+	  
+	  $yearr.append($("<option>", {
+	    value: valueDate, // 실제 전달 값
+	    text: y           // 화면에 표시되는 텍스트 (년도만)
+	  }));
+	}
 
+	$("#joHoe").on("click", function () {
+		let datas = {};
+		$('.edcJohoe').each(function() {
+		    datas[this.id] = $(this).val();
+		});
+		console.log(datas);
+		// jQuery AJAX 호출
+		$.ajax({
+		    url: "/edcJohoe",                // 요청 URL
+		    type: "get",                     // GET 방식 (fetch 코드와 동일)
+		    data: datas
+		})
+		.done((result) => {
+		    console.log(result);
+		    grid.resetData(result);          // 결과를 grid에 반영
+		})
+		.fail((error) => {
+		    console.error(error);
+		    alert("데이터 요청 중 오류 발생");
+		});
+	});
+	
+	
 		
-
-		const gridData = [ {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		}, {
-			edcNm : "산업안전보건교육",
-			edcTy : "법정의무교육",
-			edcCnt : "150",
-			compl : "100%",
-			creaDt : "2025.11.26"			
-		},
-
-		];
 
 		// Grid 생성
 		const grid = new tui.Grid({
 			el : document.getElementById('toastGrid'),
-			data : gridData,
+			data : [],
 			scrollX : false,
 			scrollY : true,
 			minBodyHeight : 0,
@@ -305,35 +251,13 @@
 			}, {
 				header : '등록일',
 				name : 'creaDt',
-				align : 'center'
+				align : 'center',
+				formatter: function({ value }) {
+	                return value ? dateFormat(value, 'yyyy-MM-dd') : '';
+	            }
 			} ],
-			bodyHeight : 520, // 본문 높이 고정
+			bodyHeight : 440, // 본문 높이 고정
 		});
-		
-		const gridData2 = [ {
-			edcNm : "교육교육",
-			nm : "김길동",
-			deptNm : "영업",
-			complSt : "미수료"						
-		}, {
-			edcNm : "교육교육",
-			nm : "김길동",
-			deptNm : "영업",
-			complSt : "수료"						
-		}, {
-			edcNm : "교육교육",
-			nm : "김길동",
-			deptNm : "영업",
-			complSt : "반려"						
-		}, {
-			edcNm : "교육교육",
-			nm : "김길동",
-			deptNm : "영업",
-			complSt : "미수료"						
-		}, 
-
-		];
-
 		
 		
 		class downloadFunc {
@@ -348,40 +272,32 @@
 			      return;
 			    }
 
-			    // --- 수료일 경우에만 아이콘 표시 ---
-			    const button = document.createElement('button');
-			    button.innerHTML = '<i class="fa fa-download"></i>';
-
-			    button.style.border = "none";
-			    button.style.background = "transparent";
-			    button.style.cursor = "pointer";
-			    button.style.fontSize = "20px";
-			    button.style.color = "#333";
-
-			    button.addEventListener("click", () => {
-			      const rowKey = props.rowKey;
-			      const row = props.grid.getRow(rowKey);
-
-			      fetch(`/api/get-file-name?id=${row.id}`)
-			        .then(res => res.json())
-			        .then(data => {
-			          const fileName = data.fileName;
-
-			          const link = document.createElement("a");
-			          link.href = `/images/download/${fileName}`;
-			          link.download = fileName;
-
-			          document.body.appendChild(link);
-			          link.click();
-			          link.remove();
-			        })
-			        .catch(err => {
-			          console.error("Download error:", err);
-			          alert("파일 다운로드 중 오류가 발생했습니다.");
-			        });
+			 // --- 수료일 경우에만 아이콘 표시 ---
+			    const $button = $("<button><i class='fa fa-download'></i></button>").css({
+			      border: "none",
+			      background: "transparent",
+			      cursor: "pointer",
+			      fontSize: "20px",
+			      color: "#333"
 			    });
 
-			    this.el = button;
+			    $button.on("click", () => {
+			      const rowKey = props.rowKey;
+			      const row = props.grid.getRow(rowKey);			      
+			      
+			      const fileName = row.complFile;
+			        const $link = $("<a></a>")
+			          .attr("href", "/docs/" + fileName)
+			          .attr("download", fileName)
+			          .appendTo("body");
+
+			        $link[0].click();
+			        $link.remove();
+
+			      
+			    });
+
+			    this.el = $button[0]; // jQuery 객체 → DOM 요소 변환
 			  }
 
 			  getElement() {
@@ -395,14 +311,14 @@
 		// Grid2 생성
 		const grid2 = new tui.Grid({
 			el : document.getElementById('toastGrid2'),
-			data : gridData2,
+			data : [],
 			scrollX : false,
 			scrollY : true,
 			minBodyHeight : 0,
 			autoWidth : true,
 			columns : [ {
 				header : '사번',
-				name : 'edcNm',
+				name : 'empId',
 				sortable : 'true'
 			}, {
 				header : '이름',
@@ -420,7 +336,7 @@
 				align : 'center',
 				renderer: downloadFunc
 			} ],
-			bodyHeight : 200, // 본문 높이 고정
+			bodyHeight : 160, // 본문 높이 고정
 		});
 		
 		/* =====================================================
@@ -429,6 +345,7 @@
 		const openBtn = document.getElementById("openRegistModal");
 		const modal   = document.getElementById("registModal");
 		const back    = document.getElementById("registBackdrop");
+		const edcCreateBtn    = document.getElementById("edcCreate");
 
 		function openModal() {
 		  if (!modal || !back) return;
@@ -455,6 +372,38 @@
 		    }
 		  });
 		}
+		if (edcCreateBtn) {
+			edcCreateBtn.addEventListener("click", (e) =>{
+				let datas = {};
+				$('[id^="m_"]').each(function() {
+				    // this.id에서 앞의 "m_" 제거
+				    let key = this.id.replace(/^m_/, '');
+				    datas[key] = $(this).val();
+				});
+				console.log(datas);
+				
+				// jQuery AJAX - POST 방식으로 JSON 전송
+				 $.ajax({
+				    url: "/edcIdRegist",                 // 요청 URL
+				    type: "post",                      // POST 방식
+				    contentType: "application/json",   
+				    data: JSON.stringify(datas),        // 객체를 JSON 문자열로 변환									
+				})
+				.done((result) => {
+				    console.log(result);
+				    grid.resetData(result);            // 결과를 grid에 반영
+				})
+				.fail((error) => {
+				    console.error(error);
+				    alert("등록 중 오류 발생");
+				}); 
+				
+				 if (e.target.closest(".modal-content")) {
+					    //closeModal();
+					  }
+			});
+			
+			} //end of if (edcCreateBtn)
 	</script>
 	<script type="module">
 import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
@@ -468,6 +417,19 @@ grid.on('click', function(ev) {
     
     const dto = formToJson();  
     console.log(dto);
+
+	$.ajax({
+		    url: "/edcDetaJohoe",                // 요청 URL
+		    type: "get",                     // GET 방식 (fetch 코드와 동일)
+		    data: dto
+		})
+		.done((result) => {		    
+		    grid2.resetData(result);          // 결과를 grid에 반영
+		})
+		.fail((error) => {
+		    console.error(error);
+		    alert("데이터 요청 중 오류 발생");
+		});
 });
 </script>
 </body>

@@ -4,22 +4,40 @@
 export function bindGridToForm(rowData) {
   Object.keys(rowData).forEach(key => {
     const input = document.getElementById("v_" + key);
-    if (input) input.value = rowData[key];
-    if(("v_" + key) == "v_st") {
-		if(rowData[key] == '신청'){
-			//stIsShow
-			document.getElementById("hugadeta").classList.add("stIsShow");
-		}else if(rowData[key] == '승인'){
-			document.getElementById("hugadeta").classList.remove("stIsShow");			
-			document.getElementById("hugaSt1").classList.remove("stIsShow");			
-			document.getElementById("hugaSt2").classList.add("stIsShow");			
-		}else{
-			document.getElementById("hugadeta").classList.remove("stIsShow");			
-			document.getElementById("hugaSt1").classList.add("stIsShow");			
-			document.getElementById("hugaSt2").classList.remove("stIsShow");
-		}			
-	}
-	if(("v_" + key) == "v_proofPhoto") input.src = rowData[key];
+    if (!input) return;   // ✅ 이게 핵심 안전장치
+
+    let value = rowData[key];
+
+    // ✅ 날짜 컬럼 포맷 처리 
+    if (key === "encpn" || key === "brthdy" || key === "creaDt" || key === "edcBeginDt" || key === "edcEndDt" || key === "complDt") {
+      if (value) {
+        const d = new Date(value);
+        value = d.toISOString().substring(0, 10); // yyyy-MM-dd
+      }
+    }
+
+    // ✅ 기본 value 세팅
+    input.value = value;
+
+    // ✅ 상태 UI 처리
+    if ("v_" + key === "v_st") {
+      if (value === '신청') {
+        document.getElementById("hugadeta").classList.add("stIsShow");
+      } else if (value === '승인') {
+        document.getElementById("hugadeta").classList.remove("stIsShow");
+        document.getElementById("hugaSt1").classList.remove("stIsShow");
+        document.getElementById("hugaSt2").classList.add("stIsShow");
+      } else {
+        document.getElementById("hugadeta").classList.remove("stIsShow");
+        document.getElementById("hugaSt1").classList.add("stIsShow");
+        document.getElementById("hugaSt2").classList.remove("stIsShow");
+      }
+    }
+
+    // ✅ 이미지 처리
+    if ("v_" + key === "v_proofPhoto") {
+      input.src = value;
+    }
   });
 }
 

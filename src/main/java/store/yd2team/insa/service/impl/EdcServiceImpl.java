@@ -1,0 +1,86 @@
+package store.yd2team.insa.service.impl;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+import store.yd2team.common.mapper.CodeMapper;
+import store.yd2team.common.service.CodeVO;
+import store.yd2team.insa.mapper.DeptMapper;
+import store.yd2team.insa.mapper.EdcMapper;
+import store.yd2team.insa.service.DeptVO;
+import store.yd2team.insa.service.EdcService;
+import store.yd2team.insa.service.EdcVO;
+import store.yd2team.insa.service.EmpVO;
+@Service
+@RequiredArgsConstructor
+public class EdcServiceImpl implements EdcService{
+
+	private final EdcMapper edcMapper;
+	private final CodeMapper codeMapper;
+	private final DeptMapper deptMapper;
+	
+	@Override
+	public List<EdcVO> getListEdcJohoe(EdcVO edc) {
+		
+		return edcMapper.getListEdcJohoe();
+	}
+
+	@Override
+	public List<EdcVO> getListEdcDetaJohoe(EdcVO edc) {
+		
+		return edcMapper.getListEdcDetaJohoe(edc);
+	}
+
+	@Override
+	public Map<String, Object> getInputOption() {
+		Map<String, Object> result = new HashMap<>();
+		
+		CodeVO grpId = new CodeVO();
+		grpId.setGrpId("k");
+		grpId.setVendId("");
+		List<CodeVO> gradeList = codeMapper.findCode(grpId);
+		result.put("grade", gradeList);
+		grpId.setGrpId("l");
+		List<CodeVO> titleList = codeMapper.findCode(grpId);
+		result.put("title", titleList);
+		List<DeptVO> deptList = deptMapper.getListDept("");
+		result.put("dept", deptList);
+
+		return result;
+	}
+
+	@Override
+	public int setDbEdcAdd(EdcVO edc) {
+		//edc Id생성
+		edc.setEdcId(edcMapper.setDbEdcAddId());
+		edcMapper.setDbEdcAdd(edc);
+		EmpVO empVal = new EmpVO();		
+		switch (edc.getEdcSel().charAt(0)) {
+				    case 'd' -> empVal.setDeptId(edc.getEdcSel());
+				    case 'k' -> empVal.setClsf(edc.getEdcSel());
+				    default  -> empVal.setRspofc(edc.getEdcSel());
+				}
+		List<EdcVO> gradeList = edcMapper.getEdcPickList(empVal);
+		String baseId = edcMapper.setDbEdcTTAddId();
+		int seq = Integer.parseInt(baseId.substring(baseId.length() - 3)); // 마지막 3자리 숫자
+
+		for (int i = 0; i < gradeList.size(); i++) {
+		    EdcVO vo = gradeList.get(i);
+		    String newId = "edcTT" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyMM"))
+		                 + String.format("%03d", seq + i);
+		    vo.setEdcTrgterId(newId);
+		    vo.setEdcId(edc.getEdcId()); // FK로 edcId도 같이 세팅
+		}
+		edcMapper.insertEdcTrgterList(gradeList);
+
+
+		return edcMapper.insertEdcTrgterList(gradeList);
+	}
+
+}
