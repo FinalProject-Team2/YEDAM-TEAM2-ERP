@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import store.yd2team.business.mapper.BusinessMapper;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
+import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.PublicDataResponse;
 import store.yd2team.business.service.PublicDataRow;
 
@@ -47,7 +48,7 @@ public class BusineServiceImpl implements BusinessService {
             URI uri = UriComponentsBuilder.fromUriString(urlString)
                     .queryParam("serviceKey", encodedServiceKey)
                     .queryParam("page", 1)
-                    .queryParam("perPage", 10)
+                    .queryParam("perPage", 50)
                     .build(true)
                     .toUri();
 
@@ -110,6 +111,18 @@ public class BusineServiceImpl implements BusinessService {
         }
         String[] parts = baseAddress.split(" ");
         return parts.length > 0 ? parts[0] : null;
+    }
+
+    //잠재고객검색조회
+	@Override
+	public List<BusinessVO> getBusinessList(BusinessVO vo) {
+		 return businessMapper.getBusinessList(vo);
+	}
+
+	//잠재고객기준상세목록조회
+	@Override
+	 public List<PotentialStdrVO> getStdrDetailAll() {
+        return businessMapper.getStdrDetailAll();
     }
 
 

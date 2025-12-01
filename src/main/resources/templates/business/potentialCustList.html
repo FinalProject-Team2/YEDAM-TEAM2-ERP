@@ -23,13 +23,14 @@
 </style>
 <body layout:fragment="content">
 
-	<span th:text="${#lists.size(list)}">0</span>
+	<span th:text="${list != null ? #lists.size(list) : 0}">0</span>
 	<form th:action="@{/potential/sync}" method="post" class="mb-2">
 		<button class="btn btn-primary">공공데이터 동기화</button>
 	</form>
 	<div
 		style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;">
-		<table class="table" style="height: 300px;"> 연습테이블
+		<table class="table" style="height: 300px;">
+			연습테이블
 			<thead>
 				<tr>
 					<th>잠재정보번호</th>
@@ -63,62 +64,64 @@
 			</tbody>
 		</table>
 	</div>
-	<div class="row">
-		<div class="col-md-12 mb-3">
-			<div class="card">
-				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-				<div class="card-header">
-					<div class="card-header-left">
-						<h5 class="card-title">조회조건</h5>
-					</div>
-					<div class="card-header-right">
-						<button class="btn btn-dark">초기화</button>
-						<button class="btn btn-outline-dark">조회</button>
-					</div>
-				</div>
-				<div class="card-body">
-					<div class="row mb-2">
-						<div class="row mb-2">
-							<div class="col-md-3">
-								<label class="form-label">업종</label> <select class="form-select">
-									<option>건설</option>
-									<option>IT</option>
-									<option>제과</option>
-									<option>의류</option>
-								</select>
-							</div>
-							<div class="col-md-3">
-								<label class="form-label">업체규모</label> <input type="text"
-									class="form-control" placeholder="Value">
-							</div>
-							<div class="col-md-3">
-								<label class="form-label">지역/상권</label> <input type="text"
-									class="form-control" placeholder="Value">
-							</div>
+	<form th:action="@{/potentialCustList}" method="post">
+		<div class="row" >
+			<div class="col-md-12 mb-3">
+				<div class="card">
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header">
+						<div class="card-header-left">
+							<h5 class="card-title">조회조건</h5>
 						</div>
-						<div class="col-md-6">
-							<label class="form-label">설립일</label>
-							<div class="d-flex align-items-center js-date-range">
-								<!-- 시작일 -->
-								<div class="input-group date">
-									<input type="text"
-										class="form-control datepicker js-date-range-start"
-										placeholder="시작일"> <span
-										class="input-group-text js-date-range-icon-start"> <i
-										class="bi bi-calendar"></i>
-									</span>
+						<div class="card-header-right">
+							<button class="btn btn-dark">초기화</button>
+							<button class="btn btn-outline-dark" type="submit">조회</button>
+						</div>
+					</div>
+					<div class="card-body">
+						<div class="row mb-2">
+							<div class="row mb-2">
+								<div class="col-md-3">
+									<label class="form-label">업종</label> <input
+										class="form-select"  name="industryType">
+										<!-- <option>코딩</option>
+										<option>분석</option>
+										<option>제과</option>
+										<option>의류</option> -->
 								</div>
+								<div class="col-md-3">
+									<label class="form-label">업체규모</label> <input type="text"
+										class="form-control" placeholder="Value" name="companySize">
+								</div>
+								<div class="col-md-3">
+									<label class="form-label">지역/상권</label> <input type="text"
+										class="form-control" placeholder="Value" name="region">
+								</div>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">설립일</label>
+								<div class="d-flex align-items-center js-date-range">
+									<!-- 시작일 -->
+									<div class="input-group date">
+										<input type="text"
+											class="form-control datepicker js-date-range-start"
+											placeholder="시작일" name="startEstablishDate"> <span
+											class="input-group-text js-date-range-icon-start"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
 
-								<span class="mx-1 fw-bold fs-5">~</span>
+									<span class="mx-1 fw-bold fs-5">~</span>
 
-								<!-- 종료일 -->
-								<div class="input-group date ms-2">
-									<input type="text"
-										class="form-control datepicker js-date-range-end"
-										placeholder="종료일"> <span
-										class="input-group-text js-date-range-icon-end"> <i
-										class="bi bi-calendar"></i>
-									</span>
+									<!-- 종료일 -->
+									<div class="input-group date ms-2">
+										<input type="text"
+											class="form-control datepicker js-date-range-end"
+											placeholder="종료일" name="endEstablishDate"> <span
+											class="input-group-text js-date-range-icon-end"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -126,10 +129,37 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</form>
+	
+	  <!-- 결과 테이블 -->
+	  <div class="card mb-3" style="height: 500px; overflow-y: auto; overflow-x: auto;">
+    <table border="1">
+        <thead>
+            <tr>
+                <th>잠재정보번호</th>
+                <th>거래처명</th>
+                <th>업종</th>
+                <th>규모</th>
+                <th>지역</th>
+                <th>설립일</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="row : ${potentialstdrList}">
+                <td th:text="${row.potentialInfoNo}"></td>
+                <td th:text="${row.vendNm}"></td>
+                <td th:text="${row.industryType}"></td>
+                <td th:text="${row.companySize}"></td>
+                <td th:text="${row.region}"></td>
+                <td th:text="${row.establishDate}"></td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+	
 
 
-	<!-- 휴먼고객 -->
+	<!-- 잠재고객 -->
 	<div class="card mb-3">
 		<div class="card-header">
 			<div class="card-header-left">
@@ -142,7 +172,7 @@
 			</div>
 		</div>
 		<div class="card-body">
-			<div id="potentialgrid" style="margin: 20px;"></div>
+			<div id="potentialgrid" style="margin: 20px; height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 		</div>
 	</div>
 
@@ -176,7 +206,7 @@
 		});
 		
 		
-		const potentialData = /*[[${list}]]*/ [];
+		const potentialData = /*[[${potentialstdrList}]]*/ [];
 	    console.log(potentialData);
 
 		// Grid 생성
