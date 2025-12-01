@@ -16,8 +16,8 @@
   <link rel="stylesheet"
         href="https://uicdn.toast.com/tui.time-picker/latest/tui.time-picker.css">
 
-  <script src="https://uicdn.toast.com/tui.date-picker/latest/tui.date-picker.js"></script>
-  <script src="https://uicdn.toast.com/tui.time-picker/latest.tui-time-picker.js"></script>
+  <script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
+  <script src="https://uicdn.toast.com/tui.time-picker/latest/tui.time-picker.js"></script>
 
   <!-- ✅ Grid -->
   <link rel="stylesheet"
@@ -41,6 +41,7 @@
     }
     .wk-time-range .input-group-text {
       font-size: 0.85rem;
+      cursor: pointer;
     }
     .wk-dot {
       display: inline-block;
@@ -52,7 +53,7 @@
       min-width: 38px;
       padding: 4px 0;
       font-size: 0.85rem;
-      border-radius: 0;        /* 가운데 버튼들 사각형 */
+      border-radius: 0;
     }
     .wk-day-buttons .btn:first-child {
       border-radius: 10px 0 0 10px;
@@ -60,30 +61,34 @@
     .wk-day-buttons .btn:last-child {
       border-radius: 0 10px 10px 0;
     }
-    /* 요일 선택된 상태 */
     .wk-day-buttons .btn.selected {
       background-color: #0d6efd;
       color: #fff;
       border-color: #0d6efd;
     }
-
-    /* 근무유형 라디오 버튼 정렬 */
     .wk-radio-group {
       display: flex;
       align-items: center;
-      gap: 24px;          /* 요일 / 주기 사이 간격 */
+      gap: 24px;
       margin-top: 4px;
     }
-
     .wk-radio {
       display: flex;
       align-items: center;
-      gap: 6px;           /* 동그라미랑 텍스트 사이 간격 */
+      gap: 6px;
+      margin: 0;
+    }
+    .wk-radio input[type="radio"] {
       margin: 0;
     }
 
-    .wk-radio input[type="radio"] {
-      margin: 0;          /* 기본 왼쪽 여백 제거 */
+    /* ✅ time 인풋 내부 기본 시계 아이콘 제거 (크롬/엣지 등) */
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      display: none;
+    }
+    input[type="time"]::-webkit-inner-spin-button,
+    input[type="time"]::-webkit-clear-button {
+      display: none;
     }
   </style>
 </head>
@@ -142,7 +147,7 @@
               <label for="startTime" class="form-label">출근시간</label>
               <div class="input-group">
                 <input type="time" id="startTime" class="form-control">
-                <span class="input-group-text">⏱</span>
+                <span class="input-group-text" id="startTimeIcon">⏱</span>
               </div>
             </div>
             <div class="col-2 d-flex align-items-end justify-content-center">
@@ -152,7 +157,7 @@
               <label for="endTime" class="form-label">퇴근시간</label>
               <div class="input-group">
                 <input type="time" id="endTime" class="form-control">
-                <span class="input-group-text">⏱</span>
+                <span class="input-group-text" id="endTimeIcon">⏱</span>
               </div>
             </div>
           </div>
@@ -172,7 +177,7 @@
             </div>
           </div>
 
-          <!-- 요일 버튼 영역 (요일 선택 시) -->
+          <!-- 요일 버튼 영역 -->
           <div id="weekdaySection" class="wk-day-buttons mb-4">
             <div class="btn-group" role="group" aria-label="weekday">
               <button type="button" class="btn btn-outline-primary btn-sm" data-day="MON">월</button>
@@ -185,7 +190,7 @@
             </div>
           </div>
 
-          <!-- 주기 영역 (주기 선택 시) -->
+          <!-- 주기 영역 -->
           <div id="cycleSection" class="row g-3 mb-2 d-none">
             <div class="col-6">
               <label for="workDays" class="form-label">근무일</label>
@@ -203,15 +208,15 @@
             </div>
           </div>
 
-          <!-- (필요하면 hidden 필드로 선택 요일 저장 가능) -->
           <input type="hidden" id="selectedWeekdays" name="selectedWeekdays" value="">
-        </div><!-- /.wk-panel -->
-      </div><!-- /.card-body -->
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<div th:replace="insa/modal/guideModal :: guideModal"></div>
+<!-- ✅ 근무형태 기준 조회 모달 -->
+<div th:replace="insa/modal/wkTyModal :: wkTyModal"></div>
 
 <script>
   /* =====================================================
@@ -232,20 +237,20 @@
    * 2. 휴일 데이터
    * ===================================================== */
   const hldyGridData = [
-    { hldyDt: '2025-01-01', hldyNm: '신정', yn: 'Y' },
-    { hldyDt: '2025-02-10', hldyNm: '설날', yn: 'Y' },
+    { hldyDt: '2025-01-01', hldyNm: '신정',   yn: 'Y' },
+    { hldyDt: '2025-02-10', hldyNm: '설날',   yn: 'Y' },
     { hldyDt: '2025-03-01', hldyNm: '삼일절', yn: 'Y' },
     { hldyDt: '2025-05-05', hldyNm: '어린이날', yn: 'Y' },
     { hldyDt: '2025-06-06', hldyNm: '현충일', yn: 'Y' },
     { hldyDt: '2025-08-15', hldyNm: '광복절', yn: 'Y' },
-    { hldyDt: '2025-09-17', hldyNm: '추석', yn: 'Y' },
+    { hldyDt: '2025-09-17', hldyNm: '추석',   yn: 'Y' },
     { hldyDt: '2025-10-03', hldyNm: '개천절', yn: 'Y' },
     { hldyDt: '2025-10-09', hldyNm: '한글날', yn: 'Y' },
     { hldyDt: '2025-12-25', hldyNm: '성탄절', yn: 'N' }
   ];
 
   /* =====================================================
-   * 3. 그리드 생성
+   * 3. 휴일 기준 Grid (yn → 사용/미사용 표시)
    * ===================================================== */
   const hldyGrid = new tui.Grid({
     el: document.getElementById('gridHldy'),
@@ -281,7 +286,7 @@
           type: 'select',
           options: {
             listItems: [
-              { text: '사용', value: 'Y' },
+              { text: '사용',   value: 'Y' },
               { text: '미사용', value: 'N' }
             ]
           }
@@ -292,7 +297,7 @@
   });
 
   /* =====================================================
-   * 4. 맨 위로 행추가
+   * 4. 휴일 기준 행추가/삭제/저장
    * ===================================================== */
   document.getElementById('btnHldyAdd').addEventListener('click', () => {
     hldyGrid.prependRow({
@@ -302,28 +307,80 @@
     }, { focus: true });
   });
 
-  /* =====================================================
-   * 5. 선택 삭제
-   * ===================================================== */
   document.getElementById('btnHldyDel').addEventListener('click', () => {
     const checked = hldyGrid.getCheckedRowKeys();
     hldyGrid.removeRows(checked);
   });
 
-  /* =====================================================
-   * 6. 저장 (콘솔 확인용)
-   * ===================================================== */
   document.getElementById('btnHldySave').addEventListener('click', () => {
     const modified = hldyGrid.getModifiedRows();
     console.log('변경 데이터', modified);
   });
+  /* =====================================================
+   * 5. 근무형태 기준 조회 Grid 데이터 (모달용)
+   *    컬럼 name 순서: basiNm, deptNm, atdcTm, afwkTm, hldyTy, hldyDesc
+   * ===================================================== */
+  const wkTyGridData = [
+    {
+      basiNm:  '인사팀 기준근무',
+      deptNm:  '인사',
+      atdcTm:  '09:00',
+      afwkTm:  '18:00',
+      hldyTy:  '요일제',
+      hldyDesc:'토,일'
+    },
+    {
+      basiNm:  '생산팀 교대근무',
+      deptNm:  '생산',
+      atdcTm:  '09:00',
+      afwkTm:  '21:00',
+      hldyTy:  '주기제',
+      hldyDesc:'3일근무 3일휴일'
+    }
+  ];
 
   /* =====================================================
-   * 7. 모달
+   * 6. 근무형태 기준 조회 Grid (모달 안)
+   *    👉 넘버(rowHeaders) 제거 + 라디오 컬럼 맨 앞
+   * ===================================================== */
+  let wkTyGrid = null;
+
+  function initWkTyGrid() {
+    const gridEl = document.getElementById('gridWkTy');
+    if (!gridEl || wkTyGrid) return;
+
+    wkTyGrid = new tui.Grid({
+      el: gridEl,
+      data: wkTyGridData,
+      bodyHeight: 260,
+      scrollX: false,
+      scrollY: true,
+      rowHeaders: [],          // ✅ 넘버 제거
+      columns: [
+        {
+          header: '선택',      // ✅ 라디오 버튼 맨 앞
+          name: 'select',
+          width: 60,
+          align: 'center',
+          formatter: ({ rowKey }) =>
+            `<input type="radio" name="wkTySelect" value="${rowKey}">`
+        },
+        { header: '기준명',   name: 'basiNm' },
+        { header: '부서명',   name: 'deptNm',  width: 80, align: 'center' },
+        { header: '출근시간', name: 'atdcTm',  width: 90, align: 'center' },
+        { header: '퇴근시간', name: 'afwkTm',  width: 90, align: 'center' },
+        { header: '휴일유형', name: 'hldyTy',  width: 90, align: 'center' },
+        { header: '휴일설명', name: 'hldyDesc' }  // 니가 임의로 넣으라 했던 마지막 컬럼
+      ]
+    });
+  }
+
+  /* =====================================================
+   * 7. 모달 오픈 (그대로 사용)
    * ===================================================== */
   const openBtn = document.getElementById('openGuideModal');
-  const modal   = document.getElementById('guideModal');
-  const back    = document.getElementById('guideBackdrop');
+  const modal   = document.getElementById('wkTyModal');
+  const back    = document.getElementById('wkTyBackdrop');
 
   function openModal() {
     if (!modal || !back) return;
@@ -332,8 +389,9 @@
     modal.style.display = 'block';
     back.style.display = 'block';
 
-    if (typeof grid2 !== 'undefined' && grid2?.refreshLayout) {
-      grid2.refreshLayout();
+    initWkTyGrid();
+    if (wkTyGrid && wkTyGrid.refreshLayout) {
+      wkTyGrid.refreshLayout();
     }
   }
 
@@ -362,7 +420,7 @@
   updateWorkTypeView();
 
   /* =====================================================
-   * 9. 요일 버튼 선택 토글
+   * 9. 요일 버튼 선택 토글 + hidden 값
    * ===================================================== */
   const dayButtons = document.querySelectorAll('#weekdaySection button');
   const hiddenWeekdays = document.getElementById('selectedWeekdays');
@@ -371,7 +429,7 @@
     const selectedDays = [];
     dayButtons.forEach(btn => {
       if (btn.classList.contains('selected')) {
-        selectedDays.push(btn.dataset.day);  // MON,TUE,...
+        selectedDays.push(btn.dataset.day);
       }
     });
     hiddenWeekdays.value = selectedDays.join(',');
@@ -379,8 +437,8 @@
 
   dayButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      btn.classList.toggle('selected');   // 시각적 토글
-      updateHiddenWeekdays();             // hidden 값 업데이트
+      btn.classList.toggle('selected');
+      updateHiddenWeekdays();
     });
   });
 
@@ -423,6 +481,26 @@
 
   workDaysInput.addEventListener('input', () => applyCycleLimit('work'));
   offDaysInput.addEventListener('input',  () => applyCycleLimit('off'));
+
+  /* =====================================================
+   * 11. 시간 아이콘 클릭 → 브라우저 시간 선택창 열기
+   * ===================================================== */
+  function bindTimeIcon(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    if (!input || !icon) return;
+
+    icon.addEventListener('click', () => {
+      if (typeof input.showPicker === 'function') {
+        input.showPicker();
+      } else {
+        input.focus();
+      }
+    });
+  }
+
+  bindTimeIcon('startTime', 'startTimeIcon');
+  bindTimeIcon('endTime',   'endTimeIcon');
 </script>
 </body>
 </html>

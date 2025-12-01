@@ -1,0 +1,61 @@
+<!-- /templates/insa/modal/wkTyModal.html -->
+<div th:fragment="wkTyModal">
+  <!-- ✅ 모달 본체 -->
+  <div class="modal-backdrop" id="wkTyBackdrop"></div>
+  <div class="modal" id="wkTyModal">
+    <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 800px;">
+      <div class="modal-content">
+        <div class="modal-body">
+          <h5 class="modal-title mb-3">근무형태기준 조회</h5>
+
+          <div class="row">
+            <div class="col-md-12">
+
+              <!-- 🔎 카드 1 : 검색조건 -->
+              <div class="card border mb-3">
+                <div class="card-header">
+                  <h5 class="card-title">검색조건</h5>
+                  <div class="card-header-right">
+                    <button class="btn btn-outline-dark">조회</button>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label">기준명</label>
+                      <input type="text" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">부서명</label>
+                      <select id="wkTyDept" class="form-select">
+                        <option>전체</option>
+                        <option>인사</option>
+                        <option>자재</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 📋 카드 2 : 근무형태 기준 목록 그리드 -->
+              <div class="card border">
+                <div class="card-header">
+                  <h5 class="card-title">근무형태 기준 목록</h5>
+                  <div class="card-header-right">
+                    <button class="btn btn-outline-dark">확인</button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div id="gridWkTy" class="mt-2"></div>
+                </div>
+              </div>
+
+            </div>
+          </div><!-- /.row -->
+
+        </div><!-- /.modal-body -->
+      </div>
+    </div>
+  </div>
+</div>
