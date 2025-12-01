@@ -34,7 +34,7 @@
 					</div>
 					<div class="card-header-right">
 						<button type="button" class="btn btn-dark">초기화</button>
-						<button type="button" class="btn btn-outline-dark">조회</button>
+						<button id="joHoe" type="button" class="btn btn-outline-dark">조회</button>
 					</div>
 				</div>
 				<div class="card-body">
@@ -43,21 +43,24 @@
 					<div class="row mb-2">
 						<div class="col-md-3">
 							<label class="form-label">교육명</label> <input type="text"
-								class="form-control" placeholder="Value">
+								id="edcNm" class="form-control edcJohoe" placeholder="Value">
+							<input id="empId" class="edcJohoe" type="text"
+								style="display: none;">
 						</div>
 
 						<div class="col-md-3">
-							<label class="form-label">교육부분</label> <select
-								class="form-select">
-								<option>법정의무교육</option>
-								<option>직무교육</option>
-								<option>소양교육</option>
-								<option>사내교육</option>
+							<label class="form-label">교육구분</label> <select id="edcTy"
+								class="form-select edcJohoe">
+								<option value="">전체</option>
+								<option value="법정의무교육">법정의무교육</option>
+								<option value="직무교육">직무교육</option>
+								<option value="소양교육">소양교육</option>
+								<option value="사내교육">사내교육</option>
 							</select>
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">연도</label> <select id="year"
-								class="form-select"></select>
+							<label class="form-label">연도</label> <select id="edcDt"
+								class="form-select edcJohoe"></select>
 						</div>
 					</div>
 				</div>
@@ -100,16 +103,16 @@
 					<div class="row mb-2">
 						<div class="col-md-6">
 							<label class="form-label">교육명</label> <input type="text"
-								class="form-control" />
+								id="v_edcNm" class="form-control" />
 						</div>
 						<div class="col-md-6">
 							<label class="form-label">교육구분</label> <input type="text"
-								class="form-control" />
+								id="v_edcTy" class="form-control" />
 						</div>
 					</div>
 					<div class="row mb-2">
 						<div class="col-md-6">
-							<label class="form-label">대상자 수</label> <input id="v_vcatnTy"
+							<label class="form-label">대상자 수</label> <input id="v_edcCnt"
 								class="form-control" />
 						</div>
 						<div class="col-md-6">
@@ -128,31 +131,31 @@
 							<label for="userName" class="form-label">기간</label>
 							<div class="d-flex align-items-center js-date-range">
 
-										<!-- 시작일 -->
-										<div class="input-group date">
-											<input type="text"
-												class="form-control datepicker js-date-range-start"
-												placeholder="시작일"> <span
-												class="input-group-text js-date-range-icon-start"> <i
-												class="bi bi-calendar"></i>
-											</span>
-										</div>
+								<!-- 시작일 -->
+								<div class="input-group date">
+									<input type="text"
+										class="form-control datepicker js-date-range-start"
+										placeholder="시작일"> <span
+										class="input-group-text js-date-range-icon-start"> <i
+										class="bi bi-calendar"></i>
+									</span>
+								</div>
 
-										<span class="mx-1 fw-bold fs-5">~</span>
+								<span class="mx-1 fw-bold fs-5">~</span>
 
-										<!-- 종료일 -->
-										<div class="input-group date ms-2">
-											<input type="text"
-												class="form-control datepicker js-date-range-end"
-												placeholder="종료일"> <span
-												class="input-group-text js-date-range-icon-end"> <i
-												class="bi bi-calendar"></i>
-											</span>
-										</div>
+								<!-- 종료일 -->
+								<div class="input-group date ms-2">
+									<input type="text"
+										class="form-control datepicker js-date-range-end"
+										placeholder="종료일"> <span
+										class="input-group-text js-date-range-icon-end"> <i
+										class="bi bi-calendar"></i>
+									</span>
+								</div>
 
-									</div>
+							</div>
 						</div>
-						
+
 					</div>
 					<div class="row mb-2">
 						<div class="col-md-6">
@@ -166,58 +169,53 @@
 		</div>
 	</div>
 
-
+<!-- 모달 -->
+	<div th:replace="insa/modal/edcRegistModal :: registModal"></div>
 
 	<script>
-		const select = document.getElementById("year");
-		const currentYear = new Date().getFullYear(); // 현재 연도
-		const startYear = 1980; // 시작 연도
-
-		for (let y = currentYear; y >= startYear; y--) {
-			const option = document.createElement("option");
-			option.value = y;
-			option.textContent = y;
-			select.appendChild(option);
-		}
-
-		const gridData = [ {
-			edcNm : "산업안전보건교육",
-			edcBeginTt : "2025.10.26",
-			edcEndTt : "2025.11.26",
-			complSt : "수료",
-			complDt : "2025.11.26"
-		}, {
-			edcNm : "산업안전보건교육",
-			edcBeginTt : "2025.10.26",
-			edcEndTt : "2025.11.26",
-			complSt : "반려",
-			complDt : "2025.11.26"
-		}, {
-			edcNm : "산업안전보건교육",
-			edcBeginTt : "2025.10.26",
-			edcEndTt : "2025.11.26",
-			complSt : "미수료",
-			complDt : null
-		}, {
-			edcNm : "산업안전보건교육",
-			edcBeginTt : "2025.10.26",
-			edcEndTt : "2025.11.26",
-			complSt : "수료",
-			complDt : "2025.11.26"
-		}, {
-			edcNm : "산업안전보건교육",
-			edcBeginTt : "2025.10.26",
-			edcEndTt : "2025.11.26",
-			complSt : "수료",
-			complDt : "2025.11.26"
-		},
-
-		];
+	const $yearr = $("#edcDt");   // select 요소 가져오기
+	const $empId = $("#empId");   // select 요소 가져오기
+	const currentYear = new Date().getFullYear(); // 현재 연도
+	const startYear = 1980; // 시작 연도
+			$empId.val('EMP008');
+	for (let y = currentYear; y >= startYear; y--) {
+	  const valueDate = y; // 서버로 넘길 값 (yyyy-MM-dd)
+	  
+	  $yearr.append($("<option>", {
+	    value: valueDate, // 실제 전달 값
+	    text: y           // 화면에 표시되는 텍스트 (년도만)
+	  }));
+	}
+	
+	const modal   = document.getElementById("registModal");
+	
+	//다중검색조회 메소드
+	$("#joHoe").on("click", function () {
+		let datas = {};
+		$('.edcJohoe').each(function() {
+		    datas[this.id] = $(this).val();
+		});
+		console.log(datas);
+		// jQuery AJAX 호출
+		$.ajax({
+		    url: "/edcUserJohoe",                // 요청 URL
+		    type: "get",                     // GET 방식 (fetch 코드와 동일)
+		    data: datas
+		})
+		.done((result) => {
+		    console.log(result);
+		    grid.resetData(result);          // 결과를 grid에 반영
+		})
+		.fail((error) => {
+		    console.error(error);
+		    alert("데이터 요청 중 오류 발생");
+		});
+	});		
 
 		// Grid 생성
 		const grid = new tui.Grid({
 			el : document.getElementById('toastGrid'),
-			data : gridData,
+			data : [],
 			scrollX : false,
 			scrollY : true,
 			minBodyHeight : 0,
@@ -228,13 +226,19 @@
 				sortable : 'true'
 			}, {
 				header : '시작날짜',
-				name : 'edcBeginTt'
+				name : 'edcBeginDt',
+				formatter: function({ value }) {
+	                return value ? dateFormat(value, 'yyyy-MM-dd') : '';
+	            }
 			}, {
 				header : '종료날짜',
-				name : 'edcEndTt'
+				name : 'edcEndDt',
+				formatter: function({ value }) {
+	                return value ? dateFormat(value, 'yyyy-MM-dd') : '';
+	            }				
 			}, {
 				header : '수료여부',
-				name : 'complSt'
+				name : 'complSt'				
 			}, {
 				header : '수료일',
 				name : 'complDt',

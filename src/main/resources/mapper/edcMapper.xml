@@ -103,4 +103,45 @@ WHERE SUBSTR(edc_trgter_id, 6, 4) = TO_CHAR(SYSDATE, 'YYMM')
   SELECT 1 FROM DUAL
 </insert>
 
+
+<!-- 법정교육 사용자가 쓰는 쿼리 모음 -->
+<select id="getListEdcUserJohoe">
+ select 
+ a.*
+ ,b.compl_st
+ ,b.compl_dt
+ ,c.*
+from tb_edc a
+join(select 
+      edc_id
+      ,compl_st
+      ,compl_dt
+        from tb_edc_trgter
+        where emp_id = #{empId}) b
+on a.edc_id = b.edc_id
+left join (SELECT 
+            edc_id,
+            COUNT(*) AS edc_cnt,
+            SUM(CASE WHEN compl_st = '수료' THEN 1 ELSE 0 END) AS compl_cnt,
+            ROUND(
+                (SUM(CASE WHEN compl_st = '수료' THEN 1 ELSE 0 END) / COUNT(*)) * 100,
+                2
+            ) || '%' AS compl
+        FROM tb_edc_trgter
+        GROUP BY edc_id) c
+on a.edc_id = c.edc_id
+<where>
+    <if test="edcNm != null and edcNm != ''">
+      AND a.edc_nm LIKE '%'|| #{edcNm}|| '%'
+    </if>
+    <if test="edcTy != null and edcTy != ''">
+      AND a.edc_ty = #{edcTy}
+    </if>
+    <if test="edcDt != null">
+      AND TO_CHAR(a.edc_begin_dt, 'YYYY') = #{edcDt}
+    </if>
+  </where>
+
+</select>
+
 </mapper>

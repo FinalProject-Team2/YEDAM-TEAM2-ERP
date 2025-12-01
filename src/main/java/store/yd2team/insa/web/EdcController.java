@@ -94,4 +94,12 @@ public class EdcController {
 			johoeKeyword.setEdcBeginDt(d);   // ✅ Date 타입 그대로 전달   
 					return edcService.getListEdcJohoe(johoeKeyword);
 		}
+		
+	//교육 대상자들 조회
+			@GetMapping("/edcUserJohoe")
+			@ResponseBody
+			public List<EdcVO> edcUserJohoe(EdcVO keyword) {							
+				
+				return edcService.getListEdcUserJohoe(keyword);
+			}
 }

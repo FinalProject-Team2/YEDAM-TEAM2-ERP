@@ -87,4 +87,10 @@ public class EdcServiceImpl implements EdcService{
 		return edcMapper.insertEdcTrgterList(gradeList);
 	}
 
+	@Override
+	public List<EdcVO> getListEdcUserJohoe(EdcVO edc) {
+		
+		return edcMapper.getListEdcUserJohoe(edc);
+	}
+
 }

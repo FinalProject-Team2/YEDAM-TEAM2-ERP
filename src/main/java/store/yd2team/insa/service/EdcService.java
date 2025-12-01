@@ -16,4 +16,8 @@ public interface EdcService {
 		
 	//모달에서 등록 눌렀을 때 db에 인서트하기
 		int setDbEdcAdd(EdcVO edc);
+		
+	//법정교육 사용자용 쿼리 밑에 모음
+	//다중조건조회(사용자용)
+		List<EdcVO> getListEdcUserJohoe(EdcVO edc);
 }
