@@ -72,7 +72,7 @@
 	            t.basis_dc_rate     = s.basis_dc_rate,
 	            t.applc_begin_dt    = s.applc_begin_dt,
 	            t.applc_end_dt      = s.applc_end_dt,
-	            t.yn                = s.yn,
+	            t.yn                = 'Y',
 	            t.rm                = s.rm,
 	            t.updt_dt           = SYSDATE,
 	            t.updt_by           = s.updt_by

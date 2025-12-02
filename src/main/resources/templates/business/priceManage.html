@@ -564,47 +564,48 @@
 	
 	document.getElementById('btnInsertSave').addEventListener('click', () => {
 
-		  const payload = {
-		    priceId: priceForm.priceId.value,
-		    priceName: priceForm.priceName.value,
-		    type: priceForm.priceType.value,
-		    percent: priceForm.percent.value,
-		    beginDt: priceForm.beginDt.value,
-		    endDt: priceForm.endDt.value,
-		    rm: priceForm.rm.value
-		  };
-
-		  fetch('/price/save', {
-		      method: 'POST',
-		      headers: { 'Content-Type': 'application/json' },
-		      body: JSON.stringify(payload)
-		  })
-		  .then(res => res.json())
-		  .then(result => {
-		    if (result.success) {
+		const payload = {
+		  priceId: priceForm.priceId.value,
+		  priceName: priceForm.priceName.value,
+		  type: priceForm.priceType.value,
+		  percent: priceForm.percent.value,
+		  beginDt: priceForm.beginDt.value,
+		  endDt: priceForm.endDt.value,
+		  rm: priceForm.rm.value
+		};
+		
+		axios.post('/price/save', payload)
+		  .then(res => {
+		    if (res.data.result === 'success') {
 		      alert('저장 완료');
-
+		
 		      // 폼 초기화
 		      document.getElementById('btnInsertInit').click();
-
+		
 		      // 그리드 새로고침
 		      reloadPriceGrid();
 		    } else {
-		      alert(result.message || '저장 실패');
+		      alert(res.data.message || '저장 실패');
 		    }
+		  })
+		  .catch(err => {
+		    console.error('저장 오류: ', err);
+		    alert('저장 중 오류 발생');
 		  });
-		});
-	
-	
+	});
 	
 	function reloadPriceGrid() {
-		  fetch('/price/list')
-		    .then(res => res.json())
-		    .then(data => {
-		      priceGrid.resetData(data);  // 기존 데이터 교체
-		    })
-		    .catch(err => console.error('그리드 재조회 오류:', err));
-		}
+		axios.post('/price/list')     // 현재 컨트롤러는 POST만 매핑됨
+		  .then(res => {
+		    console.log("조회 데이터:", res.data);
+		    priceGrid.resetData(res.data);   // 그리드 데이터 교체
+		  })
+		  .catch(err => {
+		    console.error('그리드 재조회 오류:', err);
+		  });
+	}
+	
+	
 	
 	// 11. 삭제버튼 이벤트
 	document.getElementById("btnDelete").addEventListener("click", async () => {

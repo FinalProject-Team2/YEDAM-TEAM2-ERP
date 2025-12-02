@@ -10,8 +10,8 @@
 .approve-btn,
 .reject-btn,
 .order-btn {
-  padding: 4px 8px;
-  font-size: 12px;
+  padding: 6px 8px;
+  font-size: 14px;
   line-height: 1;
   min-width: 50px;
   border-radius: 4px;
@@ -82,6 +82,8 @@
 									id="custcomName" type="text" class="form-control"
 									placeholder="YEDAM">
 							</div>
+							
+							<div class="col-1"></div>
 
 							<div class="col-md-6">
 								<label class="form-label">납기일</label>
@@ -380,14 +382,29 @@
 	
 	  window.newEstiGrid = new tui.Grid({
 	    el: document.getElementById('newEstiGrid'),
-	    scrollX: false,
+	    scrollX: true,
 	    scrollY: true,
 	    bodyHeight: 350,
+	    columnOptions: {
+	        resizable: false,   // 컬럼 리사이즈 가능
+	        minWidth: 80      // 기본 최소 폭
+	    },
 	    rowHeaders: ['checkbox'],
 	    columns: [
-	      { header: '상품명', name: 'productName', width: 300 },
-	      { header: '단위', name: 'unit', width: 152 },
-	      { header: '판매단가', name: 'basisSaleAmt', width: 240, align: 'right' },
+	      { header: '상품명*', name: 'productName',  width: 200},
+	      { header: '수량*', 
+	    	  name: 'qy',  
+	    	  width: 80,
+	    	  editor: {
+	    	      type: 'text',
+	    	      options: {
+	    	          inputType: 'number'
+	    	      }
+	    	  }},
+	      { header: '판매단가', name: 'basisSaleAmt',  width: 220, align:'right' },
+	      { header: '할인율(%)', name: 'dcRate',  width: 60, align:'right' },
+	      { header: '할인금액', name: 'saleAmt',  width: 180, align:'right' },
+	      { header: '최종금액', name: 'finalAmt',  width: 210, align:'right' },
 	    ]
 	  });
 	}
@@ -428,7 +445,25 @@
 		}
 	});
 
-// end 거래처모달
+// end 신규 견적서 모달
+
+	// 2. 모달 행추가 버튼 클릭
+	$('#addRowBtn').on('click', function () {
+	    
+	    // 신규 행 기본값
+	    const newRow = {
+	        productName: '',
+	        qy: '',
+	        unit: '',
+	        basisSaleAmt: '',
+	        discountAmt: '',
+	        finalAmt: ''
+	    };
+	
+	    // 그리드에 행 추가 (맨 마지막에 추가)
+	    window.newEstiGrid.appendRow(newRow, { at: 0 });
+	
+	});
 	
 </script>
 
