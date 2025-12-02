@@ -134,7 +134,8 @@ public class BusinessController {
 		businessService.fetchAndSaveFromApi();
 		return "redirect:/potentialCustList";
 	}
-	//
+	
+	
 	
 
 	@GetMapping("/salesActivity")

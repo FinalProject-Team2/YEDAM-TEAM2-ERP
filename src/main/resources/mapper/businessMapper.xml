@@ -97,43 +97,51 @@
 	</select>
 	
 	<select id="selectByCondGb" parameterType="store.yd2team.business.service.PotentialStdrVO">
-		  SELECT
-		      STDR_ID         AS stdrId,
-		      COND_GB         AS condGb,
-		      STDR_ITEAM_INFO AS stdrIteamInfo,
-		      INFO_SCORE      AS infoScore
-		  FROM TB_POTENTIAL_STDR_DETAIL
-		  WHERE COND_GB = #{condGb}
-		  ORDER BY STDR_ID
+		    SELECT
+              STDR_DETAIL_ID   AS stdrDetailId
+            , STDR_ID          AS stdrId
+            , VEND_ID          AS vendId
+            , STDR_ITEAM_INFO  AS stdrIteamInfo
+            , INFO_SCORE       AS infoScore
+        FROM TB_POTENTIAL_STDR_DETAIL
+        WHERE STDR_ID = #{condGb}
+        ORDER BY STDR_ID, STDR_DETAIL_ID
 </select>
 
-<insert id="insertDetail"
-        parameterType="store.yd2team.business.service.PotentialStdrVO">
-		  INSERT INTO TB_POTENTIAL_STDR_DETAIL (
-		      STDR_ID,
-		      COND_GB,
-		      STDR_ITEAM_INFO,
-		      INFO_SCORE,
-		      CREA_DT
-		  )
-		  VALUES (
-		      TO_CHAR(SEQ_POTENTIAL_STDR_ID.NEXTVAL),  <!-- 숫자 시퀀스면 TO_CHAR 제거해도 됨 -->
-		      #{condGb},
-		      #{stdrIteamInfo},
-		      #{infoScore},
-		      SYSDATE
-		  )
-</insert>
+		<insert id="insertDetail"
+		        parameterType="store.yd2team.business.service.PotentialStdrVO">
+				  INSERT INTO TB_POTENTIAL_STDR_DETAIL (
+		              STDR_DETAIL_ID
+		            , STDR_ID
+		            , VEND_ID
+		            , STDR_IT	EAM_INFO
+		            , INFO_SCORE
+		            , CREA_DT
+		        ) VALUES (
+		              SEQ_POTENTIAL_STDR_DETAIL_ID.NEXTVAL    <!-- 실제 시퀀스명에 맞게 수정 -->
+		            , #{stdrId}
+		            , #{vendId}
+		            , #{stdrIteamInfo}
+		            , #{infoScore}
+		            , SYSDATE
+		        )
+		</insert>
 
-<update id="updateDetail"
-        parameterType="store.yd2team.business.service.PotentialStdrVO">
-  UPDATE TB_POTENTIAL_STDR_DETAIL
-     SET STDR_ITEAM_INFO = #{stdrIteamInfo},
-         INFO_SCORE      = #{infoScore},
-         COND_GB         = #{condGb},
-         UPDT_DT         = SYSDATE
-   WHERE STDR_ID        = #{stdrId}
-</update>
+		<update id="updateDetail"
+		        parameterType="store.yd2team.business.service.PotentialStdrVO">
+		  UPDATE TB_POTENTIAL_STDR_DETAIL
+           SET STDR_ITEAM_INFO = #{stdrIteamInfo}
+             , INFO_SCORE      = #{infoScore}
+             , UPDT_DT         = SYSDATE
+         WHERE STDR_DETAIL_ID  = #{stdrDetailId}
+		</update>
+		
+		<select id="getcustaddrtype" parameterType="store.yd2team.business.service.PotentialStdrVO">
+			SELECT 	addr,
+					
+			FROM	tb_code
+			WHERE	#{vend_202512003}
+		</select>
 
     
 </mapper>

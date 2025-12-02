@@ -59,7 +59,7 @@
 						th:text="${row.establishDate.substring(0,4) + '년 ' 
 					            + row.establishDate.substring(5,7) + '월 ' 
 					            + row.establishDate.substring(8,10) + '일'}"></td>
-					<td th:text="${leadScore}"></td>
+					<td th:text="${row.leadScore}"></td>
 				</tr>
 			</tbody>
 		</table>
@@ -130,6 +130,8 @@
 			</div>
 		</div>
 	</form>
+	
+	
 	
 	  <!-- 결과 테이블 -->
 	  <div class="card mb-3" style="height: 500px; overflow-y: auto; overflow-x: auto;">
