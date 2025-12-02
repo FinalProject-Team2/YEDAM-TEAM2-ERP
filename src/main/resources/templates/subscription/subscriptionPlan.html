@@ -99,8 +99,9 @@
 								<label class="form-label">결제 주기</label>
 								<select class="form-select" name="sttlPerd">
 									<option value="" selected>선택</option>
-									<option value="M">월</option>
-									<option value="Y">연</option>
+									<!-- DB 코드: b1=월, b2=년 -->
+									<option value="b1">월</option>
+									<option value="b2">연</option>
 								</select>
 							</div>
 
@@ -114,10 +115,13 @@
 							<label class="form-label d-block">노출 여부</label>
 							<div class="d-flex align-items-center">
 								<label class="me-4 mb-0"> Y <input class="ms-1"
-									type="radio" name="yn" value="Y" checked>
+									type="radio" name="ynDisplay" value="Y" checked>
 								</label> <label class="mb-0"> N <input class="ms-1" type="radio"
-									name="yn" value="N">
+									name="ynDisplay" value="N">
 								</label>
+
+								<!-- 실제 서버로 전송될 hidden field (e1/e2 값 저장) -->
+								<input type="hidden" name="yn" value="e1" />
 							</div>
 						</div>
 					</form>
@@ -135,8 +139,14 @@
 		const gridData = planList.map(plan => ({
 			// 그리드에 보이는 컬럼용
 			planName : plan.planNm,
-			exposureYn : plan.yn,
-			billingCycle : plan.sttlPerd,
+			// e1/e2 -> Y/N 으로 변환해서 그리드에 표시
+			exposureYn : plan.yn === 'e1' ? 'Y'
+				: plan.yn === 'e2' ? 'N'
+				: plan.yn, // 혹시 다른 값이면 원본 그대로
+			// 결제주기: DB 코드(b1/b2)를 월/연 텍스트로 변환해 표시
+			billingCycle : plan.sttlPerd === 'b1' ? '월'
+				: plan.sttlPerd === 'b2' ? '연'
+				: plan.sttlPerd,
 			// 상세 폼 세팅용 (숨은 데이터 포함)
 			subspPlanId : plan.subspPlanId,
 			planNm : plan.planNm,
@@ -144,7 +154,6 @@
 			apiIssuCnt : plan.apiIssuCnt,
 			sttlPerd : plan.sttlPerd,
 			amt : plan.amt,
-			// Date 타입일 수 있으므로 문자열로 변환해서 사용
 			applcDt : plan.applcDt,
 			yn : plan.yn
 		}));
@@ -187,10 +196,12 @@
 			form.querySelector('input[name="acctIssuCnt"]').value = rowData.acctIssuCnt || '';
 			form.querySelector('input[name="apiIssuCnt"]').value = rowData.apiIssuCnt || '';
 
-			// 결제 주기 select 박스 설정 (M/Y 등 코드 값 사용)
+			// 결제 주기 select 박스 설정 (M/Y 코드값 사용)
 			const sttlPerdSelect = form.querySelector('select[name="sttlPerd"]');
 			if (sttlPerdSelect) {
-				sttlPerdSelect.value = rowData.sttlPerd || '';
+				// 우선 rowData.sttlPerd 사용, 없으면 billingCycle 사용
+				const sttlCode = rowData.sttlPerd || rowData.billingCycle || '';
+				sttlPerdSelect.value = sttlCode;
 			}
 
 			form.querySelector('input[name="amt"]').value = rowData.amt || '';
@@ -208,10 +219,17 @@
 
 			// 노출 여부 라디오 버튼 (Y/N)
 			if (rowData.yn) {
-				const radios = form.querySelectorAll('input[name="yn"]');
-				radios.forEach(radio => {
-					radio.checked = (radio.value === rowData.yn);
+				const radiosDisplay = form.querySelectorAll('input[name="ynDisplay"]');
+				let displayValue = rowData.yn === 'e1' ? 'Y' : (rowData.yn === 'e2' ? 'N' : 'Y');
+				radiosDisplay.forEach(radio => {
+					radio.checked = (radio.value === displayValue);
 				});
+
+				// hidden 필드(실제 값 e1/e2)도 동기화
+				const hiddenYn = form.querySelector('input[name="yn"][type="hidden"]');
+				if (hiddenYn) {
+					hiddenYn.value = rowData.yn;
+				}
 			}
 		});
 		
@@ -241,10 +259,16 @@
 			}
 
 			// 노출 여부 기본값을 Y로 재설정
-			const ynRadios = form.querySelectorAll('input[name="yn"]');
-			ynRadios.forEach(radio => {
+			const ynDisplayRadios = form.querySelectorAll('input[name="ynDisplay"]');
+			ynDisplayRadios.forEach(radio => {
 				radio.checked = (radio.value === 'Y');
 			});
+
+			// hidden yn 값도 기본 e1로 재설정
+			const hiddenYnReset = form.querySelector('input[name="yn"][type="hidden"]');
+			if (hiddenYnReset) {
+				hiddenYnReset.value = 'e1';
+			}
 
 			// 그리드 선택 행도 초기화 (선택 해제)
 			if (subscriptionGrid) {
@@ -258,6 +282,17 @@
 		// 그리드 레이아웃 새로고침 (스크롤바 벗어남 해결)
 		window.addEventListener('load', function() {
 			subscriptionGrid.refreshLayout();
+		});
+		
+		// 노출 여부 라디오(Y/N) 변경 시 hidden yn(e1/e2) 값 동기화
+		const ynDisplayRadiosChange = document.querySelectorAll('input[name="ynDisplay"]');
+		ynDisplayRadiosChange.forEach(radio => {
+			radio.addEventListener('change', function() {
+				const hiddenYn = document.querySelector('input[name="yn"][type="hidden"]');
+				if (!hiddenYn) return;
+				// Y 선택 시 e1, N 선택 시 e2 저장
+				hiddenYn.value = (this.value === 'Y') ? 'e1' : 'e2';
+			});
 		});
 		/*]]>*/
 	</script>

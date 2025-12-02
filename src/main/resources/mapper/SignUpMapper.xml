@@ -5,7 +5,7 @@
 	<!-- 아이디 중복체크 -->
 	<select id="countLoginId" parameterType="string" resultType="int">
 		SELECT COUNT(*)
-		FROM tb_vend_acct
+		FROM tb_emp_acct
 		WHERE login_id = #{loginId}
 	</select>
 	
@@ -23,11 +23,11 @@
 		WHERE vend_id LIKE CONCAT(#{prefix}, '%')
 	</select>
 	
-	<!-- 해당 월의 최대 업체계정 ID 시퀀스 조회 (예: vend_acct_202512001 → 001) -->
+	<!-- 해당 월의 최대 사원계정 ID 시퀀스 조회 (예: mas_acct_202512001 → 001) -->
 	<select id="getMaxVendAcctSeqOfMonth" parameterType="string" resultType="string">
-		SELECT MAX(SUBSTR(vend_acct_id, LENGTH(#{prefix}) + 1))
-		FROM tb_vend_acct
-		WHERE vend_acct_id LIKE CONCAT(#{prefix}, '%')
+		SELECT MAX(SUBSTR(emp_acct_id, LENGTH(#{prefix}) + 1))
+		FROM tb_emp_acct
+		WHERE emp_acct_id LIKE CONCAT(#{prefix}, '%')
 	</select>
 	
 	<!-- 신규 업체(vend) 등록: st는 DB 디폴트 사용 -->
@@ -45,7 +45,6 @@
 			join_dt,
 			crea_dt,
 			crea_by,
-			updt_dt,
 			updt_by
 		) VALUES (
 			#{vendId},
@@ -60,34 +59,35 @@
 			SYSDATE,
 			SYSDATE,
 			#{creaBy},
-			SYSDATE,
 			#{updtBy}
 		)
 	</insert>
 	
-	<!-- 신규 업체계정(vend_acct) 등록: st, yn, failr_cnt는 DB 디폴트 사용 -->
-	<insert id="insertVendAcct" parameterType="store.yd2team.common.service.VendAcctVO">
-		INSERT INTO tb_vend_acct (
-			vend_acct_id,
+	<!-- 신규 사원계정(emp_acct) 등록: st, yn, fail_cnt 등은 DB 디폴트 사용 -->
+	<insert id="insertVendAcct" parameterType="store.yd2team.common.service.EmpAcctVO">
+		INSERT INTO tb_emp_acct (
+			emp_acct_id,
 			vend_id,
+			emp_id,
 			login_id,
 			login_pwd,
+			mas_yn,
 			lock_dttm,
 			last_login,
 			crea_dt,
 			crea_by,
-			updt_dt,
 			updt_by
 		) VALUES (
-			#{vendAcctId},
+			#{empAcctId},
 			#{vendId},
+			#{empId},
 			#{loginId},
 			#{loginPwd},
+			#{masYn},
 			#{lockDttm},
 			#{lastLogin},
 			SYSDATE,
 			#{creaBy},
-			SYSDATE,
 			#{updtBy}
 		)
 	</insert>

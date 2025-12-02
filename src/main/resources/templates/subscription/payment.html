@@ -59,28 +59,30 @@
 					</div>
 				</div>
 				<div class="card-body">
-					<!-- 결제 요약 영역 (임시 값) -->
+					<!-- 결제 요약 영역 -->
 					<div class="mb-4">
-						<div
-							class="d-flex justify-content-between align-items-center mb-2">
-							<span class="summary-label">선택한 플랜</span> <span
-								class="fw-semibold" id="selectedPlanName">BASIC (테스트)</span>
+						<div class="d-flex justify-content-between align-items-center mb-1">
+							<span class="summary-label">거래처명</span>
+							<span class="fw-semibold" th:text="${vendorName}">거래처명</span>
 						</div>
-						<div
-							class="d-flex justify-content-between align-items-center mb-1">
-							<span class="summary-label">결제 주기</span> <span
-								id="billingCycleText">월간</span>
+						<div class="d-flex justify-content-between align-items-center mb-2">
+							<span class="summary-label">선택한 플랜</span>
+							<span class="fw-semibold" id="selectedPlanName" th:text="${selectedPlanName}">BASIC (테스트)</span>
+						</div>
+						<div class="d-flex justify-content-between align-items-center mb-1">
+							<span class="summary-label">결제 주기</span>
+							<span id="billingCycleText" th:text="${billingCycleText}">월간</span>
 						</div>
 						<div class="d-flex justify-content-between align-items-center">
-							<span class="summary-label">결제 금액</span> <span
-								class="amount-text" id="paymentAmount">₩1,000</span>
+							<span class="summary-label">결제 금액</span>
+							<span class="amount-text" id="paymentAmount" th:text="${#numbers.formatInteger(amount, 0, 'COMMA')}">₩1,000</span>
 						</div>
 					</div>
 
-					<!-- 서버 연동 시 사용할 숨김 필드 (현재는 테스트 값으로만 동작) -->
-					<input type="hidden" id="orderId" th:value="${orderId}"> <input
-						type="hidden" id="orderName" th:value="${orderName}"> <input
-						type="hidden" id="customerEmail" th:value="${customerEmail}">
+					<!-- 서버 연동 시 사용할 숨김 필드 -->
+					<input type="hidden" id="orderId" th:value="${orderId}"> 
+					<input type="hidden" id="orderName" th:value="${orderName}"> 
+					<input type="hidden" id="customerEmail" th:value="${customerEmail}">
 					<input type="hidden" id="customerName" th:value="${customerName}">
 					<input type="hidden" id="amount" th:value="${amount}">
 				</div>
@@ -89,23 +91,18 @@
 	</div>
 
 	<script th:inline="javascript">
-    // Toss Payments 초기화 (클라이언트 키는 프론트에서만 사용)
     const clientKey = 'test_ck_LkKEypNArWd4MlKE1v1z8lmeaxYG';
     const tossPayments = TossPayments(clientKey);
 
     function startTossPayment() {
-        // 테스트 환경에서 결제창이 확실히 뜨도록 고정 값 사용
-        const orderId = 'order-' + new Date().getTime();
-        const orderName = '구독 플랜 결제 (테스트)';
-        const amount = 1000; // 고정 금액 (테스트)
-        const customerEmail = 'customer@example.com';
-        const customerName = '테스트 사용자';
+        const orderId = /*[[${orderId}]]*/ 'order-0';
+        const orderName = /*[[${orderName}]]*/ '구독 플랜 결제 (테스트)';
+        const amount = /*[[${amount}]]*/ 1000;
+        const customerEmail = /*[[${customerEmail}]]*/ 'customer@example.com';
+        const customerName = /*[[${customerName}]]*/ '테스트 사용자';
 
-        // successUrl / failUrl 을 하드코딩된 문자열로 지정하여 Toss에 항상 전달되도록 보장
         const successUrl = 'http://localhost:80/subscription/payment/success';
         const failUrl = 'http://localhost:80/subscription/payment/fail';
-
-        console.log('Toss payment URLs:', { successUrl, failUrl });
 
         tossPayments.requestPayment('카드', {
             amount: amount,
@@ -125,7 +122,6 @@
         });
     }
 
-    // 페이지 로드가 완료되면 약간의 딜레이 후 자동으로 결제 시도
     document.addEventListener('DOMContentLoaded', function () {
         setTimeout(startTossPayment, 300);
     });

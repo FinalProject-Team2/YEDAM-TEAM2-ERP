@@ -28,6 +28,8 @@ public class EmpAcctVO {
 	private Date updtDt;
 	private String updtBy;
 	
+	private String masYn; // 관리자 여부
+	
 	// Session
 	private String empNm;   // 사원 이름
 	private String deptId;  // 부서 ID

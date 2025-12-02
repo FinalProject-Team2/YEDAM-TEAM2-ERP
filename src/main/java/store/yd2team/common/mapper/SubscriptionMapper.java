@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import store.yd2team.common.dto.SubscriptionUsageDto;
 import store.yd2team.common.service.subscriptionPlanVO;
 
 @Mapper
@@ -21,5 +22,15 @@ public interface SubscriptionMapper {
 	
 	// 구독 플랜 수정
 	int updatePlan(subscriptionPlanVO vo);
+	
+	// 결제용: 플랜명 + 결제주기로 단일 플랜 조회
+	subscriptionPlanVO selectPlanForPayment(@Param("planNm") String planNm,
+			@Param("sttlPerd") String sttlPerd);
+	
+	// vendId(PK)로 tb_vend에서 상호명(vend_nm) 조회
+	String selectVendNameById(@Param("vendId") String vendId);
+	
+	// 로그인 사용자의 vendId 기준 현재 구독 + 사용량 조회
+	SubscriptionUsageDto selectSubscriptionUsageByVendId(@Param("vendId") String vendId);
 	
 }// end interface

@@ -1,20 +1,64 @@
 package store.yd2team.common.web;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import store.yd2team.common.service.SubscriptionService;
+import store.yd2team.common.service.subscriptionPlanVO;
+import store.yd2team.common.util.LoginSession;
 
 @Controller
 public class PaymentController {
 	
-	// 결제 페이지
-	@GetMapping("/Payment")
-	public String Payment() {
+	@Autowired
+	SubscriptionService subscriptionService;
+	
+	// 구독 결제 페이지로 이동 (SubscriptionChoice에서 POST)
+	@PostMapping("/Payment")
+	public String Payment(@RequestParam("planName") String planName,
+			@RequestParam("billingCycle") String billingCycle,
+			Model model) throws Exception {
+		// DB에서 실제 플랜/주기에 따른 금액 조회
+		subscriptionPlanVO plan = subscriptionService.getPlanForPayment(planName, billingCycle);
+		long amount = (plan != null) ? plan.getAmt() : 0L;
+
+		// 결제 주기 텍스트
+		String billingCycleText = "MONTHLY".equalsIgnoreCase(billingCycle) ? "월간" : "연간";
+
+		// 세션의 vendId로 tb_vend에서 상호명(vend_nm) 조회 (subscription 쪽 서비스 이용)
+		String vendId = LoginSession.getVendId();
+		String vendorName = subscriptionService.getVendNameById(vendId);
+		if (vendorName == null || vendorName.isEmpty()) {
+			vendorName = "알 수 없는 거래처";
+		}
+
+		// 주문명: 상호명 + 플랜명 + 결제주기
+		String orderName = vendorName + " - " + planName + " (" + billingCycleText + ")";
+
+		// 간단한 주문번호 생성
+		String orderId = "order-" + System.currentTimeMillis();
+
+		// 카드 요약에 표시할 값
+		model.addAttribute("vendorName", vendorName);
+		model.addAttribute("selectedPlanName", planName);
+		model.addAttribute("billingCycleText", billingCycleText);
+		model.addAttribute("amount", amount);
+
+		// Toss 결제에 넘길 값
+		model.addAttribute("orderId", orderId);
+		model.addAttribute("orderName", orderName);
+		model.addAttribute("customerEmail", "customer@example.com"); // TODO: 세션 이메일 연동
+		model.addAttribute("customerName", vendorName);
+
 		return "subscription/payment";
 	}
 	
-	// Toss 결제 성공 콜백: 토스가 successUrl로 리다이렉트할 때 도착하는 엔드포인트
+	// Toss 결제 성공 콜백
 	@GetMapping("/subscription/payment/success")
 	public String paymentSuccess(
 			@RequestParam(name = "orderId", required = false) String orderId,
@@ -22,17 +66,14 @@ public class PaymentController {
 			@RequestParam(name = "amount", required = false) String amount,
 			RedirectAttributes redirectAttributes) {
 
-		// TODO: 실제 서비스에서는 여기서 Toss 결제 승인 API를 호출해 결금을 최종 확정합니다.
-		// 이 예제에서는 흐름만 잡고, 간단한 성공 메시지만 세팅합니다.
 		redirectAttributes.addFlashAttribute("paymentResult", "success");
 		redirectAttributes.addFlashAttribute("paymentOrderId", orderId);
 		redirectAttributes.addFlashAttribute("paymentAmount", amount);
 
-		// 단순히 성공 페이지로 이동
 		return "subscription/success";
 	}
 
-	// Toss 결제 실패 콜백: 토스가 failUrl로 리다이렉트할 때 도착하는 엔드포인트
+	// Toss 결제 실패 콜백
 	@GetMapping("/subscription/payment/fail")
 	public String paymentFail(
 			@RequestParam(name = "code", required = false) String code,
@@ -43,7 +84,6 @@ public class PaymentController {
 		redirectAttributes.addFlashAttribute("paymentErrorCode", code);
 		redirectAttributes.addFlashAttribute("paymentErrorMessage", message);
 
-		// 단순히 실패 페이지로 이동
 		return "subscription/fail";
 	}
 
