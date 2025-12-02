@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class EstiController {
 
 	private final EstiSoService estiSoService;
 
+	// 견적서 메인
 	@GetMapping("/estiMain")
 	public String selectall(Model model) {
 
@@ -30,6 +32,7 @@ public class EstiController {
 
 	}
 	
+	// 견적서 조회(그리드)
 	@PostMapping("/list")
     @ResponseBody
     public List<EstiSoVO> estiList(@RequestBody EstiSoVO cond) {
@@ -43,11 +46,26 @@ public class EstiController {
         return estiList;
     }
 	
+	// 그리드 견적서 상태 업데이트
 	@PostMapping("/updateStatus")
 	@ResponseBody
 	public int updateStatus(@RequestBody EstiSoVO vo) {
 	    return estiSoService.updateStatus(vo);
 	}
+	
+	// 견적서 모달 상품 auto complete
+	@GetMapping("/productSearch")
+	@ResponseBody
+    public List<EstiSoVO> searchProduct(@RequestParam("keyword") String keyword) {
+        return estiSoService.searchProduct(keyword);
+    }
+
+    @GetMapping("/detail")
+    public EstiSoVO getProductDetail(@RequestParam("productId") String productId) {
+        return estiSoService.getProductDetail(productId);
+    }
+	
+	
 	
 /*
 	

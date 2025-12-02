@@ -28,5 +28,9 @@ public class EstiSoVO {
     
     // ===== 공통코드 부분 =====
     private String estiStNm;  // 공통코드명(대기/승인/반려)
+    
+    // 견적서 모달 판매단가
+    private String productId;
+    private Long basisSaleAmt;
 }
 

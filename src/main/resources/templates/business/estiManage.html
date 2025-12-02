@@ -7,6 +7,9 @@
 <meta charset="UTF-8">
 <title>견적서 관리</title>
 <style>
+.ui-autocomplete {
+  z-index: 9999 !important;
+}
 .approve-btn,
 .reject-btn,
 .order-btn {
@@ -370,6 +373,60 @@
 
 	
 	
+// 모달 내부 상품명 auto complete
+class ProductAutoComplete {
+  constructor(props) {
+    const el = document.createElement('input');
+    el.type = 'text';
+    el.className = 'tui-grid-content-input';
+    el.value = props.value;
+
+    // autocomplete 설정
+    $(el).autocomplete({
+      minLength: 1,
+      source: function(request, response) {
+        $.ajax({
+          url: '/esti/productSearch',
+          data: { keyword: request.term },
+          success: function(data) {
+        	  response(data.map(item => ({
+        	        label: item.productName,
+        	        value: item.productName,
+        	        productId: item.productId,
+        	        basisSaleAmt: item.basisSaleAmt
+       	      })));
+          },
+        });
+      },
+
+      // 사용자가 선택했을 때 실행
+      select: function(event, ui) {
+        const grid = window.newEstiGrid;
+        const rowKey = props.rowKey;
+
+        // 현재 행 데이터 변경
+        grid.setValue(rowKey, 'productName', ui.item.value);
+        grid.setValue(rowKey, 'basisSaleAmt', ui.item.basisSaleAmt);  // 판매단가 자동 세팅
+      }
+    });
+
+    this.el = el;
+  }
+
+  getElement() {
+    return this.el;
+  }
+
+  getValue() {
+    return this.el.value;
+  }
+
+  mounted() {
+    this.el.focus();
+  }
+}
+	
+	
 // ---------------------------- 신규 견적서 모달 스크립트
 	//1. 그리드 생성
 	window.newEstiGrid = null;
@@ -391,23 +448,58 @@
 	    },
 	    rowHeaders: ['checkbox'],
 	    columns: [
-	      { header: '상품명*', name: 'productName',  width: 200},
+    	  {
+    	    header: '상품명*',
+    	    name: 'productName',
+    	    width: 200,
+    	    editor: {
+    	      type: ProductAutoComplete
+    	    }
+    	  },
 	      { header: '수량*', 
 	    	  name: 'qy',  
-	    	  width: 80,
+	    	  width: 90,
 	    	  editor: {
 	    	      type: 'text',
 	    	      options: {
 	    	          inputType: 'number'
 	    	      }
 	    	  }},
-	      { header: '판매단가', name: 'basisSaleAmt',  width: 220, align:'right' },
-	      { header: '할인율(%)', name: 'dcRate',  width: 60, align:'right' },
+	      { header: '판매단가', name: 'basisSaleAmt',  width: 180, align:'right' },
+	      { header: '할인율(%)', name: 'dcRate',  width: 90, align:'right' },
 	      { header: '할인금액', name: 'saleAmt',  width: 180, align:'right' },
-	      { header: '최종금액', name: 'finalAmt',  width: 210, align:'right' },
+	      { 
+	    	  header: '최종금액', 
+	    	  name: 'finalAmt',  
+	    	  width: 222, 
+	    	  align:'right',
+	    	  whiteSpace: 'normal',     // 줄바꿈 가능
+	    	  formatter({ value }) {
+	    	    return value ? value.toLocaleString() : '';
+	    	  }
+	      },
 	    ]
 	  });
+	  
+	  window.newEstiGrid.on('afterChange', (ev) => {
+	      ev.changes.forEach(change => {
+	          const rowKey = change.rowKey;
+
+	          const qty = window.newEstiGrid.getValue(rowKey, 'qy');
+	          const price = window.newEstiGrid.getValue(rowKey, 'basisSaleAmt');
+
+	          if (qty && price) {
+	            const total = qty * price;
+	            window.newEstiGrid.setValue(rowKey, 'finalAmt', total);
+	          }
+	      });
+	  });
+	  
 	}
+	
+	
+	
+	
 // -------------------------------- 모달오픈 버튼이벤트
 	// 신규 버튼 클릭 이벤트
 	$(document).on("click", "#newEstiBtn", function () {
@@ -447,7 +539,7 @@
 
 // end 신규 견적서 모달
 
-	// 2. 모달 행추가 버튼 클릭
+	// 2. 모달 행추가 버튼 이벤트
 	$('#addRowBtn').on('click', function () {
 	    
 	    // 신규 행 기본값
@@ -463,6 +555,19 @@
 	    // 그리드에 행 추가 (맨 마지막에 추가)
 	    window.newEstiGrid.appendRow(newRow, { at: 0 });
 	
+	});
+	
+	// 3. 모달 행삭제 버튼 이벤트
+	$('#deleteRowBtn').on('click', function () {
+	    const rowKeys = window.newEstiGrid.getCheckedRowKeys();   // 체크된 row key 목록
+	
+	    if (rowKeys.length === 0) {
+	        alert("삭제할 행을 선택해주세요.");
+	        return;
+	    }
+	
+	    // 선택된 row 제거
+	    window.newEstiGrid.removeRows(rowKeys);
 	});
 	
 </script>
