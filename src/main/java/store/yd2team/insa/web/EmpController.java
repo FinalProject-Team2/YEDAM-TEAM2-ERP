@@ -4,6 +4,7 @@ package store.yd2team.insa.web;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import store.yd2team.insa.service.EdcService;
 import store.yd2team.insa.service.EmpService;
 import store.yd2team.insa.service.EmpVO;
 
@@ -24,6 +26,7 @@ import store.yd2team.insa.service.EmpVO;
 public class EmpController {
 	
 	@Autowired EmpService empService;
+	@Autowired EdcService edcService;
 	
 	// ✅ 공통 파일 업로드 처리 메소드
     private void handleFileUpload(EmpVO empVO, MultipartFile photo) throws IOException {
@@ -45,7 +48,13 @@ public class EmpController {
 	
 	@GetMapping("/emp-register")
 	public String empRender(Model model) {
+		Map<String, Object> optionMap = edcService.getInputOption();
 		
+	    model.addAttribute("dept", optionMap.get("dept"));   // List<DeptVO>
+	    model.addAttribute("clsfLi", optionMap.get("grade"));   // 직급 grade clsf
+	    model.addAttribute("rspofcLi", optionMap.get("title"));   // 직책 title rspofc
+	    model.addAttribute("emplymTyLi", optionMap.get("emplymTyLi"));   // 고용형태 emplymTyLi emplymTy
+	    model.addAttribute("hffcStLi", optionMap.get("hffcStLi"));   // 재직상태 hffcStLi hffcSt
 		
 		
 		
@@ -58,13 +67,14 @@ public class EmpController {
 	@ResponseBody
 	public List<EmpVO> empJohoe(@RequestParam("nm") String name, 
 			               @RequestParam("empId") String empId, 
-			               @RequestParam("deptNm") String deptNm, 
+			               @RequestParam("deptId") String deptId, 
 			               @RequestParam("clsf") String clsf) {
 		EmpVO johoeKeyword = new EmpVO();
-		johoeKeyword.setNm(deptNm);
+		johoeKeyword.setNm(name);
 		johoeKeyword.setEmpId(empId);
-		johoeKeyword.setDeptId(deptNm);
+		johoeKeyword.setDeptId(deptId);
 		johoeKeyword.setClsf(clsf);		
+		System.out.println("모나오니"+johoeKeyword);
 		
 		return empService.getListEmpJohoe(johoeKeyword);
 	}

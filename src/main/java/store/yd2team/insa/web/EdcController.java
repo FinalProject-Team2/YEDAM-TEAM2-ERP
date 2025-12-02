@@ -123,7 +123,7 @@ public class EdcController {
 			    EdcVO edcUserData = mapper.readValue(edcUserJson, EdcVO.class);
 				
 				// 파일명 추출
-			    String fileName = edcUserData.getEmpId();
+			    String fileName = edcUserData.getEdcId() + edcUserData.getEmpId();
 			    System.out.println(fileName);
 			    // 저장 경로 지정
 			    String uploadDir = System.getProperty("user.dir") + "\\upload\\pdf\\";

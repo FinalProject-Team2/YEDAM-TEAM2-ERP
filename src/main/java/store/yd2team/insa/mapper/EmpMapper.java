@@ -10,7 +10,7 @@ import store.yd2team.insa.service.EmpVO;
 public interface EmpMapper {
 
 	//다중조건 조회
-	List<EmpVO> getListEmpJohoe();
+	List<EmpVO> getListEmpJohoe(EmpVO emp);
 	
 	//저장(업데이트)
 	int setDbEdit(EmpVO emp);

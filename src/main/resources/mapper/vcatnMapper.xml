@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.insa.mapper.VcatnMapper">
+
+<select id="getListVcatnJohoe">
+ SELECT  *
+FROM    tb_dept
+WHERE   (vend_id IS NULL OR vend_id = #{vendId})
+<where>
+<if test="clsf != null">  AND a.clsf like '%' || #{clsf} || '%'</if>
+</where>
+</select>
+
+</mapper>

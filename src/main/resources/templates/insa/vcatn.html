@@ -16,10 +16,6 @@
 	background-color: #e9ecef; /* Bootstrap 기본 disabled 색상 */
 	cursor: not-allowed; /* 마우스 커서도 입력 불가 느낌 */
 }
-
-.stIsShow {
-	display: none;
-}
 </style>
 </head>
 <body layout:fragment="content">
@@ -29,11 +25,14 @@
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
-						<h5 class="card-title">조회-(사원용)</h5>
+						<h5 class="card-title"
+							th:text="${Session != null and Session.loginId == 'mas' ? '조회-(관리자용)' : '조회-(사원용)'}">
+						</h5>
+						
 					</div>
 					<div class="card-header-right">
 						<button type="button" class="btn btn-dark">초기화</button>
-						<button type="button" class="btn btn-outline-dark">조회</button>
+						<button id="joHoe" type="button" class="btn btn-outline-dark">조회</button>
 					</div>
 				</div>
 				<div class="card-body">
@@ -45,8 +44,8 @@
 
 								<!-- 시작일 -->
 								<div class="input-group date">
-									<input type="text"
-										class="form-control datepicker js-date-range-start"
+									<input type="text" id="vcatnBegin"
+										class="form-control datepicker js-date-range-start joHoeGrp"
 										placeholder="시작일"> <span
 										class="input-group-text js-date-range-icon-start"> <i
 										class="bi bi-calendar"></i>
@@ -57,8 +56,8 @@
 
 								<!-- 종료일 -->
 								<div class="input-group date ms-2">
-									<input type="text"
-										class="form-control datepicker js-date-range-end"
+									<input type="text" id="vcatnEnd"
+										class="form-control datepicker js-date-range-end joHoeGrp"
 										placeholder="종료일"> <span
 										class="input-group-text js-date-range-icon-end"> <i
 										class="bi bi-calendar"></i>
@@ -67,21 +66,27 @@
 							</div>
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">휴가유형</label> <select
-								class="form-select">
-								<option>연차</option>
-								<option>병가</option>
-								<option>특별휴가</option>
+							<label class="form-label">휴가유형</label> <select id="vcatnTy"
+								class="form-select joHoeGrp">
+								<option value="">전체</option>
+								<option value="h1">연차</option>
+								<option value="h2">병가</option>
+								<option value="h3">특별휴가</option>
 							</select>
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">상태</label> <select class="form-select">
-								<option>전체</option>
-								<option>신청</option>
-								<option>승인</option>
-								<option>반려</option>
+							<label class="form-label">상태</label> <select id="st"
+								class="form-select joHoeGrp">
+								<option value="">전체</option>
+								<option value="g1">신청</option>
+								<option value="g2">승인</option>
+								<option value="g3">반려</option>
 							</select>
 						</div>
+						<input id="confmerId"
+							th:value="${Session != null and Session.loginId == 'mas' ? Session.loginId : ''}"
+							class="joHoeGrp"
+							style="display: none;">
 					</div>
 
 
@@ -97,7 +102,11 @@
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
-						<h5 class="card-title">나의 휴가 신청 내역 - 홍길동 (D001/개발팀)</h5>
+						<h5 class="card-title"
+							th:text="${Session != null and Session.loginId == 'mas' 
+              ? '사원 휴가 신청 내역' 
+              : '나의 휴가 신청 내역 - 홍길동 (D001/개발팀)'}">
+						</h5>
 					</div>
 				</div>
 				<div class="card-body">
@@ -116,8 +125,9 @@
 						<h5 class="card-title">휴가 신청상세</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark ">등록</button>
-						<button class="btn btn-outline-dark ">삭제</button>
+						<button id="regist" class="btn btn-outline-dark ">등록</button>
+						<button class="btn btn-outline-dark"
+							th:if="${Session.loginId != 'mas'}">삭제</button>
 					</div>
 				</div>
 				<div class="card-body">
@@ -125,17 +135,19 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="row mb-2">
-								<div class="col-md-6">
+								<div class="col-md-2">
 									<label class="form-label">이름</label> <input type="text"
-										class="form-control" />
+									    th:value="${Session.empNm}"
+										id="v_nm" class="form-control" /> <input id="v_salyPymntSt"
+										style="display: none;">
 								</div>
-								<div class="col-md-6">
+								<div class="col-md-2">
 									<label class="form-label">사번</label> <input type="text"
-										class="form-control readonly-input" readonly="readonly" />
+									    th:value="${Session.empId}" 
+										id="v_empId" class="form-control readonly-input"
+										readonly="readonly" />
 								</div>
-							</div>
-							<div class="row mb-2">
-								<div class="col-md-6">
+								<div class="col-md-3">
 									<label class="form-label">휴가유형</label> <select id="v_vcatnTy"
 										class="form-select">
 										<option>연차</option>
@@ -143,10 +155,17 @@
 										<option>특별휴가</option>
 									</select>
 								</div>
-								<div class="col-md-6">
+								<div class="col-md-5">
+									<label class="form-label">사유</label> <input type="text"
+										id="v_vcatnResn" class="form-control" />
+								</div>
+							</div>
+							<div class="row mb-2">
+
+								<div class="col-md-4">
 									<label for="userName" class="form-label">신청일</label>
 									<div class="input-group date js-date-single">
-										<input type="text"
+										<input type="text" id="v_creaDt"
 											class="form-control datepicker js-date-input"
 											placeholder="날짜 선택"> <span
 											class="input-group-text js-date-icon"> <i
@@ -154,40 +173,38 @@
 										</span>
 									</div>
 								</div>
-							</div>
-							<div class="row mb-2">
-								<label for="userName" class="form-label">기간</label>
-								<div class="d-flex align-items-center js-date-range">
+								<div class="col-md-8">
+									<label for="userName" class="form-label">기간</label>
+									<div class="d-flex align-items-center js-date-range">
 
-									<!-- 시작일 -->
-									<div class="input-group date">
-										<input type="text"
-											class="form-control datepicker js-date-range-start"
-											placeholder="시작일"> <span
-											class="input-group-text js-date-range-icon-start"> <i
-											class="bi bi-calendar"></i>
-										</span>
+										<!-- 시작일 -->
+										<div class="input-group date">
+											<input type="text"
+												class="form-control datepicker js-date-range-start"
+												placeholder="시작일" id="v_vcatnBegin"> <span
+												class="input-group-text js-date-range-icon-start"> <i
+												class="bi bi-calendar"></i>
+											</span>
+										</div>
+
+										<span class="mx-1 fw-bold fs-5">~</span>
+
+										<!-- 종료일 -->
+										<div class="input-group date ms-2">
+											<input type="text"
+												class="form-control datepicker js-date-range-end"
+												placeholder="종료일" id="v_vcatnEnd"> <span
+												class="input-group-text js-date-range-icon-end"> <i
+												class="bi bi-calendar"></i>
+											</span>
+										</div>
+
 									</div>
-
-									<span class="mx-1 fw-bold fs-5">~</span>
-
-									<!-- 종료일 -->
-									<div class="input-group date ms-2">
-										<input type="text"
-											class="form-control datepicker js-date-range-end"
-											placeholder="종료일"> <span
-											class="input-group-text js-date-range-icon-end"> <i
-											class="bi bi-calendar"></i>
-										</span>
-									</div>
-
 								</div>
+
 							</div>
-							<div class="row mb-2">
-								<div class="col-md-12">
-									<label>사유</label> <input type="text" class="form-control" />
-								</div>
-							</div>
+
+
 						</div>
 					</div>
 				</div>
@@ -202,149 +219,156 @@
 				</div>
 				<div class="card-body " style="height: 345.45px;">
 
-					<div id="hugadeta" class="stIsShow">
+					<div>
 						<div class="row mb-2">
 							<div class="col-md-6">
-								<label>처리일</label> <input type="text" class="form-control" />
+								<label>처리일</label> <input type="text" id="v_updtDt" value=""
+									class="form-control" />
 							</div>
 							<div class="col-md-6">
-								<label>승인자</label> <input id="v_nm" type="text"
+								<label>승인자</label> <input id="v_cfmNm" type="text"
 									class="form-control" />
 							</div>
 						</div>
 						<div class="row mb-2">
 							<div class="col-md-6">
 								<label>상태</label> <select id="v_st" class="form-select">
-									<option>신청</option>
-									<option>승인</option>
-									<option>반려</option>
+									<option value="g1">신청</option>
+									<option value="g2">승인</option>
+									<option value="g3">반려</option>
 								</select>
 							</div>
-							<div class="col-md-6">
-								<label id="hugaSt1">비고</label> <label id="hugaSt2">반려사유</label>
-								<textarea class="form-control" rows="5" style="height: 150px;"></textarea>
+
+							<!-- 출력 영역 -->
+							<div class="col-md-6" id="extraArea" style="display: none;">
+								<!-- 승인일 때 -->
+								<div id="approveArea" style="display: none;">
+									<label id="hugaSt1">비고</label>
+									<textarea id="v_rm" class="form-control" rows="5"
+										style="height: 150px;"></textarea>
+								</div>
+
+								<!-- 반려일 때 -->
+								<div id="rejectArea" style="display: none;">
+									<label id="hugaSt2">반려사유</label>
+									<textarea id="v_returnResn" class="form-control" rows="5"
+										style="height: 150px;"></textarea>
+								</div>
 							</div>
 						</div>
+
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+	<!-- 모달 -->
+	<div th:replace="insa/modal/default :: registModal"></div>
+	<script th:inline="javascript">
+		const modal = document.getElementById("registModal");
 
-	<script>
-		const gridData = [ {
-			creaDt : "1990-01-01",
-			vcatnTy : "연차",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "신청",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-02",
-			vcatnTy : "병가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "승인",
-			nm : "김관리"
-		}, {
-			creaDt : "1990-01-03",
-			vcatnTy : "특별휴가",
-			vcatnBegin : "1990-01-01",
-			vcatnEnd : "1990-01-02",
-			st : "반려",
-			nm : "김15"
-		},
+		$(document).ready(function() {
+			const $selectBox = $("#v_st");
+			const $extraArea = $("#extraArea");
+			const $approveArea = $("#approveArea");
+			const $rejectArea = $("#rejectArea");
+			
+			const $vcatnTy = $("#v_vcatnTy");   // 휴가유형 select
+		    const $salyPymntSt = $("#v_salyPymntSt"); // hidden input
+		    const $confmerId = $("#confmerId"); // confmerId hidden input
+		    const $joHoeBtn = $("#joHoe"); // 조회버튼
+		    const $registBtn = $("#regist"); // 저장버튼
+		    
+		    const today = new Date();
+		    $("#v_creaDt").val( dateFormat(today,'yyyy-MM-dd') );
+		    
 
-		];
+			$selectBox.on("change", function() {
+				if( !$confmerId.val() ){
+		    		alert("관리자만 설정할 수 있습니다.");
+		    		return $selectBox.val("g1");
+		    	}		    	
+				const value = $(this).val();
+
+				// 초기화
+				$extraArea.hide();
+				$approveArea.hide();
+				$rejectArea.hide();
+
+				if (value === "g2") {
+					$extraArea.show();
+					$approveArea.show();
+					$("#v_updtDt").val( dateFormat(today,'yyyy-MM-dd') );
+				} else if (value === "g3") {
+					$extraArea.show();
+					$rejectArea.show();
+					$("#v_updtDt").val( dateFormat(today,'yyyy-MM-dd') );
+				} else{
+					$("#v_updtDt").val( '' );
+				}
+				// "신청"일 때는 아무것도 출력하지 않음
+			});
+			
+			// 휴가유형 선택 이벤트
+		    $vcatnTy.on("change", function() {		    	
+		      const value = $(this).val();
+
+		      if (value === "연차" || value === "특별휴가") {
+		        $salyPymntSt.val("유급");
+		      } else if (value === "병가") {
+		        $salyPymntSt.val("무급");
+		      } else {
+		        $salyPymntSt.val("");
+		      }
+		    });
+			
+		    
+		 // 조회버튼 누를시 일어나는 이벤트
+		    $joHoeBtn.on("click", function() {		    	
+		    		let datas = {};
+		    		$('.joHoeGrp').each(function() {
+		    		    datas[this.id] = $(this).val();
+		    		});
+		    		
+		    		datas["empId"] = /*[[${Session.empId}]]*/ "";
+
+		    		console.log(datas);
+		    		// jQuery AJAX 호출
+		    		$.ajax({
+		    		    url: "/vcatnJohoe",                // 요청 URL
+		    		    type: "get",                     // GET 방식 (fetch 코드와 동일)
+		    		    data: datas
+		    		})
+		    		.done((result) => {
+		    		    console.log(result);
+		    		    //grid.resetData(result);          // 결과를 grid에 반영
+		    		})
+		    		.fail((error) => {
+		    		    console.error(error);
+		    		    alert("데이터 요청 중 오류 발생");
+		    		});		      
+		    });
+		 	
+		 	//저장버튼 누를시
+		    $registBtn.on("click", function() {
+		    	let datas = {};
+				$('[id^="v_"]').each(function() {
+				    // this.id에서 앞의 "v_" 제거
+				    let key = this.id.replace(/^v_/, '');
+				    datas[key] = $(this).val();
+				});
+				datas[confmerId] = $confmerId.val();
+				console.log(datas);
+		    });
+
+		});
+
+		
 
 		// Grid 생성
 		const grid = new tui.Grid({
 			el : document.getElementById('toastGrid'),
-			data : gridData,
+			data : [],
 			scrollX : false,
 			scrollY : true,
 			minBodyHeight : 0,
@@ -365,10 +389,16 @@
 			}, {
 				header : '상태',
 				name : 'st',
-				width : 11
+				width : 11,
+				formatter: function({ value }) {
+			        if (value === 'g1') return '신청';
+			        if (value === 'g2') return '승인';
+			        if (value === 'g3') return '반려';
+			        return value; // 그 외 값은 그대로 출력
+			      }
 			}, {
 				header : '승인자',
-				name : 'nm',
+				name : 'cfmNm',
 				align : 'center'
 			} ],
 			bodyHeight : 600, // 본문 높이 고정

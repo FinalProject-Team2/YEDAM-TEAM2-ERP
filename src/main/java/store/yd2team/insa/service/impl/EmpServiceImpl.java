@@ -18,7 +18,7 @@ public class EmpServiceImpl implements EmpService{
 	@Override
 	public List<EmpVO> getListEmpJohoe(EmpVO emp) {
 		
-		return empMapper.getListEmpJohoe();
+		return empMapper.getListEmpJohoe(emp);
 	}
 
 	@Override

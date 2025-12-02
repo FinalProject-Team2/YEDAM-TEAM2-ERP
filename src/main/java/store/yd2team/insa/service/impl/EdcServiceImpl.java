@@ -18,6 +18,7 @@ import store.yd2team.insa.service.DeptVO;
 import store.yd2team.insa.service.EdcService;
 import store.yd2team.insa.service.EdcVO;
 import store.yd2team.insa.service.EmpVO;
+import store.yd2team.common.util.LoginSession;
 @Service
 @RequiredArgsConstructor
 public class EdcServiceImpl implements EdcService{
@@ -44,13 +45,19 @@ public class EdcServiceImpl implements EdcService{
 		
 		CodeVO grpId = new CodeVO();
 		grpId.setGrpId("k");
-		grpId.setVendId("");
+		grpId.setVendId( LoginSession.getVendId() );
 		List<CodeVO> gradeList = codeMapper.findCode(grpId);
-		result.put("grade", gradeList);
+		result.put("grade", gradeList); //직급
 		grpId.setGrpId("l");
 		List<CodeVO> titleList = codeMapper.findCode(grpId);
-		result.put("title", titleList);
-		List<DeptVO> deptList = deptMapper.getListDept("");
+		result.put("title", titleList); //직책
+		grpId.setGrpId("m");
+		List<CodeVO> emplymTyList = codeMapper.findCode(grpId);
+		result.put("emplymTyLi", emplymTyList); //고용형태
+		grpId.setGrpId("n");
+		List<CodeVO> hffcStList = codeMapper.findCode(grpId);
+		result.put("hffcStLi", hffcStList); //재직상태
+		List<DeptVO> deptList = deptMapper.getListDept( LoginSession.getVendId() );
 		result.put("dept", deptList);
 
 		return result;
