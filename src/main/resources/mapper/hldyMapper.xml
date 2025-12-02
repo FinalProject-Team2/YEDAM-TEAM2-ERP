@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="store.yd2team.insa.mapper.WkTyMapper">
+
+    <!-- 휴일 기준 목록 -->
+    <select id="selectHlDyList"
+            resultType="store.yd2team.insa.service.HldyVO">
+        SELECT
+            h.hldy_no                                   AS hldyNo,
+            h.hldy_nm                                   AS hldyNm,
+            TO_CHAR(h.hldy_mmdd, 'MM-DD')              AS hldyMmdd,
+            h.yn                                        AS ynCode,
+            c.code_nm                                   AS ynNm,
+            h.crea_dt                                   AS creaDt,
+            h.crea_by                                   AS creaBy,
+            h.updt_dt                                   AS updtDt,
+            h.updt_by                                   AS updtBy,
+            h.vend_id                                   AS vendId
+        FROM tb_hldy_basi h
+        LEFT JOIN tb_code c
+          ON h.yn = c.code_id
+         AND c.grp_id = 'e'     -- e1/e2 = 사용/미사용
+        ORDER BY h.hldy_mmdd, h.hldy_no
+    </select>
+
+    <!-- 휴일 기준 등록 -->
+    <!-- hldy_no 는 트리거(DEV.TRG_TB_HLDY_BASI_BI)에서 SEQ_TB_HLDY_BASI_NO로 생성 -->
+    <insert id="insertHlDy"
+            parameterType="store.yd2team.insa.service.HldyVO">
+        INSERT INTO tb_hldy_basi (
+            hldy_nm,
+            hldy_mmdd,
+            yn,
+            crea_dt,
+            crea_by,
+            vend_id
+        )
+        SELECT
+            #{hldyNm},
+            TO_DATE('2000-' || #{hldyMmdd}, 'YYYY-MM-DD'),
+            NVL(#{ynCode}, 'e1'),   -- 공통코드: 기본 사용(e1)
+            SYSDATE,
+            #{creaBy},
+            #{vendId}
+        FROM dual
+        WHERE
+              #{hldyMmdd} IS NOT NULL
+          AND LENGTH(TRIM(#{hldyMmdd})) > 0
+          AND #{hldyNm} IS NOT NULL
+          AND LENGTH(TRIM(#{hldyNm})) > 0
+    </insert>
+
+    <!-- 휴일 기준 수정 -->
+    <update id="updateHlDy"
+            parameterType="store.yd2team.insa.service.HldyVO">
+        UPDATE tb_hldy_basi
+           SET hldy_nm   = #{hldyNm},
+               hldy_mmdd = TO_DATE('2000-' || #{hldyMmdd}, 'YYYY-MM-DD'),
+               yn        = #{ynCode},
+               updt_dt   = SYSDATE,
+               updt_by   = #{updtBy}
+         WHERE hldy_no   = #{hldyNo}
+           AND #{hldyMmdd} IS NOT NULL
+           AND LENGTH(TRIM(#{hldyMmdd})) > 0
+           AND #{hldyNm} IS NOT NULL
+           AND LENGTH(TRIM(#{hldyNm})) > 0
+    </update>
+
+    <!-- 휴일 기준 삭제 -->
+    <delete id="deleteHlDy">
+        DELETE FROM tb_hldy_basi
+         WHERE hldy_no = #{hldyNo}
+    </delete>
+
+</mapper>
