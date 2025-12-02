@@ -84,15 +84,56 @@
     ORDER BY rank
 </select>
 
-<select id="getStdrDetailAll" parameterType="store.yd2team.business.service.PotentialStdrVO">
-	SELECT
-	        STDR_DETAIL_ID   AS stdrDetailId,
-	        STDR_ID          AS stdrId,
-	        VEND_ID          AS vendId,
-	        STDR_ITEAM_INFO  AS stdrIteamInfo,
-	        INFO_SCORE       AS infoScore
-    FROM 	TB_POTENTIAL_STDR_DETAIL
-    ORDER BY INFO_SCORE DESC
+	<!-- 잠재고객지기준상세목록조회 -->
+	<select id="getStdrDetailAll" parameterType="store.yd2team.business.service.PotentialStdrVO">
+		SELECT
+		        STDR_DETAIL_ID   AS stdrDetailId,
+		        STDR_ID          AS stdrId,
+		        VEND_ID          AS vendId,
+		        STDR_ITEAM_INFO  AS stdrIteamInfo,
+		        INFO_SCORE       AS infoScore
+	    FROM 	TB_POTENTIAL_STDR_DETAIL
+	    ORDER BY INFO_SCORE DESC
+	</select>
+	
+	<select id="selectByCondGb" parameterType="store.yd2team.business.service.PotentialStdrVO">
+		  SELECT
+		      STDR_ID         AS stdrId,
+		      COND_GB         AS condGb,
+		      STDR_ITEAM_INFO AS stdrIteamInfo,
+		      INFO_SCORE      AS infoScore
+		  FROM TB_POTENTIAL_STDR_DETAIL
+		  WHERE COND_GB = #{condGb}
+		  ORDER BY STDR_ID
 </select>
+
+<insert id="insertDetail"
+        parameterType="store.yd2team.business.service.PotentialStdrVO">
+		  INSERT INTO TB_POTENTIAL_STDR_DETAIL (
+		      STDR_ID,
+		      COND_GB,
+		      STDR_ITEAM_INFO,
+		      INFO_SCORE,
+		      CREA_DT
+		  )
+		  VALUES (
+		      TO_CHAR(SEQ_POTENTIAL_STDR_ID.NEXTVAL),  <!-- 숫자 시퀀스면 TO_CHAR 제거해도 됨 -->
+		      #{condGb},
+		      #{stdrIteamInfo},
+		      #{infoScore},
+		      SYSDATE
+		  )
+</insert>
+
+<update id="updateDetail"
+        parameterType="store.yd2team.business.service.PotentialStdrVO">
+  UPDATE TB_POTENTIAL_STDR_DETAIL
+     SET STDR_ITEAM_INFO = #{stdrIteamInfo},
+         INFO_SCORE      = #{infoScore},
+         COND_GB         = #{condGb},
+         UPDT_DT         = SYSDATE
+   WHERE STDR_ID        = #{stdrId}
+</update>
+
     
 </mapper>

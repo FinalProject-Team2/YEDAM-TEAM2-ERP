@@ -26,5 +26,5 @@ public class BusinessVO {
 	    // 밑에 세 개는 지금 테이블에는 없으니까 일단 안 써도 됨
 	    private String stdrId;
 	    private String stdrIteamInfo;
-	    private String nfoScore;
+	    private Integer infoScore;
 }

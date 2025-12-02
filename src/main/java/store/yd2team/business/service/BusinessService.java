@@ -17,5 +17,10 @@ public interface BusinessService {
     //
     //잠재고객기준상세목록조회
     public List<PotentialStdrVO> getStdrDetailAll();
+    
+    //잠재고객기준상세목록수정
+    List<BusinessVO> getListByCond(String condGb);
+    
+    public void saveAll(List<BusinessVO> list);
 
 }
