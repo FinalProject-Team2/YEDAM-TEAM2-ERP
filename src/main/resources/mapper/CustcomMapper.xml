@@ -22,11 +22,65 @@
         FROM tb_custcom
         WHERE 1 = 1
 
-        <if test="custcomName != null and custcomName != ''">
-            AND custcomName LIKE '%' || #{custcomName} || '%'
-        </if>
-
-        ORDER BY crea_dt DESC
+	 	<if test="custcomId != null and custcomId != ''">
+	        AND CUSTCOM_ID LIKE '%' || #{custcomId} || '%'
+	    </if>
+	    <if test="custcomName != null and custcomName != ''">
+	        AND CUSTCOM_NAME LIKE '%' || #{custcomName} || '%'
+	    </if>
+	    <if test="psch != null and psch != ''">
+	        AND PSCH LIKE '%' || #{psch} || '%'
+	    </if>
+	    ORDER BY CUSTCOM_ID
     </select>
+    
+ <!-- 공통코드 불러옴 -->
+	<select id="selectBSType" resultType="store.yd2team.business.service.CustcomVO">
+        SELECT
+               c.code_id AS codeId
+             , c.grp_id AS grpId
+             , c.vend_id AS vendId
+             , c.code_nm AS codeNm
+             , c.yn AS yn
+        FROM   tb_code c
+        WHERE  c.grp_id = 'bs'
+          AND  c.yn = 'Y'
+        ORDER BY c.code_id
+    </select>   
+    
+ <!-- 고객사 신규 등록 -->
+    <insert id="insertCustcom" parameterType="CustcomVO">
+
+        INSERT INTO tb_custcom (
+              custcom_id
+            , custcom_name
+            , biz_no
+            , biz_addr
+            , biz_tel
+            , biz_fax
+            , psch
+            , psch_tel
+            , psch_email
+            , rpstr
+            , rpstr_tel
+            , b_s_ty
+            , crea_dt
+        ) VALUES (
+              fn_newcust_id          -- selectKey 에서 만든 값
+            , #{custcomName}
+            , #{bizNo}
+            , #{bizAddr}
+            , #{bizTel}
+            , #{bizFax}
+            , #{psch}
+            , #{pschTel}
+            , #{pschEmail}
+            , #{rpstr}
+            , #{rpstrTel}
+            , #{bSTy}               -- 예: 고객사/업체 구분코드
+            , SYSDATE
+        )
+    </insert>    
+    
 
 </mapper>

@@ -5,8 +5,10 @@ import lombok.Data;
 @Data
 public class CustcomVO {
 
+	// 그리드
 	private String custcomId;
     private String custcomName;
+    private String vendId;
     private String bizNo;
     private String bizAddr;
     private String bizTel;
@@ -18,4 +20,11 @@ public class CustcomVO {
     private String rpstrTel;
     private String bSTy;
     private String creaDt;
+    
+    // 거래구분 공통코드
+    private String codeId;
+    private String grpId;
+    private String codeNm;
+    private String yn;
+    
 }
