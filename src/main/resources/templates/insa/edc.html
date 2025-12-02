@@ -288,8 +288,8 @@
 			      
 			      const fileName = row.complFile;
 			        const $link = $("<a></a>")
-			          .attr("href", "/docs/" + fileName)
-			          .attr("download", fileName)
+			          .attr("href", fileName)
+			          .attr("download", fileName.split("/").pop())
 			          .appendTo("body");
 
 			        $link[0].click();

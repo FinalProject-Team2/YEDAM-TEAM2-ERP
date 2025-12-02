@@ -93,4 +93,10 @@ public class EdcServiceImpl implements EdcService{
 		return edcMapper.getListEdcUserJohoe(edc);
 	}
 
+	@Override
+	public int edcUserRegistChk(EdcVO edc) {
+		
+		return edcMapper.edcUserRegistChk(edc);
+	}
+
 }

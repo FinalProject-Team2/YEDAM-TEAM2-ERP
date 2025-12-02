@@ -44,8 +44,8 @@
 						<div class="col-md-3">
 							<label class="form-label">교육명</label> <input type="text"
 								id="edcNm" class="form-control edcJohoe" placeholder="Value">
-							<input id="empId" class="edcJohoe" type="text"
-								style="display: none;">
+								<input id="empId" class="edcJohoe" type="text"
+								th:value="${empId}" style="display: none;">						
 						</div>
 
 						<div class="col-md-3">
@@ -94,7 +94,7 @@
 						<h5 class="card-title">교육 기본 정보</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark ">등록</button>
+						<button class="btn btn-outline-dark " id="edcUserChk">등록</button>
 					</div>
 				</div>
 				<div class="card-body">
@@ -104,6 +104,10 @@
 						<div class="col-md-6">
 							<label class="form-label">교육명</label> <input type="text"
 								id="v_edcNm" class="form-control" />
+								<input id="v_empId" type="text"
+								th:value="${empId}" style="display: none;">
+								<input id="v_edcId" type="text"
+								style="display: none;">
 						</div>
 						<div class="col-md-6">
 							<label class="form-label">교육구분</label> <input type="text"
@@ -119,6 +123,7 @@
 							<label for="userName" class="form-label">등록일</label>
 							<div class="input-group date js-date-single">
 								<input type="text" class="form-control datepicker js-date-input"
+								    id="v_creaDt"
 									placeholder="날짜 선택"> <span
 									class="input-group-text js-date-icon"> <i
 									class="bi bi-calendar"></i>
@@ -134,6 +139,7 @@
 								<!-- 시작일 -->
 								<div class="input-group date">
 									<input type="text"
+									    id="v_edcBeginDt"
 										class="form-control datepicker js-date-range-start"
 										placeholder="시작일"> <span
 										class="input-group-text js-date-range-icon-start"> <i
@@ -146,6 +152,7 @@
 								<!-- 종료일 -->
 								<div class="input-group date ms-2">
 									<input type="text"
+									    id="v_edcEndDt"
 										class="form-control datepicker js-date-range-end"
 										placeholder="종료일"> <span
 										class="input-group-text js-date-range-icon-end"> <i
@@ -159,8 +166,8 @@
 					</div>
 					<div class="row mb-2">
 						<div class="col-md-6">
-							<label class="form-label">수료증 업로드</label> <input type="text"
-								class="form-control" />
+							<label class="form-label">수료증 업로드</label> <input type="file" accept="application/pdf"
+								id="v_complFile" class="form-control" />
 						</div>
 					</div>
 				</div>
@@ -173,11 +180,10 @@
 	<div th:replace="insa/modal/edcRegistModal :: registModal"></div>
 
 	<script>
-	const $yearr = $("#edcDt");   // select 요소 가져오기
-	const $empId = $("#empId");   // select 요소 가져오기
+	const $yearr = $("#edcDt");   // select 요소 가져오기	
 	const currentYear = new Date().getFullYear(); // 현재 연도
 	const startYear = 1980; // 시작 연도
-			$empId.val('EMP008');
+			
 	for (let y = currentYear; y >= startYear; y--) {
 	  const valueDate = y; // 서버로 넘길 값 (yyyy-MM-dd)
 	  
@@ -203,8 +209,9 @@
 		    data: datas
 		})
 		.done((result) => {
-		    console.log(result);
-		    grid.resetData(result);          // 결과를 grid에 반영
+		    const newData = result.map(({ empId, ...rest }) => rest);
+		    console.log(newData);
+		    grid.resetData(newData);          // 결과를 grid에 반영
 		})
 		.fail((error) => {
 		    console.error(error);
@@ -242,10 +249,15 @@
 			}, {
 				header : '수료일',
 				name : 'complDt',
-				align : 'center'
+				align : 'center',
+				formatter: function({ value }) {
+	                return value ? dateFormat(value, 'yyyy-MM-dd') : '';
+	            }
 			} ],
 			bodyHeight : 520, // 본문 높이 고정
 		});
+		
+		
 	</script>
 	<script type="module">
 import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
@@ -257,9 +269,50 @@ grid.on('click', function(ev) {
 
     bindGridToForm(rowData);    
     
-    const dto = formToJson();  
-    console.log(dto);
+    const dtos = formToJson();  
+    console.log(dtos);
 });
+
+//등록버튼 누를시 업로드한 수료증 인증여부 확인후 DB에 update되는 메서드
+		$("#edcUserChk").on("click", () => {
+			var fileInput = $("#v_complFile");
+			var file = fileInput.prop("files")[0];
+
+		    if (!file) {
+		        alert("먼저 PDF 파일을 선택하세요.");
+		        return;
+		    }
+		    
+		    const dto = formToJson();
+
+		    const formData = new FormData();
+		    formData.append("pdfFile", file);
+		    
+		    // 객체를 JSON 문자열로 변환해서 추가
+		    formData.append("edcUserData", JSON.stringify(dto));
+
+
+		    $.ajax({
+		        url: "/edcUser/uploadPdf",   // 컨트롤러 매핑 주소
+		        type: "POST",
+		        data: formData,
+		        processData: false,
+		        contentType: false
+		    })
+		    .done((result) => {
+		        if (result === true) {
+		        	alert("인증 성공! DB 업데이트 완료");
+		        } else {
+		            alert("인증 실패! 문장이 없습니다.");
+		        }
+		    })
+		    .fail((err) => {
+		        console.error(err);
+		        alert("업로드 중 오류 발생");
+		    });
+
+
+		});
 </script>
 </body>
 
