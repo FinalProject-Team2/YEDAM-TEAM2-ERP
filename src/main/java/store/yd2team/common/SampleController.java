@@ -4,6 +4,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import store.yd2team.common.util.LoginSession;
+
 @Controller
 public class SampleController {
 	//test
@@ -13,7 +15,7 @@ public class SampleController {
 			
 			
 			
-			model.addAttribute("test", "testone");
+			model.addAttribute("test", LoginSession.getLoginSession());
 			return "index";
 		}
 }

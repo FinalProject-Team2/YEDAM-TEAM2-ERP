@@ -19,20 +19,7 @@ export function bindGridToForm(rowData) {
     // ✅ 기본 value 세팅
     input.value = value;
 
-    // ✅ 상태 UI 처리
-    if ("v_" + key === "v_st") {
-      if (value === '신청') {
-        document.getElementById("hugadeta").classList.add("stIsShow");
-      } else if (value === '승인') {
-        document.getElementById("hugadeta").classList.remove("stIsShow");
-        document.getElementById("hugaSt1").classList.remove("stIsShow");
-        document.getElementById("hugaSt2").classList.add("stIsShow");
-      } else {
-        document.getElementById("hugadeta").classList.remove("stIsShow");
-        document.getElementById("hugaSt1").classList.add("stIsShow");
-        document.getElementById("hugaSt2").classList.remove("stIsShow");
-      }
-    }
+    
 
     // ✅ 이미지 처리
     if ("v_" + key === "v_proofPhoto") {

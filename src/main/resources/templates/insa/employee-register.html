@@ -51,16 +51,26 @@
 								class="form-control empJohoe" placeholder="Value">
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">사번</label> <input id="empId" type="text"
-								class="form-control empJohoe" placeholder="Value">
+							<label class="form-label">사번</label> <input id="empId"
+								type="text" class="form-control empJohoe" placeholder="Value">
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">부서</label> <input id="deptNm" type="text"
-								class="form-control empJohoe" placeholder="Value">
+							<label class="form-label">부서</label> <select id="deptNm"
+								class="form-select empJohoe">
+								<option value="">전체</option>
+								<th:block th:each="val : ${dept}">
+									<option th:value="${val.deptId}" th:text="${val.deptNm}"></option>
+								</th:block>
+							</select>
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">직급</label> <input id="clsf" type="text"
-								class="form-control empJohoe" placeholder="Value">
+							<label class="form-label">직급</label> <select id="clsf"
+								class="form-select empJohoe">
+								<option value="">전체</option>
+								<th:block th:each="tier : ${clsfLi}">
+									<option th:value="${tier.codeId}" th:text="${tier.codeNm}"></option>
+								</th:block>
+							</select>
 						</div>
 					</div>
 				</div>
@@ -106,23 +116,21 @@
 					<div class="row">
 						<div class="col-md-4 text-center">
 							<img id="v_proofPhoto" src="/images/profil/nonUser.jpeg" alt="사진"
-								class="img-thumbnail fixed-photo" />
-								<input type="file"
-								       id="photoInput"
-								       accept="image/*"
-								       style="display: none;">								
+								class="img-thumbnail fixed-photo" /> <input type="file"
+								id="photoInput" accept="image/*" style="display: none;">
 						</div>
 						<div class="col-md-8">
 							<div class="row mb-2">
 								<div class="col-md-6">
 									<label class="form-label ">사번</label> <input id="v_empId"
-										type="text" class="form-control readonly-input" readonly="readonly"  placeholder="사번(자동생성)" />																				
-										<input id="v_vendId" value="V001" type="text" style="display: none;">
+										type="text" class="form-control readonly-input"
+										readonly="readonly" placeholder="사번(자동생성)" /> <input
+										id="v_vendId" value="V001" type="text" style="display: none;">
 								</div>
 								<div class="col-md-6">
 									<label for="userName" class="form-label">입사일</label>
 									<div class="input-group date js-date-single">
-										<input id="v_encpn" type="text"										    
+										<input id="v_encpn" type="text"
 											class="form-control datepicker js-date-input"
 											placeholder="날짜 선택"> <span
 											class="input-group-text js-date-icon"> <i
@@ -139,8 +147,7 @@
 								<div class="col-md-6">
 									<label for="userName" class="form-label">생년월일</label>
 									<div class="input-group date js-date-single">
-										<input id="v_brthdy"
-										    type="text"
+										<input id="v_brthdy" type="text"
 											class="form-control datepicker js-date-input"
 											placeholder="날짜 선택"> <span
 											class="input-group-text js-date-icon"> <i
@@ -167,76 +174,64 @@
 						<div class="col-md-2">
 							<label class="form-label">부서</label> <select id="v_deptId"
 								class="form-select">
-								<option value="D001">인사팀</option>
-								<option value="D002">재무팀</option>
-								<option value="D003">개발팀</option>
-								<option value="D004">영업팀</option>
-								<option value="D005">마케팅팀</option>
+								<th:block th:each="val : ${dept}">
+									<option th:value="${val.deptId}" th:text="${val.deptNm}"></option>
+								</th:block>
 							</select>
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">직책</label> <select id="v_rspofcNm"
+							<label class="form-label">직책</label> <select id="v_rspofc"
 								class="form-select">
-								<option>팀원</option>
-								<option>팀장</option>
-								<option>관리자</option>
-								<option>임원</option>
-							</select>
-							<input id="v_rspofc" type="text" style="display: none;">
+								<th:block th:each="job : ${rspofcLi}">
+									<option th:value="${job.codeId}" th:text="${job.codeNm}"></option>
+								</th:block>
+							</select> 
 						</div>
 
 						<div class="col-md-2">
-							<label class="form-label">직급</label> <select id="v_clsfNm"
+							<label class="form-label">직급</label> <select id="v_clsf"
 								class="form-select">
-								<option>사원</option>
-								<option>대리</option>
-								<option>과장</option>
-								<option>부장</option>
-								<option>이사</option>
+								<th:block th:each="tier : ${clsfLi}">
+									<option th:value="${tier.codeId}" th:text="${tier.codeNm}"></option>
+								</th:block>
 							</select>
-							<input id="v_clsf" type="text" style="display: none;">
 						</div>
 
 						<div class="col-md-3">
-							<label class="form-label">고용형태</label> <select
-							    id="v_emplymTyNm"
+							<label class="form-label">고용형태</label> <select id="v_emplymTy"
 								class="form-select">
-								<option>정직원</option>
-								<option>계약직</option>
-								<option>일용직</option>
+								<th:block th:each="val : ${emplymTyLi}">
+									<option th:value="${val.codeId}" th:text="${val.codeNm}"></option>
+								</th:block>
 							</select>
-							<input id="v_emplymTy" type="text" style="display: none;">
 						</div>
 
 						<div class="col-md-2">
-							<label class="form-label">재직상태</label> <select
-							    id="v_hffcStNm"
+							<label class="form-label">재직상태</label> <select id="v_hffcSt"
 								class="form-select">
-								<option >재직</option>
-								<option >퇴직</option>
-								<option >휴직</option>
-								<option >퇴사</option>
+								<th:block th:each="val : ${hffcStLi}">
+									<option th:value="${val.codeId}" th:text="${val.codeNm}"></option>
+								</th:block>
 							</select>
-							<input id="v_hffcSt" type="text" style="display: none;">
 						</div>
 
 					</div>
 
 					<div class="row mb-2">
 						<div class="col-md-4">
-							<label class="form-label">직무</label>
-							<input id="v_dty" type="text" class="form-control" placeholder="HRM(인적자원관리)" />
+							<label class="form-label">직무</label> <input id="v_dty"
+								type="text" class="form-control" placeholder="HRM(인적자원관리)" />
 						</div>
 
 
 						<div class="col-md-4">
-							<label class="form-label">계좌번호</label>
-							<input id="v_acnutno" type="text" class="form-control" placeholder="계좌번호입력" />
+							<label class="form-label">계좌번호</label> <input id="v_acnutno"
+								type="text" class="form-control" placeholder="계좌번호입력" />
 						</div>
 
 						<div class="col-md-4">
-							<label class="form-label">근무형태</label>
-							<select id="v_basiId" class="form-select">
+							<label class="form-label">근무형태</label> <select id="v_basiId"
+								class="form-select">
 								<option value="B001">인사팀 기준근무</option>
 								<option value="B002">생산1팀 교대근무</option>
 								<option value="B003">생산2팀 교대근무</option>
@@ -270,7 +265,7 @@
 
 		</div>
 	</div>
-	
+
 	<!-- 모달 -->
 	<div th:replace="insa/modal/empRegistModal :: registModal"></div>
 	<script>	
@@ -289,7 +284,7 @@
 		    data: {                          // 쿼리 파라미터 자동 변환
 		        nm: datas.nm,
 		        empId: datas.empId,
-		        deptNm: datas.deptNm,
+		        deptId: datas.deptNm,
 		        clsf: datas.clsf
 		    }
 		})
