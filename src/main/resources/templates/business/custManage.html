@@ -153,7 +153,8 @@
 		pschTel:    document.getElementById('mpschTel'),
 		pschEmail:  document.getElementById('mpschEmail'),
 		rpstr:      document.getElementById('mrpstr'),
-		rpstrTel:   document.getElementById('mrpstrTel')
+		rpstrTel:   document.getElementById('mrpstrTel'),
+		bSTy:       document.getElementById('mbSType')
 	};
 
 
@@ -325,7 +326,7 @@
 	});
 
 
-    // 1-1 신규 견적서 모달
+    // 1-1 신규 고객사 모달
 	const openBtn = document.getElementById("newCustBtn");
 	const modal   = document.getElementById("newCustModal");
 	const back    = document.getElementById("newCustBackdrop");
@@ -360,6 +361,24 @@
 	// 2. 신규등록 모달 초기화버튼
 	document.getElementById("modalInit").addEventListener("click", function () {
 	
+	    // 1) 화면 Input 값 초기화
+	    newCustForm.custcomId.value   = "";
+	    newCustForm.custcomName.value = "";
+	    newCustForm.bizNo.value       = "";
+	    newCustForm.bizAddr.value     = "";
+	    newCustForm.bizTel.value      = "";
+	    newCustForm.bizFax.value      = "";
+	    newCustForm.psch.value        = "";
+	    newCustForm.pschTel.value     = "";
+	    newCustForm.pschEmail.value   = "";
+	    newCustForm.rpstr.value       = "";
+	    newCustForm.rpstrTel.value    = "";
+	    newCustForm.bSTy.value        = "";   // 거래구분
+	
+	    console.log("모달 입력값 초기화 완료");
+	});
+	/* document.getElementById("modalInit").addEventListener("click", function () {
+	
 	    // 1) newCustForm 객체 초기화
 	    newCustForm = {
 	        custcomId: "",
@@ -372,7 +391,8 @@
 	        pschTel:"",
 	        pschEmail:"",
 	        rpstr:"",
-	        rpstrTel:""
+	        rpstrTel:"",
+	        bSTy:"",
 	    };
 	
 	    // 2) 화면 Input 값 초기화
@@ -387,10 +407,11 @@
 	    document.querySelector("#mpschEmail").value = "";
 	    document.querySelector("#mrpstr").value = "";
 	    document.querySelector("#mrpstrTel").value = "";
+	    document.querySelector("#mbSType").value = "";
 	
 	
 	    console.log("검색조건 초기화:", newCustForm);
-	});
+	}); */
 	
 	//5-3 modalSaveBtn(저장버튼) 이벤트
 	document.getElementById("modalSaveBtn").addEventListener("click", function () {
@@ -406,7 +427,8 @@
 	        pschTel:     newCustForm.pschTel.value,
 	        pschEmail:   newCustForm.pschEmail.value,
 	        rpstr:       newCustForm.rpstr.value,
-	        rpstrTel:    newCustForm.rpstrTel.value
+	        rpstrTel:    newCustForm.rpstrTel.value,
+	        bSTy:        newCustForm.bSTy.value
 	    };
 	
 	    console.log("저장 payload >>> ", payload);
@@ -421,7 +443,7 @@
 	                // 모달 닫기
 	                closeNewCustModal();
 	
-	                // 그리드 재조회
+	                // 모달 저장
 	                $("#searchBtn").click();
 	            } else {
 	                alert("저장 실패\n" + (res.data.message || ""));
