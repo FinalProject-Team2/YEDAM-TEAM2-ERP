@@ -422,29 +422,6 @@
 	const modal   = document.getElementById("custcomModal");
 	const back    = document.getElementById("custcomBackdrop");
 	
-/*	
- 	function openModal() {
-	  if (!modal || !back) return;
-	  modal.classList.add("show");
-	  modal.style.display = "block";
-	  back.style.display = "block";
-	
-	  // 👇 모달 열때 최초 로딩 시 빈 데이터로 그리드 생성
-	  if (!window.custcomGrid) {
-	    loadCustcomGrid();
-	  } else {
-	    window.custcomGrid.refreshLayout();
-	  }
-	} // end openModal
-	
-	function closeModal() {
-	  if (!modal || !back) return;
-	  modal.classList.remove("show");
-	  modal.style.display = "none";
-	  back.style.display = "none";
-	} // end closeModal
-*/	
-	
 	function openCustcomModal() {
 		modal.classList.add("show");
 		modal.style.display = "block";
@@ -491,29 +468,6 @@
 	const openProductBtn = document.getElementById("productBtn");
 	const productModal   = document.getElementById("productModal");
 	const productBack    = document.getElementById("productBackdrop");
-	
-/*	
- 	function openModal() {
-	  if (!productModal || !productBack) return;
-	  productModal.classList.add("show");
-	  productModal.style.display = "block";
-	  productBack.style.display = "block";
-	
-	  // 👇 모달 열때 최초 로딩 시 빈 데이터로 그리드 생성
-	  if (!window.productGrid) {
-	    loadProductGrid();
-	  } else {
-	    window.productGrid.refreshLayout();
-	  }
-	} // end openModal
-	
-	function closeModal() {
-	  if (!productModal || !productBack) return;
-	  productModal.classList.remove("show");
-	  productModal.style.display = "none";
-	  productBack.style.display = "none";
-	} // end closeModal
-*/	
 	
 	function openProductModal() {
 		productModal.classList.add("show");
