@@ -50,6 +50,10 @@ dependencies {
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.3.0'
 	//윤기가 추가함 pdf내용 확인할 수 있는 라이브러리임-25/12/01
 	implementation 'org.apache.pdfbox:pdfbox:2.0.29'
+	// 문자 발송 api solapi
+	implementation 'com.solapi:sdk:1.0.3'
+	// 비밀번호 해시(BCrypt)용
+	implementation 'org.springframework.security:spring-security-crypto'
 }
 
 dependencyManagement {

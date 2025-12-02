@@ -15,4 +15,10 @@ public class SessionDto implements Serializable{
     private String empNm;     // 사원명
     private String deptId;    // 부서 ID
     private String deptNm;    // 부서명
+    private String masYn;     // 마스터 여부
+    private String addr;      // 거래처 주소
+    private String bizcnd;    // 거래처 업종
+    private String cttpc;	  // 사원 연락처
+    private String hp;        // 거래처 핸드폰 번호
+    
 }

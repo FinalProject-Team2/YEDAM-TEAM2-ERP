@@ -10,25 +10,40 @@ import store.yd2team.common.service.EmpAcctVO;
 @AllArgsConstructor
 public class LoginResultDto {
 	
-    private boolean success;      // 성공 여부
-    private String message;       // 에러/안내 메시지
-    private EmpAcctVO empAcct;    // 로그인한 계정 정보 (성공 시)
+	private boolean success;
+    private String message;
+    private EmpAcctVO empAcct;
 
     private boolean captchaRequired;
+    private boolean otpRequired; 
 
     public static LoginResultDto ok(EmpAcctVO vo) {
-        return new LoginResultDto(true, null, vo, false);
+        return new LoginResultDto(true, null, vo, false, false);
     }
 
     public static LoginResultDto ok() {
-        return new LoginResultDto(true, null, null, false);
+        return new LoginResultDto(true, null, null, false, false);
     }
 
+    // 기본 실패 (캡챠/OTP 둘다 필요 없음)
     public static LoginResultDto fail(String message) {
-        return new LoginResultDto(false, message, null, false);
+        return fail(message, false, false);
     }
 
+    // 실패 + 캡챠/OTP 플래그까지 함께 설정
+    public static LoginResultDto fail(String message,
+                                      boolean captchaRequired,
+                                      boolean otpRequired) {
+        return new LoginResultDto(false, message, null, captchaRequired, otpRequired);
+    }
+
+    // 캡챠 검증 실패
     public static LoginResultDto captchaFail(String message) {
-        return new LoginResultDto(false, message, null, true);
+        return fail(message, true, false);
+    }
+
+    // ID/PW는 맞았지만 OTP가 필요한 상태
+    public static LoginResultDto otpStep(EmpAcctVO vo, String message) {
+        return new LoginResultDto(false, message, vo, false, true);
     }
 }
