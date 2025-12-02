@@ -14,10 +14,10 @@
   <link rel="stylesheet"
         href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
   <link rel="stylesheet"
-        href="https://uicdn.toast.com/tui.time-picker/latest/tui.time-picker.css">
+        href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
 
   <script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
-  <script src="https://uicdn.toast.com/tui.time-picker/latest/tui.time-picker.js"></script>
+  <script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.js"></script>
 
   <!-- ✅ Grid -->
   <link rel="stylesheet"
@@ -216,7 +216,7 @@
 </div>
 
 <!-- ✅ 근무형태 기준 조회 모달 -->
-<div th:replace="insa/modal/wkTyModal :: wkTyModal"></div>
+<div th:replace="~{insa/modal/wkTyModal :: wkTyModal}"></div>
 
 <script>
   /* =====================================================
@@ -234,33 +234,25 @@
   };
 
   /* =====================================================
-   * 2. 휴일 데이터
-   * ===================================================== */
-  const hldyGridData = [
-    { hldyDt: '2025-01-01', hldyNm: '신정',   yn: 'Y' },
-    { hldyDt: '2025-02-10', hldyNm: '설날',   yn: 'Y' },
-    { hldyDt: '2025-03-01', hldyNm: '삼일절', yn: 'Y' },
-    { hldyDt: '2025-05-05', hldyNm: '어린이날', yn: 'Y' },
-    { hldyDt: '2025-06-06', hldyNm: '현충일', yn: 'Y' },
-    { hldyDt: '2025-08-15', hldyNm: '광복절', yn: 'Y' },
-    { hldyDt: '2025-09-17', hldyNm: '추석',   yn: 'Y' },
-    { hldyDt: '2025-10-03', hldyNm: '개천절', yn: 'Y' },
-    { hldyDt: '2025-10-09', hldyNm: '한글날', yn: 'Y' },
-    { hldyDt: '2025-12-25', hldyNm: '성탄절', yn: 'N' }
-  ];
-
-  /* =====================================================
-   * 3. 휴일 기준 Grid (yn → 사용/미사용 표시)
+   * 2. 휴일 기준 Grid
+   *    - DB: HldyVO(hldyNo, hldyNm, hldyMmdd, ynCode, ynNm)
+   *    - 서버 hldyMmdd = "MM-DD"
+   *    - 그리드에서는 datePicker 편하게 쓰려고 "2000-MM-DD" 로 변환
    * ===================================================== */
   const hldyGrid = new tui.Grid({
     el: document.getElementById('gridHldy'),
-    data: hldyGridData,
+    data: [],
     ...GridOptions,
     editingType: 'cell',
     columns: [
       {
+        header: '번호',
+        name: 'hldyNo',
+        hidden: true
+      },
+      {
         header: '월일',
-        name: 'hldyDt',
+        name: 'hldyMmdd',
         align: 'center',
         editor: {
           type: 'datePicker',
@@ -271,7 +263,11 @@
         },
         formatter: ({ value }) => {
           if (!value) return '';
-          return value.slice(5);
+          // value: '2000-01-01' → 화면엔 '01-01' 만 보여줌
+          if (value.length === 10 && value.indexOf('-') === 4) {
+            return value.slice(5); // 'MM-DD'
+          }
+          return value;
         }
       },
       {
@@ -280,45 +276,151 @@
         editor: 'text'
       },
       {
-        header: '사용여부',
-        name: 'yn',
-        editor: {
-          type: 'select',
-          options: {
-            listItems: [
-              { text: '사용',   value: 'Y' },
-              { text: '미사용', value: 'N' }
-            ]
-          }
-        },
-        formatter: ({ value }) => value === 'Y' ? '사용' : '미사용'
-      }
+    	  header: '사용여부',
+    	  name: 'ynCode',   // 서버랑 주고받는 값 (e1 / e2)
+    	  editor: {
+    	    type: 'select',
+    	    options: {
+    	      listItems: [
+    	        { text: '사용',   value: 'e1' },  // code_id e1
+    	        { text: '미사용', value: 'e2' }   // code_id e2
+    	      ]
+    	    }
+    	  },
+    	  formatter: ({ value }) => {
+    	    if (value === 'e1') return '사용';    // e1 -> 사용
+    	    if (value === 'e2') return '미사용';  // e2 -> 미사용
+    	    return '';
+    	  }
+    	}
     ]
   });
 
   /* =====================================================
-   * 4. 휴일 기준 행추가/삭제/저장
+   * 3. 휴일 기준 목록 조회 (페이지 로드 시)
+   *     GET /api/hldy/list  → List<HldyVO>
    * ===================================================== */
+   function loadHldyList() {
+	   fetch('/api/hldy/list')
+	     .then(res => {
+	       if (!res.ok) throw new Error('조회 실패');
+	       return res.json();
+	     })
+	     .then(list => {
+	       // 서버: hldyMmdd = 'MM-DD', ynCode = 'e1'/'e2'
+	       const gridData = list.map(row => ({
+	         hldyNo:  row.hldyNo,
+	         hldyNm:  row.hldyNm,
+	         hldyMmdd: row.hldyMmdd ? '2000-' + row.hldyMmdd : '',
+	         ynCode:  row.ynCode || 'e1'   // 기본값: 사용
+	       }));
+	       hldyGrid.resetData(gridData);
+	     })
+	     .catch(err => {
+	       console.error(err);
+	       alert('휴일 기준 조회 중 오류가 발생했습니다.');
+	     });
+	 }
+
+  document.addEventListener('DOMContentLoaded', loadHldyList);
+
+  /* =====================================================
+   * 4. 휴일 기준 행추가/삭제/저장
+   *    - 저장: getModifiedRows() → created / updated / deleted
+   *    - POST /api/hldy/save
+   * ===================================================== */
+
+  // 행추가
   document.getElementById('btnHldyAdd').addEventListener('click', () => {
-    hldyGrid.prependRow({
-      hldyDt: '',
-      hldyNm: '',
-      yn: 'Y'
-    }, { focus: true });
+    hldyGrid.prependRow(
+      {
+        hldyNo: null,
+        hldyMmdd: '',
+        hldyNm: '',
+        ynCode: 'e1',   // 기본값: 사용
+        ynNm: '사용'
+      },
+      { focus: true }
+    );
   });
 
+  // 삭제(체크된 행 삭제)
   document.getElementById('btnHldyDel').addEventListener('click', () => {
     const checked = hldyGrid.getCheckedRowKeys();
     hldyGrid.removeRows(checked);
   });
 
+  // ✅ 저장
   document.getElementById('btnHldySave').addEventListener('click', () => {
+    // 1) 편집 중인 셀 커밋
+    hldyGrid.finishEditing();
+
+    // 2) 변경 내역 가져오기
     const modified = hldyGrid.getModifiedRows();
     console.log('변경 데이터', modified);
+
+    // 공통 변환 함수: 그리드 row → 서버 HldyVO 형식
+function normalizeRows(rows) {
+  return (rows || []).map(row => {
+    let mmdd = row.hldyMmdd;
+    if (mmdd && typeof mmdd === 'string') {
+      if (mmdd.length === 10 && mmdd.indexOf('-') === 4) {
+        mmdd = mmdd.slice(5); // 'MM-DD'
+      }
+    }
+
+    return {
+      hldyNo: row.hldyNo || null,
+      hldyNm: row.hldyNm ? row.hldyNm.trim() : '',
+      hldyMmdd: mmdd,
+      ynCode: row.ynCode || 'e1'   // ✅ 여기서 e1/e2 그대로 서버로 보냄
+    };
   });
+}
+
+    const createdRows = normalizeRows(modified.createdRows);
+    const updatedRows = normalizeRows(modified.updatedRows);
+    const deletedRows = (modified.deletedRows || []).map(row => ({
+      hldyNo: row.hldyNo
+    }));
+
+    // 프론트 유효성 체크
+    const hasInvalid =
+      createdRows.some(r => !r.hldyNm || !r.hldyMmdd) ||
+      updatedRows.some(r => !r.hldyNm || !r.hldyMmdd);
+
+    if (hasInvalid) {
+      alert('월일과 휴일명을 모두 입력해야 저장할 수 있습니다.');
+      return;
+    }
+
+    const payload = {
+      createdRows,
+      updatedRows,
+      deletedRows
+    };
+
+    fetch('/api/hldy/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      body: JSON.stringify(payload)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('저장 실패');
+        return res.json();
+      })
+      .then(() => {
+        alert('저장되었습니다.');
+        loadHldyList();
+      })
+      .catch(err => {
+        console.error(err);
+        alert('저장 중 오류가 발생했습니다.');
+      });
+  });
+
   /* =====================================================
-   * 5. 근무형태 기준 조회 Grid 데이터 (모달용)
-   *    컬럼 name 순서: basiNm, deptNm, atdcTm, afwkTm, hldyTy, hldyDesc
+   * 5. 근무형태 기준 조회 Grid (모달용) - 더미데이터
    * ===================================================== */
   const wkTyGridData = [
     {
@@ -339,10 +441,6 @@
     }
   ];
 
-  /* =====================================================
-   * 6. 근무형태 기준 조회 Grid (모달 안)
-   *    👉 넘버(rowHeaders) 제거 + 라디오 컬럼 맨 앞
-   * ===================================================== */
   let wkTyGrid = null;
 
   function initWkTyGrid() {
@@ -355,10 +453,10 @@
       bodyHeight: 260,
       scrollX: false,
       scrollY: true,
-      rowHeaders: [],          // ✅ 넘버 제거
+      rowHeaders: [],
       columns: [
         {
-          header: '선택',      // ✅ 라디오 버튼 맨 앞
+          header: '선택',
           name: 'select',
           width: 60,
           align: 'center',
@@ -370,14 +468,11 @@
         { header: '출근시간', name: 'atdcTm',  width: 90, align: 'center' },
         { header: '퇴근시간', name: 'afwkTm',  width: 90, align: 'center' },
         { header: '휴일유형', name: 'hldyTy',  width: 90, align: 'center' },
-        { header: '휴일설명', name: 'hldyDesc' }  // 니가 임의로 넣으라 했던 마지막 컬럼
+        { header: '휴일설명', name: 'hldyDesc' }
       ]
     });
   }
 
-  /* =====================================================
-   * 7. 모달 오픈 (그대로 사용)
-   * ===================================================== */
   const openBtn = document.getElementById('openGuideModal');
   const modal   = document.getElementById('wkTyModal');
   const back    = document.getElementById('wkTyBackdrop');
@@ -398,7 +493,7 @@
   openBtn?.addEventListener('click', openModal);
 
   /* =====================================================
-   * 8. 근무유형 라디오에 따라 영역 토글
+   * 6. 근무유형 라디오에 따라 영역 토글
    * ===================================================== */
   const rdDay        = document.getElementById('wkTypeDay');
   const rdCycle      = document.getElementById('wkTypeCycle');
@@ -420,7 +515,7 @@
   updateWorkTypeView();
 
   /* =====================================================
-   * 9. 요일 버튼 선택 토글 + hidden 값
+   * 7. 요일 버튼 선택 토글 + hidden 값
    * ===================================================== */
   const dayButtons = document.querySelectorAll('#weekdaySection button');
   const hiddenWeekdays = document.getElementById('selectedWeekdays');
@@ -443,7 +538,7 @@
   });
 
   /* =====================================================
-   * 10. 주기: 근무일 + 휴일 합 최대 7 제한
+   * 8. 주기: 근무일 + 휴일 합 최대 7 제한
    * ===================================================== */
   const workDaysInput = document.getElementById('workDays');
   const offDaysInput  = document.getElementById('offDays');
@@ -483,7 +578,7 @@
   offDaysInput.addEventListener('input',  () => applyCycleLimit('off'));
 
   /* =====================================================
-   * 11. 시간 아이콘 클릭 → 브라우저 시간 선택창 열기
+   * 9. 시간 아이콘 클릭 → 브라우저 시간 선택창 열기
    * ===================================================== */
   function bindTimeIcon(inputId, iconId) {
     const input = document.getElementById(inputId);
@@ -502,5 +597,6 @@
   bindTimeIcon('startTime', 'startTimeIcon');
   bindTimeIcon('endTime',   'endTimeIcon');
 </script>
+
 </body>
 </html>
