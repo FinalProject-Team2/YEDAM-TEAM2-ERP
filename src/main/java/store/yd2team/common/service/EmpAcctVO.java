@@ -1,12 +1,15 @@
 package store.yd2team.common.service;
 
+import static store.yd2team.common.consts.CodeConst.EmpAcctStatus.ACTIVE;
+import static store.yd2team.common.consts.CodeConst.EmpAcctStatus.INACTIVE;
+import static store.yd2team.common.consts.CodeConst.EmpAcctStatus.LOCKED;
+import static store.yd2team.common.consts.CodeConst.EmpAcctStatus.TERMINATED;
+import static store.yd2team.common.consts.CodeConst.Yn.Y;
+
 import java.time.LocalDateTime;
 import java.util.Date;
 
 import lombok.Data;
-
-import static store.yd2team.common.consts.CodeConst.EmpAcctStatus.*;
-import static store.yd2team.common.consts.CodeConst.Yn.*;
 
 @Data
 public class EmpAcctVO {
@@ -31,8 +34,6 @@ public class EmpAcctVO {
 	private String creaBy;
 	private Date updtDt;
 	private String updtBy;
-	
-	private String masYn; // 관리자 여부
 	
 	// Session
 	private String empNm;   // 사원 이름
