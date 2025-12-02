@@ -14,10 +14,9 @@
       display: flex;
       align-items: flex-start; /* 위쪽 기준으로 붙이기 */
       justify-content: center; /* 가로 가운데 유지 */
-      padding-top: 0px; /* 위에서 약간 내려오게 (숫자 조절 가능) */
+      padding-top: 0px;
     }
 
-    /* 로그인 카드 박스 */
     .login-card {
       width: 380px;
       border: 1px solid #ddd;
@@ -34,7 +33,6 @@
       margin-bottom: 28px;
     }
 
-    /* 오른쪽 상단 X 버튼 */
     .login-card-close {
       position: absolute;
       right: 10px;
@@ -49,7 +47,6 @@
       opacity: .7;
     }
 
-    /* 에러 메시지 영역 */
     .login-error {
       min-height: 18px;
       font-size: 0.78rem;
@@ -84,6 +81,15 @@
       font-size: 0.9rem;
     }
 
+    /* === OTP 영역 === */
+    .otp-box {
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin-top: 16px;
+      background-color: #ffffff;
+    }
+
     .btn-login,
     .btn-find-pwd {
       min-width: 120px;
@@ -96,12 +102,10 @@
 <div class="login-wrapper">
   <div class="login-card">
 
-    <!-- 닫기 버튼 (필요 없으면 제거) -->
     <button type="button" class="login-card-close" aria-label="Close">&times;</button>
 
     <h1 class="login-card-title">ERP 로그인</h1>
 
-    <!-- 로그인 폼 -->
     <form id="loginForm" method="post" action="" novalidate autocomplete="on">
       <!-- 회사 코드 -->
       <div class="mb-3">
@@ -139,12 +143,12 @@
       <!-- 에러 메시지 영역 -->
       <div id="loginError" class="login-error"></div>
 
-      <!-- ✅ 실제 캡챠 영역 -->
-      <div class="captcha-box" id="captchaBox">
+      <!-- ✅ 캡챠 영역: 처음에는 숨김 상태로 -->
+      <div class="captcha-box" id="captchaBox" style="display:none;">
         <div class="captcha-top-row">
           <img id="captchaImg"
                class="captcha-image"
-               src="/logIn/captcha"
+               src=""
                alt="보안문자 이미지">
           <button type="button"
                   class="btn btn-outline-secondary btn-sm"
@@ -160,11 +164,35 @@
         <div id="captchaError" class="login-error"></div>
       </div>
 
+      <!-- ✅ OTP 영역: 처음에는 숨김 -->
+      <div class="otp-box" id="otpBox" style="display:none;">
+        <div class="mb-2">
+          <label for="otpCode" class="form-label">OTP 코드</label>
+          <input type="text"
+                 class="form-control"
+                 id="otpCode"
+                 name="otpCode"
+                 placeholder="전송된 인증번호를 입력하세요.">
+        </div>
+        <div id="otpError" class="login-error"></div>
+        <div class="d-flex justify-content-center gap-2 mt-2">
+          <button type="button"
+                  class="btn btn-dark btn-login"
+                  id="otpSubmitBtn">OTP 확인
+          </button>
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  id="otpCancelBtn">취소
+          </button>
+        </div>
+      </div>
+
       <!-- 버튼 영역 -->
-      <div class="d-flex justify-content-center gap-2">
+      <div class="d-flex justify-content-center gap-2 mt-3" id="loginBtnArea">
         <button type="submit" class="btn btn-dark btn-login" id="loginBtn">로그인</button>
         <button type="button"
-                class="btn btn-outline-secondary btn-find-pwd">비밀번호 찾기</button>
+                class="btn btn-outline-secondary btn-find-pwd"
+                id="findPwdBtn">비밀번호 찾기</button>
       </div>
     </form>
 
@@ -174,21 +202,34 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('loginForm');
-    const loginBtn = document.getElementById('loginBtn');
-    const errorDiv = document.getElementById('loginError');
-
-    const captchaBox = document.getElementById('captchaBox');
-    const captchaImg = document.getElementById('captchaImg');
-    const captchaInput = document.getElementById('captchaValue');
-    const captchaError = document.getElementById('captchaError');
-    const btnRefreshCaptcha = document.getElementById('btnRefreshCaptcha');
-
     if (!form) return;
 
-    // ✅ 캡챠 이미지 새로고침 함수
+    const vendIdInput   = document.getElementById('vendId');
+    const loginIdInput  = document.getElementById('loginId');
+    const passwordInput = document.getElementById('password');
+
+    const loginBtn      = document.getElementById('loginBtn');
+    const findPwdBtn    = document.getElementById('findPwdBtn');
+    const loginBtnArea  = document.getElementById('loginBtnArea');
+    const errorDiv      = document.getElementById('loginError');
+
+    // 캡챠 관련
+    const captchaBox        = document.getElementById('captchaBox');
+    const captchaImg        = document.getElementById('captchaImg');
+    const captchaInput      = document.getElementById('captchaValue');
+    const captchaError      = document.getElementById('captchaError');
+    const btnRefreshCaptcha = document.getElementById('btnRefreshCaptcha');
+
+    // OTP 관련
+    const otpBox        = document.getElementById('otpBox');
+    const otpCodeInput  = document.getElementById('otpCode');
+    const otpError      = document.getElementById('otpError');
+    const otpSubmitBtn  = document.getElementById('otpSubmitBtn');
+    const otpCancelBtn  = document.getElementById('otpCancelBtn');
+
+    // ✅ 캡챠 이미지 새로고침 함수 (필요할 때만 호출)
     function refreshCaptcha() {
       if (!captchaImg) return;
-      // 캐시 방지를 위해 쿼리 파라미터에 timestamp 추가
       const baseUrl = '/logIn/captcha';
       captchaImg.src = baseUrl + '?ts=' + new Date().getTime();
       if (captchaInput) {
@@ -199,39 +240,40 @@
       }
     }
 
-    // 페이지 로드 시 한 번 호출 (초기 캡챠 표시)
-    refreshCaptcha();
+    // 초기에는 캡챠/OTP 숨김
+    if (captchaBox) captchaBox.style.display = 'none';
+    if (otpBox) otpBox.style.display = 'none';
 
-    // 새로고침 버튼 클릭 시 캡챠 재생성
+    // 캡챠 새로고침 버튼
     if (btnRefreshCaptcha) {
       btnRefreshCaptcha.addEventListener('click', function () {
         refreshCaptcha();
       });
     }
 
+    // ==========================
+    // ⓐ 로그인 폼 submit (ID/PW + 캡챠)
+    // ==========================
     form.addEventListener('submit', function (e) {
       e.preventDefault(); // 기본 폼 제출 막기
 
+      // OTP 모드일 때는 로그인 submit 대신 무시
+      if (otpBox && otpBox.style.display !== 'none') {
+        return;
+      }
+
       errorDiv.textContent = '';
       if (captchaError) captchaError.textContent = '';
+      if (otpError) otpError.textContent = '';
 
-      const vendId = form.vendId.value.trim();
-      const loginId = form.loginId.value.trim();
-      const password = form.password.value.trim();
+      const vendId = vendIdInput.value.trim();
+      const loginId = loginIdInput.value.trim();
+      const password = passwordInput.value.trim();
       const captchaValue = captchaInput ? captchaInput.value.trim() : '';
 
       if (!vendId || !loginId || !password) {
         errorDiv.textContent = '회사 코드, 아이디, 비밀번호를 모두 입력해주세요.';
         return;
-      }
-
-      // (정책에 따라) 캡챠를 항상 필수로 쓰고 싶으면 이 검증 유지
-      // 나중에 "captchaRequired" 플래그에 따라 조건부로 바꿀 수도 있음
-      if (captchaBox && captchaBox.style.display !== 'none') {
-        if (!captchaValue) {
-          captchaError.textContent = '보안문자를 입력해주세요.';
-          return;
-        }
       }
 
       loginBtn.disabled = true;
@@ -242,7 +284,7 @@
       formData.append('vendId', vendId);
       formData.append('loginId', loginId);
       formData.append('password', password);
-      // ✅ 캡챠 값도 함께 전송
+      // 캡챠 값도 있으면 같이 전송
       if (captchaValue) {
         formData.append('captchaValue', captchaValue);
       }
@@ -258,40 +300,130 @@
           return response.json();
         })
         .then(function (data) {
+          // 최종 로그인 성공
           if (data.success) {
             window.location.href = '/';
-          } else {
-            // 공통 에러 메시지
-            errorDiv.textContent = data.message || '아이디 또는 비밀번호가 올바르지 않습니다.';
+            return;
+          }
 
-            // ✅ 서버에서 captchaRequired 플래그 내려줄 경우 처리 (선택)
-            if (typeof data.captchaRequired !== 'undefined') {
-              if (data.captchaRequired) {
-                // 캡챠가 필요한 상태 → 보여주고 새로고침
-                if (captchaBox) {
-                  captchaBox.style.display = '';
-                }
-                refreshCaptcha();
-              } else {
-                // 필요 없다면 숨길 수도 있음 (원하면 유지)
-                // captchaBox.style.display = 'none';
-              }
-            } else {
-              // 플래그가 없더라도, 캡챠 실패 등으로 다시 그려주는 편이 안전
-              refreshCaptcha();
+          // 공통 에러 메시지
+          errorDiv.textContent = data.message || '아이디 또는 비밀번호가 올바르지 않습니다.';
+
+          // ✅ 1) OTP가 필요한 상태 (ID/PW OK + OTP_YN = Y)
+          if (data.otpRequired) {
+
+            // 입력창/버튼 비활성화 (아이디/비번 재입력 방지)
+            vendIdInput.readOnly   = true;
+            loginIdInput.readOnly  = true;
+            passwordInput.readOnly = true;
+
+            // 로그인 버튼 영역은 숨기거나 비활성화
+            if (loginBtnArea) {
+              loginBtnArea.style.display = 'none';
             }
+
+            // 캡챠는 더 이상 필요 없음 (원하면 그대로 둬도 됨)
+            if (captchaBox) {
+              captchaBox.style.display = 'none';
+            }
+
+            // OTP 박스 표시
+            if (otpBox) {
+              otpBox.style.display = '';
+            }
+            if (otpCodeInput) {
+              otpCodeInput.value = '';
+              otpCodeInput.focus();
+            }
+            if (otpError) {
+              otpError.textContent = '';
+            }
+
+            return; // 여기서는 캡챠Required 처리는 안 해도 됨
+          }
+
+          // ✅ 2) 일반 실패 + 캡챠 필요 (다음 로그인부터 캡챠 ON)
+          if (typeof data.captchaRequired !== 'undefined' && data.captchaRequired) {
+            if (captchaBox) {
+              captchaBox.style.display = '';
+            }
+            refreshCaptcha();
           }
         })
         .catch(function (err) {
           console.error(err);
           errorDiv.textContent = '로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-          refreshCaptcha();
         })
         .finally(function () {
+          // OTP 모드로 넘어간 뒤에도 이 finally가 한 번은 실행되지만,
+          // 로그인 버튼을 다시 활성화해도 실제로는 form submit이 무시되므로 큰 문제는 없음.
           loginBtn.disabled = false;
           loginBtn.textContent = originalText;
         });
     });
+
+    // ==========================
+    // ⓑ OTP 확인 버튼 클릭 (/logIn/otp)
+    // ==========================
+    if (otpSubmitBtn) {
+      otpSubmitBtn.addEventListener('click', function () {
+        if (!otpCodeInput) return;
+
+        const code = otpCodeInput.value.trim();
+        otpError.textContent = '';
+        errorDiv.textContent = '';
+
+        if (!code) {
+          otpError.textContent = 'OTP 코드를 입력해 주세요.';
+          return;
+        }
+
+        otpSubmitBtn.disabled = true;
+        const originalText = otpSubmitBtn.textContent;
+        otpSubmitBtn.textContent = '확인 중...';
+
+        const formData = new FormData();
+        formData.append('otpCode', code);
+
+        fetch('/logIn/otp', {
+          method: 'POST',
+          body: formData
+        })
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error('서버 응답 오류');
+            }
+            return response.json();
+          })
+          .then(function (data) {
+            if (data.success) {
+              // OTP까지 최종 인증 성공
+              window.location.href = '/';
+            } else {
+              // OTP 실패 메시지
+              otpError.textContent = data.message || 'OTP 코드가 올바르지 않습니다.';
+            }
+          })
+          .catch(function (err) {
+            console.error(err);
+            otpError.textContent = 'OTP 검증 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+          })
+          .finally(function () {
+            otpSubmitBtn.disabled = false;
+            otpSubmitBtn.textContent = originalText;
+          });
+      });
+    }
+
+    // ==========================
+    // ⓒ OTP 취소 버튼 → 전체 로그인 초기화
+    // ==========================
+    if (otpCancelBtn) {
+      otpCancelBtn.addEventListener('click', function () {
+        // 가장 간단하게는 페이지 리로드로 초기화
+        window.location.reload();
+      });
+    }
   });
 </script>
 

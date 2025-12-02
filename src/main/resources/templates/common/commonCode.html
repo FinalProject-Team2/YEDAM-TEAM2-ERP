@@ -101,7 +101,7 @@
                             -->
 							</div>
 							<div class="col-md-3">
-								<label for="codeGroupRegYn" class="form-label">코드 등록 여부</label>
+								<label for="codeGroupRegYn" class="form-label">코드 저장 여부</label>
 								<div class="position-relative">
 									<select id="codeGroupRegYn" name="codeGroupRegYn"
 										class="form-select">
@@ -148,7 +148,7 @@
 						</div>
 						<div class="card-header-right">
 							<button id="addRowBtn" class="btn btn-outline-dark">행추가</button>
-							<button id="insertBtn" type="button" class="btn btn-outline-dark">등록</button>
+							<button id="insertBtn" type="button" class="btn btn-outline-dark">저장</button>
 						</div>
 					</div>
 
@@ -200,7 +200,7 @@
         { header: '그룹 ID', name: 'groupId' },
         { header: '코드 그룹 명', name: 'groupName' },
         { header: '설명', name: 'description' },
-        { header: '코드 등록 여부', name: 'oprtrYn', sortable: true }
+        { header: '코드 저장 여부', name: 'oprtrYn', sortable: true }
       ]
     });
 
@@ -447,7 +447,7 @@
     });
 
     // ==========================
-    // 9. 등록 버튼: 신규 행들 INSERT
+    // 9. 저장 버튼: 신규 행들 INSERT
     // ==========================
     const insertBtn = document.getElementById('insertBtn');
 
@@ -462,17 +462,17 @@
         codeGrid.finishEditing();
 
         const modified = codeGrid.getModifiedRows();
-        const createdRows = modified.createdRows || [];  // 신규(등록)
+        const createdRows = modified.createdRows || [];  // 신규(저장)
         const updatedRows = modified.updatedRows || [];  // 수정
 
-        // 등록 + 수정 대상 모두 합치기
+        // 저장 + 수정 대상 모두 합치기
         const targetRows = [
           ...createdRows.map(r => ({ ...r, _type: 'insert' })),
           ...updatedRows.map(r => ({ ...r, _type: 'update' }))
         ];
 
         if (targetRows.length === 0) {
-          alert('등록/수정할 코드 행이 없습니다.\n행을 추가하거나 기존 행을 수정한 후 다시 시도해주세요.');
+          alert('저장/수정할 코드 행이 없습니다.\n행을 추가하거나 기존 행을 수정한 후 다시 시도해주세요.');
           return;
         }
 
@@ -499,7 +499,7 @@
 
           const payload = {
             grpId: currentGrpId,
-            // 수정일 때만 codeId 전달, 등록일 때는 null
+            // 수정일 때만 codeId 전달, 저장일 때는 null
             codeId: isUpdate ? row.codeId : null,
             codeNm: row.codeName,
             yn: row.useYn,
@@ -551,7 +551,7 @@
             const rowNo = (res && typeof res._rowIndex === 'number')
               ? res._rowIndex + 1
               : '?';
-            const typeLabel = isUpdate ? '수정' : '등록';
+            const typeLabel = isUpdate ? '수정' : '저장';
 
             if (res && res.success) {
               if (isUpdate) {
@@ -567,7 +567,7 @@
 
           let alertMsg = '';
           if (insertCount > 0) {
-            alertMsg += insertCount + '건의 코드가 등록되었습니다.\n';
+            alertMsg += insertCount + '건의 코드가 저장되었습니다.\n';
           }
           if (updateCount > 0) {
             alertMsg += updateCount + '건의 코드가 수정되었습니다.\n';

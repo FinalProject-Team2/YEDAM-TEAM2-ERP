@@ -3,24 +3,29 @@
 <mapper namespace="store.yd2team.common.mapper.EmpLoginMapper">
 	
     <select id="selectByLogin">
-        SELECT  a.EMP_ACCT_ID,
-                a.VEND_ID,
-                a.EMP_ID,
-                a.LOGIN_ID,
-                a.LOGIN_PWD,
-                a.ST,
-                a.FAIL_CNT,
-                a.LOCK_DTTM,
-                a.LAST_LOGIN,
-                a.YN,
-                a.CREA_DT,
-                a.CREA_BY,
-                a.UPDT_DT,
-                a.UPDT_BY,
-                a.TEMP_YN,
-                e.NM        AS empNm,
-                e.DEPT_ID   AS deptId,
-                d.DEPT_NM   AS deptNm 
+        SELECT  a.emp_acct_id,
+                a.vend_id,
+                a.emp_id,
+                a.login_id,
+                a.login_pwd,
+                a.st,
+                a.fail_cnt,
+                a.lock_dttm,
+                a.last_login,
+                a.yn,
+                a.crea_dt,
+                a.crea_by,
+                a.updt_dt,
+                a.updt_by,
+                a.temp_yn,
+                a.mas_yn,
+                e.nm        AS empNm,
+                e.dept_id   AS deptId,
+                d.dept_nm   AS deptNm,
+                v.bizcnd,    
+                v.addr,  
+                e.cttpc,
+                v.hp     
         FROM TB_EMP_ACCT a
         LEFT JOIN TB_EMP e
                ON a.EMP_ID = e.EMP_ID
@@ -28,9 +33,11 @@
         LEFT JOIN TB_DEPT d
                ON e.DEPT_ID = d.DEPT_ID
               AND e.VEND_ID = d.VEND_ID
+        LEFT JOIN TB_VEND v
+               ON a.VEND_ID = v.VEND_ID
         WHERE a.VEND_ID  = #{vendId}
         AND a.LOGIN_ID = #{loginId}
-        AND a.YN = 'Y'
+        AND a.YN = 'e1'
     </select>
     
     <update id="updateLoginSuccess">
@@ -45,7 +52,7 @@
            SET fail_cnt = fail_cnt + 1,
                st       = CASE
                             WHEN fail_cnt + 1 >= #{maxFailCnt}
-                            THEN 'LOCKED'
+                            THEN 'r2'
                             ELSE st
                           END,
                lock_dttm = CASE
@@ -58,7 +65,7 @@
 
     <update id="unlock">
         UPDATE tb_emp_acct
-           SET st        = 'ACTIVE',
+           SET st        = 'r1',
                fail_cnt  = 0,
                lock_dttm = NULL,
                updt_dt   = SYSDATE,

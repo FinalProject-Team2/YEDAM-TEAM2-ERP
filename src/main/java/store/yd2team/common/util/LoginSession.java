@@ -81,5 +81,30 @@ public class LoginSession {
         SessionDto s = getLoginSession();
         return (s != null) ? s.getDeptNm() : null;
     }
+    
+    public static String getMasYn() {
+        SessionDto s = getLoginSession();
+        return (s != null) ? s.getMasYn() : null;
+    }
+    
+    public static String getBizcnd() {
+        SessionDto s = getLoginSession();
+        return (s != null) ? s.getBizcnd() : null;
+    }
+    
+    public static String getAddr() {
+        SessionDto s = getLoginSession();
+        return (s != null) ? s.getAddr() : null;
+    }
 	
+    public static String getCttpc() {
+        SessionDto s = getLoginSession();
+        return (s != null) ? s.getCttpc() : null;
+    }
+    
+    public static String getHp() {
+        SessionDto s = getLoginSession();
+        return (s != null) ? s.getHp() : null;
+    }
+    
 }
