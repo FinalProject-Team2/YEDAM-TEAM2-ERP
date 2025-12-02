@@ -36,9 +36,10 @@ public interface BusinessMapper {
     //잠재고객검색조회
     public List<BusinessVO> getBusinessList(BusinessVO vo);
     
-    //잠재고객기준등록
+    //로그인한 거래처의 주소, 업체명 조회
+    public List<BusinessVO> getcustaddrtype(String info);
     
-    //잠재고객기준수정
+    //로그인한 거래처의 주소, 
 
 	
 	//등록

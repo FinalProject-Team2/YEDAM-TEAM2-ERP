@@ -22,5 +22,8 @@ public interface BusinessService {
     List<BusinessVO> getListByCond(String condGb);
     
     public void saveAll(List<BusinessVO> list);
+    
+    //로그인한 거래처의 주소, 업체명 조회
+    public List<BusinessVO> getcustaddrtype(String info);
 
 }

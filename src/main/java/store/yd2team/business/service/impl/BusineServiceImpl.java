@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import lombok.RequiredArgsConstructor;
+import store.yd2team.AiService;
 import store.yd2team.business.mapper.BusinessMapper;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
@@ -22,6 +23,8 @@ import store.yd2team.business.service.PublicDataRow;
 public class BusineServiceImpl implements BusinessService {
 
     private final BusinessMapper businessMapper;
+    private final AiService aiService;
+
 
     @Value("${publicdata.service-key}")
     private String serviceKey;  // 지금은 안 쓰고 하드코딩 중
@@ -113,11 +116,38 @@ public class BusineServiceImpl implements BusinessService {
         return parts.length > 0 ? parts[0] : null;
     }
 
-    //잠재고객검색조회
-	@Override
-	public List<BusinessVO> getBusinessList(BusinessVO vo) {
-		 return businessMapper.getBusinessList(vo);
-	}
+		//    //잠재고객검색조회
+		//	@Override
+		//	public List<BusinessVO> getBusinessList(BusinessVO vo) {
+		//		 return businessMapper.getBusinessList(vo);
+		//	}
+    
+    // 잠재고객조건 + 리드점수 포함 조회 (BusinessController에서 사용하는 메서드라고 가정)
+    @Override
+    public List<BusinessVO> getBusinessList(BusinessVO cond) {
+        // 1) 조건에 맞는 잠재고객 리스트 조회 (이미 프로젝트에 맞는 쿼리가 있을 거라고 가정)
+        List<BusinessVO> list = businessMapper.selectByCondGb(/* 필요하면 cond 사용 */ "STDR-001");
+        // 또는 businessMapper.getBusinessList(cond); 처럼 네가 실제로 쓰는 메서드명으로 변경
+
+        // 2) 로그인 회사 업종 가져오기
+        String loginIndustry = getLoginCompanyIndustry();
+
+        // 3) 각 잠재고객 업종과 비교해서 리드점수 계산
+        for (BusinessVO row : list) {
+            String leadIndustry = row.getIndustryType(); // 잠재고객 업종 컬럼
+
+            int score = aiService.calculateLeadScoreByIndustry(loginIndustry, leadIndustry);
+            row.setLeadScore(score);
+        }
+
+        return list;
+    }
+    
+ // 임시 구현: 나중에는 로그인한 회사 정보(세션/DB)에서 업종을 가져오도록 수정
+    private String getLoginCompanyIndustry() {
+        // 예: 현재 로그인 회사가 "정보통신업"이라고 가정
+        return "정보통신업";
+    }
 
 	//잠재고객기준상세목록조회
 	@Override
@@ -126,7 +156,6 @@ public class BusineServiceImpl implements BusinessService {
     }
 
 	//잠재고객기준상세목록수정
-
     public void saveAll(List<BusinessVO> list) {
         if (list == null) return;
 
@@ -155,11 +184,28 @@ public class BusineServiceImpl implements BusinessService {
         return businessMapper.selectByCondGb(condGb);
     }
 
+	@Override
+	public List<BusinessVO> getcustaddrtype(String cond) {
+		 List<BusinessVO> list = businessMapper.getcustaddrtype(cond);
 
-	
-	
+		    String loginIndustry = "01"; //LoginSession.getBizcnd(); // 로그인 회사 업종
 
+		    for (BusinessVO row : list) {
+		        String leadIndustry = row.getIndustryType(); // 잠재고객 업종 (DB에서 온 값)
 
-	
+		        String userPrompt = """
+		            [로그인 회사 업종]
+		            %s
+
+		            [리드(잠재고객) 업종]
+		            %s
+		            """.formatted(loginIndustry, leadIndustry);
+
+		        int score = aiService.calculateLeadScoreByPrompt(userPrompt);
+		        row.setLeadScore(score);
+		    }
+
+		    return list;
+	}
 
 }

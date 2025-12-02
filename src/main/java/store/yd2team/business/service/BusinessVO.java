@@ -27,4 +27,7 @@ public class BusinessVO {
 	    private String stdrId;
 	    private String stdrIteamInfo;
 	    private Integer infoScore;
+	    
+	    // === AI로 계산한 리드 점수 (DB 컬럼 없이 화면용) ===
+	    private Integer leadScore;
 }
