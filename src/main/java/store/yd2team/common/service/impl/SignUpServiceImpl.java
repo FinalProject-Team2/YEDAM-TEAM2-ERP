@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import store.yd2team.common.dto.SignUpRequestDTO;
 import store.yd2team.common.mapper.SignUpMapper;
 import store.yd2team.common.service.SignUpService;
-import store.yd2team.common.service.VendAcctVO;
 import store.yd2team.common.service.VendVO;
+import store.yd2team.common.service.EmpAcctVO;
 
 @Service
 public class SignUpServiceImpl implements SignUpService {
@@ -39,7 +39,7 @@ public class SignUpServiceImpl implements SignUpService {
 		return count > 0;
 	}
 	
-	// 회원가입 처리: tb_vend, tb_vend_acct에 데이터 저장 후 생성된 vendId 반환
+	// 회원가입 처리: tb_vend, tb_emp_acct에 데이터 저장 후 생성된 vendId 반환
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public String registerVendor(SignUpRequestDTO dto) throws Exception {
@@ -47,12 +47,12 @@ public class SignUpServiceImpl implements SignUpService {
 			throw new IllegalArgumentException("SignUpRequestDTO must not be null");
 		}
 		
-		// 1. vend_id, vend_acct_id PK 생성 (yyyyMM 기준 3자리 시퀀스)
+		// 1. vend_id, emp_acct_id PK 생성 (yyyyMM 기준 3자리 시퀀스)
 		LocalDate today = LocalDate.now();
 		String yyyymm = today.format(DateTimeFormatter.ofPattern("yyyyMM"));
 		
 		String vendPrefix = "vend_" + yyyymm;
-		String vendAcctPrefix = "vend_acct_" + yyyymm;
+		String empAcctPrefix = "mas_acct_" + yyyymm;
 		
 		String vendSeq = signUpMapper.getMaxVendSeqOfMonth(vendPrefix);
 		int vendNext = 1;
@@ -65,16 +65,16 @@ public class SignUpServiceImpl implements SignUpService {
 		}
 		String vendId = vendPrefix + String.format("%03d", vendNext);
 		
-		String vendAcctSeq = signUpMapper.getMaxVendAcctSeqOfMonth(vendAcctPrefix);
-		int vendAcctNext = 1;
-		if (vendAcctSeq != null && !vendAcctSeq.isEmpty()) {
+		String empAcctSeq = signUpMapper.getMaxVendAcctSeqOfMonth(empAcctPrefix);
+		int empAcctNext = 1;
+		if (empAcctSeq != null && !empAcctSeq.isEmpty()) {
 			try {
-				vendAcctNext = Integer.parseInt(vendAcctSeq) + 1;
+				empAcctNext = Integer.parseInt(empAcctSeq) + 1;
 			} catch (NumberFormatException e) {
-				vendAcctNext = 1;
+				empAcctNext = 1;
 			}
 		}
-		String vendAcctId = vendAcctPrefix + String.format("%03d", vendAcctNext);
+		String empAcctId = empAcctPrefix + String.format("%03d", empAcctNext);
 		
 		// 2. tb_vend 데이터 매핑 (상호명, 대표자, 사업자등록번호, 휴대폰, 대표전화, 이메일, 주소, 업태/업종)
 		VendVO vend = new VendVO();
@@ -91,29 +91,25 @@ public class SignUpServiceImpl implements SignUpService {
 		vend.setAddr(dto.getAddr()); // 화면에서 도로명+상세로 조합된 값
 		vend.setBizcnd(dto.getBizType());
 		
-		// 상태(st)는 tb_vend 컬럼 기본값을 사용하므로 명시적으로 세팅하지 않음
-		vend.setCreaBy("SYSTEM");
-		vend.setUpdtBy("SYSTEM");
-		
 		int vendInsertCount = signUpMapper.insertVend(vend);
 		if (vendInsertCount != 1) {
 			throw new IllegalStateException("Failed to insert tb_vend record");
 		}
 		
-		// 3. tb_vend_acct 데이터 매핑 (아이디, 비밀번호, vend_id 등)
-		VendAcctVO vendAcct = new VendAcctVO();
-		vendAcct.setVendAcctId(vendAcctId);
-		vendAcct.setVendId(vendId);
-		vendAcct.setLoginId(dto.getUserId());
-		vendAcct.setLoginPwd(dto.getPassword());
+		// 3. tb_emp_acct 데이터 매핑 (아이디, 비밀번호, vend_id 등)
+		EmpAcctVO empAcct = new EmpAcctVO();
+		empAcct.setEmpAcctId(empAcctId);
+		empAcct.setVendId(vendId);
+		// 최초 가입 계정이므로 empId는 별도 발번 전까지 null 허용 (DB 기본값 사용 또는 추후 업데이트)
+		empAcct.setEmpId(null);
+		empAcct.setLoginId(dto.getUserId());
+		empAcct.setLoginPwd(dto.getPassword());
+		// 관리자 여부 mas_yn = 'e1' 고정
+		empAcct.setMasYn("e1");
 		
-		// st 컬럼은 tb_vend_acct 테이블의 기본값을 사용하므로 명시적으로 세팅하지 않음
-		vendAcct.setCreaBy("SYSTEM");
-		vendAcct.setUpdtBy("SYSTEM");
-		
-		int vendAcctInsertCount = signUpMapper.insertVendAcct(vendAcct);
-		if (vendAcctInsertCount != 1) {
-			throw new IllegalStateException("Failed to insert tb_vend_acct record");
+		int empAcctInsertCount = signUpMapper.insertVendAcct(empAcct);
+		if (empAcctInsertCount != 1) {
+			throw new IllegalStateException("Failed to insert tb_emp_acct record");
 		}
 		
 		return vendId;

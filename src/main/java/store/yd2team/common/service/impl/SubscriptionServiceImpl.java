@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import store.yd2team.common.dto.SubscriptionUsageDto;
 import store.yd2team.common.mapper.SubscriptionMapper;
 import store.yd2team.common.service.SubscriptionService;
 import store.yd2team.common.service.subscriptionPlanVO;
@@ -51,6 +52,28 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 	@Override
 	public List<subscriptionPlanVO> getSubscriptionPlans() throws Exception {
 		return subscriptionMapper.selectSubscriptionPlans();
+	}
+	
+	@Override
+	public subscriptionPlanVO getPlanForPayment(String planNm, String billingCycle) throws Exception {
+		// billingCycle(MONTHLY/YEARLY)를 Mapper에서 사용하는 sttlPerd 구분값으로 그대로 전달
+		return subscriptionMapper.selectPlanForPayment(planNm, billingCycle);
+	}
+	
+	@Override
+	public String getVendNameById(String vendId) throws Exception {
+		if (vendId == null || vendId.isEmpty()) {
+			return null;
+		}
+		return subscriptionMapper.selectVendNameById(vendId);
+	}
+	
+	@Override
+	public SubscriptionUsageDto getSubscriptionUsageByVendId(String vendId) throws Exception {
+		if (vendId == null || vendId.isEmpty()) {
+			return null;
+		}
+		return subscriptionMapper.selectSubscriptionUsageByVendId(vendId);
 	}
 	
 }// end class

@@ -117,9 +117,12 @@
 					<div class="card-header-right">
 						<a th:href="@{/}">
 							<button class="btn btn-outline-dark" type="button">홈으로</button>
-						</a> <a th:href="@{/Payment}">
-							<button class="btn btn-outline-dark" type="button">다음</button>
 						</a>
+						<form th:action="@{/Payment}" method="post" style="display:inline-block;">
+							<input type="hidden" name="planName" id="selectedPlanInput" />
+							<input type="hidden" name="billingCycle" id="selectedBillingInput" />
+							<button class="btn btn-outline-dark" type="submit" id="nextButton" disabled>다음</button>
+						</form>
 
 					</div>
 				</div>
@@ -153,10 +156,9 @@
 									</span>
 									<div class="mt-2">
 										<!-- BASIC / 월 -->
-										<div class="plan-billing-block" data-plan="BASIC"
-											data-billing="MONTHLY">
+										<div class="plan-billing-block" data-plan="BASIC" data-billing="MONTHLY">
 											<div th:each="p : ${planList}"
-												th:if="${p.planNm == 'BASIC' and p.sttlPerd == '월'}">
+												th:if="${p.planNm == 'BASIC' and (p.sttlPerd == 'b1' or p.sttlPerd == '\uc6d4')}">
 												<div>
 													월 API 허용 횟수 : <span
 														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
@@ -166,22 +168,16 @@
 														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
 												</div>
 											</div>
-											<div
-												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and sttlPerd == '월'])}">
-												<div>
-													월 API 허용 횟수 : <span>0</span>
-												</div>
-												<div>
-													계정 생성 제한 수 : <span>0</span>
-												</div>
+											<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and (sttlPerd == 'b1' or sttlPerd == '\uc6d4')])}">
+												<div>월 API 허용 횟수 : <span>0</span></div>
+												<div>계정 생성 제한 수 : <span>0</span></div>
 											</div>
 										</div>
 
 										<!-- BASIC / 연 -->
-										<div class="plan-billing-block" data-plan="BASIC"
-											data-billing="YEARLY" style="display: none">
+										<div class="plan-billing-block" data-plan="BASIC" data-billing="YEARLY" style="display: none">
 											<div th:each="p : ${planList}"
-												th:if="${p.planNm == 'BASIC' and p.sttlPerd == '연'}">
+												th:if="${p.planNm == 'BASIC' and (p.sttlPerd == 'b2' or p.sttlPerd == '\uc5f0')}">
 												<div>
 													월 API 허용 횟수 : <span
 														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
@@ -191,51 +187,38 @@
 														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
 												</div>
 											</div>
-											<div
-												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and sttlPerd == '연'])}">
-												<div>
-													월 API 허용 횟수 : <span>0</span>
-												</div>
-												<div>
-													계정 생성 제한 수 : <span>0</span>
-												</div>
+											<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and (sttlPerd == 'b2' or sttlPerd == '\uc5f0')])}">
+												<div>월 API 허용 횟수 : <span>0</span></div>
+												<div>계정 생성 제한 수 : <span>0</span></div>
 											</div>
 										</div>
 									</div>
 								</div>
 								<div class="plan-price">
 									<!-- BASIC / 월 -->
-									<div class="plan-billing-block" data-plan="BASIC"
-										data-billing="MONTHLY">
+									<div class="plan-billing-block" data-plan="BASIC" data-billing="MONTHLY">
 										<div th:each="p : ${planList}"
-											th:if="${p.planNm == 'BASIC' and p.sttlPerd == '월'}">
-											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
-											₩&nbsp;/ 월
-										</div>
-										<div
-											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and sttlPerd == '월'])}">
+											th:if="${p.planNm == 'BASIC' and (p.sttlPerd == 'b1' or p.sttlPerd == '\uc6d4')}">
+												<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span> ₩&nbsp;/ 월
+											</div>
+										<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and (sttlPerd == 'b1' or sttlPerd == '\uc6d4')])}">
 											<span>0</span>&nbsp;/ 월
 										</div>
 									</div>
 
 									<!-- BASIC / 연 -->
-									<div class="plan-billing-block" data-plan="BASIC"
-										data-billing="YEARLY" style="display: none">
+									<div class="plan-billing-block" data-plan="BASIC" data-billing="YEARLY" style="display: none">
 										<div th:each="p : ${planList}"
-											th:if="${p.planNm == 'BASIC' and p.sttlPerd == '연'}">
-											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
-											₩&nbsp;/ 연
-										</div>
-										<div
-											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and sttlPerd == '연'])}">
+											th:if="${p.planNm == 'BASIC' and (p.sttlPerd == 'b2' or p.sttlPerd == '\uc5f0')}">
+												<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span> ₩&nbsp;/ 연
+											</div>
+										<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'BASIC' and (sttlPerd == 'b2' or sttlPerd == '\uc5f0')])}">
 											<span>0</span>&nbsp;/ 연
 										</div>
 									</div>
 								</div>
 								<div class="plan-cta">
-									<button type="button"
-										class="btn btn-outline-dark btn-sm plan-select-btn"
-										data-plan="BASIC">선택</button>
+									<button type="button" class="btn btn-outline-dark btn-sm plan-select-btn" data-plan="BASIC">선택</button>
 								</div>
 							</div>
 						</div>
@@ -249,89 +232,57 @@
 									일반적인 비즈니스 운영에 필요한 기능을 균형 있게 제공. 추가 계정과 API 호출 한도가 포함된 플랜입니다.
 									<div class="mt-2">
 										<!-- STANDARD / 월 -->
-										<div class="plan-billing-block" data-plan="STANDARD"
-											data-billing="MONTHLY">
+										<div class="plan-billing-block" data-plan="STANDARD" data-billing="MONTHLY">
 											<div th:each="p : ${planList}"
-												th:if="${p.planNm == 'STANDARD' and p.sttlPerd == '월'}">
-												<div>
-													월 API 허용 횟수 : <span
-														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
-												</div>
-												<div>
-													계정 생성 제한 수 : <span
-														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
-												</div>
+												th:if="${p.planNm == 'STANDARD' and (p.sttlPerd == 'b1' or p.sttlPerd == '\uc6d4')}">
+												<div>월 API 허용 횟수 : <span th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span></div>
+												<div>계정 생성 제한 수 : <span th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span></div>
 											</div>
-											<div
-												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and sttlPerd == '월'])}">
-												<div>
-													월 API 허용 횟수 : <span>0</span>
-												</div>
-												<div>
-													계정 생성 제한 수 : <span>0</span>
-												</div>
+											<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and (sttlPerd == 'b1' or sttlPerd == '\uc6d4')])}">
+												<div>월 API 허용 횟수 : <span>0</span></div>
+												<div>계정 생성 제한 수 : <span>0</span></div>
 											</div>
 										</div>
 
 										<!-- STANDARD / 연 -->
-										<div class="plan-billing-block" data-plan="STANDARD"
-											data-billing="YEARLY" style="display: none">
+										<div class="plan-billing-block" data-plan="STANDARD" data-billing="YEARLY" style="display: none">
 											<div th:each="p : ${planList}"
-												th:if="${p.planNm == 'STANDARD' and p.sttlPerd == '연'}">
-												<div>
-													월 API 허용 횟수 : <span
-														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
-												</div>
-												<div>
-													계정 생성 제한 수 : <span
-														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
-												</div>
+												th:if="${p.planNm == 'STANDARD' and (p.sttlPerd == 'b2' or p.sttlPerd == '\uc5f0')}">
+												<div>월 API 허용 횟수 : <span th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span></div>
+												<div>계정 생성 제한 수 : <span th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span></div>
 											</div>
-											<div
-												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and sttlPerd == '연'])}">
-												<div>
-													월 API 허용 횟수 : <span>0</span>
-												</div>
-												<div>
-													계정 생성 제한 수 : <span>0</span>
-												</div>
+											<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and (sttlPerd == 'b2' or sttlPerd == '\uc5f0')])}">
+												<div>월 API 허용 횟수 : <span>0</span></div>
+												<div>계정 생성 제한 수 : <span>0</span></div>
 											</div>
 										</div>
 									</div>
 								</div>
 								<div class="plan-price">
 									<!-- STANDARD / 월 -->
-									<div class="plan-billing-block" data-plan="STANDARD"
-										data-billing="MONTHLY">
+									<div class="plan-billing-block" data-plan="STANDARD" data-billing="MONTHLY">
 										<div th:each="p : ${planList}"
-											th:if="${p.planNm == 'STANDARD' and p.sttlPerd == '월'}">
-											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
-											₩&nbsp;/ 월
-										</div>
-										<div
-											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and sttlPerd == '월'])}">
+											th:if="${p.planNm == 'STANDARD' and (p.sttlPerd == 'b1' or p.sttlPerd == '\uc6d4')}">
+												<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span> ₩&nbsp;/ 월
+											</div>
+										<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and (sttlPerd == 'b1' or sttlPerd == '\uc6d4')])}">
 											<span>0</span>&nbsp;/ 월
 										</div>
 									</div>
 
 									<!-- STANDARD / 연 -->
-									<div class="plan-billing-block" data-plan="STANDARD"
-										data-billing="YEARLY" style="display: none">
+									<div class="plan-billing-block" data-plan="STANDARD" data-billing="YEARLY" style="display: none">
 										<div th:each="p : ${planList}"
-											th:if="${p.planNm == 'STANDARD' and p.sttlPerd == '연'}">
-											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
-											₩&nbsp;/ 연
-										</div>
-										<div
-											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and sttlPerd == '연'])}">
+											th:if="${p.planNm == 'STANDARD' and (p.sttlPerd == 'b2' or p.sttlPerd == '\uc5f0')}">
+												<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span> ₩&nbsp;/ 연
+											</div>
+										<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'STANDARD' and (sttlPerd == 'b2' or sttlPerd == '\uc5f0')])}">
 											<span>0</span>&nbsp;/ 연
 										</div>
 									</div>
 								</div>
 								<div class="plan-cta">
-									<button type="button"
-										class="btn btn-outline-dark btn-sm plan-select-btn"
-										data-plan="STANDARD">선택</button>
+									<button type="button" class="btn btn-outline-dark btn-sm plan-select-btn" data-plan="STANDARD">선택</button>
 								</div>
 							</div>
 						</div>
@@ -345,89 +296,57 @@
 									고급 기능과 넉넉한 사용량을 제공하는 상위 플랜. 성장 단계 이상의 기업에 적합한 구성입니다.
 									<div class="mt-2">
 										<!-- PREMIUM / 월 -->
-										<div class="plan-billing-block" data-plan="PREMIUM"
-											data-billing="MONTHLY">
+										<div class="plan-billing-block" data-plan="PREMIUM" data-billing="MONTHLY">
 											<div th:each="p : ${planList}"
-												th:if="${p.planNm == 'PREMIUM' and p.sttlPerd == '월'}">
-												<div>
-													월 API 허용 횟수 : <span
-														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
-												</div>
-												<div>
-													계정 생성 제한 수 : <span
-														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
-												</div>
+												th:if="${p.planNm == 'PREMIUM' and (p.sttlPerd == 'b1' or p.sttlPerd == '\uc6d4')}">
+												<div>월 API 허용 횟수 : <span th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span></div>
+												<div>계정 생성 제한 수 : <span th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span></div>
 											</div>
-											<div
-												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and sttlPerd == '월'])}">
-												<div>
-													월 API 허용 횟수 : <span>0</span>
-												</div>
-												<div>
-													계정 생성 제한 수 : <span>0</span>
-												</div>
+											<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and (sttlPerd == 'b1' or sttlPerd == '\uc6d4')])}">
+												<div>월 API 허용 횟수 : <span>0</span></div>
+												<div>계정 생성 제한 수 : <span>0</span></div>
 											</div>
 										</div>
 
 										<!-- PREMIUM / 연 -->
-										<div class="plan-billing-block" data-plan="PREMIUM"
-											data-billing="YEARLY" style="display: none">
+										<div class="plan-billing-block" data-plan="PREMIUM" data-billing="YEARLY" style="display: none">
 											<div th:each="p : ${planList}"
-												th:if="${p.planNm == 'PREMIUM' and p.sttlPerd == '연'}">
-												<div>
-													월 API 허용 횟수 : <span
-														th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span>
-												</div>
-												<div>
-													계정 생성 제한 수 : <span
-														th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span>
-												</div>
+												th:if="${p.planNm == 'PREMIUM' and (p.sttlPerd == 'b2' or p.sttlPerd == '\uc5f0')}">
+												<div>월 API 허용 횟수 : <span th:text="${#numbers.formatInteger(p.apiIssuCnt, 0, 'COMMA')}"></span></div>
+												<div>계정 생성 제한 수 : <span th:text="${#numbers.formatInteger(p.acctIssuCnt, 0, 'COMMA')}"></span></div>
 											</div>
-											<div
-												th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and sttlPerd == '연'])}">
-												<div>
-													월 API 허용 횟수 : <span>0</span>
-												</div>
-												<div>
-													계정 생성 제한 수 : <span>0</span>
-												</div>
+											<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and (sttlPerd == 'b2' or sttlPerd == '\uc5f0')])}">
+												<div>월 API 허용 횟수 : <span>0</span></div>
+												<div>계정 생성 제한 수 : <span>0</span></div>
 											</div>
 										</div>
 									</div>
 								</div>
 								<div class="plan-price">
 									<!-- PREMIUM / 월 -->
-									<div class="plan-billing-block" data-plan="PREMIUM"
-										data-billing="MONTHLY">
+									<div class="plan-billing-block" data-plan="PREMIUM" data-billing="MONTHLY">
 										<div th:each="p : ${planList}"
-											th:if="${p.planNm == 'PREMIUM' and p.sttlPerd == '월'}">
-											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
-											₩&nbsp;/ 월
-										</div>
-										<div
-											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and sttlPerd == '월'])}">
+											th:if="${p.planNm == 'PREMIUM' and (p.sttlPerd == 'b1' or p.sttlPerd == '\uc6d4')}">
+												<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span> ₩&nbsp;/ 월
+											</div>
+										<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and (sttlPerd == 'b1' or sttlPerd == '\uc6d4')])}">
 											<span>0</span>&nbsp;/ 월
 										</div>
 									</div>
 
 									<!-- PREMIUM / 연 -->
-									<div class="plan-billing-block" data-plan="PREMIUM"
-										data-billing="YEARLY" style="display: none">
+									<div class="plan-billing-block" data-plan="PREMIUM" data-billing="YEARLY" style="display: none">
 										<div th:each="p : ${planList}"
-											th:if="${p.planNm == 'PREMIUM' and p.sttlPerd == '연'}">
-											<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span>
-											₩&nbsp;/ 연
-										</div>
-										<div
-											th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and sttlPerd == '연'])}">
+											th:if="${p.planNm == 'PREMIUM' and (p.sttlPerd == 'b2' or p.sttlPerd == '\uc5f0')}">
+												<span th:text="${#numbers.formatInteger(p.amt, 0, 'COMMA')}"></span> ₩&nbsp;/ 연
+											</div>
+										<div th:if="${#lists.isEmpty(planList) or #lists.isEmpty(planList.?[planNm == 'PREMIUM' and (sttlPerd == 'b2' or sttlPerd == '\uc5f0')])}">
 											<span>0</span>&nbsp;/ 연
 										</div>
 									</div>
 								</div>
 								<div class="plan-cta">
-									<button type="button"
-										class="btn btn-outline-dark btn-sm plan-select-btn"
-										data-plan="PREMIUM">선택</button>
+									<button type="button" class="btn btn-outline-dark btn-sm plan-select-btn" data-plan="PREMIUM">선택</button>
 								</div>
 							</div>
 						</div>
@@ -438,46 +357,65 @@
 	</div>
 
 	<script>
-	// 플랜 선택 버튼 클릭 시 active 상태 토글 (한 개만 선택되도록)
+	// 플랜 / 요금제 선택 상태를 Payment로 전달하기 위해 hidden input 갱신
 	document.addEventListener('DOMContentLoaded', function() {
 		const planButtons = document.querySelectorAll('.plan-select-btn');
+		const billingButtons = document.querySelectorAll('.billing-toggle-btn');
+		const billingBlocks = document.querySelectorAll('.plan-billing-block');
+		const selectedPlanInput = document.getElementById('selectedPlanInput');
+		const selectedBillingInput = document.getElementById('selectedBillingInput');
+		const nextButton = document.getElementById('nextButton');
+
+		let currentPlan = null; // BASIC / STANDARD / PREMIUM
+		let currentBilling = 'MONTHLY'; // 기본값
+
+		function updateHiddenFields() {
+			if (currentPlan && currentBilling) {
+				selectedPlanInput.value = currentPlan;
+				selectedBillingInput.value = currentBilling;
+				nextButton.disabled = false;
+			} else {
+				nextButton.disabled = true;
+			}
+		}
+
+		// 플랜 선택 버튼 클릭 시 active 토글 및 현재 선택값 저장
 		planButtons.forEach(btn => {
 			btn.addEventListener('click', function() {
-				// 기존 선택 해제
 				planButtons.forEach(b => b.classList.remove('active'));
-				// 현재 버튼 선택
 				this.classList.add('active');
+				currentPlan = this.getAttribute('data-plan');
+				updateHiddenFields();
 			});
 		});
 
-		// 월간/연간 요금 토글 active 관리 + 플랜 블록 전환
-		const billingButtons = document.querySelectorAll('.billing-toggle-btn');
-		const billingBlocks = document.querySelectorAll('.plan-billing-block');
-
+		// 월간/연간 요금 토글 + 블록 전환 + 현재 선택값 저장
 		billingButtons.forEach(btn => {
 			btn.addEventListener('click', function() {
 				billingButtons.forEach(b => b.classList.remove('billing-active'));
 				this.classList.add('billing-active');
-				// 라디오도 함께 체크 상태로 변경
 				const input = this.querySelector('input[type="radio"]');
 				if (input) {
 					input.checked = true;
 				}
 
-				// 선택된 요금 주기 (MONTHLY / YEARLY)
-				const selectedBilling = this.getAttribute('data-billing');
+				currentBilling = this.getAttribute('data-billing');
 
-				// 각 플랜 블록 중 같은 billing 만 보이게
 				billingBlocks.forEach(block => {
 					const blockBilling = block.getAttribute('data-billing');
-					if (blockBilling === selectedBilling) {
+					if (blockBilling === currentBilling) {
 						block.style.display = '';
 					} else {
 						block.style.display = 'none';
 					}
 				});
+
+				updateHiddenFields();
 			});
 		});
+
+		// 초기값: 월간 선택
+		updateHiddenFields();
 	});
 	</script>
 

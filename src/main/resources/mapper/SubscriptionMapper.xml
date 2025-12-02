@@ -68,4 +68,56 @@
 		FROM tb_subsp_plan
 		ORDER BY subsp_plan_id DESC
 	</select>
+	
+	<!-- 결제용: 플랜명 + 결제주기로 단일 플랜 조회 (Oracle 호환) -->
+	<select id="selectPlanForPayment" resultType="store.yd2team.common.service.subscriptionPlanVO">
+		SELECT *
+		FROM (
+			SELECT
+				subsp_plan_id AS subspPlanId,
+				plan_nm       AS planNm,
+				acct_issu_cnt AS acctIssuCnt,
+				api_issu_cnt  AS apiIssuCnt,
+				amt,
+				sttl_perd     AS sttlPerd,
+				applc_dt      AS applcDt,
+				yn,
+				crea_dt       AS creaDt,
+				crea_by       AS creaBy,
+				updt_dt       AS updtDt,
+				updt_by       AS updtBy
+			FROM tb_subsp_plan
+			WHERE plan_nm = #{planNm}
+			  AND (
+					(#{sttlPerd} = 'MONTHLY' AND (sttl_perd = 'b1' OR sttl_perd = '월'))
+				 OR (#{sttlPerd} = 'YEARLY'  AND (sttl_perd = 'b2' OR sttl_perd = '연'))
+			  )
+			ORDER BY applc_dt DESC
+		)
+		WHERE ROWNUM = 1
+	</select>
+	
+	<!-- vendId(PK)로 tb_vend에서 상호명(vend_nm) 조회 -->
+	<select id="selectVendNameById" parameterType="string" resultType="string">
+		SELECT vend_nm
+		FROM tb_vend
+		WHERE vend_id = #{vendId}
+	</select>
+
+	<!-- 로그인 사용자의 vendId 기준 현재 구독 + 사용량 조회 -->
+	<select id="selectSubscriptionUsageByVendId" parameterType="string" resultType="store.yd2team.common.dto.SubscriptionUsageDto">
+		SELECT
+			p.plan_nm        AS planNm,
+			p.crea_dt        AS creaDt,
+			p.sttl_perd      AS sttlPerd,
+			p.acct_issu_cnt  AS acctIssuCnt,
+			p.api_issu_cnt   AS apiIssuCnt,
+			s.acct_use_cnt   AS acctUseCnt,
+			s.api_use_cnt    AS apiUseCnt
+		FROM tb_subsp s
+		JOIN tb_subsp_plan p
+		  ON s.subsp_plan_id = p.subsp_plan_id
+		WHERE s.vend_id = #{vendId}
+	</select>
+	
 </mapper>
