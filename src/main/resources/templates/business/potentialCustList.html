@@ -59,7 +59,7 @@
 						th:text="${row.establishDate.substring(0,4) + '년 ' 
 					            + row.establishDate.substring(5,7) + '월 ' 
 					            + row.establishDate.substring(8,10) + '일'}"></td>
-					<td th:text="${row.leadScore}"></td>
+					 <td th:text="${row.leadScore}"></td>   <!-- 여기 -->
 				</tr>
 			</tbody>
 		</table>
@@ -249,10 +249,10 @@
 				header : '지역/상권',
 				name : 'region',
 				align : 'center'
-			}, {
-				header : '리드점수',
-				name : 'leadscore',
-				align : 'center'
+			},{
+			    header : '리드점수',
+			    name   : 'leadScore',   // leadscore → leadScore 로 수정
+			    align  : 'center'
 			} ]
 		});
 	</script>

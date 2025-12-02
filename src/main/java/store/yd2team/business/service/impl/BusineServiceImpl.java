@@ -125,9 +125,11 @@ public class BusineServiceImpl implements BusinessService {
     // 잠재고객조건 + 리드점수 포함 조회 (BusinessController에서 사용하는 메서드라고 가정)
     @Override
     public List<BusinessVO> getBusinessList(BusinessVO cond) {
-        // 1) 조건에 맞는 잠재고객 리스트 조회 (이미 프로젝트에 맞는 쿼리가 있을 거라고 가정)
-        List<BusinessVO> list = businessMapper.selectByCondGb(/* 필요하면 cond 사용 */ "STDR-001");
-        // 또는 businessMapper.getBusinessList(cond); 처럼 네가 실제로 쓰는 메서드명으로 변경
+    	
+    	// 1) 조건에 맞는 잠재고객 리스트 조회
+        //    → 이 쿼리는 이미 mapper에 있는 getBusinessList를 쓰는 게 자연스러워
+        List<BusinessVO> list = businessMapper.getBusinessList(cond);
+        // (mapper 쿼리는 tb_potential_cust_list 에서 industry_type, company_size 등 조회하는 그거)
 
         // 2) 로그인 회사 업종 가져오기
         String loginIndustry = getLoginCompanyIndustry();
@@ -135,7 +137,6 @@ public class BusineServiceImpl implements BusinessService {
         // 3) 각 잠재고객 업종과 비교해서 리드점수 계산
         for (BusinessVO row : list) {
             String leadIndustry = row.getIndustryType(); // 잠재고객 업종 컬럼
-
             int score = aiService.calculateLeadScoreByIndustry(loginIndustry, leadIndustry);
             row.setLeadScore(score);
         }
