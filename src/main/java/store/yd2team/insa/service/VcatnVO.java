@@ -18,6 +18,7 @@ public class VcatnVO {
 	private String vcatnId;      // 주식별자
 	private String empId;        // 사원_ID(FK)-휴가신청사원
 	private String cfmNm;        // 승인자이름
+	private String nm;        // 신청자이름
 	private String confmerId;    // 사원_ID(FK)-휴가승인관리자
 	private String vcatnTy;      // 연차/병가/특별휴가
 	private String salyPymntSt;  // 유급/무급

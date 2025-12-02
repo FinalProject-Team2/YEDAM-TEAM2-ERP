@@ -8,8 +8,9 @@ export function bindGridToForm(rowData) {
 
     let value = rowData[key];
 
-    // ✅ 날짜 컬럼 포맷 처리 
-    if (key === "encpn" || key === "brthdy" || key === "creaDt" || key === "edcBeginDt" || key === "edcEndDt" || key === "complDt") {
+    // ✅ 날짜 컬럼 포맷 처리  
+    if (key === "encpn" || key === "brthdy" || key === "creaDt" || key === "edcBeginDt" || key === "edcEndDt" || key === "complDt" || key === "vcatnBegin" || key === "vcatnEnd"
+     || key === "updtDt") {
       if (value) {
         const d = new Date(value);
         value = d.toISOString().substring(0, 10); // yyyy-MM-dd
