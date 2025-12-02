@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Toast UI Grid -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+    <title>attStatus</title>
+
+    <style>
+        #attGrid { width: 100%; }
+    </style>
+</head>
+<body layout:fragment="content">
+<div class="row">
+
+    <!-- ================= 검색조건 ================= -->
+    <div class="col-md-12">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title">근태현황 조회(관리자)</h5>
+                <div class="card-header-right">
+                    <button class="btn btn-outline-dark">조회</button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+
+                    <!-- 부서명 -->
+                    <div class="col-md-3">
+                        <label class="form-label">부서명</label>
+                        <select class="form-select">
+                            <option>전체</option>
+                            <option>인사</option>
+                            <option>생산</option>
+                            <option>총무</option>
+                        </select>
+                    </div>
+
+                    <!-- 사원명 -->
+                    <div class="col-md-3">
+                        <label class="form-label">사원명</label>
+                        <input type="text" class="form-control" placeholder="사원명 입력">
+                    </div>
+
+                    <!-- 근무기간 -->
+                    <div class="col-md-6">
+                        <label class="form-label">근무기간</label>
+                        <div class="d-flex align-items-center js-date-range">
+
+                            <!-- 시작일 -->
+                            <div class="input-group date me-2">
+                                <input type="text"
+                                       class="form-control js-date-range-start"
+                                       id="workDtStart"
+                                       placeholder="날짜 선택">
+                                <span class="input-group-text js-date-range-icon-start">
+                                    <i class="bi bi-calendar"></i>
+                                </span>
+                            </div>
+
+                            <span class="mx-1 fw-bold fs-5">~</span>
+
+                            <!-- 종료일 -->
+                            <div class="input-group date ms-2">
+                                <input type="text"
+                                       class="form-control js-date-range-end"
+                                       id="workDtEnd"
+                                       placeholder="날짜 선택">
+                                <span class="input-group-text js-date-range-icon-end">
+                                    <i class="bi bi-calendar"></i>
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 목록 ================= -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">근태 목록</h5>
+                <div class="card-header-right">
+                    <button class="btn btn-outline-dark">PDF</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="attGrid" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /***********************
+     * 더미 데이터
+     ***********************/
+    const attGridData = [
+        { workDt: "2025.04.03", deptNm: "인사", positionNm: "부장", empNo: "001", empNm: "민윤기", attType: "연차", inTime: "09:00", outTime: "18:00" },
+        { workDt: "2025.05.12", deptNm: "인사", positionNm: "부장", empNo: "001", empNm: "민윤기", attType: "조퇴", inTime: "09:00", outTime: "16:00" },
+        { workDt: "2025.04.03", deptNm: "인사", positionNm: "과장", empNo: "002", empNm: "정재민", attType: "지각", inTime: "10:00", outTime: "19:00" },
+        { workDt: "2025.04.03", deptNm: "인사", positionNm: "과장", empNo: "002", empNm: "정재민", attType: "휴무", inTime: "-", outTime: "-" }
+    ];
+
+    /***********************
+     * Grid 생성
+     ***********************/
+    const attGrid = new tui.Grid({
+        el: document.getElementById("attGrid"),
+        data: attGridData,
+        bodyHeight: 320,
+        scrollX: false,
+        scrollY: true,
+        rowHeaders: [],
+        columns: [
+            { header: "근무일자", name: "workDt", align: "center" },
+            { header: "부서명",   name: "deptNm", align: "center" },
+            { header: "직급",     name: "positionNm", align: "center" },
+            { header: "사원번호", name: "empNo", align: "center" },
+            { header: "사원명",   name: "empNm", align: "center" },
+            { header: "근태종류", name: "attType", align: "center" },
+            { header: "출근시간", name: "inTime", align: "center" },
+            { header: "퇴근시간", name: "outTime", align: "center" }
+        ]
+    });
+
+    // ⚠️ 기능 구현은 하지 않음 (화면 전용)
+</script>
+</body>
+</html>

@@ -173,10 +173,10 @@
     const grid = new tui.Grid({
         el: document.getElementById("grid"),
         data: gridData,
-        bodyHeight: 320,     // 🔥 그리드 안에서만 스크롤, 320px 고정
+        bodyHeight: 320,     // 그리드 안에서만 스크롤
         scrollX: false,
         scrollY: true,
-        rowHeaders: [],      // 🔥 체크박스 완전 제거
+        rowHeaders: [],      // 메인 그리드는 체크박스 없음
         columns: [
             { header: "귀속연월",     name: "revsMmdd",  align: "center" },
             { header: "지급일",       name: "payDt",     align: "center" },
@@ -247,7 +247,7 @@
      ************************/
     function setSalyStatus(rowKey, status) {
         grid.setValue(rowKey, "status", status, false);
-        grid.refreshLayout();  // 여기서만 레이아웃 갱신
+        grid.refreshLayout();
     }
 
     function confirmSaly(rowKey) {
@@ -318,6 +318,7 @@
 
     /***********************
      * 5. 모달 안 grid2
+     *    👉 체크박스 rowHeaders 사용
      ***********************/
     const gridData2 = [
         { empId: "EMP001", nm: "김철수", emplymTy: "정규직", deptNm: "개발팀" },
@@ -336,7 +337,7 @@
         bodyHeight: 320,
         scrollX: false,
         scrollY: true,
-        rowHeaders: [],
+        rowHeaders: ['checkbox'],   // ✅ 체크박스 추가
         columns: [
             { header: "사원번호", name: "empId" },
             { header: "사원명",   name: "nm" },
@@ -365,7 +366,7 @@
     }
 
     /***********************
-     * 7. revs_ym / payDt 연동 (기존)
+     * 7. revs_ym / payDt 연동
      ***********************/
     $(function () {
         const $revsYm = $("#revs_ym");
@@ -485,4 +486,3 @@
 </script>
 </body>
 </html>
-	
