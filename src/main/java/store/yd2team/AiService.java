@@ -3,6 +3,8 @@ package store.yd2team;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
+import store.yd2team.common.util.LoginSession;
+
 @Service
 public class AiService {
 
@@ -193,11 +195,11 @@ public class AiService {
                 || leadIndustry == null || leadIndustry.isBlank()) {
             return 0;
         }
-
-        // 나중에 세션에서 꺼내고 싶으면 여기서 loginIndustry를 덮어써도 됨.
-        // 예)
-        // String bizType = LoginSession.getBizcnd();
-        // loginIndustry = bizType;
+//
+//         나중에 세션에서 꺼내고 싶으면 여기서 loginIndustry를 덮어써도 됨.
+//         예)
+         String bizType = LoginSession.getBizcnd();
+         loginIndustry = bizType;
 
         String userPrompt = """
             [로그인 회사 업종]
@@ -206,6 +208,8 @@ public class AiService {
             [리드(잠재고객) 업종]
             %s
             """.formatted(loginIndustry, leadIndustry);
+        
+        System.out.println(bizType + loginIndustry);
 
         return calculateLeadScoreByPrompt(userPrompt);
     }
