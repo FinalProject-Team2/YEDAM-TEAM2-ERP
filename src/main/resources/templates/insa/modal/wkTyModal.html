@@ -1,8 +1,10 @@
 <!-- /templates/insa/modal/wkTyModal.html -->
 <div th:fragment="wkTyModal">
+  <!-- ✅ 모달 배경 -->
+  <div class="modal-backdrop" id="wkTyBackdrop" style="display:none;"></div>
+
   <!-- ✅ 모달 본체 -->
-  <div class="modal-backdrop" id="wkTyBackdrop"></div>
-  <div class="modal" id="wkTyModal">
+  <div class="modal" id="wkTyModal" tabindex="-1" style="display:none;">
     <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 800px;">
       <div class="modal-content">
         <div class="modal-body">
@@ -16,7 +18,8 @@
                 <div class="card-header">
                   <h5 class="card-title">검색조건</h5>
                   <div class="card-header-right">
-                    <button class="btn btn-outline-dark">조회</button>
+                    <!-- 검색 버튼 (원하면 JS에서 써도 됨) -->
+                    <button class="btn btn-outline-dark" id="btnWkTySearch">조회</button>
                   </div>
                 </div>
 
@@ -24,14 +27,12 @@
                   <div class="row mb-3">
                     <div class="col-md-6">
                       <label class="form-label">기준명</label>
-                      <input type="text" class="form-control">
+                      <input type="text" class="form-control" id="wkTySrchBasiNm">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">부서명</label>
                       <select id="wkTyDept" class="form-select">
-                        <option>전체</option>
-                        <option>인사</option>
-                        <option>자재</option>
+                        <option value="">전체</option>
                       </select>
                     </div>
                   </div>
@@ -43,7 +44,8 @@
                 <div class="card-header">
                   <h5 class="card-title">근무형태 기준 목록</h5>
                   <div class="card-header-right">
-                    <button class="btn btn-outline-dark">확인</button>
+                    <!-- ✅ 선택 적용 버튼 -->
+                    <button class="btn btn-outline-dark" id="btnWkTySelect">확인</button>
                   </div>
                 </div>
                 <div class="card-body">
