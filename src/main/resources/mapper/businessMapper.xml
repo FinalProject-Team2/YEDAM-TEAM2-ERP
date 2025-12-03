@@ -136,11 +136,34 @@
          WHERE STDR_DETAIL_ID  = #{stdrDetailId}
 		</update>
 		
-		<select id="getcustaddrtype" parameterType="store.yd2team.business.service.PotentialStdrVO">
-			SELECT 	addr,
-					
-			FROM	tb_code
-			WHERE	#{vend_202512003}
+		
+		<!-- 휴면/이탈고객검색조회 -->
+		<select id="getchurnRiskList" parameterType="store.yd2team.business.service.churnRiskVO">
+			SELECT 
+				cust_aggregate_no as custAggregateNo,
+				vend_id           as vendId,
+				purc_stop_dt      as purcStopDt,
+				avg_purc_cycle    as avgPurcCycle,
+				sales_change      as salesChange,
+				churn_risk_score  as churnRiskScore
+			FROM
+				tb_cust_aggregate
+			 WHERE 1 = 1
+			    <if test="custAggregateNo != null and custAggregateNo != ''">
+			         AND salesChange &gt;= TO_DATE(#{salesChange}, 'YYYY-MM-DD')
+			    </if>
+			    <if test="vendId != null and vendId != ''">
+			        AND vendId LIKE '%' || #{vendId} || '%'
+			    </if>
+			    <if test="avgPurcCycle != null and avgPurcCycle != ''">
+			        AND avgPurcCycle LIKE '%' || #{avgPurcCycle} || '%'
+			    </if>
+			    <if test="salesChange != null and salesChange != ''">
+			         AND salesChange LIKE '%' || #{salesChange} || '%'
+			    </if>
+			    <if test="churnRiskScore != null and churnRiskScore != ''">
+			        AND churnRiskScore LIKE '%' || #{churnRiskScore} || '%'
+			    </if>
 		</select>
 
     

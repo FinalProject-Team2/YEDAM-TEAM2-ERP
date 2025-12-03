@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.PotentialStdrVO;
+import store.yd2team.business.service.churnRiskVO;
 
 @Mapper
 public interface BusinessMapper {
@@ -30,20 +31,17 @@ public interface BusinessMapper {
     //번호조회
     int existsPotentialInfoNo(@Param("potentialInfoNo") Long potentialInfoNo);
     
-    //잠재고객기준조회
-    	
-    
     //잠재고객검색조회
     public List<BusinessVO> getBusinessList(BusinessVO vo);
     
     //로그인한 거래처의 주소, 업체명 조회
     public List<BusinessVO> getcustaddrtype(String info);
+    //
+    //
+    //휴면,이탈고객 검색조회
+    List<churnRiskVO> getchurnRiskList(churnRiskVO vo);
     
-    //로그인한 거래처의 주소, 
-
-	
 	//등록
-//	int insert(BusinessVO business);
 	
 	//수정
 	

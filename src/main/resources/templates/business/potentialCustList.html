@@ -27,7 +27,7 @@
 	<form th:action="@{/potential/sync}" method="post" class="mb-2">
 		<button class="btn btn-primary">공공데이터 동기화</button>
 	</form>
-	<div
+	<!-- <div
 		style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;">
 		<table class="table" style="height: 300px;">
 			연습테이블
@@ -59,11 +59,11 @@
 						th:text="${row.establishDate.substring(0,4) + '년 ' 
 					            + row.establishDate.substring(5,7) + '월 ' 
 					            + row.establishDate.substring(8,10) + '일'}"></td>
-					 <td th:text="${row.leadScore}"></td>   <!-- 여기 -->
+					 <td th:text="${row.leadScore}"></td>   여기
 				</tr>
 			</tbody>
 		</table>
-	</div>
+	</div> -->
 	<form th:action="@{/potentialCustList}" method="post">
 		<div class="row" >
 			<div class="col-md-12 mb-3">
@@ -74,6 +74,9 @@
 							<h5 class="card-title">조회조건</h5>
 						</div>
 						<div class="card-header-right">
+						<form th:action="@{/potential/sync}" method="post" class="mb-2">
+							<button class="btn btn-primary">공공데이터 동기화</button>
+						</form>
 							<button class="btn btn-dark">초기화</button>
 							<button class="btn btn-outline-dark" type="submit">조회</button>
 						</div>
@@ -134,7 +137,7 @@
 	
 	
 	  <!-- 결과 테이블 -->
-	  <div class="card mb-3" style="height: 500px; overflow-y: auto; overflow-x: auto;">
+	 <!--  <div class="card mb-3" style="height: 500px; overflow-y: auto; overflow-x: auto;">
     <table border="1">
         <thead>
             <tr>
@@ -157,26 +160,24 @@
             </tr>
         </tbody>
     </table>
-    </div>
+    </div> -->
 	
 
 
 	<!-- 잠재고객 -->
+	<form th:action="@{/potentialCustList}" method="post">
 	<div class="card mb-3">
 		<div class="card-header">
 			<div class="card-header-left">
 				<h5 class="card-title">잠재고객목록</h5>
 			</div>
 			<!-- card-header-left end  -->
-			<div class="card-header-right">
-				<button class="btn btn-dark">초기화</button>
-				<button class="btn btn-outline-dark">조회</button>
-			</div>
 		</div>
 		<div class="card-body">
-			<div id="potentialgrid" style="margin: 20px; height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+			<div id="potentialgrid" style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 		</div>
 	</div>
+	</form>
 
 
 
@@ -252,7 +253,8 @@
 			},{
 			    header : '리드점수',
 			    name   : 'leadScore',   // leadscore → leadScore 로 수정
-			    align  : 'center'
+			    align  : 'center',
+			    sortable : 'true'
 			} ]
 		});
 	</script>
