@@ -12,5 +12,11 @@ public interface VcatnService {
 	//휴가등록
 	String vcatnRegist(VcatnVO val);
 	
+	//휴가등록취소
+	int vcatnRollback(VcatnVO val);
+	
+	//관리자권한의 휴가처리 승인 및 반려기능
+	int vcatnCfmUpdate(VcatnVO val);
+	
 	
 }

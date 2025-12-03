@@ -22,14 +22,19 @@ on a.emp_id = c.emp_id
 </select>
 
 <select id="yrycUserRemndrChk">
-select remndr_yryc
-from tb_yryc
-where emp_id = #{empId}
-and vcatn_year = (
-        SELECT MAX(vcatn_year)
+SELECT NVL(
+    (
+        SELECT remndr_yryc
         FROM tb_yryc
         WHERE emp_id = #{empId}
-    )
+          AND vcatn_year = (
+              SELECT MAX(vcatn_year)
+              FROM tb_yryc
+              WHERE emp_id = #{empId}
+          )
+    ), 0
+) AS remndr_yryc
+FROM dual
 </select>
 
 <insert id="vcatnCreateData">
@@ -78,7 +83,7 @@ WHERE emp_id = #{empId}
 </update>
 
 <delete id="vcateDel">
-delete from tb_vcate where vcatn_id = #{vcatnId}
+delete from tb_vcatn where vcatn_id = #{vcatnId}
 </delete>
 
 <update id="yrycRollback">
@@ -91,6 +96,18 @@ WHERE emp_id = #{empId}
         FROM tb_yryc
         WHERE emp_id = #{empId}
     )
+</update>
+
+<update id="vcatnCfmUpdate">
+UPDATE tb_vcatn
+SET
+ confmer_id = #{confmerId}
+ ,st = #{st}
+ ,rm = #{rm}
+ ,return_resn = #{returnResn}
+ ,updt_dt = SYSDATE
+ ,updt_by = 'myk'
+WHERE vcatn_id = #{vcatnId}
 </update>
 
 </mapper>

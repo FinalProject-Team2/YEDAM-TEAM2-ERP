@@ -22,5 +22,14 @@ public interface VcatnMapper {
 	//휴가등록yryc에 업데이트용 메소드
 			int vcatnUpdateYrycData(@Param("empId") String empId,
                     @Param("vcatnDe") int vcatnDe);
+			
+	//vcatn등록했던 건 삭제
+			int vcateDel(VcatnVO val);
+			
+	//yryc연차소모된만큼 다시 롤백쿼리
+			int yrycRollback(VcatnVO val);
+			
+	//관리자가 휴가처리 승인/반려처리
+			int vcatnCfmUpdate(VcatnVO val);
 
 }

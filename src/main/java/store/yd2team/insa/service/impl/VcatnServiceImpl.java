@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import store.yd2team.insa.mapper.VcatnMapper;
@@ -51,6 +52,20 @@ public class VcatnServiceImpl implements VcatnService{
 	public int yrycUserRemndrChk(String val) {
 		
 		return vcatnMapper.yrycUserRemndrChk(val);
+	}
+
+	@Transactional
+	@Override
+	public int vcatnRollback(VcatnVO val) {
+		vcatnMapper.vcateDel(val);
+		vcatnMapper.yrycRollback(val);
+		return 1;
+	}
+
+	@Override
+	public int vcatnCfmUpdate(VcatnVO val) {
+		
+		return vcatnMapper.vcatnCfmUpdate(val);
 	}
 
 }
