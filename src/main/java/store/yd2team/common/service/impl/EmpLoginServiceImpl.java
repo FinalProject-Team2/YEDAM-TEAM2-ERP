@@ -13,17 +13,17 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import store.yd2team.common.dto.LoginResultDto;
+import store.yd2team.common.dto.EmpLoginResultDto;
 import store.yd2team.common.mapper.EmpLoginMapper;
 import store.yd2team.common.mapper.SecPolicyMapper;
-import store.yd2team.common.service.EmpAcctService;
+import store.yd2team.common.service.EmpLoginService;
 import store.yd2team.common.service.EmpAcctVO;
 import store.yd2team.common.service.SecPolicyVO;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmpAcctServiceImpl implements EmpAcctService {
+public class EmpLoginServiceImpl implements EmpLoginService {
 
     private final EmpLoginMapper empLoginMapper;
     private final SecPolicyMapper secPolicyMapper;
@@ -33,13 +33,13 @@ public class EmpAcctServiceImpl implements EmpAcctService {
     private static final int DEFAULT_MAX_FAIL_CNT = 5;
 
     @Override
-    public LoginResultDto login(String vendId, String loginId, String password) {
+    public EmpLoginResultDto login(String vendId, String loginId, String password) {
 
         // 1) 계정 조회
         EmpAcctVO empAcct = empLoginMapper.selectByLogin(vendId, loginId);
         if (empAcct == null) {
             // 이때는 실패 횟수를 관리할 필요가 없으니 그냥 캡챠/OTP 없이 실패만 반환
-            return LoginResultDto.fail("아이디 또는 비밀번호가 올바르지 않습니다.");
+            return EmpLoginResultDto.fail("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
         // 2) 보안 정책 조회 (없으면 기본값 사용)
@@ -63,13 +63,13 @@ public class EmpAcctServiceImpl implements EmpAcctService {
 
             // 자동 잠금 해제 시간이 없으면 계속 잠금 상태 유지
             if (autoUnlockTm == null || autoUnlockTm <= 0) {
-                return LoginResultDto.fail("잠금된 계정입니다. 관리자에게 문의하세요.");
+                return EmpLoginResultDto.fail("잠금된 계정입니다. 관리자에게 문의하세요.");
             }
 
             LocalDateTime lockedAt = empAcct.getLockDttm();
 
             if (lockedAt == null) {
-                return LoginResultDto.fail("잠금된 계정입니다. 관리자에게 문의하세요.");
+                return EmpLoginResultDto.fail("잠금된 계정입니다. 관리자에게 문의하세요.");
             }
 
             long minutes = Duration.between(lockedAt, LocalDateTime.now()).toMinutes();
@@ -81,7 +81,7 @@ public class EmpAcctServiceImpl implements EmpAcctService {
                 empAcct.setFailCnt(0);
             } else {
                 long remain = autoUnlockTm - minutes;
-                return LoginResultDto.fail("잠금된 계정입니다. 약 " + remain + "분 후 다시 시도해주세요.");
+                return EmpLoginResultDto.fail("잠금된 계정입니다. 약 " + remain + "분 후 다시 시도해주세요.");
             }
         }
 
@@ -113,14 +113,14 @@ public class EmpAcctServiceImpl implements EmpAcctService {
 
             if (nextFailCnt >= maxFailCnt) {
                 // 이번 실패로 인해 잠금 조건 도달
-                return LoginResultDto.fail(
+                return EmpLoginResultDto.fail(
                         "비밀번호를 " + maxFailCnt + "회 이상 잘못 입력하여 계정이 잠겼습니다.",
                         captchaRequiredNext,
                         false  // OTP는 비밀번호가 맞아야 의미 있으므로 false
                 );
             } else {
                 int remain = maxFailCnt - nextFailCnt;
-                return LoginResultDto.fail(
+                return EmpLoginResultDto.fail(
                         "아이디 또는 비밀번호가 올바르지 않습니다. (남은 시도 횟수: " + remain + "회)",
                         captchaRequiredNext,
                         false
@@ -144,11 +144,11 @@ public class EmpAcctServiceImpl implements EmpAcctService {
         if (otpEnabled) {
             // ★ OTP 사용: 1차(ID/PW) 성공 상태 → OTP 추가 인증 필요
             // success=false, otpRequired=true 상태로 반환
-            return LoginResultDto.otpStep(empAcct, "OTP 인증이 필요합니다.");
+            return EmpLoginResultDto.otpStep(empAcct, "OTP 인증이 필요합니다.");
         }
 
         // OTP 미사용 → 바로 로그인 최종 성공
-        return LoginResultDto.ok(empAcct);
+        return EmpLoginResultDto.ok(empAcct);
     }
 
     @Override

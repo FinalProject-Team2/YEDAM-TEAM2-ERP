@@ -22,6 +22,15 @@ public final class CodeConst {
         private EmpAcctStatus() {}
     }
     
+    // === 세션 타임아웃 동작 (grp_id = 't') ===
+    public static final class TimeoutAction {
+        public static final String GRP_ID        = "t";  // tb_code.grp_id
+        public static final String AUTO_LOGOUT   = "t1"; // 자동 로그아웃
+        public static final String WARN_LOGOUT   = "t2"; // 경고 후 로그아웃
+
+        private TimeoutAction() {}
+    }
+    
     // 인스턴스 생성 방지
     private CodeConst() {} 
 	
