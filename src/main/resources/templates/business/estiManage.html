@@ -25,37 +25,6 @@
   margin-left: 4px; 
 }
 
-/* 모달창 css  */
-.compact-input .form-control,
-.compact-input .icon-btn,
-.compact-input .input-group-text {
-  height: 32px !important;
-  font-size: 0.85rem !important;
-  padding: 4px 8px !important;
-}
-
-.compact-input .icon-btn {
-  width: 34px !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.compact-input i {
-  font-size: 15px !important;
-}
-
-/* Label size */
-.form-label {
-  font-size: 0.85rem;
-  margin-bottom: 4px;
-}
-
-/* Grid spacing top */
-#newEstiGrid {
-  margin-top: 6px;
-}
-
 </style>
 
 </head>
@@ -372,8 +341,66 @@
 	}); // 2-4. 반려 버튼 이벤트 끝
 
 	
+// =====================================================모달
+	// 0-1. 고객사Id 자동완성
+	if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
+
+      TeamCommon.autocomplete.init({
+        inputSelector: '#autoCustcomId',
+        listSelector: '#autoCustcomIdSuggest',
+        url: '/esti/custcomIdSearch',
+        paramName: 'keyword',
+        minLength: 1,
+        delay: 300,
+        preventClose: true,
+        mapResponse: item => ({
+            id: item.customId,
+            label: item.custcomId,      // 자동완성 목록에 실제로 보이는 값
+            value: item.custcomId,      // input에 입력될 기본값
+            name: item.custcomName      // 추가 저장된 고객사명
+        }),
+        onSelect: item => {
+            $('#autoCustcomId').val(item.value);
+            $('#autoCustcomName').val(item.name);
+        }
+      });
+
+    } else {
+      console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
+    }
+
+
+
+    // 0-2. 고객사명 자동완성 (공통 유틸 사용)
+
+    if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
+
+      TeamCommon.autocomplete.init({
+        inputSelector: '#autoCustcomName',
+        listSelector: '#autoCustcomNameSuggest',
+        url: '/esti/custcomSearch',
+        paramName: 'keyword',
+        minLength: 1,
+        delay: 300,
+        preventClose: true,
+        mapResponse: item => ({
+            id: item.custcomId,
+            label: item.custcomName,
+            value: item.custcomName
+        }),
+        onSelect: item => {
+            $('#autoCustcomName').val(item.value);
+            $('#autoCustcomId').val(item.id);
+        }
+      });
+
+    } else {
+      console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
+    }
+
+
 	
-// 모달 내부 상품명 auto complete
+// 1. 모달 내부 상품명 auto complete
 class ProductAutoComplete {
   constructor(props) {
     const el = document.createElement('input');
@@ -405,6 +432,7 @@ class ProductAutoComplete {
         const rowKey = props.rowKey;
 
         // 현재 행 데이터 변경
+        grid.setValue(rowKey, 'productId', ui.item.productId); // 현재 행 product_id PK세팅
         grid.setValue(rowKey, 'productName', ui.item.value);
         grid.setValue(rowKey, 'basisSaleAmt', ui.item.basisSaleAmt);  // 판매단가 자동 세팅
       }
@@ -448,6 +476,7 @@ class ProductAutoComplete {
 	    },
 	    rowHeaders: ['checkbox'],
 	    columns: [
+	      { name: 'productId', hidden: true },   // ← PK 저장
     	  {
     	    header: '상품명*',
     	    name: 'productName',
@@ -522,13 +551,30 @@ class ProductAutoComplete {
 		} else {
 		  window.newEstiGrid.refreshLayout();
 		}
-	}
+	} // openNewEstiModal
 	
 	function closeNewEstiModal() {
 		modal.classList.remove("show");
 		modal.style.display = "none";
 		back.style.display = "none";
-	}
+		
+		// 모달 닫을 때 입력값 초기화
+		resetNewEstiForm();
+	} // closeNewEstiModal
+	
+	function resetNewEstiForm() {
+
+		// 1) 모달 입력창 초기화
+		$('#autoCustcomId').val('');
+		$('#autoCustcomName').val('');
+		$('#autoDueDt').val('');
+		$('#autoRemark').val('');
+		
+		// 2) 그리드 데이터 초기화
+		if (window.newEstiGrid) {
+		  window.newEstiGrid.resetData([]);   // 빈 배열로 초기화
+		}
+	} // resetNewEstiForm
 	
 	// 바깥 클릭 시 닫기
 	modal.addEventListener("click", (event) => {

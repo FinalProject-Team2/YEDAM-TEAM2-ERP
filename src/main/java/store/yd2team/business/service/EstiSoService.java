@@ -14,4 +14,8 @@ public interface EstiSoService {
     List<EstiSoVO> searchProduct(String keyword);
     EstiSoVO getProductDetail(String productId);
     
+    // 견적서 모달 고객사 auto complete
+    List<EstiSoVO> searchCustcomId(String keyword);
+    List<EstiSoVO> searchCustcomName(String keyword);
+    
 }

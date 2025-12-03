@@ -18,7 +18,7 @@ public class CustcomVO {
     private String pschEmail;
     private String rpstr;
     private String rpstrTel;
-    private String bSTy;
+    private String bsTy;
     private String creaDt;
     
     // 거래구분 공통코드

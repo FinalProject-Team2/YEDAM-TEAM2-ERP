@@ -397,13 +397,130 @@ $(function () {
 // -------------------------------------------------------------------
 
 (function (global, $) {
+  global.TeamCommon = global.TeamCommon || {};
+  const ns = global.TeamCommon.autocomplete = global.TeamCommon.autocomplete || {};
+
+  ns.init = function (config) {
+
+    const $input = $(config.inputSelector);
+    const $list = $(config.listSelector);
+
+    if ($input.length === 0 || $list.length === 0) {
+      console.warn('autocomplete - selector 확인 필요', config);
+      return;
+    }
+
+    const url         = config.url;
+    const paramName   = config.paramName || 'keyword';
+    const minLength   = config.minLength ?? 2;
+    const delay       = config.delay ?? 300;
+    const preventClose = config.preventClose ?? false;   // ★ 추가 (모달 닫힘 방지 옵션)
+
+    const mapResponse = config.mapResponse || function (item) {
+      return {
+        id: item.id,
+        label: item.name,
+        value: item.name
+      };
+    };
+
+    const onSelect = config.onSelect || function (item) {
+      $input.val(item.value);
+    };
+
+    function clearList() {
+      $list.empty().hide();
+    }
+
+    function renderList(items) {
+      $list.empty();
+      if (!items || items.length === 0) {
+        $list.hide();
+        return;
+      }
+
+      items.forEach(function (item) {
+        const $li = $('<li>')
+          .addClass('list-group-item list-group-item-action autocomplete-item')
+          .text(item.label)
+          .data('autocomplete-item', item)
+          // ★ mousedown 사용 (click 대신)
+          .on('mousedown', function (e) {
+            if (preventClose) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+            const selected = $(this).data('autocomplete-item');
+            onSelect(selected);
+            clearList();
+          });
+
+        $list.append($li);
+      });
+
+      $list.show();
+    }
+
+    let timerId = null;
+    $input.on('input', function () {
+      const q = $(this).val();
+      if (!q || q.length < minLength) {
+        clearList();
+        return;
+      }
+
+      clearTimeout(timerId);
+      timerId = setTimeout(function () {
+        const params = {};
+        params[paramName] = q;
+
+        $.getJSON(url, params)
+          .done(function (data) {
+            const items = (data || []).map(mapResponse);
+            renderList(items);
+          })
+          .fail(function () {
+            console.error('autocomplete 요청 실패');
+            clearList();
+          });
+      }, delay);
+    });
+
+    // esc
+    $input.on('keydown', function (e) {
+      if (e.key === 'Escape') clearList();
+    });
+
+    if (preventClose) {
+      // ★ 목록 클릭해도 모달 닫히지 않게 처리
+      $list.on('mousedown', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    }
+
+    // 외부 클릭 시 닫기
+    $(document).on('click', function (e) {
+      const $target = $(e.target);
+      if (
+        !$target.closest(config.inputSelector).length &&
+        !$target.closest(config.listSelector).length
+      ) {
+        clearList();
+      }
+    });
+  };
+
+})(window, jQuery);
+
+/*(function (global, $) {
   // 전역 네임스페이스(TeamCommon) 보장
   global.TeamCommon = global.TeamCommon || {};
 
   // 자동완성 전용 네임스페이스
   const ns = global.TeamCommon.autocomplete = global.TeamCommon.autocomplete || {};
 
-  /**
+  *
    * 자동완성 초기화 함수
    *
    * @param {Object} config - 설정 객체
@@ -415,7 +532,7 @@ $(function () {
    *  - delay         : (선택) 디바운스(ms, 기본 300)
    *  - mapResponse   : (선택) item -> {id, label, value} 변환 함수
    *  - onSelect      : (선택) 항목 클릭 시 콜백
-   */
+   
   ns.init = function (config) {
     const $input = $(config.inputSelector);
     const $list  = $(config.listSelector);
@@ -518,7 +635,7 @@ $(function () {
     });
   };
 
-})(window, jQuery);
+})(window, jQuery);*/
 
 
 // -------------------------------------------------------------------

@@ -19,4 +19,8 @@ public interface EstiSoMapper {
     // 견적서 모달 상품 auto complete
     List<EstiSoVO> searchProduct(@Param("keyword") String keyword);
     EstiSoVO getProductDetail(@Param("productId") String productId);
+    
+    // 모달 고객사 auto complete
+    List<EstiSoVO> searchCustcomName(String keyword);  // 고객사명 검색
+    List<EstiSoVO> searchCustcomId(String keyword);    // 고객사코드(아이디) 검색
 }
