@@ -6,9 +6,8 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<script src="/assets/js/teamUtil.js"></script>
+<title>여신 관리</title>
 </head>
 
 <body layout:fragment="content">
@@ -25,8 +24,8 @@
 							<h5 class="card-title">검색 조건</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-dark">초기화</button>
-							<button type="button" class="btn btn-outline-dark">조회</button>
+							<button type="button" class="btn btn-dark" id="creditInit">초기화</button>
+							<button type="button" class="btn btn-outline-dark" id="searchCredit">조회</button>
 						</div>
 					</div>
 
@@ -34,18 +33,38 @@
 					<div class="card-body">
 						<div class="row g-5">
 							<div class="col-md-4">
-								<label>고객코드</label> <select class="form-select">
-									<option>251125-001</option>
-									<option>251125-002</option>
-								</select>
-							</div>
-							<div class="col-md-4">
-								<label>고객사</label> <select class="form-select">
-									<option>무신사</option>
-									<option>29cm</option>
-								</select>
-							</div>
+							<label for="autoCustcomId" class="form-label">고객사코드</label>
 
+								<!-- [자동완성][추가] 고객사Id input + 추천 목록을 함께 감싸는 래퍼 -->
+								<div class="position-relative">
+									<!-- [자동완성][기존 input에 autocomplete="off"만 추가] -->
+									<input id="autoCustcomId" type="text" class="form-control" placeholder="고객사코드를 입력해주세요" autocomplete="off">
+									<!-- 브라우저 기본 자동완성 끄기 -->
+
+									<!-- [자동완성][추가] 사용자Id 자동완성 후보 리스트 -->
+									<ul id="autoCustcomIdSuggest" class="list-group position-absolute w-100" style="z-index: 2000;">
+										<!-- JS에서 <li> 항목이 동적으로 추가됨 -->
+									</ul>
+								</div>
+				            </div>
+				            
+							<div class="col-md-4">
+								<label for="autoCustcomName" class="form-label">고객사명</label>
+
+								<!-- [자동완성][추가] 고객사명 input + 추천 목록을 함께 감싸는 래퍼 -->
+								<div class="position-relative">
+									<!-- [자동완성][기존 input에 autocomplete="off"만 추가] -->
+									<input id="autoCustcomName" type="text" class="form-control" placeholder="고객사명을 입력해주세요" autocomplete="off">
+									<!-- 브라우저 기본 자동완성 끄기 -->
+
+									<!-- [자동완성][추가] 고객사명 자동완성 후보 리스트 -->
+									<ul id="autoCustcomNameSuggest" class="list-group position-absolute w-100" style="z-index: 2000;">
+										<!-- JS에서 <li> 항목이 동적으로 추가됨 -->
+									</ul>
+								</div>
+				            </div>
+						</div><!-- row end -->
+							
 						</div>
 					</div>
 					<!-- /card-body end -->
@@ -64,8 +83,8 @@
 							<h5 class="card-title">여신한도설정</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-dark">초기화</button>
-							<button type="button" class="btn btn-outline-dark">저장</button>
+							<button type="button" class="btn btn-dark" id="limitInit">초기화</button>
+							<button type="button" class="btn btn-outline-dark" id="limitSave">저장</button>
 						</div>
 
 					</div>
@@ -142,7 +161,7 @@
 				</div>
 			</div>
 			<!--업체정보 카드 end -->
-		</div>
+
 
 		<script>
 
@@ -183,35 +202,14 @@ tui.Grid.applyTheme('default', {
 
 
     // 2. 더미 데이터
-    const creditData = [
-        {
-        	custId: '251126-0001',
-        	customer: '무신사',
-        	creditRating: 'A',
-        	loanCheck: 'Y',
-        	collateralLimit: '200,000,000',
-        	creditLimit: '800,000,000',
-        	loanLimit:'1,000,000,000',
-        	maxOut:'N'
-        },
-        {
-        	custId: '251126-0002',
-        	customer: '29cm',
-        	creditRating: 'B',
-        	loanCheck: 'Y',
-        	collateralLimit: '300,000,000',
-        	creditLimit:'500,000,000',
-            loanLimit:'800,000,000',
-            maxOut:'N'
-        }
-    ];
+    const creditData = [];
 
     // 3. Grid 공통 옵션
     const businessGridOptions = {
         bodyHeight: 260,
         scrollX: true,
         scrollY: true,
-        rowHeaders: ['checkbox'],// 좌측 체크박스
+        rowHeaders: [],// 좌측 체크박스
         rowHeight: 40,
         columnOptions: {
             minWidth: 80,
@@ -225,29 +223,114 @@ tui.Grid.applyTheme('default', {
         data: creditData,
         ...businessGridOptions,
         columns: [
-            { header: '고객코드', name: 'custId', width: 140 },
-            { header: '고객사', name: 'customer', width: 180 },
-            { header: '신용등급', name: 'creditRating', width: 120 },
-            { header: '여신체크', name: 'loanCheck', width: 120 },
-            { header: '담보한도', name: 'collateralLimit', width: 180 },
-            { header: '신용한도', name: 'creditLimit', width: 180 },
-            { header: '여신한도', name: 'loanLimit', width: 180 },
-            { header: '한도초과여부', name: 'maxOut', width: 110 },
+            { header: '고객코드', name: 'custcomId', width: 140 },
+            { header: '고객사', name: 'custcomName', width: 180 },
+            { header: '신용등급', name: 'creditGrad', width: 120 },
+            { header: '여신체크', name: 'cdtlnCheck', width: 120 },
+            { header: '담보한도', name: 'mrtggLmt', width: 180 },
+            { header: '신용한도', name: 'creditLmt', width: 180 },
+            { header: '여신한도', name: 'cdtlnLmt', width: 180 },
+            { header: '한도초과여부', name: 'lmtOverCheck', width: 110 },
         ]
     });
 
-    
-    
-    $('#applyDatePicker input').datepicker({
-        format: "yyyy-mm-dd",
-        autoclose: true,
-        todayHighlight: true
-    });
+	// 5. 조회 초기화버튼 이벤트
+	//5-1 초기화버튼
+	document.getElementById("creditInit").addEventListener("click", function () {
+	
+	    // 1) searchForm 객체 초기화
+	    searchForm = {
+	        custcomId: "",
+	        custcomName: "",
+	    };
+	
+	    // 2) 화면 Input 값 초기화
+	    document.querySelector("#custcomId").value = "";
+	    document.querySelector("#custcomName").value = "";
+	
+	    console.log("검색조건 초기화:", searchForm);
+	});
+	
+	// 5-2 조회버튼 (jQuery 버전)
+	$(document).on("click", "#searchCredit", function () {
 
-    // 아이콘 클릭 → input focus → 달력 열림
-    $('#icon-calendar').on('click', function () {
-        $('#applyDate').focus();
-    }); 
+	    // 1) 화면 입력값 → searchForm 에 세팅
+	    let searchForm = {
+	    		custcomId: $("#custcomId").val().trim(),
+	    		custcomName: $("#custcomName").val().trim(),
+	    };
+
+	    console.log("보낼 searchForm >>> ", searchForm);
+
+	    // 2) AJAX 요청
+	    $.ajax({
+	        url: "/credit/list",
+	        type: "POST",
+	        contentType: "application/json",
+	        data: JSON.stringify(searchForm),
+	        success: function (res) {
+	            console.log("조회결과 >>> ", res);
+
+	            // 3) 그리드 데이터 반영
+	            custGrid.resetData(res);
+	        },
+	        error: function (err) {
+	            console.error("조회 중 오류:", err);
+	        }
+	    });
+	});   
+
+    
+    
+
+	// 5-3. 고객코드 자동완성
+	if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
+     TeamCommon.autocomplete.init({
+       inputSelector: '#autoCustcomId',
+       listSelector: '#autoCustcomIdSuggest',
+       url: '/credit/custcomIdSearch',
+       paramName: 'keyword',
+       minLength: 1,
+       delay: 300,
+       preventClose: true,
+       mapResponse: item => ({
+           id: item.customId,
+           label: item.custcomId,      // 자동완성 목록에 실제로 보이는 값
+           value: item.custcomId,      // input에 입력될 기본값
+           name: item.custcomName      // 추가 저장된 고객사명
+       }),
+       onSelect: item => {
+           $('#autoCustcomId').val(item.value);
+           $('#autoCustcomName').val(item.name);
+       }
+     });
+   } else {
+     console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
+   }
+   // 5-4 고객사명 자동완성
+   if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
+     TeamCommon.autocomplete.init({
+       inputSelector: '#autoCustcomName',
+       listSelector: '#autoCustcomNameSuggest',
+       url: '/credit/custcomNameSearch',
+       paramName: 'keyword',
+       minLength: 1,
+       delay: 300,
+       preventClose: true,
+       mapResponse: item => ({
+           id: item.custcomId,
+           label: item.custcomName,
+           value: item.custcomName
+       }),
+       onSelect: item => {
+           $('#autoCustcomName').val(item.value);
+           $('#autoCustcomId').val(item.id);
+       }
+     });
+   } else {
+     console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
+   }
+
 </script>
 </body>
 </html>
