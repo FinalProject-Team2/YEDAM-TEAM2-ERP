@@ -24,14 +24,20 @@ public class SecPolicyServiceImpl implements SecPolicyService {
     @Override
     public SecPolicyVO getByVendIdOrDefault(String vendId) {
 
+    	// 해당 거래처(vend_id) 정책 조회
         SecPolicyVO vo = secPolicyMapper.selectByVendId(vendId);
-
-        // tb_sec_policy 에 row 자체가 하나도 없을 때 기본 정책 사용
-        if (vo == null) {
-            vo = SecPolicyVO.defaultPolicy();
+        if (vo != null) {
+            return vo;
         }
 
-        return vo;
+        // 없으면 “공통 기본 정책” 행 조회
+        SecPolicyVO defaultPolicy = secPolicyMapper.selectDefaultPolicy();
+        if (defaultPolicy != null) {
+            return defaultPolicy;
+        }
+
+        // 안전장치로 하드코딩 (원하면 제거도 가능)
+        return SecPolicyVO.defaultPolicy();
     }
 
     @Override
@@ -62,7 +68,7 @@ public class SecPolicyServiceImpl implements SecPolicyService {
         return secPolicyMapper.selectByVendId(vendId);
     }
 
-    // 요청값 → 저장용 VO 복사 로직
+    // 요청값 => 저장용 VO 복사 로직
     private void applyFromRequest(SecPolicyVO src, SecPolicyVO dest) {
         dest.setPwFailCnt(src.getPwFailCnt());
         dest.setAutoUnlockTm(src.getAutoUnlockTm());
@@ -87,14 +93,14 @@ public class SecPolicyServiceImpl implements SecPolicyService {
     
     private void validatePolicy(SecPolicyVO vo) {
 
-        // 1) 로그인 실패 허용 횟수 3~10
+        // 로그인 실패 허용 횟수 3~10
         if (vo.getPwFailCnt() == null
                 || vo.getPwFailCnt() < 3
                 || vo.getPwFailCnt() > 10) {
             throw new IllegalArgumentException("로그인 실패 허용 횟수는 3~10회 사이여야 합니다.");
         }
 
-        // 2) 자동 잠금 해제 시간
+        // 자동 잠금 해제 시간
         Integer autoUnlockTm = vo.getAutoUnlockTm();
         if (autoUnlockTm == null) {
             autoUnlockTm = 0;
@@ -104,7 +110,7 @@ public class SecPolicyServiceImpl implements SecPolicyService {
             throw new IllegalArgumentException("잠금 유지 시간은 0~120분 사이여야 합니다.");
         }
 
-        // 3) 비밀번호 길이
+        // 비밀번호 길이
         Integer pwLenMin = vo.getPwLenMin();
         Integer pwLenMax = vo.getPwLenMax();
 
@@ -121,7 +127,7 @@ public class SecPolicyServiceImpl implements SecPolicyService {
             throw new IllegalArgumentException("비밀번호 최소 길이는 최대 길이보다 클 수 없습니다.");
         }
 
-        // 4) 세션 타임아웃
+        // 세션 타임아웃
         Integer sessionTimeoutMin = vo.getSessionTimeoutMin();
         if (sessionTimeoutMin == null
                 || sessionTimeoutMin < 15
@@ -129,7 +135,7 @@ public class SecPolicyServiceImpl implements SecPolicyService {
             throw new IllegalArgumentException("세션 타임 아웃은 15~120분 사이여야 합니다.");
         }
 
-        // 5) OTP
+        // OTP
         boolean otpOn = Y.equals(vo.getOtpYn());
         if (otpOn) {
             Integer otpValidMin = vo.getOtpValidMin();
@@ -147,7 +153,7 @@ public class SecPolicyServiceImpl implements SecPolicyService {
             }
         }
 
-        // 6) CAPTCHA
+        // CAPTCHA
         boolean captchaOn = Y.equals(vo.getCaptchaYn());
         if (captchaOn) {
             Integer captchaFailCnt = vo.getCaptchaFailCnt();

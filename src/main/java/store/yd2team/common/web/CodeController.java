@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import store.yd2team.common.util.LoginSession;
 import store.yd2team.common.dto.CodeRegResponseDto;
 import store.yd2team.common.service.CodeService;
 import store.yd2team.common.service.CodeVO;
@@ -45,6 +46,12 @@ public class CodeController {
 	@PostMapping("/code/regCode")
 	public CodeRegResponseDto regCode(@RequestBody CodeVO vo) {
 		
+		String vendId = LoginSession.getVendId();
+	    String empId  = LoginSession.getEmpId();
+
+	    vo.setVendId(vendId);  
+	    vo.setCreaBy(empId);    
+		
 		String chkId = vo.getGrpId();
 
 		int chk = codeService.regYn(chkId);
@@ -77,6 +84,12 @@ public class CodeController {
 	    if (vo.getGrpId() == null || vo.getCodeId() == null) {
 	        return CodeRegResponseDto.fail("그룹 ID 또는 코드 ID가 없습니다.");
 	    }
+	    
+	    String vendId = LoginSession.getVendId();
+	    String empId  = LoginSession.getEmpId();
+
+	    vo.setVendId(vendId);
+	    vo.setUpdtBy(empId);
 
 	    int result = codeService.modifyCode(vo);
 	    

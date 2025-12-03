@@ -18,5 +18,7 @@ public interface SecPolicyMapper {
     
     // 수정
     int updatePolicy(SecPolicyVO vo);
-
+    
+    // 공통 기본 정책 조회용
+    SecPolicyVO selectDefaultPolicy();
 }

@@ -76,13 +76,17 @@
                           grp_id,
                           code_nm,
                           yn,
-                          vend_id)
+                          vend_id,
+                          crea_by,
+                          crea_dt)
      SELECT
 			#{codeId},            
             #{grpId},
             #{codeNm},
             #{yn},
-            #{vendId}
+            #{vendId},
+            #{creaBy},
+            SYSDATE
      FROM dual
      WHERE (#{vendId} IS NULL OR EXISTS (
            SELECT 1
@@ -98,7 +102,8 @@
      UPDATE tb_code
      SET    code_nm = #{codeNm},
             yn      = #{yn},
-            updt_dt = SYSDATE
+            updt_dt = SYSDATE,
+            updt_by = #{updtBy}
      WHERE  grp_id  = #{grpId}
      AND    code_id = #{codeId}   
     </update>

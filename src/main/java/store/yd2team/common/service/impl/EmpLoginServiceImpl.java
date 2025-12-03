@@ -1,6 +1,6 @@
 package store.yd2team.common.service.impl;
 
-// ★ 상태 코드 상수 import
+// 상태 코드 상수 import
 import static store.yd2team.common.consts.CodeConst.EmpAcctStatus.ACTIVE;
 import static store.yd2team.common.consts.CodeConst.EmpAcctStatus.LOCKED;
 import static store.yd2team.common.consts.CodeConst.Yn.Y;
@@ -15,9 +15,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.dto.EmpLoginResultDto;
 import store.yd2team.common.mapper.EmpLoginMapper;
-import store.yd2team.common.mapper.SecPolicyMapper;
-import store.yd2team.common.service.EmpLoginService;
 import store.yd2team.common.service.EmpAcctVO;
+import store.yd2team.common.service.EmpLoginService;
+import store.yd2team.common.service.SecPolicyService;
 import store.yd2team.common.service.SecPolicyVO;
 
 @Slf4j
@@ -26,7 +26,7 @@ import store.yd2team.common.service.SecPolicyVO;
 public class EmpLoginServiceImpl implements EmpLoginService {
 
     private final EmpLoginMapper empLoginMapper;
-    private final SecPolicyMapper secPolicyMapper;
+    private final SecPolicyService secPolicyService;
     private final PasswordEncoder passwordEncoder;
 
     // 보안 정책이 없을 때 기본 최대 실패 횟수
@@ -35,16 +35,23 @@ public class EmpLoginServiceImpl implements EmpLoginService {
     @Override
     public EmpLoginResultDto login(String vendId, String loginId, String password) {
 
-        // 1) 계정 조회
+        // 계정 조회
         EmpAcctVO empAcct = empLoginMapper.selectByLogin(vendId, loginId);
         if (empAcct == null) {
             // 이때는 실패 횟수를 관리할 필요가 없으니 그냥 캡챠/OTP 없이 실패만 반환
             return EmpLoginResultDto.fail("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
-        // 2) 보안 정책 조회 (없으면 기본값 사용)
-        SecPolicyVO policy = secPolicyMapper.selectByVendId(vendId);
-
+        // 보안 정책 조회 (없으면 기본값 사용)
+        SecPolicyVO policy = secPolicyService.getByVendIdOrDefault(vendId);
+        
+        log.info(">>> [LOGIN] 정책 확인: vendId={}, policyId={}, otpYn={}, otpValidMin={}, otpFailCnt={}",
+                vendId,
+                (policy == null ? null : policy.getPolicyId()),
+                (policy == null ? null : policy.getOtpYn()),
+                (policy == null ? null : policy.getOtpValidMin()),
+                (policy == null ? null : policy.getOtpFailCnt()));
+        
         int maxFailCnt = DEFAULT_MAX_FAIL_CNT;
         Integer autoUnlockTm = null;   // 단위: 분
 
@@ -58,7 +65,7 @@ public class EmpLoginServiceImpl implements EmpLoginService {
         log.info(">>> 로그인 잠금 체크: st={}, lockDttm={}, autoUnlockTm={}",
                 empAcct.getSt(), empAcct.getLockDttm(), autoUnlockTm);
 
-        // 3) 잠금 상태인지 확인 + 자동 잠금 해제
+        // 잠금 상태인지 확인 + 자동 잠금 해제
         if (LOCKED.equals(empAcct.getSt())) {
 
             // 자동 잠금 해제 시간이 없으면 계속 잠금 상태 유지
@@ -85,28 +92,27 @@ public class EmpLoginServiceImpl implements EmpLoginService {
             }
         }
 
-        // 4) 비밀번호 검증 (※ 추후 해시 적용 예정)
+        // 비밀번호 검증
         String dbPwd = empAcct.getLoginPwd();
         boolean passwordOk = (dbPwd != null && passwordEncoder.matches(password, dbPwd));
 
         // ===========================
-        // 4-1) 비밀번호 불일치 → 실패 처리 + 캡챠 정책
+        // 비밀번호 불일치 → 실패 처리 + 캡챠 정책
         // ===========================
         if (!passwordOk) {
             // 실패 횟수 + 잠금 처리 (DB 업데이트)
-            empLoginMapper.updateLoginFail(empAcct.getEmpAcctId(), maxFailCnt, loginId);
+            empLoginMapper.updateLoginFail(empAcct.getEmpAcctId(), maxFailCnt, empAcct.getEmpId());
 
             int currentFailCnt = (empAcct.getFailCnt() == null ? 0 : empAcct.getFailCnt());
             int nextFailCnt = currentFailCnt + 1; // 이번 실패 포함 카운트
 
-            // ★ 여기서 “다음 로그인 시도부터 캡챠를 보여줘야 하는지” 판단
+            // 다음 로그인 시도부터 캡챠를 보여줘야 하는지 판단
             boolean captchaRequiredNext = false;
 
             if (policy != null && Y.equals(policy.getCaptchaYn())) { // CAPTCHA_YN = 'Y'
                 Integer captchaFailCnt = policy.getCaptchaFailCnt();
                 if (captchaFailCnt != null && captchaFailCnt > 0 && nextFailCnt >= captchaFailCnt) {
-                    // 예: captchaFailCnt = 3
-                    // → nextFailCnt가 3 이상이 되는 순간부터 "다음 시도"에 캡챠 ON
+                    // nextFailCnt 이상이 되는 순간부터 다음 시도에 캡챠 ON
                     captchaRequiredNext = true;
                 }
             }
@@ -129,12 +135,11 @@ public class EmpLoginServiceImpl implements EmpLoginService {
         }
 
         // ===========================
-        // 4-2) 비밀번호 일치 → OTP 정책에 따라 분기
+        // 비밀번호 일치 → OTP 정책에 따라 분기
         // ===========================
 
         // 비밀번호는 맞았으므로 실패 카운트/잠금 관련 필드는 초기화
-        // (비밀번호 기준 실패 횟수는 여기서 리셋해도 됨)
-        empLoginMapper.updateLoginSuccess(empAcct.getEmpAcctId(), loginId);
+        empLoginMapper.updateLoginSuccess(empAcct.getEmpAcctId(), empAcct.getEmpId());
 
         boolean otpEnabled = false;
         if (policy != null && Y.equals(policy.getOtpYn())) {
@@ -142,7 +147,7 @@ public class EmpLoginServiceImpl implements EmpLoginService {
         }
 
         if (otpEnabled) {
-            // ★ OTP 사용: 1차(ID/PW) 성공 상태 → OTP 추가 인증 필요
+            // OTP 사용: 1차(ID/PW) 성공 상태 → OTP 추가 인증 필요
             // success=false, otpRequired=true 상태로 반환
             return EmpLoginResultDto.otpStep(empAcct, "OTP 인증이 필요합니다.");
         }
@@ -154,26 +159,25 @@ public class EmpLoginServiceImpl implements EmpLoginService {
     @Override
     public boolean isCaptchaRequired(String vendId, String loginId) {
 
-        // 1) 계정 조회
+        // 계정 조회
         EmpAcctVO empAcct = empLoginMapper.selectByLogin(vendId, loginId);
         if (empAcct == null) {
-            // 계정 자체가 없을 때부터 캡챠를 강제할지 말지는 정책 문제인데
-            // 일단은 false로 두자. (원하면 나중에 true로 바꿔도 됨)
+            // 계정 자체가 없을 때 안 함
             return false;
         }
 
-        // 2) 보안 정책 조회
-        SecPolicyVO policy = secPolicyMapper.selectByVendId(vendId);
+        // 보안 정책 조회
+        SecPolicyVO policy = secPolicyService.getByVendIdOrDefault(vendId);
         if (policy == null) {
             return false;
         }
 
-        // 3) 캡챠 사용 여부 (CAPTCHA_YN)
+        // 캡챠 사용 여부 (CAPTCHA_YN)
         if (!Y.equals(policy.getCaptchaYn())) { // Y면 사용, N이면 미사용
             return false;
         }
 
-        // 4) 몇 번 틀린 후부터 캡챠?
+        // 몇 번 틀린 후부터 캡챠?
         Integer threshold = policy.getCaptchaFailCnt();
         if (threshold == null || threshold <= 0) {
             return false;
@@ -182,13 +186,39 @@ public class EmpLoginServiceImpl implements EmpLoginService {
         // 현재 계정의 실패 횟수
         int failCnt = (empAcct.getFailCnt() == null) ? 0 : empAcct.getFailCnt();
 
-        // "CAPTCHA_FAIL_CNT 회 이상 틀린 이후부터" → 그 다음 로그인 시도부터 캡챠 강제
+        // CAPTCHA_FAIL_CNT 회 이상 틀린 이후부터 그 다음 로그인 시도부터 캡챠 강제
         return failCnt >= threshold;
     }
     
     @Override
     public SecPolicyVO getSecPolicy(String vendId) {
-        return secPolicyMapper.selectByVendId(vendId);
+        return secPolicyService.getByVendIdOrDefault(vendId);
+    }
+    
+    @Override
+    public void increaseLoginFailByOtp(EmpAcctVO empAcct) {
+        if (empAcct == null) {
+            return;
+        }
+
+        // 해당 계정이 속한 거래처의 보안 정책 조회
+        String vendId = empAcct.getVendId();
+        SecPolicyVO policy = secPolicyService.getByVendIdOrDefault(vendId);
+
+        int maxFailCnt = DEFAULT_MAX_FAIL_CNT;
+        if (policy != null && policy.getPwFailCnt() != null && policy.getPwFailCnt() > 0) {
+            maxFailCnt = policy.getPwFailCnt();
+        }
+
+        // 기존 로그인 실패 처리 로직 재사용
+        empLoginMapper.updateLoginFail(
+                empAcct.getEmpAcctId(),
+                maxFailCnt,
+                empAcct.getEmpId()
+        );
+
+        log.info(">>> [OTP] OTP 실패 한도 도달 → 로그인 실패 1회 반영: empAcctId={}, vendId={}, empId={}, maxFailCnt={}",
+                empAcct.getEmpAcctId(), vendId, empAcct.getEmpId(), maxFailCnt);
     }
 
 }
