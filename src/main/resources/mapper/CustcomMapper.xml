@@ -17,7 +17,7 @@
             psch_email AS pschEmail,
             rpstr,
             rpstr_tel AS rpstrTel,
-            b_s_ty AS bSTy,
+            bs_ty AS bsTy,
             crea_dt AS creaDt
         FROM tb_custcom
         WHERE 1 = 1
@@ -63,7 +63,7 @@
             , psch_email
             , rpstr
             , rpstr_tel
-            , b_s_ty
+            , bs_ty
             , crea_dt
         ) VALUES (
               fn_newcust_id          -- selectKey 에서 만든 값
@@ -77,7 +77,7 @@
             , #{pschEmail}
             , #{rpstr}
             , #{rpstrTel}
-            , #{bSTy}               -- 예: 고객사/업체 구분코드
+            , #{bsTy}               -- 예: 고객사/업체 구분코드
             , SYSDATE
         )
     </insert>    

@@ -116,7 +116,7 @@
 						</div>
 						<div class="card-header-right">
 							<button type="button" class="btn btn-outline-dark" id="newCustBtn">신규</button>
-							<button type="button" class="btn btn-outline-dark" id="saveBtn">저장</button>
+							<!-- <button type="button" class="btn btn-outline-dark" id="saveBtn">저장</button> -->
 						</div>
 
 					</div>
@@ -139,27 +139,8 @@
 <div th:replace="business/modal/newCustModal :: newCustModal"></div>
 
 <script>
-// 0. 데이터
-
-// 모달 폼 요소 캐싱
-	const newCustForm = {
-		custcomId:  document.getElementById('mcustcomId'),
-		custcomName: document.getElementById('mcustcomName'),
-		bizNo:      document.getElementById('mbizNo'),
-		bizAddr:    document.getElementById('mbizAddr'),
-		bizTel:     document.getElementById('mbizTel'),
-		bizFax:     document.getElementById('mbizFax'),
-		psch:       document.getElementById('mpsch'),
-		pschTel:    document.getElementById('mpschTel'),
-		pschEmail:  document.getElementById('mpschEmail'),
-		rpstr:      document.getElementById('mrpstr'),
-		rpstrTel:   document.getElementById('mrpstrTel'),
-		bSTy:       document.getElementById('mbSType')
-	};
-
-
-	// 0-1. 단가정책유형 공통코드 매핑
-	const bsTypeMap = {}; // { p1: '거래처별', p2: '품목별' }
+	// 0. 거래구분(매입/매출) 공통코드 매핑
+	const bsTypeMap = {}; // { bs1: '매입', bs2: '매출' }
 
 	
 	// 공통코드(단가정책유형) 로딩 + select 채우기 + map 만들기
@@ -173,8 +154,8 @@
 	            selects.forEach(select => {
 	                data.forEach(item => {
 	                    const opt = document.createElement('option');
-	                    opt.value = item.codeId;       // p1, p2
-	                    opt.textContent = item.codeNm; // 거래처별, 품목별
+	                    opt.value = item.codeId;       // bs1, bs2
+	                    opt.textContent = item.codeNm; // 매입, 매출
 	                    select.appendChild(opt);
 	                });
 	            });
@@ -228,43 +209,64 @@
 
 
 
-		 // 2. 더미 데이터
-	    const custData = [];
+	// 2. 더미 데이터
+	const custData = [];
 
-	    // 3. Grid 공통 옵션
-	    const custGridOptions = {
-	        bodyHeight: 320,
-	        scrollX: true,
-	        scrollY: true,
-	        rowHeaders: ['rowNum'],     //No 번호
-	        columnOptions: {
-	            minWidth: 80,
-	            resizable: true
-	        }
-	    };
+	// 3. Grid 공통 옵션
+	const custGridOptions = {
+	    bodyHeight: 320,
+	    scrollX: true,
+	    scrollY: true,
+	    rowHeaders: ['rowNum'],     //No 번호
+	    columnOptions: {
+	        minWidth: 80,
+	        resizable: true
+	    }
+	};
 
-	    // 4. 계정 목록 Grid 생성
-	    const custGrid = new tui.Grid({
-	        el: document.getElementById('custGrid'),
-	        data: custData,
-	        ...custGridOptions,
-	        columns: [
-	            { header: '고객코드', name: 'custcomId', width: 120, align: 'center'},
-	            { header: '고객사', name: 'custcomName', width: 150, align: 'center'},
-	            { header: '대표자', name: 'rpstr', width: 120, align: 'center' },
-	            { header: '사업자번호', name: 'bizNo', width: 140, align: 'center' },
-	            { header: '담당자', name: 'psch', width: 100, align: 'center' },
-	            { header: '담당자연락처', name: 'pschTel', width: 120, align: 'center' },
-	            { header: '이메일', name: 'pschEmail', width: 200, align: 'center' },
-	            { header: '사업장주소', name: 'bizAddr', minWidth: 350 },
-	        ]
-	    }); // 4. 끝
+	// 4. 계정 목록 Grid 생성
+	const custGrid = new tui.Grid({
+	    el: document.getElementById('custGrid'),
+	    data: custData,
+	    ...custGridOptions,
+	    columns: [
+	        { header: '고객코드', name: 'custcomId', width: 120, align: 'center' },
+	        { header: '고객사', name: 'custcomName', width: 150, align: 'center' },
+	        { header: '거래구분', name: 'bsTy', width: 100, align: 'center',
+	        	formatter: ({ value }) => bsTypeMap[value] || value
+	        },
+	        { header: '대표자', name: 'rpstr', width: 120, align: 'center' },
+	        { header: '사업자번호', name: 'bizNo', width: 140, align: 'center' },
+	        { header: '담당자', name: 'psch', width: 100, align: 'center' },
+	        { header: '담당자연락처', name: 'pschTel', width: 120, align: 'center' },
+	        { header: '이메일', name: 'pschEmail', width: 200, align: 'center' },
+	        { header: '사업장주소', name: 'bizAddr', minWidth: 350 },
+	    ]
+	}); // 4. 끝
     
     
+	// 5. 모달 폼 요소 캐싱
+	const newCustForm = {
+		custcomId:  document.getElementById('mcustcomId'),
+		custcomName: document.getElementById('mcustcomName'),
+		bizNo:      document.getElementById('mbizNo'),
+		bizAddr:    document.getElementById('mbizAddr'),
+		bizTel:     document.getElementById('mbizTel'),
+		bizFax:     document.getElementById('mbizFax'),
+		psch:       document.getElementById('mpsch'),
+		pschTel:    document.getElementById('mpschTel'),
+		pschEmail:  document.getElementById('mpschEmail'),
+		rpstr:      document.getElementById('mrpstr'),
+		rpstrTel:   document.getElementById('mrpstrTel'),
+		bsTy:       document.getElementById('mbsTy')
+	}; // 5. 모달 폼 요소 캐싱
+
+
+	    
     
  	
  	// 5. 조회 초기화버튼 이벤트
-	//5-1 초기화버튼
+	// 5-1 초기화버튼
 	document.getElementById("searchInit").addEventListener("click", function () {
 	
 	    // 1) searchForm 객체 초기화
@@ -373,45 +375,11 @@
 	    newCustForm.pschEmail.value   = "";
 	    newCustForm.rpstr.value       = "";
 	    newCustForm.rpstrTel.value    = "";
-	    newCustForm.bSTy.value        = "";   // 거래구분
+	    newCustForm.bsTy.value        = "";   // 거래구분
 	
 	    console.log("모달 입력값 초기화 완료");
 	});
-	/* document.getElementById("modalInit").addEventListener("click", function () {
-	
-	    // 1) newCustForm 객체 초기화
-	    newCustForm = {
-	        custcomId: "",
-	        custcomName: "",
-	        bizNo:"",
-	        bizAddr:"",
-	        bizTel:"",
-	        bizFax:"",
-	        psch: "",
-	        pschTel:"",
-	        pschEmail:"",
-	        rpstr:"",
-	        rpstrTel:"",
-	        bSTy:"",
-	    };
-	
-	    // 2) 화면 Input 값 초기화
-	    document.querySelector("#mcustcomId").value = "";
-	    document.querySelector("#mcustcomName").value = "";
-	    document.querySelector("#mbizNo").value = "";
-	    document.querySelector("#mbizAddr").value = "";
-	    document.querySelector("#mbizTel").value = "";
-	    document.querySelector("#mbizFax").value = "";
-	    document.querySelector("#mpsch").value = "";
-	    document.querySelector("#mpschTel").value = "";
-	    document.querySelector("#mpschEmail").value = "";
-	    document.querySelector("#mrpstr").value = "";
-	    document.querySelector("#mrpstrTel").value = "";
-	    document.querySelector("#mbSType").value = "";
-	
-	
-	    console.log("검색조건 초기화:", newCustForm);
-	}); */
+
 	
 	//5-3 modalSaveBtn(저장버튼) 이벤트
 	document.getElementById("modalSaveBtn").addEventListener("click", function () {
@@ -428,7 +396,7 @@
 	        pschEmail:   newCustForm.pschEmail.value,
 	        rpstr:       newCustForm.rpstr.value,
 	        rpstrTel:    newCustForm.rpstrTel.value,
-	        bSTy:        newCustForm.bSTy.value
+	        bsTy:        newCustForm.bsTy.value
 	    };
 	
 	    console.log("저장 payload >>> ", payload);
@@ -437,14 +405,12 @@
 	        .then(res => {
 	            console.log("저장 결과 >>> ", res.data);
 	
-	            if (res.data.success) {
+	            if (res.data.result === "success") {
 	                alert("저장 완료");
-	
-	                // 모달 닫기
+
 	                closeNewCustModal();
-	
-	                // 모달 저장
 	                $("#searchBtn").click();
+
 	            } else {
 	                alert("저장 실패\n" + (res.data.message || ""));
 	            }

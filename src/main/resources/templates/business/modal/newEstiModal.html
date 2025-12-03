@@ -23,20 +23,37 @@
 						<div class="row g-2">
 							<!-- 고객사명 -->
 				            <div class="col-md-3">
-				              <label for="custcomName" class="form-label">고객사명</label>
-				              <div class="input-group compact-input">
-				                <select id="custcomName" type="text" class="form-control" placeholder="고객사 선택">
-				              </div>
+				              <label for="autoCustcomId" class="form-label">고객사코드</label>
+
+								<!-- [자동완성][추가] 고객사Id input + 추천 목록을 함께 감싸는 래퍼 -->
+								<div class="position-relative">
+									<!-- [자동완성][기존 input에 autocomplete="off"만 추가] -->
+									<input id="autoCustcomId" type="text" class="form-control" placeholder="고객사코드를 입력해주세요" autocomplete="off">
+									<!-- 브라우저 기본 자동완성 끄기 -->
+
+									<!-- [자동완성][추가] 사용자Id 자동완성 후보 리스트 -->
+									<ul id="autoCustcomIdSuggest" class="list-group position-absolute w-100" style="z-index: 2000;">
+										<!-- JS에서 <li> 항목이 동적으로 추가됨 -->
+									</ul>
+								</div>
 				            </div>
 				
-				
-							<div class="col-1"></div>
-				
+							<!-- <div class="col-1"></div> -->
+							
 				            <div class="col-md-3">
-				              <label for="psch" class="form-label">담당자</label>
-				              <div class="input-group compact-input">
-				                <input id="psch" type="text" class="form-control" >
-				              </div>
+				              <label for="autoCustcomName" class="form-label">고객사명</label>
+
+								<!-- [자동완성][추가] 고객사명 input + 추천 목록을 함께 감싸는 래퍼 -->
+								<div class="position-relative">
+									<!-- [자동완성][기존 input에 autocomplete="off"만 추가] -->
+									<input id="autoCustcomName" type="text" class="form-control" placeholder="고객사명을 입력해주세요" autocomplete="off">
+									<!-- 브라우저 기본 자동완성 끄기 -->
+
+									<!-- [자동완성][추가] 사용자명 자동완성 후보 리스트 -->
+									<ul id="autoCustcomNameSuggest" class="list-group position-absolute w-100" style="z-index: 2000;">
+										<!-- JS에서 <li> 항목이 동적으로 추가됨 -->
+									</ul>
+								</div>
 				            </div>
 				            
 				            <div class="col-1"></div>

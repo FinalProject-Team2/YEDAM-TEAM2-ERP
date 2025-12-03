@@ -65,17 +65,24 @@ public class EstiController {
         return estiSoService.getProductDetail(productId);
     }
 	
+    // 견적서 모달 고객사 auto complete
+    @GetMapping("/custcomIdSearch")
+    @ResponseBody
+    public List<EstiSoVO> searchCustcomId(@RequestParam("keyword") String keyword) {
+        return estiSoService.searchCustcomId(keyword);
+    }
+    
+    @GetMapping("/custcomSearch")
+    @ResponseBody
+    public List<EstiSoVO> searchCustcomName(@RequestParam("keyword") String keyword) {
+        return estiSoService.searchCustcomName(keyword);
+    }
+
+    
+    
 	
 	
 /*
-	
-	// 공통코드로 정책유형
-	@GetMapping("/type-codes")
-	@ResponseBody
-	public List<CommonCodeVO> getPriceType() {
-	    return priceService.getPriceType();
-	}
-	
 	// 등록 및 수정
 	@PostMapping("/save")
 	@ResponseBody
@@ -97,27 +104,6 @@ public class EstiController {
 	    }
 
 	    System.out.println("### Final Response : " + result);
-	    return result;
-	}
-	
-	// 삭제
-	@PostMapping("/delete")
-	@ResponseBody
-	public Map<String, Object> deletePricePolicy(@RequestBody Map<String, Object> param) {
-	    Map<String, Object> result = new HashMap<>();
-	    
-	    try {
-	        List<String> priceIdList = (List<String>) param.get("priceIdList");
-	        System.out.println("삭제 요청 ID 리스트 >>> " + priceIdList);
-
-	        priceService.deletePricePolicy(priceIdList);
-
-	        result.put("result", "success");
-	    } catch (Exception e) {
-	        result.put("result", "fail");
-	        result.put("message", e.getMessage());
-	    }
-
 	    return result;
 	}
 */	

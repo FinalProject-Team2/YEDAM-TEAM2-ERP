@@ -106,4 +106,26 @@
          WHERE product_id = #{productId}
     </select>
 
+<!-- 신규견적서 모달 고객사 auto complete -->
+	<!-- 고객사명 검색 -->
+    <select id="searchCustcomId" parameterType="string" resultType="store.yd2team.business.service.EstiSoVO">
+	    SELECT 
+	        custcom_id AS custcomId,
+	        custcom_name AS custcomName,
+	        vend_id AS vendId
+	    FROM tb_custcom
+	    WHERE custcom_id LIKE '%' || #{keyword} || '%'
+	    ORDER BY custcom_id
+	</select>
+
+    <!-- 고객사코드 검색 -->
+    <select id="searchCustcomName" parameterType="string" resultType="store.yd2team.business.service.EstiSoVO">
+	    SELECT 
+	        custcom_id AS custcomId,
+	        custcom_name AS custcomName,
+	        vend_id AS vendId
+	    FROM tb_custcom
+	    WHERE custcom_name LIKE '%' || #{keyword} || '%'
+	    ORDER BY custcom_name
+	</select>
 </mapper>

@@ -32,5 +32,9 @@ public class EstiSoVO {
     // 견적서 모달 판매단가
     private String productId;
     private Long basisSaleAmt;
+    
+    //===== 모달 고객사 auto complete
+    private String custcomId;     // 고객사ID
+    private String vendId;       // 거래처ID
 }
 

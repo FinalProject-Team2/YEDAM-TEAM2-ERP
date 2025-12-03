@@ -37,4 +37,16 @@ public class EstiSoServiceImpl implements EstiSoService {
     public EstiSoVO getProductDetail(String productId) {
         return estiSoMapper.getProductDetail(productId);
     }
+    
+    // 견적서 모달 고객사 auto complete
+    @Override
+    public List<EstiSoVO> searchCustcomId(String keyword) {
+    	return estiSoMapper.searchCustcomId(keyword);
+    }
+    
+    @Override
+    public List<EstiSoVO> searchCustcomName(String keyword) {
+        return estiSoMapper.searchCustcomName(keyword);
+    }
+
 }
