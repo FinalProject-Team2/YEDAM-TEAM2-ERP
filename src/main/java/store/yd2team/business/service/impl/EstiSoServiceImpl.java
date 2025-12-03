@@ -15,14 +15,26 @@ public class EstiSoServiceImpl implements EstiSoService {
 
 	private final EstiSoMapper estiSoMapper;
 
+	// 견적서 조회
     @Override
     public List<EstiSoVO> selectEstiList(EstiSoVO cond) {
-        // 필요하면 여기서 기본값 세팅, 검증, 로깅 등 수행
         return estiSoMapper.selectEsti(cond);
     }
     
+    // 견적서 그리드 상태 업데이트
     @Override
     public int updateStatus(EstiSoVO vo) {
         return estiSoMapper.updateStatus(vo);
+    }
+    
+    // 견적서 모달 상품명 auto complete
+    @Override
+    public List<EstiSoVO> searchProduct(String keyword) {
+        return estiSoMapper.searchProduct(keyword);
+    }
+
+    @Override
+    public EstiSoVO getProductDetail(String productId) {
+        return estiSoMapper.getProductDetail(productId);
     }
 }

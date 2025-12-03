@@ -83,4 +83,27 @@
 	     WHERE esti_id = #{estiId}
 	       AND version = #{version}
 	</update>
+	
+<!-- 견적서 모달 상품 auto complete -->
+    <!-- 상품명 자동완성 검색 -->
+    <select id="searchProduct" resultType="EstiSoVO">
+        SELECT
+               product_id AS productId,
+               product_name AS productName,
+               basis_sale_amt AS basisSaleAmt
+          FROM tb_product
+         WHERE product_name LIKE '%' || #{keyword} || '%'
+         ORDER BY product_name
+    </select>
+
+    <!-- 상품 상세조회 (단가 가져오기) -->
+    <select id="getProductDetail" resultType="EstiSoVO">
+        SELECT
+               product_id,
+               product_name,
+               basis_sale_amt
+          FROM tb_product
+         WHERE product_id = #{productId}
+    </select>
+
 </mapper>
