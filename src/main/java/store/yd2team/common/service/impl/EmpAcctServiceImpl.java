@@ -27,7 +27,7 @@ public class EmpAcctServiceImpl implements EmpAcctService {
 
     private final EmpLoginMapper empLoginMapper;
     private final SecPolicyMapper secPolicyMapper;
-//    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     // 보안 정책이 없을 때 기본 최대 실패 횟수
     private static final int DEFAULT_MAX_FAIL_CNT = 5;
@@ -87,7 +87,7 @@ public class EmpAcctServiceImpl implements EmpAcctService {
 
         // 4) 비밀번호 검증 (※ 추후 해시 적용 예정)
         String dbPwd = empAcct.getLoginPwd();
-        boolean passwordOk = (dbPwd != null && dbPwd.equals(password));
+        boolean passwordOk = (dbPwd != null && passwordEncoder.matches(password, dbPwd));
 
         // ===========================
         // 4-1) 비밀번호 불일치 → 실패 처리 + 캡챠 정책
