@@ -17,6 +17,8 @@ import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.PublicDataResponse;
 import store.yd2team.business.service.PublicDataRow;
+import store.yd2team.business.service.churnRiskVO;
+import store.yd2team.common.util.LoginSession;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class BusineServiceImpl implements BusinessService {
 
 
     @Value("${publicdata.service-key}")
-    private String serviceKey;  // 지금은 안 쓰고 하드코딩 중
+    private String encodedServiceKey;  // 지금은 안 쓰고 하드코딩 중
 
     @Override
     public List<BusinessVO> getList() {
@@ -46,12 +48,12 @@ public class BusineServiceImpl implements BusinessService {
             RestTemplate restTemplate = new RestTemplate();
 
             String urlString = "https://api.odcloud.kr/api/15125657/v1/uddi:46ae6a57-03aa-4eef-9120-f632956d38e5";
-            String encodedServiceKey = "qIWgK5nPmfUmVGffAxfyxZqboQb%2FwSG0TFq8Gu1GwkI2pLB13450nWdVnNDL%2BDjfCIakfDpJwi2yOqppnR%2Fbpw%3D%3D";
+//            String encodedServiceKey = "qIWgK5nPmfUmVGffAxfyxZqboQb%2FwSG0TFq8Gu1GwkI2pLB13450nWdVnNDL%2BDjfCIakfDpJwi2yOqppnR%2Fbpw%3D%3D";
 
             URI uri = UriComponentsBuilder.fromUriString(urlString)
                     .queryParam("serviceKey", encodedServiceKey)
                     .queryParam("page", 1)
-                    .queryParam("perPage", 50)
+                    .queryParam("perPage", 10)
                     .build(true)
                     .toUri();
 
@@ -116,20 +118,12 @@ public class BusineServiceImpl implements BusinessService {
         return parts.length > 0 ? parts[0] : null;
     }
 
-		//    //잠재고객검색조회
-		//	@Override
-		//	public List<BusinessVO> getBusinessList(BusinessVO vo) {
-		//		 return businessMapper.getBusinessList(vo);
-		//	}
-    
     // 잠재고객조건 + 리드점수 포함 조회 (BusinessController에서 사용하는 메서드라고 가정)
     @Override
     public List<BusinessVO> getBusinessList(BusinessVO cond) {
     	
     	// 1) 조건에 맞는 잠재고객 리스트 조회
-        //    → 이 쿼리는 이미 mapper에 있는 getBusinessList를 쓰는 게 자연스러워
         List<BusinessVO> list = businessMapper.getBusinessList(cond);
-        // (mapper 쿼리는 tb_potential_cust_list 에서 industry_type, company_size 등 조회하는 그거)
 
         // 2) 로그인 회사 업종 가져오기
         String loginIndustry = getLoginCompanyIndustry();
@@ -137,7 +131,13 @@ public class BusineServiceImpl implements BusinessService {
         // 3) 각 잠재고객 업종과 비교해서 리드점수 계산
         for (BusinessVO row : list) {
             String leadIndustry = row.getIndustryType(); // 잠재고객 업종 컬럼
-            int score = aiService.calculateLeadScoreByIndustry(loginIndustry, leadIndustry);
+            String companySize    = row.getCompanySize();
+            String region         = row.getRegion();
+            String establishDate  = row.getEstablishDate();
+            
+            int score = aiService.calculateLeadScoreByIndustry(loginIndustry, leadIndustry,  companySize,
+                    region,
+                    establishDate);
             row.setLeadScore(score);
         }
 
@@ -146,8 +146,8 @@ public class BusineServiceImpl implements BusinessService {
     
  // 임시 구현: 나중에는 로그인한 회사 정보(세션/DB)에서 업종을 가져오도록 수정
     private String getLoginCompanyIndustry() {
-        // 예: 현재 로그인 회사가 "정보통신업"이라고 가정
-        return "정보통신업";
+    	String biz = LoginSession.getBizcnd();
+        return biz;
     }
 
 	//잠재고객기준상세목록조회
@@ -189,24 +189,27 @@ public class BusineServiceImpl implements BusinessService {
 	public List<BusinessVO> getcustaddrtype(String cond) {
 		 List<BusinessVO> list = businessMapper.getcustaddrtype(cond);
 
-		    String loginIndustry = "01"; //LoginSession.getBizcnd(); // 로그인 회사 업종
+		    String loginIndustry = LoginSession.getBizcnd(); // 로그인 회사 업종
 
 		    for (BusinessVO row : list) {
-		        String leadIndustry = row.getIndustryType(); // 잠재고객 업종 (DB에서 온 값)
-
-		        String userPrompt = """
-		            [로그인 회사 업종]
-		            %s
-
-		            [리드(잠재고객) 업종]
-		            %s
-		            """.formatted(loginIndustry, leadIndustry);
-
-		        int score = aiService.calculateLeadScoreByPrompt(userPrompt);
-		        row.setLeadScore(score);
+		    	 int score = aiService.calculateLeadScoreByIndustry(
+		                 loginIndustry,
+		                 row.getIndustryType(),
+		                 row.getCompanySize(),
+		                 row.getRegion(),
+		                 row.getEstablishDate()
+		         );
+		         row.setLeadScore(score);
 		    }
 
 		    return list;
+	}
+	//
+	//
+	//휴면,이탈검색조회
+	@Override
+	public List<churnRiskVO> getchurnRiskList(churnRiskVO vo) {
+		return businessMapper.getchurnRiskList(vo);
 	}
 
 }

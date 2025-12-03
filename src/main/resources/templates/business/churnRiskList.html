@@ -23,9 +23,10 @@
 </style>
 <body layout:fragment="content">
 
-	<div class="row">
-		<div class="col-md-12 mb-3">
-			<div class="card">
+	<form th:action="@{/churnRiskList}" method="post">
+		<div class="row">
+			<div class="col-md-12 mb-3">
+				<div class="card">
 					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 					<div class="card-header">
 						<div class="card-header-left">
@@ -33,42 +34,46 @@
 						</div>
 						<div class="card-header-right">
 							<button class="btn btn-dark">초기화</button>
-							<button class="btn btn-outline-dark">조회</button>
+							<button class="btn btn-outline-dark" type="submit">조회</button>
 						</div>
 					</div>
-						<div class="card-body">
-							<div class="row mb-2">
-								<div class="col-md-3">
-									<label class="form-label">마지막 거래일</label> <input type="text" class="form-control" placeholder="Value">
-								</div>
-								<div class="col-md-3">
-									<label class="form-label">갱신여부</label> <input type="text" class="form-control" placeholder="Value">
-								</div>
-								<div class="col-md-3">
-									<label class="form-label">미갱신기간</label> <input type="text" class="form-control" placeholder="Value">
-								</div>
-								<div class="col-md-3">
-									<label class="form-label">매출변동</label> <input type="text" class="form-control" placeholder="Value">
-								</div>
+					<div class="card-body">
+						<div class="row mb-2">
+							<div class="col-md-3">
+								<label class="form-label">마지막 거래일</label> <input type="text"
+									class="form-control" placeholder="Value">
 							</div>
-							<div class="row mb-2">
-								<div class="col-md-3">
-									<label class="form-label">최근 웹활동</label> <input type="text" class="form-control" placeholder="Value">
-								</div>
-								<div class="col-md-3">
-									<label class="form-label">평균 구매주기</label> <input type="text" class="form-control" placeholder="Value">
-								</div>
-								<div class="col-md-3">
-									<label class="form-label">평균 구매주기</label> <input type="text" class="form-control" placeholder="Value">
-								</div>	
+							<div class="col-md-3">
+								<label class="form-label">갱신여부</label> <input type="text"
+									class="form-control" placeholder="Value">
+							</div>
+							<div class="col-md-3">
+								<label class="form-label">미갱신기간</label> <input type="text"
+									class="form-control" placeholder="Value">
+							</div>
+							<div class="col-md-3">
+								<label class="form-label">매출변동</label> <input type="text"
+									class="form-control" placeholder="Value">
 							</div>
 						</div>
+						<div class="row mb-2">
+							<div class="col-md-3">
+								<label class="form-label">최근 웹활동</label> <input type="text"
+									class="form-control" placeholder="Value">
+							</div>
+							<div class="col-md-3">
+								<label class="form-label">평균 구매주기</label> <input type="text"
+									class="form-control" placeholder="Value">
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
-		
-		
-		
+	</form>
+
+
+
 	<!-- 휴먼고객 -->
 	<div class="card mb-3">
 		<div class="card-header">
@@ -76,17 +81,18 @@
 				<h5 class="card-title">휴먼고객목록</h5>
 			</div>
 			<!-- card-header-left end -->
-		<!-- 	<div class="card-header-right">
+			<!-- 	<div class="card-header-right">
 				<button class="btn btn-dark">초기화</button>
 				<button class="btn btn-outline-dark">조회</button>
 			</div> //card-header right end -->
-		</div> <!-- //card-header wihy-actions end -->
+		</div>
+		<!-- //card-header wihy-actions end -->
 		<div class="card-body">
-			<div id="dormancygrid" style="margin: 20px;"></div>
+			<div id="dormancygrid" style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 		</div>
 	</div>
-	<script>
-		
+	
+	<script th:inline="javascript">
 		// 휴먼/이탈고객 데이터
 		tui.Grid.applyTheme('default', {
 			cell : {
@@ -112,23 +118,9 @@
 				}
 			}
 		});
-		const dormancygridData = [ {
-			custName: "코드예담",
-			dormancyBreakaway: "이탈",
-			INACTIVE_PERIOD_DAYS: "11개월",
-			NON_RENEWAL_PERIOD_DAYS: "6개월",
-			REVENUE_CHG: "-73%",
-			AVG_PURCHASE_CYCLE_DAYS: "2개월",
-			CHURN_RISK_SCORE: "73"
-		}, {
-			custName : "예담건설",
-			dormancyBreakaway: "휴면",
-			INACTIVE_PERIOD_DAYS: "14개월",
-			NON_RENEWAL_PERIOD_DAYS: "8개월",
-			REVENUE_CHG: "-64%",
-			AVG_PURCHASE_CYCLE_DAYS: "3개월",
-			CHURN_RISK_SCORE: "57"
-		} ];
+		const dormancygridData = /*[[${getchurnRiskList}]]*/ [];
+		console.log('dormancygridData', dormancygridData);
+
 		// Grid 생성
 		const dormancygrid = new tui.Grid({
 			el : document.getElementById('dormancygrid'),
@@ -141,29 +133,33 @@
 				header : '업체명',
 				name : 'custName',
 				sortable : 'true'
-			},{
+			}, {
 				header : '휴면/이탈',
 				name : 'dormancyBreakaway',
 				sortable : 'true'
 			}, {
 				header : '거래중단기간',
-				name : 'INACTIVE_PERIOD_DAYS',
+				name : 'purcStopDt',
+				  formatter: ({ value }) => {
+		                const d = new Date(value);
+		                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
+		            },
 				editor : 'text'
 			}, {
 				header : '미갱신기간',
 				name : 'NON_RENEWAL_PERIOD_DAYS',
 				align : 'center'
-			},{
+			}, {
 				header : '매출변동',
-				name : 'REVENUE_CHG',
+				name : 'salesChange',
 				align : 'center'
-			},{
+			}, {
 				header : '평균구매주기',
-				name : 'AVG_PURCHASE_CYCLE_DAYS',
+				name : 'avgPurcCycle',
 				align : 'center'
 			}, {
 				header : '이탈위험점수',
-				name : 'CHURN_RISK_SCORE',
+				name : 'churnRiskScore',
 				align : 'center'
 			} ]
 		});

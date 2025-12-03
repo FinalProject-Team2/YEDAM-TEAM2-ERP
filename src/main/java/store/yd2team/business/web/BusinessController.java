@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.PotentialStdrVO;
+import store.yd2team.business.service.churnRiskVO;
 
 @Controller
 public class BusinessController {
@@ -42,11 +43,19 @@ public class BusinessController {
 		model.addAttribute("test", "testone");
 		return "business/churnRiskStdrRegister"; // /는 빼도 됨
 	}
-
+	//
+	//
+	//휴면,이탈 조회페이지열람 
 	@GetMapping("/churnRiskList")
-	public String selectall(Model model) {
-		System.out.println("=== BusinessController.selectall() 호출됨 ===");
-		model.addAttribute("test", "testone");
+	public String churnRiskListForm(Model model) {
+	    return "business/churnRiskList";
+	}
+	//
+	@PostMapping("/churnRiskList")
+	public String selectall(churnRiskVO vo, Model model) {
+		System.out.println("=== churnRiskList.selectall() 호출됨 ===");
+		List<churnRiskVO> getchurnRiskList = businessService.getchurnRiskList(vo);
+		model.addAttribute("getchurnRiskList", getchurnRiskList);
 		return "business/churnRiskList";
 	}
 	//

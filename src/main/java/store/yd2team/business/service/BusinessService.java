@@ -25,5 +25,9 @@ public interface BusinessService {
     
     //로그인한 거래처의 주소, 업체명 조회
     public List<BusinessVO> getcustaddrtype(String info);
+    //
+    //
+    //휴면,이탈고객 검색조회
+    List<churnRiskVO> getchurnRiskList(churnRiskVO vo);
 
 }
