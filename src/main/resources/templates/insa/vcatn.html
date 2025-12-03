@@ -26,9 +26,9 @@
 				<div class="card-header">
 					<div class="card-header-left">
 						<h5 class="card-title"
-							th:text="${Session != null and Session.loginId == 'mas' ? '조회-(관리자용)' : '조회-(사원용)'}">
+							th:text="${Session != null and Session.masYn == 'e1' ? '조회-(관리자용)' : '조회-(사원용)'}">
 						</h5>
-						
+
 					</div>
 					<div class="card-header-right">
 						<button type="button" class="btn btn-dark">초기화</button>
@@ -84,9 +84,8 @@
 							</select>
 						</div>
 						<input id="confmerId"
-							th:value="${Session != null and Session.loginId == 'mas' ? Session.loginId : ''}"
-							class="joHoeGrp"
-							style="display: none;">
+							th:value="${Session != null and Session.masYn == 'e1' ? Session.empId : null}"
+							class="joHoeGrp" style="display: none;">
 					</div>
 
 
@@ -103,9 +102,12 @@
 				<div class="card-header">
 					<div class="card-header-left">
 						<h5 class="card-title"
-							th:text="${Session != null and Session.loginId == 'mas' 
-              ? '사원 휴가 신청 내역' 
-              : '나의 휴가 신청 내역 - 홍길동 (D001/개발팀)'}">
+							th:if="${Session != null and Session.masYn == 'e1'}">사원 휴가
+							신청 내역</h5>
+						<h5 class="card-title"
+							th:unless="${Session != null and Session.masYn == 'e1'}">나의
+							휴가 신청 내역 -
+							[[${Session.empNm}]]([[${Session.deptId}]]/[[${Session.deptNm}]])
 						</h5>
 					</div>
 				</div>
@@ -127,7 +129,7 @@
 					<div class="card-header-right">
 						<button id="regist" class="btn btn-outline-dark ">등록</button>
 						<button class="btn btn-outline-dark"
-							th:if="${Session.loginId != 'mas'}">삭제</button>
+							th:if="${Session.masYn != 'e1'}">삭제</button>
 					</div>
 				</div>
 				<div class="card-body">
@@ -137,22 +139,20 @@
 							<div class="row mb-2">
 								<div class="col-md-2">
 									<label class="form-label">이름</label> <input type="text"
-									    th:value="${Session.empNm}"
-										id="v_nm" class="form-control" /> <input id="v_salyPymntSt"
-										style="display: none;">
+										th:value="${Session.empNm}" id="v_nm" class="form-control" />
+									<input id="v_salyPymntSt" style="display: none;">
 								</div>
 								<div class="col-md-2">
 									<label class="form-label">사번</label> <input type="text"
-									    th:value="${Session.empId}" 
-										id="v_empId" class="form-control readonly-input"
-										readonly="readonly" />
+										th:value="${Session.empId}" id="v_empId"
+										class="form-control readonly-input" readonly="readonly" />
 								</div>
 								<div class="col-md-3">
 									<label class="form-label">휴가유형</label> <select id="v_vcatnTy"
 										class="form-select">
-										<option>연차</option>
-										<option>병가</option>
-										<option>특별휴가</option>
+										<option value="h1">연차</option>
+										<option value="h2">병가</option>
+										<option value="h3">특별휴가</option>
 									</select>
 								</div>
 								<div class="col-md-5">
@@ -236,7 +236,7 @@
 									<option value="g1">신청</option>
 									<option value="g2">승인</option>
 									<option value="g3">반려</option>
-								</select>
+								</select>								
 							</div>
 
 							<!-- 출력 영역 -->
@@ -266,46 +266,51 @@
 	<div th:replace="insa/modal/default :: registModal"></div>
 	<script th:inline="javascript">
 		const modal = document.getElementById("registModal");
+		window.today = new Date();
 
+		// 공통 함수 정의
+		function handleStatusChange(value) {
+		  const today = new Date();
+		  const $extraArea = $("#extraArea");
+		  const $approveArea = $("#approveArea");
+		  const $rejectArea = $("#rejectArea");
+
+		  // 초기화
+		  $extraArea.hide();
+		  $approveArea.hide();
+		  $rejectArea.hide();
+
+		  if (value === "g2") {
+		    $extraArea.show();
+		    $approveArea.show();
+		    $("#v_updtDt").val(dateFormat(today, 'yyyy-MM-dd'));
+		  } else if (value === "g3") {
+		    $extraArea.show();
+		    $rejectArea.show();
+		    $("#v_updtDt").val(dateFormat(today, 'yyyy-MM-dd'));
+		  } else {
+		    $("#v_updtDt").val('');
+		  }
+		}
+
+		
 		$(document).ready(function() {
-			const $selectBox = $("#v_st");
-			const $extraArea = $("#extraArea");
-			const $approveArea = $("#approveArea");
-			const $rejectArea = $("#rejectArea");
+			const $selectBox = $("#v_st");			
 			
 			const $vcatnTy = $("#v_vcatnTy");   // 휴가유형 select
 		    const $salyPymntSt = $("#v_salyPymntSt"); // hidden input
 		    const $confmerId = $("#confmerId"); // confmerId hidden input
 		    const $joHoeBtn = $("#joHoe"); // 조회버튼
-		    const $registBtn = $("#regist"); // 저장버튼
+		    const $registBtn = $("#regist"); // 저장버튼	 d   
 		    
-		    const today = new Date();
-		    $("#v_creaDt").val( dateFormat(today,'yyyy-MM-dd') );
-		    
+		    $("#v_creaDt").val( dateFormat(today,'yyyy-MM-dd') );		    
 
 			$selectBox.on("change", function() {
-				if( !$confmerId.val() ){
+				if( !$confmerId.val() ){					
 		    		alert("관리자만 설정할 수 있습니다.");
-		    		return $selectBox.val("g1");
+		    		return $selectBox.val( localStorage.getItem("tempSelectValue") );
 		    	}		    	
-				const value = $(this).val();
-
-				// 초기화
-				$extraArea.hide();
-				$approveArea.hide();
-				$rejectArea.hide();
-
-				if (value === "g2") {
-					$extraArea.show();
-					$approveArea.show();
-					$("#v_updtDt").val( dateFormat(today,'yyyy-MM-dd') );
-				} else if (value === "g3") {
-					$extraArea.show();
-					$rejectArea.show();
-					$("#v_updtDt").val( dateFormat(today,'yyyy-MM-dd') );
-				} else{
-					$("#v_updtDt").val( '' );
-				}
+				handleStatusChange($(this).val());
 				// "신청"일 때는 아무것도 출력하지 않음
 			});
 			
@@ -341,7 +346,7 @@
 		    		})
 		    		.done((result) => {
 		    		    console.log(result);
-		    		    //grid.resetData(result);          // 결과를 grid에 반영
+		    		    grid.resetData(result);          // 결과를 grid에 반영
 		    		})
 		    		.fail((error) => {
 		    		    console.error(error);
@@ -376,16 +381,31 @@
 			columns : [ {
 				header : '신청일',
 				name : 'creaDt',
-				sortable : 'true'
+				sortable : 'true',
+				formatter: function({ value }) {
+	                return value ? dateFormat(value, 'yyyy-MM-dd') : '';
+	            }
 			}, {
 				header : '휴가유형',
-				name : 'vcatnTy'
+				name : 'vcatnTy',
+				formatter: function({ value }) {
+			        if (value === 'h1') return '연가';
+			        if (value === 'h2') return '병가';
+			        if (value === 'h3') return '특별휴가';
+			        return value; // 그 외 값은 그대로 출력
+			      }
 			}, {
 				header : '시작일',
-				name : 'vcatnBegin'
+				name : 'vcatnBegin',
+				formatter: function({ value }) {
+	                return value ? dateFormat(value, 'yyyy-MM-dd') : '';
+	            }
 			}, {
 				header : '종료일',
-				name : 'vcatnEnd'
+				name : 'vcatnEnd',
+				formatter: function({ value }) {
+	                return value ? dateFormat(value, 'yyyy-MM-dd') : '';
+	            }
 			}, {
 				header : '상태',
 				name : 'st',
@@ -406,14 +426,19 @@
 	</script>
 	<script type="module">
 import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
+const today = new Date();
 
 //그리드 행 클릭 시 상세정보 입력
 grid.on('click', function(ev) {
     const rowData = grid.getRow(ev.rowKey);
     if (!rowData) return;
 
-    bindGridToForm(rowData);    
-    
+    bindGridToForm(rowData);	
+    localStorage.setItem("tempSelectValue", rowData.st);
+
+	// 공통 로직 호출
+    handleStatusChange(rowData.st);	
+
     const dto = formToJson();  
     console.log(dto);
 });

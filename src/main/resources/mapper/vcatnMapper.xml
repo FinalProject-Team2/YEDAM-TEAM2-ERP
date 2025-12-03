@@ -3,11 +3,17 @@
 <mapper namespace="store.yd2team.insa.mapper.VcatnMapper">
 
 <select id="getListVcatnJohoe">
- SELECT  *
-FROM    tb_dept
-WHERE   (vend_id IS NULL OR vend_id = #{vendId})
+ select 
+ a.*
+ ,b.nm "cfm_nm"
+ ,c.nm
+from tb_vcatn a
+left join tb_emp b
+on a.confmer_id = b.emp_id
+left join tb_emp c
+on a.emp_id = c.emp_id
 <where>
-<if test="clsf != null">  AND a.clsf like '%' || #{clsf} || '%'</if>
+<if test="confmerId == null">  AND a.emp_id = #{empId}</if>
 </where>
 </select>
 
