@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class HldyVO {
 
     /** 휴일번호 (PK, NUMBER(10)) */
-    private Long hldyNo;
+    private Integer hldyNo;
 
     /** 휴일명 */
     private String hldyNm;

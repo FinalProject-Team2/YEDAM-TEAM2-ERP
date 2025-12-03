@@ -674,13 +674,15 @@ function closeModal() {
   modal.style.display = "none";
   back.style.display = "none";
 }
-        if (modal) {
-            modal.addEventListener("click", (event) => {
-                if (!event.target.closest(".modal-content")) {
-                    closeModal();
-                }
-            });
+
+
+if (typeof modal !== "undefined") {
+    modal.addEventListener("click", (event) => {
+        if (!event.target.closest(".modal-content")) {
+            closeModal();
         }
+    });
+}
         
         
 /*

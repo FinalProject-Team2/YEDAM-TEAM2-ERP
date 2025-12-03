@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="store.yd2team.insa.mapper.WkTyMapper">
+
+  <!-- =========================
+       공휴일(HldyVO) 관련
+       ========================= -->
+
+  <!-- 법정 공휴일 목록 (vend_id IS NULL) -->
+  <select id="selectLegalHlDyList"
+          resultType="store.yd2team.insa.service.HldyVO">
+    SELECT
+      h.hldy_no          AS hldyNo,
+      h.hldy_nm          AS hldyNm,
+      TO_CHAR(h.hldy_mmdd, 'MM-DD') AS hldyMmdd,
+      h.yn               AS ynCode,
+      c.code_nm          AS ynNm,
+      h.vend_id          AS vendId,
+      h.crea_dt          AS creaDt,
+      h.crea_by          AS creaBy,
+      h.updt_dt          AS updtDt,
+      h.updt_by          AS updtBy
+    FROM tb_hldy_basi h
+    LEFT JOIN tb_code c
+      ON h.yn = c.code_id
+     AND c.grp_id = 'e'
+    WHERE h.vend_id IS NULL
+    ORDER BY h.hldy_mmdd, h.hldy_no
+  </select>
+
+  <!-- 회사 지정 공휴일 목록 -->
+  <select id="selectCompanyHlDyList"
+          parameterType="string"
+          resultType="store.yd2team.insa.service.HldyVO">
+    SELECT
+      h.hldy_no          AS hldyNo,
+      h.hldy_nm          AS hldyNm,
+      TO_CHAR(h.hldy_mmdd, 'MM-DD') AS hldyMmdd,
+      h.yn               AS ynCode,
+      c.code_nm          AS ynNm,
+      h.vend_id          AS vendId,
+      h.crea_dt          AS creaDt,
+      h.crea_by          AS creaBy,
+      h.updt_dt          AS updtDt,
+      h.updt_by          AS updtBy
+    FROM tb_hldy_basi h
+    LEFT JOIN tb_code c
+      ON h.yn = c.code_id
+     AND c.grp_id = 'e'
+    WHERE h.vend_id = #{vendId}
+    ORDER BY h.hldy_mmdd, h.hldy_no
+  </select>
+
+  <!-- 회사 지정 공휴일 등록 -->
+  <insert id="insertHlDy"
+          parameterType="store.yd2team.insa.service.HldyVO">
+    INSERT INTO tb_hldy_basi (
+      hldy_no,
+      hldy_nm,
+      hldy_mmdd,
+      yn,
+      vend_id,
+      crea_dt,
+      crea_by
+    )
+    VALUES (
+      seq_tb_hldy_basi_no.NEXTVAL,
+      #{hldyNm},
+      TO_DATE(#{hldyMmdd}, 'MM-DD'),
+      #{ynCode},
+      #{vendId},
+      SYSDATE,
+      #{creaBy}
+    )
+  </insert>
+
+  <!-- 회사 지정 공휴일 수정 -->
+  <update id="updateHlDy"
+          parameterType="store.yd2team.insa.service.HldyVO">
+    UPDATE tb_hldy_basi
+       SET hldy_nm   = #{hldyNm},
+           hldy_mmdd = TO_DATE(#{hldyMmdd}, 'MM-DD'),
+           yn        = #{ynCode},
+           updt_dt   = SYSDATE,
+           updt_by   = #{updtBy}
+     WHERE hldy_no   = #{hldyNo}
+       AND vend_id   = #{vendId}
+  </update>
+
+  <!-- 회사 지정 공휴일 삭제 -->
+  <delete id="deleteHlDy" parameterType="int">
+    DELETE FROM tb_hldy_basi
+     WHERE hldy_no = #{hldyNo}
+  </delete>
+
+  <!-- ===================================================== -->
+  <!-- =========== 휴일 근무시간 기준 / 요일 =============== -->
+  <!-- ===================================================== -->
+
+  <!-- 기준 목록 -->
+  <select id="selectHldyWkBasiList"
+          parameterType="store.yd2team.insa.service.HldyWkBasiVO"
+          resultType="store.yd2team.insa.service.HldyWkBasiVO">
+    SELECT
+           b.basi_no      AS basiNo
+         , b.dept_id      AS deptId
+         , b.basi_nm      AS basiNm
+         , b.vend_id      AS vendId
+         , b.atdc_tm      AS atdcTm
+         , b.afwk_tm      AS afwkTm
+         , b.hldy_ty      AS hldyTy
+         , b.wk_de        AS wkDe
+         , b.hldy_de      AS hldyDe
+         , b.crea_dt      AS creaDt
+         , b.crea_by      AS creaBy
+         , b.updt_dt      AS updtDt
+         , b.updt_by      AS updtBy
+         , d.dept_nm      AS deptNm
+         , c.code_nm      AS hldyTyNm
+    FROM   tb_hldy_wk_basi b
+           LEFT JOIN tb_dept d
+             ON b.dept_id = d.dept_id
+           LEFT JOIN tb_code c
+             ON b.hldy_ty = c.code_id
+            AND c.grp_id  = 'HLDY_TY'  
+    WHERE  b.vend_id = #{vendId}
+    <if test="deptId != null and deptId != ''">
+      AND b.dept_id = #{deptId}
+    </if>
+    <if test="basiNm != null and basiNm != ''">
+      AND b.basi_nm LIKE '%' || #{basiNm} || '%'
+    </if>
+    ORDER BY b.basi_no
+  </select>
+
+  <!-- 기준 단건 -->
+  <select id="selectHldyWkBasiByNo"
+          resultType="store.yd2team.insa.service.HldyWkBasiVO">
+    SELECT
+           b.basi_no      AS basiNo
+         , b.dept_id      AS deptId
+         , b.basi_nm      AS basiNm
+         , b.vend_id      AS vendId
+         , b.atdc_tm      AS atdcTm
+         , b.afwk_tm      AS afwkTm
+         , b.hldy_ty      AS hldyTy
+         , b.wk_de        AS wkDe
+         , b.hldy_de      AS hldyDe
+         , b.crea_dt      AS creaDt
+         , b.crea_by      AS creaBy
+         , b.updt_dt      AS updtDt
+         , b.updt_by      AS updtBy
+    FROM   tb_hldy_wk_basi b
+    WHERE  b.basi_no = #{basiNo}
+      AND  b.vend_id = #{vendId}
+  </select>
+
+  <!-- 기준 등록 (selectKey로 basiNo 세팅) -->
+  <insert id="insertHldyWkBasi"
+          parameterType="store.yd2team.insa.service.HldyWkBasiVO">
+    <selectKey keyProperty="basiNo"
+               resultType="long"
+               order="BEFORE">
+      SELECT seq_tb_hldy_wk_basi.NEXTVAL FROM dual
+    </selectKey>
+
+    INSERT INTO tb_hldy_wk_basi (
+          basi_no
+        , dept_id
+        , basi_nm
+        , vend_id
+        , atdc_tm
+        , afwk_tm
+        , hldy_ty
+        , wk_de
+        , hldy_de
+        , crea_dt
+        , crea_by
+    ) VALUES (
+          #{basiNo}
+        , #{deptId}
+        , #{basiNm}
+        , #{vendId}
+        , #{atdcTm}
+        , #{afwkTm}
+        , #{hldyTy}
+        , #{wkDe}
+        , #{hldyDe}
+        , SYSDATE
+        , #{creaBy}
+    )
+  </insert>
+
+  <!-- 기준 수정 -->
+  <update id="updateHldyWkBasi"
+          parameterType="store.yd2team.insa.service.HldyWkBasiVO">
+    UPDATE tb_hldy_wk_basi
+       SET dept_id = #{deptId}
+         , basi_nm = #{basiNm}
+         , atdc_tm = #{atdcTm}
+         , afwk_tm = #{afwkTm}
+         , hldy_ty = #{hldyTy}
+         , wk_de   = #{wkDe}
+         , hldy_de = #{hldyDe}
+         , updt_dt = SYSDATE
+         , updt_by = #{updtBy}
+     WHERE basi_no = #{basiNo}
+       AND vend_id = #{vendId}
+  </update>
+
+  <!-- 기준 삭제 -->
+  <delete id="deleteHldyWkBasi">
+    DELETE FROM tb_hldy_wk_basi
+     WHERE basi_no = #{basiNo}
+       AND vend_id = #{vendId}
+  </delete>
+
+  <!-- 기준별 요일 목록 -->
+  <select id="selectDayListByBasiNo"
+          resultType="store.yd2team.insa.service.DayVO">
+    SELECT
+           d.day_no  AS dayNo
+         , d.basi_no AS basiNo
+         , d.day_nm  AS dayNm
+         , d.crea_dt AS creaDt
+         , d.crea_by AS creaBy
+         , d.updt_dt AS updtDt
+         , d.updt_by AS updtBy
+    FROM   tb_day d
+           JOIN tb_hldy_wk_basi b
+             ON d.basi_no = b.basi_no
+    WHERE  d.basi_no = #{basiNo}
+      AND  b.vend_id = #{vendId}
+    ORDER BY d.day_no
+  </select>
+
+  <!-- 요일 등록 -->
+  <insert id="insertDay"
+          parameterType="store.yd2team.insa.service.DayVO">
+    <selectKey keyProperty="dayNo"
+               resultType="long"
+               order="BEFORE">
+      SELECT seq_tb_day.NEXTVAL FROM dual
+    </selectKey>
+
+    INSERT INTO tb_day (
+          day_no
+        , basi_no
+        , day_nm
+        , crea_dt
+        , crea_by
+    ) VALUES (
+          #{dayNo}
+        , #{basiNo}
+        , #{dayNm}
+        , SYSDATE
+        , #{creaBy}
+    )
+  </insert>
+
+  <!-- 요일 단건 삭제 -->
+  <delete id="deleteDay">
+    DELETE FROM tb_day
+     WHERE day_no = #{dayNo}
+       AND basi_no IN (
+           SELECT b.basi_no
+             FROM tb_hldy_wk_basi b
+            WHERE b.vend_id = #{vendId}
+       )
+  </delete>
+
+  <!-- 기준 삭제 시 요일 전체 삭제 -->
+  <delete id="deleteDayByBasiNo">
+    DELETE FROM tb_day
+     WHERE basi_no = #{basiNo}
+       AND basi_no IN (
+           SELECT b.basi_no
+             FROM tb_hldy_wk_basi b
+            WHERE b.vend_id = #{vendId}
+       )
+  </delete>
+
+</mapper>

@@ -8,61 +8,142 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import store.yd2team.common.util.LoginSession;
 import store.yd2team.insa.mapper.WkTyMapper;
+import store.yd2team.insa.service.DayVO;
 import store.yd2team.insa.service.HldyVO;
+import store.yd2team.insa.service.HldyWkBasiVO;
 import store.yd2team.insa.service.WkTyService;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class WkTyServiceImpl implements WkTyService {
 
     private final WkTyMapper wkTyMapper;
 
-    /** 휴일 기준 전체 조회 */
+    // ======================= 휴일 =======================
+
     @Override
-    public List<HldyVO> getHlDyList() {
-        return wkTyMapper.selectHlDyList();
+    public List<HldyVO> selectLegalHlDyList() {
+        return wkTyMapper.selectLegalHlDyList();
     }
 
-    /** 휴일 단건 등록 */
     @Override
-    @Transactional
-    public int insertHlDy(HldyVO vo) {
-
-        // 🔹 세션에서 공통값 가져오기
-        String empId  = LoginSession.getEmpId();   // 작성자
-        String vendId = LoginSession.getVendId();  // 회사코드
-
-        // 🔹 NOT NULL 컬럼 강제 세팅
-        vo.setCreaBy(empId);    // CREA_BY
-        vo.setVendId(vendId);   // VEND_ID
-
-        // 🔹 사용여부 코드 기본값 (널/공백이면 e1 = 사용)
-        if (vo.getYnCode() == null || vo.getYnCode().isBlank()) {
-            vo.setYnCode("e1");
-        }
-
-        return wkTyMapper.insertHlDy(vo);
+    public List<HldyVO> selectCompanyHlDyList(String vendId) {
+        return wkTyMapper.selectCompanyHlDyList(vendId);
     }
 
-    /** 휴일 단건 수정 */
     @Override
-    @Transactional
-    public int updateHlDy(HldyVO vo) {
+    public void insertHlDy(HldyVO vo) {
+        wkTyMapper.insertHlDy(vo);
+    }
 
-        String empId = LoginSession.getEmpId();  // 수정자
+    @Override
+    public void updateHlDy(HldyVO vo) {
+        wkTyMapper.updateHlDy(vo);
+    }
+
+    @Override
+    public void deleteHlDy(Integer hldyNo) {
+        wkTyMapper.deleteHlDy(hldyNo);
+    }
+
+    // =================== 휴일 근무시간 기준 ===================
+
+    @Override
+    public List<HldyWkBasiVO> getHldyWkBasiList(HldyWkBasiVO searchVO) {
+        String vendId = LoginSession.getVendId();
+        searchVO.setVendId(vendId);
+        return wkTyMapper.selectHldyWkBasiList(searchVO);
+    }
+
+    @Override
+    public HldyWkBasiVO getHldyWkBasi(Long basiNo) {
+        String vendId = LoginSession.getVendId();
+        return wkTyMapper.selectHldyWkBasiByNo(basiNo, vendId);
+    }
+
+    @Override
+    public int insertHldyWkBasi(HldyWkBasiVO vo) {
+        String empId  = LoginSession.getEmpId();
+        String vendId = LoginSession.getVendId();
+        vo.setCreaBy(empId);
+        vo.setVendId(vendId);
+        return wkTyMapper.insertHldyWkBasi(vo);
+    }
+
+    @Override
+    public int updateHldyWkBasi(HldyWkBasiVO vo) {
+        String empId  = LoginSession.getEmpId();
+        String vendId = LoginSession.getVendId();
         vo.setUpdtBy(empId);
-
-        if (vo.getYnCode() == null || vo.getYnCode().isBlank()) {
-            vo.setYnCode("e1");
-        }
-
-        return wkTyMapper.updateHlDy(vo);
+        vo.setVendId(vendId);
+        return wkTyMapper.updateHldyWkBasi(vo);
     }
 
-    /** 휴일 단건 삭제 */
     @Override
-    @Transactional
-    public int deleteHlDy(Long hldyNo) {
-        return wkTyMapper.deleteHlDy(hldyNo);
+    public int deleteHldyWkBasi(Long basiNo) {
+        String vendId = LoginSession.getVendId();
+        // 자식 요일 먼저 삭제
+        wkTyMapper.deleteDayByBasiNo(basiNo, vendId);
+        // 기준 삭제
+        return wkTyMapper.deleteHldyWkBasi(basiNo, vendId);
+    }
+
+    @Override
+    public Long saveHldyWkBasi(HldyWkBasiVO vo, List<String> dayList) {
+
+        String empId  = LoginSession.getEmpId();
+        String vendId = LoginSession.getVendId();
+
+        vo.setVendId(vendId);
+
+        if (vo.getBasiNo() == null) {
+            // INSERT
+            vo.setCreaBy(empId);
+            wkTyMapper.insertHldyWkBasi(vo);   // selectKey로 basiNo 세팅
+        } else {
+            // UPDATE
+            vo.setUpdtBy(empId);
+            wkTyMapper.updateHldyWkBasi(vo);
+            // 기존 요일 전체 삭제
+            wkTyMapper.deleteDayByBasiNo(vo.getBasiNo(), vendId);
+        }
+
+        // 요일제면 요일 다시 insert
+        if ("DAY".equals(vo.getHldyTy()) && dayList != null) {
+            for (String dayNm : dayList) {
+                DayVO d = new DayVO();
+                d.setBasiNo(vo.getBasiNo());
+                d.setDayNm(dayNm);
+                d.setCreaBy(empId);
+                wkTyMapper.insertDay(d);
+            }
+        } else {
+            // 주기제면 혹시 남아있을 요일 삭제
+            wkTyMapper.deleteDayByBasiNo(vo.getBasiNo(), vendId);
+        }
+
+        return vo.getBasiNo();
+    }
+
+    // ======================== 요일 ========================
+
+    @Override
+    public List<DayVO> getDayListByBasiNo(Long basiNo) {
+        String vendId = LoginSession.getVendId();
+        return wkTyMapper.selectDayListByBasiNo(basiNo, vendId);
+    }
+
+    @Override
+    public int insertDay(DayVO vo) {
+        String empId = LoginSession.getEmpId();
+        vo.setCreaBy(empId);
+        return wkTyMapper.insertDay(vo);
+    }
+
+    @Override
+    public int deleteDay(Long dayNo) {
+        String vendId = LoginSession.getVendId();
+        return wkTyMapper.deleteDay(dayNo, vendId);
     }
 }
