@@ -29,5 +29,7 @@ public interface BusinessService {
     //
     //휴면,이탈고객 검색조회
     List<churnRiskVO> getchurnRiskList(churnRiskVO vo);
+    //휴면,이탈 평균구매주기
+    int getAVG();
 
 }

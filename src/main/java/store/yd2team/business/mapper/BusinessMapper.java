@@ -1,6 +1,7 @@
 package store.yd2team.business.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
@@ -40,10 +41,11 @@ public interface BusinessMapper {
     //
     //휴면,이탈고객 검색조회
     List<churnRiskVO> getchurnRiskList(churnRiskVO vo);
-    
-	//등록
-	
-	//수정
+    //
+	//휴면, 이탈고객 평균
+    int getAVG();
+    //휴면, 이탈 매출변동
+    List<Map<String, Object>> getSalesChange();
 	
 	//단건조회
 }
