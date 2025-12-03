@@ -14,7 +14,83 @@ left join tb_emp c
 on a.emp_id = c.emp_id
 <where>
 <if test="confmerId == null">  AND a.emp_id = #{empId}</if>
+<if test="vcatnBegin != null">  AND a.vcatn_begin >= #{vcatnBegin}</if>
+<if test="vcatnEnd != null">  <![CDATA[ AND a.vcatn_end <= #{vcatnEnd} ]]> </if>
+<if test="vcatnTy != null and vcatnTy != ''">  AND a.vcatn_ty = #{vcatnTy}</if>
+<if test="st != null and st != ''">  AND a.st = #{st}</if>
 </where>
 </select>
+
+<select id="yrycUserRemndrChk">
+select remndr_yryc
+from tb_yryc
+where emp_id = #{empId}
+and vcatn_year = (
+        SELECT MAX(vcatn_year)
+        FROM tb_yryc
+        WHERE emp_id = #{empId}
+    )
+</select>
+
+<insert id="vcatnCreateData">
+<selectKey keyProperty="vcatnId" resultType="String" order="BEFORE">
+SELECT 'vcatn' || TO_CHAR(SYSDATE, 'YYMM') ||
+       LPAD(NVL(MAX(SUBSTR(vcatn_id, LENGTH(vcatn_id)-2, 3)), 0) + 1, 3, '0') AS vcatn_id
+FROM tb_vcatn
+WHERE SUBSTR(vcatn_id, 6, 4) = TO_CHAR(SYSDATE, 'YYMM')
+</selectKey>
+insert into tb_vcatn(
+ vcatn_id
+ ,emp_id
+ ,vcatn_ty
+ ,saly_pymnt_st
+ ,vcatn_begin
+ ,vcatn_end
+ ,vcatn_resn
+ ,st
+ ,vcatn_de
+ ,crea_by
+)VALUES(
+ #{vcatnId}
+ ,#{empId}
+ ,#{vcatnTy}
+ ,#{salyPymntSt}
+ ,#{vcatnBegin}
+ ,#{vcatnEnd}
+ ,#{vcatnResn}
+ ,'g1'
+ ,#{vcatnDe}
+ ,'myk'
+)
+</insert>
+
+<update id="vcatnUpdateYrycData">
+UPDATE tb_yryc
+SET use_yryc   = use_yryc + #{vcatnDe},
+    remndr_yryc = remndr_yryc - #{vcatnDe}
+WHERE emp_id = #{empId}
+  AND vcatn_year = (
+        SELECT MAX(vcatn_year)
+        FROM tb_yryc
+        WHERE emp_id = #{empId}
+    )
+    AND remndr_yryc >= #{vcatnDe}
+</update>
+
+<delete id="vcateDel">
+delete from tb_vcate where vcatn_id = #{vcatnId}
+</delete>
+
+<update id="yrycRollback">
+UPDATE tb_yryc
+SET use_yryc   = use_yryc - #{vcatnDe},
+    remndr_yryc = remndr_yryc + #{vcatnDe}
+WHERE emp_id = #{empId}
+  AND vcatn_year = (
+        SELECT MAX(vcatn_year)
+        FROM tb_yryc
+        WHERE emp_id = #{empId}
+    )
+</update>
 
 </mapper>

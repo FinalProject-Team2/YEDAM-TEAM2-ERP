@@ -128,7 +128,7 @@
 					</div>
 					<div class="card-header-right">
 						<button id="regist" class="btn btn-outline-dark ">등록</button>
-						<button class="btn btn-outline-dark"
+						<button id="dleVcatn" class="btn btn-outline-dark"
 							th:if="${Session.masYn != 'e1'}">삭제</button>
 					</div>
 				</div>
@@ -139,8 +139,11 @@
 							<div class="row mb-2">
 								<div class="col-md-2">
 									<label class="form-label">이름</label> <input type="text"
-										th:value="${Session.empNm}" id="v_nm" class="form-control" />
-									<input id="v_salyPymntSt" style="display: none;">
+										th:value="${Session.empNm}" id="v_nm"
+										class="form-control readonly-input" readonly="readonly" /> <input
+										id="v_salyPymntSt" style="display: none;">
+										<input id="v_vcatnId" style="display: none;">
+										<input id="v_vcatnDe" style="display: none;">
 								</div>
 								<div class="col-md-2">
 									<label class="form-label">사번</label> <input type="text"
@@ -149,7 +152,8 @@
 								</div>
 								<div class="col-md-3">
 									<label class="form-label">휴가유형</label> <select id="v_vcatnTy"
-										class="form-select">
+										class="form-select"
+										th:attr="disabled=${Session.masYn == 'e1'} ? 'disabled' : null">
 										<option value="h1">연차</option>
 										<option value="h2">병가</option>
 										<option value="h3">특별휴가</option>
@@ -157,7 +161,8 @@
 								</div>
 								<div class="col-md-5">
 									<label class="form-label">사유</label> <input type="text"
-										id="v_vcatnResn" class="form-control" />
+										id="v_vcatnResn" class="form-control"
+										th:attr="disabled=${Session.masYn == 'e1'} ? 'disabled' : null" />
 								</div>
 							</div>
 							<div class="row mb-2">
@@ -167,6 +172,7 @@
 									<div class="input-group date js-date-single">
 										<input type="text" id="v_creaDt"
 											class="form-control datepicker js-date-input"
+											th:attr="disabled=${Session.masYn == 'e1'} ? 'disabled' : null"
 											placeholder="날짜 선택"> <span
 											class="input-group-text js-date-icon"> <i
 											class="bi bi-calendar"></i>
@@ -181,6 +187,7 @@
 										<div class="input-group date">
 											<input type="text"
 												class="form-control datepicker js-date-range-start"
+												th:attr="disabled=${Session.masYn == 'e1'} ? 'disabled' : null"
 												placeholder="시작일" id="v_vcatnBegin"> <span
 												class="input-group-text js-date-range-icon-start"> <i
 												class="bi bi-calendar"></i>
@@ -193,6 +200,7 @@
 										<div class="input-group date ms-2">
 											<input type="text"
 												class="form-control datepicker js-date-range-end"
+												th:attr="disabled=${Session.masYn == 'e1'} ? 'disabled' : null"
 												placeholder="종료일" id="v_vcatnEnd"> <span
 												class="input-group-text js-date-range-icon-end"> <i
 												class="bi bi-calendar"></i>
@@ -226,7 +234,7 @@
 									class="form-control" />
 							</div>
 							<div class="col-md-6">
-								<label>승인자</label> <input id="v_cfmNm" type="text"
+								<label>승인자</label> <input id="v_cfmNm" type="text"									
 									class="form-control" />
 							</div>
 						</div>
@@ -236,7 +244,7 @@
 									<option value="g1">신청</option>
 									<option value="g2">승인</option>
 									<option value="g3">반려</option>
-								</select>								
+								</select>
 							</div>
 
 							<!-- 출력 영역 -->
@@ -299,9 +307,11 @@
 			
 			const $vcatnTy = $("#v_vcatnTy");   // 휴가유형 select
 		    const $salyPymntSt = $("#v_salyPymntSt"); // hidden input
-		    const $confmerId = $("#confmerId"); // confmerId hidden input
+		    const $confmerId = $("#confmerId"); // confmerId hidden input		    
+		    const $cfmNm = $("#v_cfmNm"); // cfmNm 승인자이름		    
 		    const $joHoeBtn = $("#joHoe"); // 조회버튼
 		    const $registBtn = $("#regist"); // 저장버튼	 d   
+		    const $dleVcatnBtn = $("#dleVcatn"); // 삭제버튼	 d   
 		    
 		    $("#v_creaDt").val( dateFormat(today,'yyyy-MM-dd') );		    
 
@@ -312,15 +322,17 @@
 		    	}		    	
 				handleStatusChange($(this).val());
 				// "신청"일 때는 아무것도 출력하지 않음
+				$cfmNm.val([[${Session.empId}]]);
 			});
 			
 			// 휴가유형 선택 이벤트
 		    $vcatnTy.on("change", function() {		    	
 		      const value = $(this).val();
+		      console.log("선택됨"+value);
 
-		      if (value === "연차" || value === "특별휴가") {
+		      if (value == "h1" || value == "h3") {
 		        $salyPymntSt.val("유급");
-		      } else if (value === "병가") {
+		      } else if (value === "h2") {
 		        $salyPymntSt.val("무급");
 		      } else {
 		        $salyPymntSt.val("");
@@ -362,9 +374,60 @@
 				    let key = this.id.replace(/^v_/, '');
 				    datas[key] = $(this).val();
 				});
-				datas[confmerId] = $confmerId.val();
+				datas["confmerId"] = $confmerId.val() ? $confmerId.val() : null;
 				console.log(datas);
+				
+				
+			    let vcatnUrl = ([[${Session.masYn}]] == "e1") ? "/vcatnUpdate" : "/vcatnRegist";
+			    if(vcatnUrl =="/vcatnUpdate" && datas.st =="g1"){
+			    	console.log("팅겻나?");
+			    	return;
+			    }
+
+					
+				
+				// jQuery AJAX - POST 방식으로 JSON 전송
+				 $.ajax({
+				    url: vcatnUrl,                 // 요청 URL
+				    type: "post",                      // POST 방식
+				    contentType: "application/json",   
+				    data: JSON.stringify(datas),        // 객체를 JSON 문자열로 변환									
+				})
+				.done((result) => {
+					alert(result);			    			             
+				})
+				.fail((error) => {
+				    console.error(error);
+				    alert("등록 중 오류 발생");
+				}); 
+				
 		    });
+		 	
+		 	//삭제버튼 누를시
+		    $dleVcatnBtn.on("click", function() {
+		    	
+		    	let datas = {};
+				$('[id^="v_"]').each(function() {
+				    // this.id에서 앞의 "v_" 제거
+				    let key = this.id.replace(/^v_/, '');
+				    datas[key] = $(this).val();
+				});
+				
+		    	// jQuery AJAX - POST 방식으로 JSON 전송
+				 $.ajax({
+				    url: "/vcatnDel",                 // 요청 URL
+				    type: "post",                      // POST 방식
+				    contentType: "application/json",   
+				    data: JSON.stringify(datas),        // 객체를 JSON 문자열로 변환									
+				})
+				.done((result) => {
+					alert(result);			    			             
+				})
+				.fail((error) => {
+				    console.error(error);
+				    alert("등록 중 오류 발생");
+				}); 
+		    }) //삭제버튼 누를시
 
 		});
 
