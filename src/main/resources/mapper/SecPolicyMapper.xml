@@ -18,13 +18,130 @@
                 otp_yn,
                 otp_valid_min,
                 otp_fail_cnt,
+                session_timeout_min,
+                timeout_action,
                 crea_dt,
                 crea_by,
                 updt_dt,
                 updt_by
-        FROM    tb_sec_policy
-        WHERE   vend_id = #{vendId}
-        AND     ROWNUM = 1
+        FROM (
+            SELECT  policy_id,
+                    vend_id,
+                    pw_fail_cnt,
+                    auto_unlock_tm,
+                    pw_len_min,
+                    pw_len_max,
+                    use_upper_yn,
+                    use_lower_yn,
+                    use_num_yn,
+                    use_spcl_yn,
+                    captcha_yn,
+                    captcha_fail_cnt,
+                    otp_yn,
+                    otp_valid_min,
+                    otp_fail_cnt,
+                    session_timeout_min,
+                    timeout_action,
+                    crea_dt,
+                    crea_by,
+                    updt_dt,
+                    updt_by,
+                    CASE
+                        WHEN vend_id = #{vendId} THEN 1
+                        ELSE 2
+                    END AS sort_order
+            FROM    tb_sec_policy
+            WHERE   vend_id = #{vendId}
+               OR   vend_id IS NULL
+               OR   vend_id = ''
+        )
+        WHERE ROWNUM = 1
+        ORDER BY sort_order
     </select>
+    
+    <select id="countByVendId">
+        SELECT COUNT(1)
+        FROM   tb_sec_policy
+        WHERE  vend_id = #{vendId}
+    </select>
+
+    <insert id="insertPolicy">
+      <selectKey keyProperty="policyId"
+               resultType="String"
+               order="BEFORE">
+        SELECT 'sec_' || TO_CHAR(SYSDATE, 'YYYYMM')
+               || LPAD(
+                    NVL(MAX(TO_NUMBER(SUBSTR(policy_id, -3))), 0) + 1,
+                    3,
+                    '0'
+                  )
+        FROM tb_sec_policy
+        WHERE policy_id LIKE 'sec_' || TO_CHAR(SYSDATE, 'YYYYMM') || '%'
+      </selectKey> 
+    
+        INSERT INTO tb_sec_policy (
+            policy_id,
+            vend_id,
+            pw_fail_cnt,
+            auto_unlock_tm,
+            pw_len_min,
+            pw_len_max,
+            use_upper_yn,
+            use_lower_yn,
+            use_num_yn,
+            use_spcl_yn,
+            captcha_yn,
+            captcha_fail_cnt,
+            otp_yn,
+            otp_valid_min,
+            otp_fail_cnt,
+            session_timeout_min,
+            timeout_action,
+            crea_dt,
+            crea_by
+        ) VALUES (
+            #{policyId},
+            #{vendId},
+            #{pwFailCnt},
+            #{autoUnlockTm},
+            #{pwLenMin},
+            #{pwLenMax},
+            #{useUpperYn},
+            #{useLowerYn},
+            #{useNumYn},
+            #{useSpclYn},
+            #{captchaYn},
+            #{captchaFailCnt},
+            #{otpYn},
+            #{otpValidMin},
+            #{otpFailCnt},
+            #{sessionTimeoutMin},
+            #{timeoutAction},
+            SYSDATE,
+            #{creaBy}
+        )
+    </insert>
+
+    <update id="updatePolicy">
+        UPDATE tb_sec_policy
+        SET pw_fail_cnt         = #{pwFailCnt},
+            auto_unlock_tm      = #{autoUnlockTm},
+            pw_len_min          = #{pwLenMin},
+            pw_len_max          = #{pwLenMax},
+            use_upper_yn        = #{useUpperYn},
+            use_lower_yn        = #{useLowerYn},
+            use_num_yn          = #{useNumYn},
+            use_spcl_yn         = #{useSpclYn},
+            captcha_yn          = #{captchaYn},
+            captcha_fail_cnt    = #{captchaFailCnt},
+            otp_yn              = #{otpYn},
+            otp_valid_min       = #{otpValidMin},
+            otp_fail_cnt        = #{otpFailCnt},
+            session_timeout_min = #{sessionTimeoutMin},
+            timeout_action      = #{timeoutAction},
+            updt_dt             = SYSDATE,
+            updt_by             = #{updtBy}
+        WHERE vend_id = #{vendId}
+    </update>
 	
 </mapper>

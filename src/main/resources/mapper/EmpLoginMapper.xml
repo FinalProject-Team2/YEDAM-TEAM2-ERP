@@ -43,7 +43,9 @@
     <update id="updateLoginSuccess">
         UPDATE tb_emp_acct
            SET fail_cnt   = 0,
-               last_login = SYSDATE
+               last_login = SYSDATE,
+               updt_dt    = SYSDATE,
+               updt_by    = #{updtBy}
          WHERE emp_acct_id = #{empAcctId}
     </update>
 
@@ -59,7 +61,9 @@
                              WHEN fail_cnt + 1 >= #{maxFailCnt}
                              THEN SYSDATE
                              ELSE lock_dttm
-                           END
+                           END,
+               updt_dt   = SYSDATE,
+               updt_by   = #{updtBy}
          WHERE emp_acct_id = #{empAcctId}
     </update>
 

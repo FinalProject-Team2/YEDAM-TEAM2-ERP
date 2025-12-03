@@ -13,7 +13,7 @@ public class PasswordEncodeTest {
 
     @Test
     void encode() {
-        String raw = "master";
+        String raw = "mas";
         String encoded = passwordEncoder.encode(raw);
         System.out.println(encoded);
     }

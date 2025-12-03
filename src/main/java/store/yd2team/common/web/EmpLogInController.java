@@ -8,9 +8,9 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.consts.SessionConst;
-import store.yd2team.common.dto.LoginResultDto;
+import store.yd2team.common.dto.EmpLoginResultDto;
 import store.yd2team.common.dto.SessionDto;
-import store.yd2team.common.service.EmpAcctService;
+import store.yd2team.common.service.EmpLoginService;
 import store.yd2team.common.service.EmpAcctVO;
 import store.yd2team.common.service.SecPolicyVO;
 import store.yd2team.common.service.SmsService;
@@ -18,9 +18,9 @@ import store.yd2team.common.service.SmsService;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-public class LogInController {
+public class EmpLogInController {
 
-    final EmpAcctService empAcctService;
+    final EmpLoginService empAcctService;
     final SmsService smsService;
 
     // OTP 기본값 (정책이 비어있을 때 대비)
@@ -31,7 +31,7 @@ public class LogInController {
     // 1) 로그인 (ID/PW + 캡챠 + OTP 1단계)
     // ==========================
     @PostMapping("/logIn/login")
-    public LoginResultDto login(@RequestParam("vendId") String vendId,
+    public EmpLoginResultDto login(@RequestParam("vendId") String vendId,
                                 @RequestParam("loginId") String loginId,
                                 @RequestParam("password") String password,
                                 @RequestParam(value = "captchaValue", required = false) String captchaValue,
@@ -47,12 +47,12 @@ public class LogInController {
             String answer = (String) session.getAttribute(SessionConst.LOGIN_CAPTCHA_ANSWER);
 
             if (answer == null) {
-                return LoginResultDto.captchaFail("보안문자를 다시 받아주세요.");
+                return EmpLoginResultDto.captchaFail("보안문자를 다시 받아주세요.");
             }
 
             if (captchaValue == null || captchaValue.isBlank()
                     || !answer.equalsIgnoreCase(captchaValue.trim())) {
-                return LoginResultDto.captchaFail("보안문자를 정확히 입력해 주세요.");
+                return EmpLoginResultDto.captchaFail("보안문자를 정확히 입력해 주세요.");
             }
 
             // 캡챠 통과했으면 한 번 쓰고 제거 (재사용 방지)
@@ -69,7 +69,7 @@ public class LogInController {
         // ==========================
         // 2) 실제 로그인 서비스 호출 (ID/PW + 잠금 + 정책)
         // ==========================
-        LoginResultDto result = empAcctService.login(vendId, loginId, password);
+        EmpLoginResultDto result = empAcctService.login(vendId, loginId, password);
 
         // ---------------------------------
         // (1) 최종 로그인 성공 (OTP 미사용)
@@ -155,7 +155,7 @@ public class LogInController {
     // 2) OTP 검증 API (2단계 로그인)
     // ==========================
     @PostMapping("/logIn/otp")
-    public LoginResultDto verifyOtp(@RequestParam("otpCode") String otpCode,
+    public EmpLoginResultDto verifyOtp(@RequestParam("otpCode") String otpCode,
                                     HttpSession session) {
 
         String savedOtp      = (String) session.getAttribute(SessionConst.LOGIN_OTP_CODE);
@@ -170,7 +170,7 @@ public class LogInController {
 
         // 1) OTP 세션정보가 없는 경우 (직접 URL 접근 / 세션 만료 등)
         if (savedOtp == null || expireMillis == null || pendingEmp == null) {
-            return LoginResultDto.fail("OTP 세션 정보가 없습니다. 다시 로그인해 주세요.");
+            return EmpLoginResultDto.fail("OTP 세션 정보가 없습니다. 다시 로그인해 주세요.");
         }
 
         // 2) 만료 시간 체크 (otp_valid_min 기준)
@@ -178,7 +178,7 @@ public class LogInController {
         if (now > expireMillis) {
             // 만료된 OTP 정보는 지우고 재로그인 유도
             clearOtpSession(session);
-            return LoginResultDto.fail("OTP 유효 시간이 지났습니다. 다시 로그인해 주세요.");
+            return EmpLoginResultDto.fail("OTP 유효 시간이 지났습니다. 다시 로그인해 주세요.");
         }
 
         // 3) 코드 일치 여부 확인
@@ -189,12 +189,12 @@ public class LogInController {
             if (failCnt >= failLimit) {
                 // otp_fail_cnt 회 이상 틀리면 OTP 폐기 + 재로그인 요구
                 clearOtpSession(session);
-                return LoginResultDto.fail(
+                return EmpLoginResultDto.fail(
                         "OTP를 " + failLimit + "회 이상 잘못 입력하여 다시 로그인해 주세요."
                 );
             } else {
                 int remain = failLimit - failCnt;
-                return LoginResultDto.fail(
+                return EmpLoginResultDto.fail(
                         "OTP 코드가 올바르지 않습니다. (남은 시도 횟수: " + remain + "회)"
                 );
             }
@@ -219,7 +219,7 @@ public class LogInController {
         clearOtpSession(session);
 
         // 최종 성공 응답
-        return LoginResultDto.ok(empAcct);
+        return EmpLoginResultDto.ok(empAcct);
     }
 
     // ==========================
@@ -285,9 +285,9 @@ public class LogInController {
     // 로그아웃
     // ==========================
     @PostMapping("/logIn/logout")
-    public LoginResultDto logout(HttpSession session) {
+    public EmpLoginResultDto logout(HttpSession session) {
         session.invalidate();
-        return LoginResultDto.ok();
+        return EmpLoginResultDto.ok();
     }
 
 }
