@@ -50,7 +50,7 @@ public class BusinessController {
 	public String churnRiskListForm(Model model) {
 	    return "business/churnRiskList";
 	}
-	//
+	// 휴면,이탈고객검색조회
 	@PostMapping("/churnRiskList")
 	public String selectall(churnRiskVO vo, Model model) {
 		System.out.println("=== churnRiskList.selectall() 호출됨 ===");
@@ -58,6 +58,15 @@ public class BusinessController {
 		model.addAttribute("getchurnRiskList", getchurnRiskList);
 		return "business/churnRiskList";
 	}
+//	// 평균구매주기 구하기
+//	@PostMapping("/churnRiskList")
+//	public String getAVG(churnRiskVO vo, Model model) {
+//		System.out.println("=== churnRiskList.getAVG() 호출됨 ===");
+//		List<churnRiskVO> getchurnRiskList = businessService.getchurnRiskList(vo);
+//		model.addAttribute("getchurnRiskList", getchurnRiskList);
+//		return "business/churnRiskList";
+//	}
+	
 	//
 	//
 	//

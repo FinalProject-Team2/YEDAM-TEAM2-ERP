@@ -211,5 +211,9 @@ public class BusineServiceImpl implements BusinessService {
 	public List<churnRiskVO> getchurnRiskList(churnRiskVO vo) {
 		return businessMapper.getchurnRiskList(vo);
 	}
-
+	//휴면,이탈 평균구매주기
+	@Override
+	public int getAVG() {
+		return businessMapper.getAVG();
+	}
 }

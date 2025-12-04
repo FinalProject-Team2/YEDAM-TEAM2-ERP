@@ -5,7 +5,7 @@ import java.util.Date;
 import lombok.Data;
 
 @Data
-public class BusinessVO {
+public class SalesChangeVO {
 	    private Long   potentialInfoNo;   	// POTENTIAL_INFO_NO
 	    private int   potentialCondNo;   	// POTENTIAL_COND_NO
 	    private String vendId;            	// VEND_ID
