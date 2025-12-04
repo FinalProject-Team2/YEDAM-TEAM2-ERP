@@ -23,7 +23,7 @@
 </style>
 <body layout:fragment="content">
 
-	<form th:action="@{/churnRiskList}" method="post">
+	<form th:action="@{/churnRiskListLead}" method="post">
 		<div class="row">
 			<div class="col-md-12 mb-3">
 				<div class="card">
@@ -88,8 +88,97 @@
 		</div>
 	</div>
 	
+		<!-- 매출변동 -->
+	<div class="card mb-3">
+		<div class="card-header">
+			<div class="card-header-left">
+				<h5 class="card-title">매출변동</h5>
+			</div>
+			<!-- card-header-left end -->
+			<!-- 	<div class="card-header-right">
+				<button class="btn btn-dark">초기화</button>
+				<button class="btn btn-outline-dark">조회</button>
+			</div> //card-header right end -->
+		</div>
+		<!-- //card-header wihy-actions end -->
+		<div class="card-body">
+			<div id="MonthlySalesgrid" style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+		</div>
+	</div>
+	
 	<script th:inline="javascript">
 		// 휴먼/이탈고객 데이터
+		tui.Grid.applyTheme('default', {
+			cell : {
+				normal : { // 일반 셀(본문)
+					border : '#ccc',
+					background : "#fff",
+					showVerticalBorder : true, // 세로 라인 표시
+				},
+				header : { // 헤더 셀
+					border : '#ccc',
+					background : '#E3E6ED',
+					showVerticalBorder : true,
+				},
+				editable : { // ★ 편집 가능한 셀 공통 스타일
+					background : '#FFFDF0', // 연노랑 같은 색으로 표시
+					text : '#000'
+				},
+				selectedHeader : { // 헤더 클릭했을 때 색
+					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+				},
+				selected : { // 선택된 셀 색
+					background : '#ffffff' // 필요하면 여기도 조정
+				}
+			}
+		});
+		const MonthlySalesData = /*[[${getchurnRiskList}]]*/ [];
+		console.log('MonthlySalesData', MonthlySalesData);
+
+		// Grid 생성
+		const monthlySalesgrid = new tui.Grid({
+			el : document.getElementById('monthlySalesgrid'),
+			data : MonthlySalesData,
+			scrollX : false,
+			scrollY : true,
+			minBodyHeight : 0,
+			autoWidth : true,
+			columns : [ {
+				header : '거래처아이디',
+				name : 'custcomid',
+				sortable : 'true'
+			}, 
+			{
+				header : '월',
+				name : 'ym',
+				sortable : 'true'
+			}, {
+				header : 'monthlysales',
+				name : 'monthlysales',
+				  formatter: ({ value }) => {
+		                const d = new Date(value);
+		                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
+		            },
+				editor : 'text'
+			}, 
+			{
+				header : '월매출',
+				name : 'prevsales',
+				align : 'center'
+			}, 
+			{
+				header : '매출금액',
+				name : 'salesChange',
+				align : 'center'
+			}, 
+			{
+				header : '매출변동',
+				name : 'changerate',
+				align : 'center'
+			}]
+		});
+		
+		// 매출변동 데이터
 		tui.Grid.applyTheme('default', {
 			cell : {
 				normal : { // 일반 셀(본문)
