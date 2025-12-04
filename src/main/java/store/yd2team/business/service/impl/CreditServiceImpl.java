@@ -44,12 +44,5 @@ public class CreditServiceImpl implements CreditService {
 	}
 
 
-	@Override
-	public List<CreditVO> searchCustcom(CreditVO vo) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
 
 }

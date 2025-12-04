@@ -13,7 +13,7 @@ public interface CreditService {
 	List<CreditVO> searchCustcomId(String keyword);
 	List<CreditVO> searchCustcomName(String keyword);
 
-	List<CreditVO> searchCustcom(CreditVO vo);
+	
 
 
 }

@@ -24,5 +24,41 @@
 	    WHERE custcom_name LIKE '%' || #{keyword} || '%'
 	    ORDER BY custcom_name
 	</select>
+	
+<!-- 여신한도 목록 조회 -->
+	<select id="searchCredit" parameterType="string" resultType="store.yd2team.business.service.CreditVO">
+		SELECT
+		    cdt.cdtln_no,
+		    cdt.custcom_id,
+		    cust.custcom_name,
+		    cdt.credit_grad,
+		    cdt.cdtln_check,
+		    cdt.mrtgg_lmt,
+		    cdt.credit_lmt,
+		    cdt.cdtln_lmt,
+		    cdt.lmtover_check,
+		    cdt.yn,
+		    cdt.applc_begin_dt,
+		    cdt.applc_end_dt,
+		    cdt.crea_dt,
+            
+            cust.biz_addr,
+            cust.biz_tel,
+            cust.biz_fax,
+            cust.psch,
+            cust.psch_tel,
+            cust.psch_email
+            
+		FROM tb_cdtln_lmt cdt
+		JOIN tb_custcom cust
+		  ON cdt.custcom_id = cust.custcom_id
+		WHERE (
+				cdt.custcom_id LIKE '%' || #{custcomId} || '%'
+		  OR 	cust.custcom_name LIKE '%' || #{custcomName} || '%'
+		      )
+		ORDER BY cdt.cdtln_no DESC
+		  
+			
+	</select>
 
 </mapper>

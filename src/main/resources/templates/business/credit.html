@@ -8,6 +8,20 @@
 <meta charset="UTF-8">
 <script src="/assets/js/teamUtil.js"></script>
 <title>여신 관리</title>
+<style type="text/css">
+/* 그리드 버튼 스타일 */
+.grid-btn {
+    padding: 4px 10px;
+    border: 1px solid #bbb;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.grid-btn:hover {
+    background-color: #eee;
+}
+</style>
 </head>
 
 <body layout:fragment="content">
@@ -31,7 +45,7 @@
 
 					<!-- /card-body start -->
 					<div class="card-body">
-						<div class="row g-5">
+						<div class="row">
 							<div class="col-md-4">
 							<label for="autoCustcomId" class="form-label">고객사코드</label>
 
@@ -74,7 +88,7 @@
 
 		<!-- 여신한도 카드 -->
 		<div class="row">
-			<div class="col-md-7 d-flex">
+			<div class="col-md-12 d-flex">
 				<div class="card w-100 h-100">
 
 					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
@@ -90,83 +104,19 @@
 					</div>
 
 					<div class="card-body">
-						<div class="priceGridWrap">
+						<div class="creditGridWrap">
 							<div id="creditGrid"></div>
 						</div>
 					</div>
 				</div>
 			</div>
-
-			<!--업체정보 카드 -->
-			<div class="col-md-5 d-flex">
-				<div class="card w-100 h-100">
-
-					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header with-actions">
-						<div class="card-header-left">
-							<h5 class="card-title">업체정보</h5>
-						</div>
-
-					</div>
-
-					<!-- 업체정보 -->
-					<div class="card-body d-flex flex-column justify-content-between">
-						  <div class="row g-3">
-							    <!-- 위쪽 영역 -->
-							    <div class="col-12">
-							      <label for="workplace" class="form-label">사업장주소</label> 
-							      <input id="workplace" type="text" class="form-control" placeholder="YEDAM">
-							    </div>
-							
-							    <!-- 중간 : 유형 / 할인율 / 적용일 -->
-							    <div class="col-md-6">
-							      <div class="mb-3">
-							        <label for="phoneNum" class="form-label">연락처</label> 
-							        <input id="phoneNum" type="text" class="form-control" placeholder="YEDAM">
-							      </div>
-							    </div>
-							    
-							    <div class="col-md-6">
-							      <div class="mb-3">
-							        <label for="faxNum" class="form-label">Fax번호</label> 
-							        <input id="faxNum" type="text" class="form-control" placeholder="YEDAM">
-							      </div>
-							    </div>
-							    
-							    
-							    <!-- 3번째줄  -->
-							    <div class="col-md-6">
-							      <div class="mb-3">
-							        <label for="manager" class="form-label">담당자</label> 
-							        <input id="manager" type="text" class="form-control" placeholder="YEDAM">
-							      </div>
-							    </div>
-							    
-							    <div class="col-md-6">
-							      <div class="mb-3">
-							        <label for="managerPhone" class="form-label">담당자연락처</label> 
-							        <input id="managerPhone" type="text" class="form-control" placeholder="YEDAM">
-							      </div>
-							    </div>
-
-						  </div>
-						
-						    <!-- 아래 : 비고 (아래쪽에 붙도록) -->
-						    <div class="col-12 mt-auto">
-						      <label for="managerEmail" class="form-label">담당자이메일</label> 
-						      <input id="managerEmail" type="text" class="form-control" placeholder="YEDAM">
-						    </div>
-						  </div>
-					</div> 
-				</div>
-			</div>
-			<!--업체정보 카드 end -->
+		</div>
+		
 
 
-		<script>
+<div th:replace="business/modal/creditCustModal :: creditModal"></div>
 
-
-	
+<script>
     // 1. Toast UI Grid 테마
 tui.Grid.applyTheme('default', {
   cell: {
@@ -225,39 +175,54 @@ tui.Grid.applyTheme('default', {
         columns: [
             { header: '고객코드', name: 'custcomId', width: 140 },
             { header: '고객사', name: 'custcomName', width: 180 },
+            {
+           	  header: '고객사상세조회',
+           	  name: 'clientSelect',
+           	  width: 120,
+           	  align: 'center',
+	          formatter: ({ rowKey, row }) => {   // ← rowKey 같이 받기
+	              const label = row.custcomNameResult || '고객사조회';
+	              return `
+	                <button type="button"
+	                        class="grid-btn open-client-modal-btn"
+	                        data-row-key="${rowKey}">
+	                  ${label}
+	                </button>
+	              `;
+           	  }
+           	},
             { header: '신용등급', name: 'creditGrad', width: 120 },
             { header: '여신체크', name: 'cdtlnCheck', width: 120 },
             { header: '담보한도', name: 'mrtggLmt', width: 180 },
             { header: '신용한도', name: 'creditLmt', width: 180 },
             { header: '여신한도', name: 'cdtlnLmt', width: 180 },
-            { header: '한도초과여부', name: 'lmtOverCheck', width: 110 },
+            { header: '한도초과여부', name: 'lmtoverCheck', width: 110 },
         ]
     });
 
-	// 5. 조회 초기화버튼 이벤트
-	//5-1 초기화버튼
-	document.getElementById("creditInit").addEventListener("click", function () {
-	
-	    // 1) searchForm 객체 초기화
-	    searchForm = {
-	        custcomId: "",
-	        custcomName: "",
-	    };
-	
-	    // 2) 화면 Input 값 초기화
-	    document.querySelector("#custcomId").value = "";
-	    document.querySelector("#custcomName").value = "";
-	
-	    console.log("검색조건 초기화:", searchForm);
-	});
-	
+ 	// 5-1 초기화버튼
+    document.getElementById("creditInit").addEventListener("click", function () {
+
+        // 1) searchForm 객체 초기화
+        const searchForm = {
+            custcomId: "",
+            custcomName: "",
+        };
+
+        // 2) 화면 Input 값 초기화
+        document.querySelector("#autoCustcomId").value = "";
+        document.querySelector("#autoCustcomName").value = "";
+
+        console.log("검색조건 초기화:", searchForm);
+    });
+
 	// 5-2 조회버튼 (jQuery 버전)
 	$(document).on("click", "#searchCredit", function () {
 
 	    // 1) 화면 입력값 → searchForm 에 세팅
 	    let searchForm = {
-	    		custcomId: $("#custcomId").val().trim(),
-	    		custcomName: $("#custcomName").val().trim(),
+	    		custcomId: $("#autoCustcomId").val().trim(),
+	    		custcomName: $("#autoCustcomName").val().trim(),
 	    };
 
 	    console.log("보낼 searchForm >>> ", searchForm);
@@ -272,7 +237,7 @@ tui.Grid.applyTheme('default', {
 	            console.log("조회결과 >>> ", res);
 
 	            // 3) 그리드 데이터 반영
-	            custGrid.resetData(res);
+	            creditGrid.resetData(res);
 	        },
 	        error: function (err) {
 	            console.error("조회 중 오류:", err);
@@ -330,6 +295,47 @@ tui.Grid.applyTheme('default', {
    } else {
      console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
    }
+   
+
+
+	// 6.고객사정보 모달
+		const modal   = document.getElementById("creditModal");
+		const back    = document.getElementById("creditBackdrop");
+		
+		function openCreditModal() {
+			modal.classList.add("show");
+			modal.style.display = "block";
+			back.style.display = "block";
+			
+		}
+		
+		function closeCreditModal() {
+			modal.classList.remove("show");
+			modal.style.display = "none";
+			back.style.display = "none";
+		}
+		
+		// 바깥 클릭 시 닫기
+		modal.addEventListener("click", (event) => {
+			if (!event.target.closest(".modal-content")) {
+			  closeCreditModal();
+			}
+		});
+		
+		document.addEventListener('click', (e) => {
+
+		  if (e.target.classList.contains('open-client-modal-btn')) {
+
+		    const cell = creditGrid.getFocusedCell();
+		    const row = cell ? creditGrid.getRow(cell.rowKey) : null;
+		    if (!row) return;
+
+		    // 바깥 버튼과 동일하게 모달 열기
+		    openCreditModal();
+		  }
+		}); // end 모달
+	   
+
 
 </script>
 </body>
