@@ -21,4 +21,7 @@ public interface SubscriptionService {
 	// 로그인 사용자의 구독 정보 + 사용량 조회
 	SubscriptionUsageDto getSubscriptionUsageByVendId(String vendId) throws Exception;
 	
+	// 신규 추가: vendId 기준 구독 해지(tb_subsp 삭제)
+	int cancelSubscriptionByVendId(String vendId) throws Exception;
+	
 }// end interface
