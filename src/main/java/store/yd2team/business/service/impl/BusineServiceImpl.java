@@ -14,6 +14,7 @@ import store.yd2team.AiService;
 import store.yd2team.business.mapper.BusinessMapper;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
+import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.PublicDataResponse;
 import store.yd2team.business.service.PublicDataRow;
@@ -215,5 +216,10 @@ public class BusineServiceImpl implements BusinessService {
 	@Override
 	public int getAVG() {
 		return businessMapper.getAVG();
+	}
+	//매풀변동
+	@Override
+	public List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo) {
+		return businessMapper.getMonthlySalesChange(vo);
 	}
 }

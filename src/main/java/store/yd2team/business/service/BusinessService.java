@@ -31,5 +31,7 @@ public interface BusinessService {
     List<churnRiskVO> getchurnRiskList(churnRiskVO vo);
     //휴면,이탈 평균구매주기
     int getAVG();
+    //모든조건 점수화
+    List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo);
 
 }

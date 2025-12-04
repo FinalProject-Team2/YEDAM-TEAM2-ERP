@@ -1,12 +1,12 @@
 package store.yd2team.business.mapper;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
 import store.yd2team.business.service.BusinessVO;
+import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.churnRiskVO;
 
@@ -45,7 +45,7 @@ public interface BusinessMapper {
 	//휴면, 이탈고객 평균
     int getAVG();
     //휴면, 이탈 매출변동
-    List<Map<String, Object>> getSalesChange();
+    List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo);
 	
 	//단건조회
 }

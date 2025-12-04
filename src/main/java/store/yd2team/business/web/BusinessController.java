@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
+import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
+import store.yd2team.business.service.SalesChangeDTO;
 import store.yd2team.business.service.churnRiskVO;
 
 @Controller
@@ -52,21 +54,24 @@ public class BusinessController {
 	}
 	// 휴면,이탈고객검색조회
 	@PostMapping("/churnRiskList")
-	public String selectall(churnRiskVO vo, Model model) {
+	public String selectall(churnRiskVO vo, SalesChangeDTO vo1, Model model) {
 		System.out.println("=== churnRiskList.selectall() 호출됨 ===");
+		//검색조회
 		List<churnRiskVO> getchurnRiskList = businessService.getchurnRiskList(vo);
 		model.addAttribute("getchurnRiskList", getchurnRiskList);
+		//매출변동
 		return "business/churnRiskList";
 	}
-//	// 평균구매주기 구하기
-//	@PostMapping("/churnRiskList")
-//	public String getAVG(churnRiskVO vo, Model model) {
-//		System.out.println("=== churnRiskList.getAVG() 호출됨 ===");
-//		List<churnRiskVO> getchurnRiskList = businessService.getchurnRiskList(vo);
-//		model.addAttribute("getchurnRiskList", getchurnRiskList);
-//		return "business/churnRiskList";
-//	}
-	
+	// 휴면,이탈 조건조회 및 점수화
+	@PostMapping("/churnRiskListLead")
+	public String getstdrlead(MonthlySalesDTO vo, Model model) {
+		System.out.println("=== churnRiskList.selectall() 호출됨 ===");
+		//검색조회
+		List<MonthlySalesDTO> getchurnRiskList = businessService.getMonthlySalesChange(vo);
+		model.addAttribute("getchurnRiskList", getchurnRiskList);
+		//매출변동
+		return "business/churnRiskList";
+	}
 	//
 	//
 	//
@@ -153,9 +158,6 @@ public class BusinessController {
 		businessService.fetchAndSaveFromApi();
 		return "redirect:/potentialCustList";
 	}
-	
-	
-	
 
 	@GetMapping("/salesActivity")
 	public String update1(Model model) {
