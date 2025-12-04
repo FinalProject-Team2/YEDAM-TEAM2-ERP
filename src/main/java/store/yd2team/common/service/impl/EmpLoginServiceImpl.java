@@ -35,23 +35,23 @@ public class EmpLoginServiceImpl implements EmpLoginService {
     @Override
     public EmpLoginResultDto login(String vendId, String loginId, String password) {
 
-        // 계정 조회
+    	 // 1) 계정 조회
         EmpAcctVO empAcct = empLoginMapper.selectByLogin(vendId, loginId);
         if (empAcct == null) {
-            // 이때는 실패 횟수를 관리할 필요가 없으니 그냥 캡챠/OTP 없이 실패만 반환
+            // 계정이 존재하지 않을 때
             return EmpLoginResultDto.fail("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
-        // 보안 정책 조회 (없으면 기본값 사용)
+        // 2) 보안 정책 조회 (없으면 기본값 사용)
         SecPolicyVO policy = secPolicyService.getByVendIdOrDefault(vendId);
-        
+
         log.info(">>> [LOGIN] 정책 확인: vendId={}, policyId={}, otpYn={}, otpValidMin={}, otpFailCnt={}",
                 vendId,
                 (policy == null ? null : policy.getPolicyId()),
                 (policy == null ? null : policy.getOtpYn()),
                 (policy == null ? null : policy.getOtpValidMin()),
                 (policy == null ? null : policy.getOtpFailCnt()));
-        
+
         int maxFailCnt = DEFAULT_MAX_FAIL_CNT;
         Integer autoUnlockTm = null;   // 단위: 분
 
@@ -65,8 +65,8 @@ public class EmpLoginServiceImpl implements EmpLoginService {
         log.info(">>> 로그인 잠금 체크: st={}, lockDttm={}, autoUnlockTm={}",
                 empAcct.getSt(), empAcct.getLockDttm(), autoUnlockTm);
 
-        // 잠금 상태인지 확인 + 자동 잠금 해제
-        if (LOCKED.equals(empAcct.getSt())) {
+        // 3) 잠금 상태인지 확인 + 자동 잠금 해제
+        if (LOCKED.equals(empAcct.getSt())) {   // LOCKED == "r2" 라고 가정
 
             // 자동 잠금 해제 시간이 없으면 계속 잠금 상태 유지
             if (autoUnlockTm == null || autoUnlockTm <= 0) {
@@ -74,7 +74,6 @@ public class EmpLoginServiceImpl implements EmpLoginService {
             }
 
             LocalDateTime lockedAt = empAcct.getLockDttm();
-
             if (lockedAt == null) {
                 return EmpLoginResultDto.fail("잠금된 계정입니다. 관리자에게 문의하세요.");
             }
@@ -84,7 +83,7 @@ public class EmpLoginServiceImpl implements EmpLoginService {
             if (minutes >= autoUnlockTm) {
                 // 자동 해제
                 empLoginMapper.unlock(empAcct.getEmpAcctId(), "SYSTEM");
-                empAcct.setSt(ACTIVE);
+                empAcct.setSt(ACTIVE);   // 상태를 정상(r1)으로 변경
                 empAcct.setFailCnt(0);
             } else {
                 long remain = autoUnlockTm - minutes;
@@ -92,13 +91,42 @@ public class EmpLoginServiceImpl implements EmpLoginService {
             }
         }
 
+        // 4) 상태(st) / 사용여부(yn) 공통 체크
+        String st = empAcct.getSt();     // 자동해지로 ACTIVE 로 바뀌었을 수도 있음
+        String yn = empAcct.getYn();    // e1(사용), e2(중지)
+
+        // yn = e2 → 사용 중지
+        if (!Y.equals(yn)) { // CodeConst.Yn.Y == "e1"
+            return EmpLoginResultDto.fail("사용 중지된 계정입니다.");
+        }
+
+        // st = ACTIVE 가 아닌 모든 상태는 로그인 불가
+        if (!ACTIVE.equals(st)) {
+
+            // r3 → 비활성 / 관리자 처리 대상
+            if ("r3".equals(st)) {
+                return EmpLoginResultDto.fail("잠금 또는 비활성화된 계정입니다. 관리자에게 문의하세요.");
+            }
+
+            // r4 → 구독 해지
+            if ("r4".equals(st)) {
+                return EmpLoginResultDto.fail("구독 해지 상태입니다.");
+            }
+
+            // 그 밖의 예외 상태
+            return EmpLoginResultDto.fail("로그인할 수 없는 계정 상태입니다. 관리자에게 문의하세요.");
+        }
+
+        // ===========================
+        // 5) 여기까지 온 계정만
+        //    st = r1(ACTIVE), yn = e1 인 정상 로그인 가능 계정
+        //    → 기존 비밀번호/캡챠/OTP 로직 그대로 수행
+        // ===========================
+
         // 비밀번호 검증
         String dbPwd = empAcct.getLoginPwd();
         boolean passwordOk = (dbPwd != null && passwordEncoder.matches(password, dbPwd));
 
-        // ===========================
-        // 비밀번호 불일치 → 실패 처리 + 캡챠 정책
-        // ===========================
         if (!passwordOk) {
             // 실패 횟수 + 잠금 처리 (DB 업데이트)
             empLoginMapper.updateLoginFail(empAcct.getEmpAcctId(), maxFailCnt, empAcct.getEmpId());
@@ -112,17 +140,15 @@ public class EmpLoginServiceImpl implements EmpLoginService {
             if (policy != null && Y.equals(policy.getCaptchaYn())) { // CAPTCHA_YN = 'Y'
                 Integer captchaFailCnt = policy.getCaptchaFailCnt();
                 if (captchaFailCnt != null && captchaFailCnt > 0 && nextFailCnt >= captchaFailCnt) {
-                    // nextFailCnt 이상이 되는 순간부터 다음 시도에 캡챠 ON
                     captchaRequiredNext = true;
                 }
             }
 
             if (nextFailCnt >= maxFailCnt) {
-                // 이번 실패로 인해 잠금 조건 도달
                 return EmpLoginResultDto.fail(
                         "비밀번호를 " + maxFailCnt + "회 이상 잘못 입력하여 계정이 잠겼습니다.",
                         captchaRequiredNext,
-                        false  // OTP는 비밀번호가 맞아야 의미 있으므로 false
+                        false
                 );
             } else {
                 int remain = maxFailCnt - nextFailCnt;
@@ -134,11 +160,7 @@ public class EmpLoginServiceImpl implements EmpLoginService {
             }
         }
 
-        // ===========================
-        // 비밀번호 일치 → OTP 정책에 따라 분기
-        // ===========================
-
-        // 비밀번호는 맞았으므로 실패 카운트/잠금 관련 필드는 초기화
+        // 비밀번호 일치 → 실패 카운트/잠금 관련 필드 초기화
         empLoginMapper.updateLoginSuccess(empAcct.getEmpAcctId(), empAcct.getEmpId());
 
         boolean otpEnabled = false;
@@ -148,7 +170,6 @@ public class EmpLoginServiceImpl implements EmpLoginService {
 
         if (otpEnabled) {
             // OTP 사용: 1차(ID/PW) 성공 상태 → OTP 추가 인증 필요
-            // success=false, otpRequired=true 상태로 반환
             return EmpLoginResultDto.otpStep(empAcct, "OTP 인증이 필요합니다.");
         }
 
