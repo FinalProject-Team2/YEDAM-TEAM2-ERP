@@ -49,10 +49,12 @@
       font-size: 18px;
       line-height: 36px;
     }
+
+    /* ✅ 요일 버튼 조금 키운 버전 */
     .wk-day-buttons .btn {
-      min-width: 38px;
-      padding: 4px 0;
-      font-size: 0.85rem;
+      min-width: 46px;
+      padding: 7px 0;
+      font-size: 0.9rem;
       border-radius: 0;
     }
     .wk-day-buttons .btn:first-child {
@@ -66,6 +68,7 @@
       color: #fff;
       border-color: #0d6efd;
     }
+
     .wk-radio-group {
       display: flex;
       align-items: center;
@@ -257,48 +260,18 @@
             </div>
           </div>
 
-          <!-- 근무유형 (요일 / 주기) -->
-          <div class="mb-2">
-            <label class="form-label d-block">근무유형</label>
-            <div class="wk-radio-group">
-              <label class="wk-radio">
-                <input type="radio" name="wkType" id="wkTypeDay" value="DAY" checked>
-                <span>요일</span>
-              </label>
-              <label class="wk-radio">
-                <input type="radio" name="wkType" id="wkTypeCycle" value="CYCLE">
-                <span>주기</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- 요일 버튼 영역 -->
-          <div id="weekdaySection" class="wk-day-buttons mb-4">
-            <div class="btn-group" role="group" aria-label="weekday">
-              <button type="button" class="btn btn-outline-primary btn-sm" data-day="MON">월</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" data-day="TUE">화</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" data-day="WED">수</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" data-day="THU">목</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" data-day="FRI">금</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" data-day="SAT">토</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" data-day="SUN">일</button>
-            </div>
-          </div>
-
-          <!-- 주기 영역 -->
-          <div id="cycleSection" class="row g-3 mb-2 d-none">
-            <div class="col-6">
-              <label for="workDays" class="form-label">근무일</label>
-              <div class="input-group">
-                <input type="number" id="workDays" class="form-control" min="0">
-                <span class="input-group-text">일</span>
-              </div>
-            </div>
-            <div class="col-6">
-              <label for="offDays" class="form-label">휴일</label>
-              <div class="input-group">
-                <input type="number" id="offDays" class="form-control" min="0">
-                <span class="input-group-text">일</span>
+          <!-- ✅ 근무유형 라디오/주기 삭제하고, 휴일(요일)만 표시 -->
+          <div class="mb-4">
+            <label class="form-label d-block">휴일</label>
+            <div id="weekdaySection" class="wk-day-buttons">
+              <div class="btn-group" role="group" aria-label="weekday">
+                <button type="button" class="btn btn-outline-primary btn-sm" data-day="MON">월</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-day="TUE">화</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-day="WED">수</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-day="THU">목</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-day="FRI">금</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-day="SAT">토</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-day="SUN">일</button>
               </div>
             </div>
           </div>
@@ -344,48 +317,44 @@ function sortByMmdd(data) {
 /* =====================================================
  * ✅ 부서 셀렉트 박스 로딩
  * ===================================================== */
- function loadDeptList() {
+function loadDeptList() {
+  const mainSelect  = document.getElementById('deptNm');      // 메인
+  const modalSelect = document.getElementById('wkTyDept');    // 모달
 
-	  const mainSelect  = document.getElementById('deptNm');      // 메인
-	  const modalSelect = document.getElementById('wkTyDept');    // 모달
+  if (!mainSelect && !modalSelect) return;
 
-	  if (!mainSelect && !modalSelect) return;
+  // 기본 초기화
+  if (mainSelect)  mainSelect.innerHTML  = '<option value="">선택</option>';
+  if (modalSelect) modalSelect.innerHTML = '<option value="">전체</option>';
 
-	  // 기본 초기화
-	  if (mainSelect)  mainSelect.innerHTML  = '<option value="">선택</option>';
-	  if (modalSelect) modalSelect.innerHTML = '<option value="">전체</option>';
+  fetch('/insa/edc/inputOption')
+    .then(res => res.json())
+    .then(data => {
+      const deptList = data.dept || [];
 
-	  fetch('/insa/edc/inputOption')
-	    .then(res => res.json())
-	    .then(data => {
+      deptList.forEach(dept => {
+        // 메인 페이지
+        if (mainSelect) {
+          const opt1 = document.createElement('option');
+          opt1.value = dept.deptId;
+          opt1.textContent = dept.deptNm;
+          mainSelect.appendChild(opt1);
+        }
 
-	      const deptList = data.dept || [];
+        // 모달
+        if (modalSelect) {
+          const opt2 = document.createElement('option');
+          opt2.value = dept.deptId;
+          opt2.textContent = dept.deptNm;
+          modalSelect.appendChild(opt2);
+        }
+      });
+    })
+    .catch(() => {
+      alert('부서 목록을 불러오는 중 오류가 발생했습니다.');
+    });
+}
 
-	      deptList.forEach(dept => {
-
-	        // 메인 페이지
-	        if (mainSelect) {
-	          const opt1 = document.createElement('option');
-	          opt1.value = dept.deptId;
-	          opt1.textContent = dept.deptNm;
-	          mainSelect.appendChild(opt1);
-	        }
-
-	        // 모달
-	        if (modalSelect) {
-	          const opt2 = document.createElement('option');
-	          opt2.value = dept.deptId;
-	          opt2.textContent = dept.deptNm;
-	          modalSelect.appendChild(opt2);
-	        }
-
-	      });
-
-	    })
-	    .catch(() => {
-	      alert('부서 목록을 불러오는 중 오류가 발생했습니다.');
-	    });
-	}
 /* =====================================================
  * 2. 휴일 Grid 2개 (법정 / 회사)
  * ===================================================== */
@@ -583,7 +552,7 @@ document.getElementById('btnHldySave').onclick = () => {
 };
 
 /* =====================================================
- * 6 ~ 16 : 근무형태 기준 관련 JS (그대로 유지)
+ * 6 ~ 16 : 근무형태 기준 관련 JS (요일만 사용)
  * ===================================================== */
 
 // 전역 변수
@@ -596,25 +565,7 @@ const startTimeInput = document.getElementById('startTime');
 const endTimeInput   = document.getElementById('endTime');
 const basiNoInput    = document.getElementById('basiNo');
 
-/* 근무유형 라디오 토글 */
-const rdDay      = document.getElementById('wkTypeDay');
-const rdCycle    = document.getElementById('wkTypeCycle');
-const weekdaySec = document.getElementById('weekdaySection');
-const cycleSec   = document.getElementById('cycleSection');
-
-function updateWorkTypeView() {
-  if (rdDay.checked) {
-    weekdaySec.classList.remove('d-none');
-    cycleSec.classList.add('d-none');
-  } else {
-    weekdaySec.classList.add('d-none');
-    cycleSec.classList.remove('d-none');
-  }
-}
-
-rdDay.addEventListener('change', updateWorkTypeView);
-rdCycle.addEventListener('change', updateWorkTypeView);
-updateWorkTypeView();
+/* ✅ 근무유형 라디오/주기 관련 코드 다 제거 */
 
 /* 요일 버튼 + hidden 값 */
 const dayButtons      = document.querySelectorAll('#weekdaySection button');
@@ -636,44 +587,6 @@ dayButtons.forEach(btn => {
     updateHiddenWeekdays();
   });
 });
-
-/* 주기: 근무일 + 휴일 합 최대 7 제한 */
-const workDaysInput = document.getElementById('workDays');
-const offDaysInput  = document.getElementById('offDays');
-
-function applyCycleLimit(changed) {
-  let work = parseInt(workDaysInput.value || 0, 10);
-  let off  = parseInt(offDaysInput.value  || 0, 10);
-
-  if (isNaN(work)) work = 0;
-  if (isNaN(off))  off  = 0;
-  if (work < 0) work = 0;
-  if (off  < 0) off = 0;
-
-  let total = work + off;
-
-  if (total > 7) {
-    if (changed === 'work') {
-      off = 7 - work;
-      if (off < 0) {
-        off = 0;
-        work = 7;
-      }
-    } else {
-      work = 7 - off;
-      if (work < 0) {
-        work = 0;
-        off = 7;
-      }
-    }
-  }
-
-  workDaysInput.value = work;
-  offDaysInput.value  = off;
-}
-
-workDaysInput.addEventListener('input', () => applyCycleLimit('work'));
-offDaysInput.addEventListener('input',  () => applyCycleLimit('off'));
 
 /* 시간 아이콘 → time picker 열기 */
 function bindTimeIcon(inputId, iconId) {
@@ -703,13 +616,7 @@ function resetWorkTypeForm() {
   startTimeInput.value = '';
   endTimeInput.value   = '';
 
-  rdDay.checked   = true;
-  rdCycle.checked = false;
-  updateWorkTypeView();
-
-  workDaysInput.value = '';
-  offDaysInput.value  = '';
-
+  // ✅ 주기/라디오 관련 초기화 제거, 요일만 초기화
   dayButtons.forEach(btn => btn.classList.remove('selected'));
   updateHiddenWeekdays();
 }
@@ -840,17 +747,7 @@ function loadWorkTypeDetail(basiNo) {
       startTimeInput.value = at;
       endTimeInput.value   = af;
 
-      if (vo.hldyTy === 'CYCLE') {
-        rdCycle.checked = true;
-        rdDay.checked   = false;
-      } else {
-        rdDay.checked   = true;
-        rdCycle.checked = false;
-      }
-      updateWorkTypeView();
-
-      workDaysInput.value = vo.wkDe   != null ? vo.wkDe   : '';
-      offDaysInput.value  = vo.hldyDe != null ? vo.hldyDe : '';
+      // ✅ hldyTy/DAY/CYCLE에 따라 UI 토글하는 부분 제거 (항상 요일만 사용)
 
       return fetch('/insa/hldyWkBasi/day/list?basiNo=' + basiNo);
     })
@@ -890,14 +787,10 @@ document.getElementById('btnWkSave').addEventListener('click', () => {
     return;
   }
 
-  const hldyTy = rdDay.checked ? 'DAY' : 'CYCLE';
-
-  let wkDe   = null;
-  let hldyDe = null;
-  if (hldyTy === 'CYCLE') {
-    wkDe   = workDaysInput.value ? Number(workDaysInput.value) : 0;
-    hldyDe = offDaysInput.value ? Number(offDaysInput.value) : 0;
-  }
+  // ✅ 이제 항상 요일제만 사용
+  const hldyTy = 'DAY';
+  const wkDe   = null;
+  const hldyDe = null;
 
   const dayList = (hiddenWeekdays.value || '')
     .split(',')
