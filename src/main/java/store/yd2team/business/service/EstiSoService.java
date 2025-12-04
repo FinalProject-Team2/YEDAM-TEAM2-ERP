@@ -18,4 +18,11 @@ public interface EstiSoService {
     List<EstiSoVO> searchCustcomId(String keyword);
     List<EstiSoVO> searchCustcomName(String keyword);
     
+    
+    
+    /** 저장 (항상 INSERT, 이력 관리) */
+    String saveEsti(EstiSoVO vo);
+
+    /** 최신버전 기준 조회 (필요시 버전별 조회는 추가로 만들면 됨) */
+    EstiSoVO getEsti(String estiId);
 }

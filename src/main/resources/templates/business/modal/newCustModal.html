@@ -1,8 +1,8 @@
 <!-- /templates/business/modal/newEstiModal.html -->
-<div th:fragment="newCustModal">
+<div th:fragment="newSoModal">
   <!--  모달 본체 -->
-  <div class="modal-backdrop" id="newCustBackdrop"></div>
-  <div class="modal" id="newCustModal">
+  <div class="modal-backdrop" id="newSoBackdrop"></div>
+  <div class="modal" id="newSoModal">
     <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 800px;">
       <div class="modal-content">
         <div class="modal-body">
@@ -11,10 +11,10 @@
 		        <div class="col-md-12">
 		        	<div class="card-header with-actions">
 						<div class="card-header-left">
-				          	<h5 class="modal-title">신규 고객사 등록</h5>
+				          	<h5 class="modal-title">주문서 등록</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-dark" id="modalInit">초기화</button>
+							<!-- <button type="button" class="btn btn-dark" id="modalInit">초기화</button> -->
 			           		<button type="button" class="btn btn-outline-dark" id="modalSaveBtn">저장</button>
 						</div>
 					</div>
@@ -26,67 +26,42 @@
 
 					<!-- 신규등록폼 -->
 					<div class="card-body d-flex flex-column justify-content-between">
-						  <div class="row g-3">
-							    <!-- 위쪽 영역 -->
-							    <div class="col-4">
-							      <label for="mcustcomId" class="form-label">고객코드</label>
-							      <input id="mcustcomId" type="text" class="form-control" readonly>
-							    </div>
-							    <div class="col-4">
-							      <label for="mcustcomName" class="form-label">고객사</label>
-							      <input id="mcustcomName" type="text" class="form-control">
-							    </div>
-							    <div class="col-4">
-							      <label for="mbizNo" class="form-label">사업자번호</label>
-							      <input id="mbizNo" type="text" class="form-control">
-							    </div>
-							
-							    <!-- 2번째줄 -->
-							    <div class="col-md-4">
-	                                <label for="mbizAddr" class="form-label">사업장주소</label> 
-									<input id="mbizAddr" type="text" class="form-control" placeholder="YEDAM" align-items-center>
-								</div>
-								<div class="col-md-4">
-	                                <label for="mbizTel" class="form-label">사업장연락처</label> 
-									<input id="mbizTel" type="text" class="form-control" placeholder="YEDAM" align-items-center>
-								</div>
-								<div class="col-md-4">
-	                                <label for="mbizFax" class="form-label">Fax번호</label> 
-									<input id="mbizFax" type="text" class="form-control" placeholder="YEDAM" align-items-center>
-								</div>
-							
-							    <!-- 3번째줄 -->
-							    <div class="col-md-4">
-	                                <label for="mpsch" class="form-label">담당자</label> 
-									<input id="mpsch" type="text" class="form-control" placeholder="YEDAM" align-items-center>
-								</div>
-								<div class="col-md-4">
-	                                <label for="mpschTel" class="form-label">담당자연락처</label> 
-									<input id="mpschTel" type="text" class="form-control" placeholder="YEDAM" align-items-center>
-								</div>
-								<div class="col-md-4">
-	                                <label for="mpschEmail" class="form-label">담당자이메일</label> 
-									<input id="mpschEmail" type="text" class="form-control" placeholder="YEDAM" align-items-center>
-								</div>
-							
-							    <!-- 아래 : 비고 (아래쪽에 붙도록) -->
-							    <div class="col-md-4">
-	                                <label for="mrpstr" class="form-label">대표자</label> 
-									<input id="mrpstr" type="text" class="form-control" placeholder="YEDAM" align-items-center>
-								</div>
-								<div class="col-md-4">
-	                                <label for="mrpstrTel" class="form-label">대표자연락처</label> 
-									<input id="mrpstrTel" type="text" class="form-control" placeholder="YEDAM" align-items-center>
-								</div>
-								<div class="col-md-4">
-	                                <label for="mbsTy" class="form-label">거래구분</label> 
-									<select id="mbsTy" class="form-select bs-type">
-    								<option value="">전체</option> <!-- 기본값 -->
-							        <!-- 여기에 JS로 공통코드 옵션이 자동 추가됨 -->
-							    </select>
-								</div>
+					    <!-- 대표 사업장 주소 - 다음 우편번호 검색 적용 -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">대표 사업장 주소</label>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6 col-sm-9">
+                                        <input type="text" id="postcode" class="form-control" placeholder="우편번호" required readonly>
+                                    </div>
+                                    <div class="col-4 col-sm-3 d-grid">
+                                        <button type="button" class="btn btn-outline-dark" onclick="execDaumPostcode()">우편번호 찾기</button>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <input type="text" id="roadAddress" class="form-control mb-2" placeholder="도로명주소" required readonly>
+                                    <input type="text" id="jibunAddress" class="form-control mb-2" placeholder="지번주소" required readonly>
+                                    <span id="guide" style="color:#999;display:none"></span>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <!-- 실제 대표 사업장 주소: 도로명주소 + 참고항목 + 상세주소를 합쳐서 addr에 저장 -->
+                                        <input type="text" id="detailAddress" class="form-control" placeholder="상세주소를 입력하세요" required>
+                                        <input type="hidden" id="extraAddress">
+                                        <input type="hidden" id="addr" name="addr" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!-- 사업장주소 end -->
+                        
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">요청사항</label>
+                                <input type="text" name="rm" class="form-control" placeholder="요청사항을 입력하세요" required>
+                            </div>
+                        </div>
+                        
 								
-						  </div>
 					</div> <!-- 신규등록폼 end -->
 					
 				</div>

@@ -128,4 +128,135 @@
 	    WHERE custcom_name LIKE '%' || #{keyword} || '%'
 	    ORDER BY custcom_name
 	</select>
+	
+
+<!--  모달 저장버튼 -->
+<!-- ======================= 헤더 INSERT (항상 INSERT) ======================= -->
+    <insert id="insertEsti" parameterType="store.yd2team.business.service.EstiSoVO">
+
+        <!-- fn_esti_id 로 PK 생성 → vo.estiId 에 세팅 -->
+        <selectKey keyProperty="estiId" resultType="string" order="BEFORE">
+            select fn_esti_id()
+            from dual
+        </selectKey>
+
+        insert into tb_esti (
+              esti_id
+            , version
+            , custcom_id
+            , cdtln_no
+            , custcom_name
+            , so_dt
+            , due_dt
+            , cdtln_lmt
+            , tt_supply_amt
+            , esti_st
+            , recall_resn
+            , rm
+            , crea_dt
+        ) values (
+              #{estiId}
+            , #{version}
+            , #{custcomId}
+            , #{cdtlnNo}
+            , #{custcomName}      <!-- 입력용 필드 -->
+            , sysdate
+            , #{dueDt}
+            , #{cdtlnLmt}
+            , #{ttSupplyAmt}
+            , #{estiSt}
+            , #{recallResn}
+            , #{rm}
+            , sysdate
+        )
+    </insert>
+
+    <!-- ======================= 상세 INSERT (항상 INSERT) ======================= -->
+    <insert id="insertEstiDetail" parameterType="store.yd2team.business.service.EstiSoDetailVO">
+
+        <selectKey keyProperty="estiDetailNo" resultType="long" order="BEFORE">
+            select seq_esti_detail.nextval
+            from dual
+        </selectKey>
+
+        insert into tb_esti_detail (
+              esti_detail_no
+            , esti_id
+            , version
+            , product_id
+            , qy
+            , price
+            , supply_amt
+            , rm
+            , crea_dt
+        ) values (
+              #{estiDetailNo}
+            , #{estiId}
+            , #{version}
+            , #{productId}
+            , #{qy}
+            , #{price}
+            , #{supplyAmt}
+            , #{rm}
+            , sysdate
+        )
+    </insert>
+
+    <!-- ======================= 현재 버전 조회 ======================= -->
+    <select id="selectCurrentVersion"
+            parameterType="string"
+            resultType="string">
+        select nvl(max(version), 0)
+        from tb_esti
+        where esti_id = #{estiId}
+    </select>
+
+    <!-- ======================= 헤더 조회 (최신 버전 1건) ======================= -->
+    <select id="selectEstiHeader"
+            parameterType="string"
+            resultType="store.yd2team.business.service.EstiSoVO">
+        select
+              esti_id          as estiId
+            , version          as version
+            , custcom_id       as custcomId
+            , cdtln_no         as cdtlnNo
+            , custcom_name     as custcomNameResult   <!-- 조회용 필드 -->
+            , so_dt            as soDt
+            , due_dt           as dueDt
+            , cdtln_lmt        as cdtlnLmt
+            , tt_supply_amt    as ttSupplyAmt
+            , esti_st          as estiSt
+            , recall_resn      as recallResn
+            , rm               as rm
+        from tb_esti
+        where esti_id = #{estiId}
+        order by version desc
+        fetch first 1 row only
+    </select>
+
+    <!-- ======================= 상세 조회 (해당 estiId의 최신버전 상세) ======================= -->
+    <select id="selectEstiDetailList"
+            parameterType="string"
+            resultType="store.yd2team.business.service.EstiSoDetailVO">
+        select
+              esti_detail_no   as estiDetailNo
+            , esti_id          as estiId
+            , version          as version
+            , vend_id          as vendId
+            , product_id       as productId
+            , qy               as qy
+            , price            as price
+            , supply_amt       as supplyAmt
+            , rm               as rm
+        from tb_esti_detail
+        where esti_id = #{estiId}
+          and version = (
+                select max(version)
+                from tb_esti_detail
+                where esti_id = #{estiId}
+          )
+        order by esti_detail_no
+    </select>
+	    
+
 </mapper>
