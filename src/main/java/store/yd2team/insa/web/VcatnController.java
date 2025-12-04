@@ -52,20 +52,27 @@ public class VcatnController {
 				return vcatnService.vcatnRegist(keyword);
 			}
 			
-	//휴가등록(연차소진)
+	//휴가취소(연차신청롤백)
 			@PostMapping("/vcatnDel")
 			@ResponseBody
 			public String vcatnDelete(@RequestBody VcatnVO keyword) {
-				System.out.println("모나오니"+keyword);				
-				return vcatnService.vcatnRegist(keyword);
+				System.out.println("모나오니"+keyword);	
+				int v = vcatnService.vcatnRollback(keyword);
+				if (v >0) {
+					return "휴가 취소 정상처리되었습니다.";					
+				}
+				return "휴가 취소가 처리되지 않았습니다.";	
 			}
 			
 	//휴가승인(관리자가 쓰는 메소드)
 		@PostMapping("/vcatnUpdate")
 		@ResponseBody
-		public boolean vcatnUpdateEdit(@RequestBody VcatnVO keyword) {
+		public String vcatnUpdateEdit(@RequestBody VcatnVO keyword) {
 			System.out.println("모나오니업데이트" + keyword);	
-			
-				return false;
+			int v = vcatnService.vcatnCfmUpdate(keyword);
+			if (v >0) {
+				return "휴가 정상처리 되었습니다.";
+			}
+				return "휴가 정상처리 되지 않았습니다.";
 		}
 }

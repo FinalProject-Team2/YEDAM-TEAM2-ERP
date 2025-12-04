@@ -107,7 +107,7 @@
 						<h5 class="card-title"
 							th:unless="${Session != null and Session.masYn == 'e1'}">나의
 							휴가 신청 내역 -
-							[[${Session.empNm}]]([[${Session.deptId}]]/[[${Session.deptNm}]])
+							[[${Session.empNm}]]([[${Session.deptId}]]/[[${Session.deptNm}]]) 잔여연차수 : 
 						</h5>
 					</div>
 				</div>
@@ -140,8 +140,7 @@
 								<div class="col-md-2">
 									<label class="form-label">이름</label> <input type="text"
 										th:value="${Session.empNm}" id="v_nm"
-										class="form-control readonly-input" readonly="readonly" /> <input
-										id="v_salyPymntSt" style="display: none;">
+										class="form-control readonly-input" readonly="readonly" /> 
 										<input id="v_vcatnId" style="display: none;">
 										<input id="v_vcatnDe" style="display: none;">
 								</div>
@@ -325,19 +324,7 @@
 				$cfmNm.val([[${Session.empId}]]);
 			});
 			
-			// 휴가유형 선택 이벤트
-		    $vcatnTy.on("change", function() {		    	
-		      const value = $(this).val();
-		      console.log("선택됨"+value);
-
-		      if (value == "h1" || value == "h3") {
-		        $salyPymntSt.val("유급");
-		      } else if (value === "h2") {
-		        $salyPymntSt.val("무급");
-		      } else {
-		        $salyPymntSt.val("");
-		      }
-		    });
+			
 			
 		    
 		 // 조회버튼 누를시 일어나는 이벤트
@@ -375,6 +362,12 @@
 				    datas[key] = $(this).val();
 				});
 				datas["confmerId"] = $confmerId.val() ? $confmerId.val() : null;
+				//휴가유형에 따른 유급 무급 판단
+				if($vcatnTy.val() == "h1" || $vcatnTy.val() == "h3") {
+					datas["salyPymntSt"] = '유급'
+				}else if($vcatnTy.val() == "h2") {
+					datas["salyPymntSt"] = '무급'
+				}else{}
 				console.log(datas);
 				
 				
