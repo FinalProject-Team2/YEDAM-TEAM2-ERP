@@ -228,11 +228,11 @@
           <!-- 기준명 / 부서명 -->
           <div class="row mb-3">
             <div class="col-6">
-              <label for="stdNm" class="form-label">기준명</label>
+              <label for="stdNm" class="form-label astar">기준명</label>
               <input type="text" id="stdNm" class="form-control" />
             </div>
             <div class="col-6">
-              <label for="deptNm" class="form-label">부서명</label>
+              <label for="deptNm" class="form-label astar">부서명</label>
               <select id="deptNm" class="form-select">
                 <option value="">선택</option>
               </select>
@@ -242,7 +242,7 @@
           <!-- 출근시간 / 퇴근시간 -->
           <div class="row mb-4 wk-time-range">
             <div class="col-5">
-              <label for="startTime" class="form-label">출근시간</label>
+              <label for="startTime" class="form-label astar">출근시간</label>
               <div class="input-group">
                 <input type="time" id="startTime" class="form-control">
                 <span class="input-group-text" id="startTimeIcon">⏱</span>
@@ -252,7 +252,7 @@
               <span class="wk-dot">~</span>
             </div>
             <div class="col-5">
-              <label for="endTime" class="form-label">퇴근시간</label>
+              <label for="endTime" class="form-label astar">퇴근시간</label>
               <div class="input-group">
                 <input type="time" id="endTime" class="form-control">
                 <span class="input-group-text" id="endTimeIcon">⏱</span>
@@ -262,7 +262,7 @@
 
           <!-- ✅ 근무유형 라디오/주기 삭제하고, 휴일(요일)만 표시 -->
           <div class="mb-4">
-            <label class="form-label d-block">휴일</label>
+            <label class="form-label d-block astar">휴일</label>
             <div id="weekdaySection" class="wk-day-buttons">
               <div class="btn-group" role="group" aria-label="weekday">
                 <button type="button" class="btn btn-outline-primary btn-sm" data-day="MON">월</button>
@@ -378,7 +378,6 @@ const legalGrid = new tui.Grid({
     {
       header: '사용여부',
       name: 'ynCode',
-      align: 'center',
       formatter: ({ value }) => value === 'e1' ? '사용' : '미사용'
     }
   ]
@@ -507,6 +506,7 @@ document.getElementById('btnHldyDel').onclick = () => {
 document.getElementById('btnHldySave').onclick = () => {
   const { grid } = getActiveHldyGrid();
 
+  // ✅  현재 편집 중인 셀 값 강제 반영
   grid.finishEditing();
   const { createdRows, updatedRows, deletedRows } = grid.getModifiedRows();
 
@@ -565,8 +565,6 @@ const startTimeInput = document.getElementById('startTime');
 const endTimeInput   = document.getElementById('endTime');
 const basiNoInput    = document.getElementById('basiNo');
 
-/* ✅ 근무유형 라디오/주기 관련 코드 다 제거 */
-
 /* 요일 버튼 + hidden 값 */
 const dayButtons      = document.querySelectorAll('#weekdaySection button');
 const hiddenWeekdays  = document.getElementById('selectedWeekdays');
@@ -616,7 +614,6 @@ function resetWorkTypeForm() {
   startTimeInput.value = '';
   endTimeInput.value   = '';
 
-  // ✅ 주기/라디오 관련 초기화 제거, 요일만 초기화
   dayButtons.forEach(btn => btn.classList.remove('selected'));
   updateHiddenWeekdays();
 }
@@ -641,50 +638,88 @@ function initWkTyGrid() {
         name: 'select',
         width: 60,
         align: 'center',
-        formatter: ({ rowKey }) =>
-          `<input type="radio" name="wkTySelect" value="${rowKey}">`
+        // ✅ rowKey 대신 기준번호(basiNo)를 value로 사용
+        formatter: ({ row }) =>
+          `<input type="radio" name="wkTySelect" value="${row.basiNo}">`
       },
       { header: '기준명',   name: 'basiNm' },
       { header: '부서명',   name: 'deptNm',  width: 80, align: 'center' },
       { header: '출근시간', name: 'atdcTm',  width: 90, align: 'center' },
       { header: '퇴근시간', name: 'afwkTm',  width: 90, align: 'center' },
-      { header: '휴일유형', name: 'hldyTy',  width: 90, align: 'center' },
-      { header: '휴일설명', name: 'hldyDesc' }
+      /* ✅ 휴일 컬럼: 선택 요일 표시(예: 토,일) */
+      { header: '휴일', name: 'hldyDesc' }
     ]
   });
 }
 
-/* 기준 목록 조회 → 모달 그리드에 바인딩 */
+/* 기준 목록 조회 → 모달 그리드에 바인딩 (검색조건 적용 버전) */
 function loadWkTyList() {
   if (!wkTyGrid) initWkTyGrid();
 
-  fetch('/insa/hldyWkBasi/list')
+  const basiNmInput = document.getElementById('wkTySrchBasiNm');
+  const deptSel     = document.getElementById('wkTyDept');
+
+  const basiNm = basiNmInput ? basiNmInput.value.trim() : '';
+  const deptId = deptSel ? (deptSel.value || '') : '';
+
+  const params = new URLSearchParams();
+  if (basiNm) params.append('basiNm', basiNm);
+  if (deptId) params.append('deptId', deptId);
+
+  const url = '/insa/hldyWkBasi/list' + (params.toString() ? ('?' + params.toString()) : '');
+
+  fetch(url)
     .then(res => res.json())
     .then(list => {
       const data = list.map(r => {
         const at = r.atdcTm ? ('' + r.atdcTm).substring(11, 16) : '';
         const af = r.afwkTm ? ('' + r.afwkTm).substring(11, 16) : '';
-        let desc = '';
-        if (r.hldyTy === 'DAY') {
-          desc = r.hldyTyNm || '요일제';
-        } else if (r.hldyTy === 'CYCLE') {
-          desc = (r.wkDe || 0) + '일 근무 ' + (r.hldyDe || 0) + '일 휴일';
-        }
+
         return {
-          basiNo:  r.basiNo,
-          basiNm:  r.basiNm,
-          deptNm:  r.deptNm,
-          atdcTm:  at,
-          afwkTm:  af,
-          hldyTy:  r.hldyTyNm || r.hldyTy,
-          hldyDesc: desc
+          basiNo:   r.basiNo,
+          basiNm:   r.basiNm,
+          deptNm:   r.deptNm,
+          atdcTm:   at,
+          afwkTm:   af,
+          hldyDesc: ''   // ✅ 휴일 문자열은 아래에서 따로 채움
         };
       });
       wkTyGrid.resetData(data);
+
+      /* ✅ 각 기준별 요일 조회해서 "토,일" 형식으로 셀에 세팅 */
+      const dayLabelMap = {
+        MON: '월',
+        TUE: '화',
+        WED: '수',
+        THU: '목',
+        FRI: '금',
+        SAT: '토',
+        SUN: '일'
+      };
+
+      list.forEach((r, idx) => {
+        if (!r.basiNo) return;
+        const row = wkTyGrid.getRowAt(idx);
+        if (!row) return;
+        const rowKey = row.rowKey;
+
+        fetch('/insa/hldyWkBasi/day/list?basiNo=' + r.basiNo)
+          .then(res => res.json())
+          .then(dayList => {
+            const txt = (dayList || [])
+              .map(d => dayLabelMap[d.dayNm] || d.dayNm)
+              .join(',');
+            wkTyGrid.setValue(rowKey, 'hldyDesc', txt);
+          })
+          .catch(() => {
+            // 에러 시에는 그냥 비워둠
+          });
+      });
     });
 }
 
 /* 모달 열기/닫기 + 선택 */
+// 🔹 팀유틸 closeModal()에서 쓸 수 있게 전역 modal/back 세팅
 const openBtn = document.getElementById('openGuideModal');
 const modal   = document.getElementById('wkTyModal');
 const back    = document.getElementById('wkTyBackdrop');
@@ -703,14 +738,49 @@ function openModal() {
   }
 }
 
-function closeModal() {
-  if (!modal || !back) return;
-  modal.classList.remove('show');
-  modal.style.display = 'none';
-  back.style.display  = 'none';
+openBtn?.addEventListener('click', openModal);
+
+// ✅ 백드롭 클릭 시: teamUtil 의 closeModal 사용
+back?.addEventListener('click', () => {
+  if (typeof closeModal === 'function') {
+    closeModal();
+  } else {
+    // 혹시 teamUtil이 로드 안 된 경우 fallback
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    back.style.display  = 'none';
+  }
+});
+
+/* ✅ 여기 추가: teamUtil.js 방식의 바깥 클릭 닫기 */
+if (typeof modal !== 'undefined' && modal) {
+  modal.addEventListener('click', (event) => {
+    if (!event.target.closest('.modal-content')) {
+      if (typeof closeModal === 'function') {
+        closeModal();
+      } else {
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        if (back) back.style.display = 'none';
+      }
+    }
+  });
 }
 
-openBtn?.addEventListener('click', openModal);
+// 🔎 모달 검색 버튼 / 엔터 / 부서변경 → 검색
+document.getElementById('btnWkTySearch')?.addEventListener('click', () => {
+  loadWkTyList();
+});
+
+document.getElementById('wkTySrchBasiNm')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    loadWkTyList();
+  }
+});
+
+document.getElementById('wkTyDept')?.addEventListener('change', () => {
+  loadWkTyList();
+});
 
 document.getElementById('btnWkTySelect')?.addEventListener('click', () => {
   if (!wkTyGrid) return;
@@ -719,15 +789,35 @@ document.getElementById('btnWkTySelect')?.addEventListener('click', () => {
     alert('기준을 선택하세요.');
     return;
   }
-  const rowKey = Number(checked.value);
-  const row = wkTyGrid.getRow(rowKey);
-  if (!row) return;
 
-  loadWorkTypeDetail(row.basiNo);
-  closeModal();
+  // ✅ rowKey로 getRow 하지 않고, 라디오에 실린 basiNo를 그대로 사용
+  const selectedBasiNo = checked.value;
+  if (!selectedBasiNo) {
+    alert('기준 정보가 올바르지 않습니다.');
+    return;
+  }
+
+  loadWorkTypeDetail(selectedBasiNo);
+
+  if (typeof closeModal === 'function') {
+    closeModal();
+  } else {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    if (back) back.style.display = 'none';
+  }
 });
 
-document.getElementById('btnWkTyClose')?.addEventListener('click', closeModal);
+// 혹시 모달 내부에 닫기 버튼(id="btnWkTyClose") 있으면 거기도 연결
+document.getElementById('btnWkTyClose')?.addEventListener('click', () => {
+  if (typeof closeModal === 'function') {
+    closeModal();
+  } else {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    if (back) back.style.display = 'none';
+  }
+});
 
 /* 기준 상세 조회 + 요일 조회 → 폼 바인딩 */
 function loadWorkTypeDetail(basiNo) {
@@ -746,8 +836,6 @@ function loadWorkTypeDetail(basiNo) {
       const af = vo.afwkTm ? ('' + vo.afwkTm).substring(11, 16) : '';
       startTimeInput.value = at;
       endTimeInput.value   = af;
-
-      // ✅ hldyTy/DAY/CYCLE에 따라 UI 토글하는 부분 제거 (항상 요일만 사용)
 
       return fetch('/insa/hldyWkBasi/day/list?basiNo=' + basiNo);
     })
@@ -787,15 +875,16 @@ document.getElementById('btnWkSave').addEventListener('click', () => {
     return;
   }
 
-  // ✅ 이제 항상 요일제만 사용
-  const hldyTy = 'DAY';
-  const wkDe   = null;
-  const hldyDe = null;
-
   const dayList = (hiddenWeekdays.value || '')
     .split(',')
     .map(s => s.trim())
     .filter(s => s.length > 0);
+
+  /* ✅ 추가: 요일을 하나도 선택하지 않았으면 저장 불가 */
+  if (dayList.length === 0) {
+    alert('휴일을 한 개 이상 선택하세요.');
+    return;
+  }
 
   const payload = {
     basiNo,
@@ -803,9 +892,6 @@ document.getElementById('btnWkSave').addEventListener('click', () => {
     basiNm,
     atdcTm,
     afwkTm,
-    hldyTy,
-    wkDe,
-    hldyDe,
     dayList
   };
 
@@ -866,3 +952,67 @@ document.getElementById('btnWkDelete').addEventListener('click', () => {
 
 </body>
 </html>
+
+<!-- /templates/insa/modal/wkTyModal.html -->
+<div th:fragment="wkTyModal">
+  <!-- ✅ 모달 배경 -->
+  <div class="modal-backdrop" id="wkTyBackdrop" style="display:none;"></div>
+
+  <!-- ✅ 모달 본체 -->
+  <div class="modal" id="wkTyModal" tabindex="-1" style="display:none;">
+    <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 800px;">
+      <div class="modal-content">
+        <div class="modal-body">
+          <h5 class="modal-title mb-3">근무형태기준 조회</h5>
+
+          <div class="row">
+            <div class="col-md-12">
+
+              <!-- 🔎 카드 1 : 검색조건 -->
+              <div class="card border mb-3">
+                <div class="card-header">
+                  <h5 class="card-title">검색조건</h5>
+                  <div class="card-header-right">
+                    <!-- 검색 버튼 -->
+                    <button class="btn btn-outline-dark" id="btnWkTySearch">조회</button>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label">기준명</label>
+                      <input type="text" class="form-control" id="wkTySrchBasiNm">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">부서명</label>
+                      <select id="wkTyDept" class="form-select">
+                        <option value="">전체</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 📋 카드 2 : 근무형태 기준 목록 그리드 -->
+              <div class="card border">
+                <div class="card-header">
+                  <h5 class="card-title">근무형태 기준 목록</h5>
+                  <div class="card-header-right">
+                    <!-- ✅ 선택 적용 버튼 -->
+                    <button class="btn btn-outline-dark" id="btnWkTySelect">확인</button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div id="gridWkTy" class="mt-2"></div>
+                </div>
+              </div>
+
+            </div>
+          </div><!-- /.row -->
+
+        </div><!-- /.modal-body -->
+      </div>
+    </div>
+  </div>
+</div>

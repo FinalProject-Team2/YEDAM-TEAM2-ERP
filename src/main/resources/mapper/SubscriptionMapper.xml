@@ -108,7 +108,7 @@
 	<select id="selectSubscriptionUsageByVendId" parameterType="string" resultType="store.yd2team.common.dto.SubscriptionUsageDto">
 		SELECT
 			p.plan_nm        AS planNm,
-			p.crea_dt        AS creaDt,
+			s.crea_dt        AS creaDt,
 			p.sttl_perd      AS sttlPerd,
 			p.acct_issu_cnt  AS acctIssuCnt,
 			p.api_issu_cnt   AS apiIssuCnt,
@@ -119,5 +119,42 @@
 		  ON s.subsp_plan_id = p.subsp_plan_id
 		WHERE s.vend_id = #{vendId}
 	</select>
+	
+	<!-- 신규 추가: tb_subsp ID 시퀀스 조회 (예: 'subsp_202512' prefix 기준 MAX 3자리) -->
+	<select id="getMaxSubspSeqOfMonth" parameterType="string" resultType="string">
+		SELECT MAX(SUBSTR(subsp_id, LENGTH(#{prefix}) + 1))
+		FROM tb_subsp
+		WHERE subsp_id LIKE CONCAT(#{prefix}, '%')
+	</select>
+	
+	<!-- 신규 추가: tb_subsp 등록 -->
+	<insert id="insertSubscription" parameterType="store.yd2team.common.service.SubscriptionVO">
+		INSERT INTO tb_subsp
+		(
+			subsp_id,
+			vend_id,
+			subsp_plan_id,
+			acct_use_cnt,
+			api_use_cnt,
+			crea_dt,
+			crea_by
+		)
+		VALUES
+		(
+			#{subspId},
+			#{vendId},
+			#{subspPlanId},
+			NVL(#{acctUseCnt}, 0),
+			NVL(#{apiUseCnt}, 0),
+			SYSDATE,
+			#{creaBy}
+		)
+	</insert>
+	
+	<!-- 신규 추가: vendId 기준 tb_subsp 구독 삭제 (구독 해지) -->
+	<delete id="deleteSubscriptionByVendId" parameterType="string">
+		DELETE FROM tb_subsp
+		WHERE vend_id = #{vendId}
+	</delete>
 	
 </mapper>

@@ -89,6 +89,10 @@ public class WkTyServiceImpl implements WkTyService {
         return wkTyMapper.deleteHldyWkBasi(basiNo, vendId);
     }
 
+    /**
+     * 기준 + 요일 한 번에 저장 (신규/수정 공통)
+     * - hldy_ty / wk_de / hldy_de 없이, 요일제만 사용
+     */
     @Override
     public Long saveHldyWkBasi(HldyWkBasiVO vo, List<String> dayList) {
 
@@ -96,34 +100,35 @@ public class WkTyServiceImpl implements WkTyService {
         String vendId = LoginSession.getVendId();
 
         vo.setVendId(vendId);
+        Long basiNo = vo.getBasiNo();
 
-        if (vo.getBasiNo() == null) {
+        if (basiNo == null) {
             // INSERT
             vo.setCreaBy(empId);
             wkTyMapper.insertHldyWkBasi(vo);   // selectKey로 basiNo 세팅
+            basiNo = vo.getBasiNo();
         } else {
             // UPDATE
             vo.setUpdtBy(empId);
             wkTyMapper.updateHldyWkBasi(vo);
             // 기존 요일 전체 삭제
-            wkTyMapper.deleteDayByBasiNo(vo.getBasiNo(), vendId);
+            wkTyMapper.deleteDayByBasiNo(basiNo, vendId);
         }
 
-        // 요일제면 요일 다시 insert
-        if ("DAY".equals(vo.getHldyTy()) && dayList != null) {
+        // 요일 재등록 (요일제만 사용)
+        if (dayList != null) {
             for (String dayNm : dayList) {
+                if (dayNm == null || dayNm.isBlank()) continue;
+
                 DayVO d = new DayVO();
-                d.setBasiNo(vo.getBasiNo());
+                d.setBasiNo(basiNo);
                 d.setDayNm(dayNm);
                 d.setCreaBy(empId);
                 wkTyMapper.insertDay(d);
             }
-        } else {
-            // 주기제면 혹시 남아있을 요일 삭제
-            wkTyMapper.deleteDayByBasiNo(vo.getBasiNo(), vendId);
         }
 
-        return vo.getBasiNo();
+        return basiNo;
     }
 
     // ======================== 요일 ========================

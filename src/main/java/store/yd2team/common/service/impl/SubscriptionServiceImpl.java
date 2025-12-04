@@ -76,4 +76,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 		return subscriptionMapper.selectSubscriptionUsageByVendId(vendId);
 	}
 	
+	@Override
+	@Transactional
+	public int cancelSubscriptionByVendId(String vendId) throws Exception {
+		if (vendId == null || vendId.isEmpty()) {
+			return 0;
+		}
+		return subscriptionMapper.deleteSubscriptionByVendId(vendId);
+	}
+	
 }// end class

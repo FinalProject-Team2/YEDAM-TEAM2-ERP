@@ -25,6 +25,7 @@ public class CreditController {
 
     private final CreditService creditService;
 	
+    // 여신한도관리 메인화면
 	@GetMapping("/creditMain")
 	public String selectall(Model model) {
 
@@ -48,8 +49,8 @@ public class CreditController {
 	// 조회
     @PostMapping("/list")
     @ResponseBody
-    public List<CreditVO> searchCustcom(@RequestBody CreditVO vo) {
-        return creditService.searchCustcom(vo);
+    public List<CreditVO> searchCredit(@RequestBody CreditVO vo) {
+        return creditService.searchCredit(vo);
     }
     
     

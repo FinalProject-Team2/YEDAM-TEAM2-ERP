@@ -165,60 +165,119 @@
 			        AND churnRiskScore LIKE '%' || #{churnRiskScore} || '%'
 			    </if>
 		</select>
-		
-		<!-- 휴면,이탈 평균구매주기 -->
-		<select id="getAVG" parameterType="int">
-			WITH ordered AS (
-						    SELECT
-						        custcom_id,
-						        trns_dt,
-						        LAG(trns_dt) OVER (
-						            PARTITION BY custcom_id
-						            ORDER BY trns_dt
-						        ) AS prev_trns_dt
-						    FROM tb_rcipt
-						    WHERE custcom_id =: #{custcomId}   -- 바인딩 파라미터
-						)
-			SELECT
-			    ROUND(AVG(trns_dt - prev_trns_dt), 1) AS avg_cycle_days
-			FROM ordered
-			WHERE prev_trns_dt IS NOT NULL;
-		</select>
 
-		<select id="getSalesChange" resultType="map">
-			    <![CDATA[
-			    WITH monthly AS (
-			        SELECT
-			            custcom_id,
-			            TO_CHAR(trns_dt, 'YYYY-MM') AS ym,
-			            SUM(sale_amt) AS monthly_sales
-			        FROM tb_rcipt
-			        GROUP BY custcom_id, TO_CHAR(trns_dt, 'YYYY-MM')
-			    ),
-			    calc AS (
-			        SELECT
-			            custcom_id,
-			            ym,
-			            monthly_sales,
-			            LAG(monthly_sales) OVER (
-			                PARTITION BY custcom_id ORDER BY ym
-			            ) AS prev_sales
-			        FROM monthly
-			    )
-			    SELECT
-			        custcom_id,
-			        ym,
-			        monthly_sales,
-			        prev_sales,
-			        CASE
-			            WHEN prev_sales IS NULL THEN NULL
-			            WHEN prev_sales = 0 THEN NULL
-			            ELSE ROUND(((monthly_sales - prev_sales) / prev_sales) * 100, 1)
-			        END AS change_rate
-			    FROM calc
-			    ORDER BY custcom_id, ym
-			    ]]>
+		<select id="getMonthlySalesChange" resultType="store.yd2team.business.service.MonthlySalesDTO">
+
+WITH MONTHLY_SALES AS (
+    SELECT
+        a.CUSTcom_ID CUSTOMER_ID,
+        TRUNC(a.SALE_DATE, 'MM') AS MONTH,
+        SUM(d.supply_price) AS TOTAL_AMOUNT
+    FROM tb_SALE a 
+    JOIN tb_sale_detail d ON a.sale_slip_no = d.sale_slip_no
+    GROUP BY a.CUSTcom_ID, TRUNC(a.SALE_DATE, 'MM')
+),
+
+LATEST_6 AS (
+    SELECT CUSTOMER_ID, SUM(TOTAL_AMOUNT) AS AMT_6
+    FROM MONTHLY_SALES
+    WHERE MONTH &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
+    GROUP BY CUSTOMER_ID
+),
+
+PREV_6 AS (
+    SELECT CUSTOMER_ID, SUM(TOTAL_AMOUNT) AS AMT_PREV_6
+    FROM MONTHLY_SALES
+    WHERE MONTH &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
+      AND MONTH &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -11)
+    GROUP BY CUSTOMER_ID
+),
+
+TREND AS (
+    SELECT
+        a.CUSTOMER_ID,
+        CASE
+            WHEN b.AMT_PREV_6 = 0 THEN 100
+            ELSE ((a.AMT_6 - b.AMT_PREV_6) / b.AMT_PREV_6) * 100
+        END AS GROWTH_RATE
+    FROM LATEST_6 a
+    LEFT JOIN PREV_6 b ON a.CUSTOMER_ID = b.CUSTOMER_ID
+),
+
+TREND_SCORE AS (
+    SELECT
+        CUSTOMER_ID,
+        CASE
+            WHEN GROWTH_RATE &gt;= 20 THEN 100
+            WHEN GROWTH_RATE BETWEEN 5 AND 19 THEN 80
+            WHEN GROWTH_RATE BETWEEN -5 AND 4 THEN 60
+            WHEN GROWTH_RATE BETWEEN -20 AND -6 THEN 40
+            ELSE 20
+        END AS TREND_SCORE
+    FROM TREND
+),
+
+LAST_PURCHASE AS (
+    SELECT
+        CUSTCOM_ID CUSTOMER_ID,
+        MAX(SALE_DATE) AS LAST_DATE,
+        TRUNC(SYSDATE - MAX(SALE_DATE)) AS DAYS_SINCE
+    FROM tb_sale
+    GROUP BY CUSTCOM_ID
+),
+
+RECENCY_SCORE AS (
+    SELECT
+        CUSTOMER_ID,
+        CASE
+            WHEN DAYS_SINCE &lt;= 30 THEN 100
+            WHEN DAYS_SINCE &lt;= 60 THEN 80
+            WHEN DAYS_SINCE &lt;= 90 THEN 60
+            WHEN DAYS_SINCE &lt;= 180 THEN 30
+            ELSE 10
+        END AS REC_SCORE
+    FROM LAST_PURCHASE
+),
+
+FREQ AS (
+    SELECT
+        CUSTCOM_ID CUSTOMER_ID,
+        SUM(CASE WHEN SALE_DATE &gt;= ADD_MONTHS(SYSDATE, -3) THEN 1 END) AS FREQ_3,
+        SUM(CASE WHEN SALE_DATE &gt;= ADD_MONTHS(SYSDATE, -12) THEN 1 END) AS FREQ_12
+    FROM TB_SALE
+    GROUP BY CUSTCOM_ID
+),
+
+FREQ_SCORE AS (
+    SELECT
+        CUSTOMER_ID,
+        CASE
+            WHEN FREQ_12 = 0 THEN 20
+            WHEN (FREQ_3 / (FREQ_12/12*3)) &gt;= 1.5 THEN 90
+            WHEN (FREQ_3 / (FREQ_12/12*3)) &gt;= 0.8 THEN 60
+            ELSE 30
+        END AS FREQ_SCORE
+    FROM FREQ
+)
+
+SELECT
+    t.CUSTOMER_ID AS customerId,
+    t.TREND_SCORE AS trendScore,
+    r.REC_SCORE AS recScore,
+    f.FREQ_SCORE AS freqScore,
+    (t.TREND_SCORE * 0.4) + (r.REC_SCORE * 0.4) + (f.FREQ_SCORE * 0.2) AS finalScore,
+    CASE
+        WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 80 THEN '정상 고객'
+        WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 60 THEN '주의 고객'
+        WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 40 THEN '휴먼 고객'
+        ELSE '이탈 고객'
+    END AS customerStatus
+FROM TREND_SCORE t
+JOIN RECENCY_SCORE r ON t.CUSTOMER_ID = r.CUSTOMER_ID
+JOIN FREQ_SCORE f ON t.CUSTOMER_ID = f.CUSTOMER_ID
+ORDER BY finalScore DESC
+
 </select>
+
 		
-    
 </mapper>

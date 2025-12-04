@@ -1,10 +1,14 @@
 package store.yd2team.business.web;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,32 +84,29 @@ public class EstiController {
 
     
     
-	
-	
-/*
-	// 등록 및 수정
-	@PostMapping("/save")
-	@ResponseBody
-	public Map<String, Object> savePricePolicy(@RequestBody PriceVO vo) {
-	    Map<String, Object> result = new HashMap<>();
+    
+    /** 저장 (신규/수정 공통, 이력 INSERT 방식) */
+    @PostMapping("/save")
+    public ResponseEntity<Map<String, Object>> saveEsti(@RequestBody EstiSoVO vo) {
 
-	    try {
-	        System.out.println("### Controller Request VO : " + vo);
+        // 로그인 사용자ID는 프로젝트 방식에 맞춰 교체
+        String loginId = "testUser";
+        vo.setCreaBy(loginId);
+        vo.setUpdtBy(loginId);
 
-	        int saveResult = priceService.savePricePolicy(vo);
+        String estiId = estiSoService.saveEsti(vo);
 
-	        result.put("result", saveResult > 0 ? "success" : "success"); // 무조건 success 처리
-	        result.put("message", "단가정책 저장 완료");
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("estiId", estiId);
 
-	    } catch (Exception e) {
-	        System.out.println("### Exception : " + e.getMessage());
-	        result.put("result", "fail");
-	        result.put("message", e.getMessage());
-	    }
+        return ResponseEntity.ok(result);
+    }
 
-	    System.out.println("### Final Response : " + result);
-	    return result;
-	}
-*/	
+    /** estiId 기준 최신버전 조회 */
+    @GetMapping("/{estiId}")
+    public ResponseEntity<EstiSoVO> getEsti(@PathVariable String estiId) {
+        return ResponseEntity.ok(estiSoService.getEsti(estiId));
+    }
 	
 }

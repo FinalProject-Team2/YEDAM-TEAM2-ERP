@@ -347,7 +347,7 @@
     });
 
     /***********************
-     * 6. 모달 열기
+     * 6. 모달 열기 + 닫기
      ***********************/
     const openBtn = document.getElementById("openSalyRegistModal");
     const modal   = document.getElementById("salyRegistModal");
@@ -361,9 +361,41 @@
         grid2.refreshLayout();
     }
 
+    // ✅ 공통 닫기 함수
+    function closeSalyRegistModal() {
+        if (modal) {
+            modal.classList.remove("show");
+            modal.style.display = "none";
+        }
+        if (back) {
+            back.style.display = "none";
+        }
+    }
+
     if (openBtn) {
         openBtn.addEventListener("click", openModal);
     }
+
+    // ✅ 배경 클릭 시 닫기
+    if (back) {
+        back.addEventListener("click", closeSalyRegistModal);
+    }
+
+    // ✅ 모달 바깥(검정 배경) 클릭 시 닫기
+    if (modal) {
+        modal.addEventListener("click", function (e) {
+            if (!e.target.closest(".modal-content")) {
+                closeSalyRegistModal();
+            }
+        });
+    }
+
+    // ✅ ESC 키로 닫기
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            closeSalyRegistModal();
+        }
+    });
 
     /***********************
      * 7. revs_ym / payDt 연동

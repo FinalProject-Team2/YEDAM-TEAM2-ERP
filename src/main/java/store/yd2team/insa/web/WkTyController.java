@@ -133,10 +133,6 @@ public class WkTyController {
             m.put("basiNo", vo.getBasiNo());
             m.put("basiNm", vo.getBasiNm());
             m.put("deptNm", vo.getDeptNm());
-            m.put("hldyTy", vo.getHldyTy());
-            m.put("hldyTyNm", vo.getHldyTyNm());
-            m.put("wkDe", vo.getWkDe());
-            m.put("hldyDe", vo.getHldyDe());
             m.put("atdcTm", vo.getAtdcTm() != null ? fmt.format(vo.getAtdcTm()) : null);
             m.put("afwkTm", vo.getAfwkTm() != null ? fmt.format(vo.getAfwkTm()) : null);
             return m;
@@ -159,15 +155,12 @@ public class WkTyController {
         m.put("basiNo", vo.getBasiNo());
         m.put("basiNm", vo.getBasiNm());
         m.put("deptId", vo.getDeptId());
-        m.put("hldyTy", vo.getHldyTy());
-        m.put("wkDe", vo.getWkDe());
-        m.put("hldyDe", vo.getHldyDe());
         m.put("atdcTm", vo.getAtdcTm() != null ? fmt.format(vo.getAtdcTm()) : null);
         m.put("afwkTm", vo.getAfwkTm() != null ? fmt.format(vo.getAfwkTm()) : null);
         return m;
     }
 
-    /** 기준별 요일 목록 (요일제일 때 선택 요일) */
+    /** 기준별 요일 목록 (선택 요일) */
     @GetMapping("/insa/hldyWkBasi/day/list")
     @ResponseBody
     public List<DayVO> hldyWkBasiDayList(@RequestParam("basiNo") Long basiNo) {
@@ -191,13 +184,6 @@ public class WkTyController {
         String basiNm   = (String) body.get("basiNm");
         String atdcStr  = (String) body.get("atdcTm");
         String afwkStr  = (String) body.get("afwkTm");
-        String hldyTy   = (String) body.get("hldyTy");
-
-        Integer wkDe = null;
-        if (body.get("wkDe") instanceof Number n1) wkDe = n1.intValue();
-
-        Integer hldyDe = null;
-        if (body.get("hldyDe") instanceof Number n2) hldyDe = n2.intValue();
 
         SimpleDateFormat timeFmt = new SimpleDateFormat("HH:mm");
         Date atdcTm = null;
@@ -216,9 +202,7 @@ public class WkTyController {
         vo.setBasiNm(basiNm);
         vo.setAtdcTm(atdcTm);
         vo.setAfwkTm(afwkTm);
-        vo.setHldyTy(hldyTy);
-        vo.setWkDe(wkDe);
-        vo.setHldyDe(hldyDe);
+        // hldyTy / wkDe / hldyDe 제거됨
 
         @SuppressWarnings("unchecked")
         List<String> dayList =

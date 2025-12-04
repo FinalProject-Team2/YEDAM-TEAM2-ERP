@@ -26,9 +26,7 @@ public class HldyWkBasiVO {
     @DateTimeFormat(pattern = "HH:mm")
     private Date afwkTm;
 
-    private String hldyTy;   // DAY / CYCLE
-    private Integer wkDe;
-    private Integer hldyDe;
+    // ✅ 삭제됨: hldyTy / wkDe / hldyDe
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date creaDt;
@@ -40,5 +38,6 @@ public class HldyWkBasiVO {
 
     // -------- 조회용 --------
     private String deptNm;
-    private String hldyTyNm;
+
+    // ✅ 삭제됨: hldyTyNm
 }
