@@ -22,8 +22,10 @@ public class VcatnController {
 	
 	@GetMapping("/vcatn")
 	public String vcatnRender(Model model) {
+		if(LoginSession.getLoginSession() == null) {
+			return "common/logIn";
+		}
 		
-		;
 		model.addAttribute("Session", LoginSession.getLoginSession());
 		String id = LoginSession.getEmpId();
 		model.addAttribute("remndrYryc", vcatnService.yrycUserRemndrChk(id) );

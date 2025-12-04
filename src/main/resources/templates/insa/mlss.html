@@ -41,82 +41,19 @@
 				<div class="card-body">
 
 					<div class="row mb-2">
-						<div class="col-md-4">
+						<div class="col-md-2">
 							<label class="form-label">본인 평가 완료 여부</label> <input type="text"
 								value="0 / 3" class="form-control" />
 						</div>
-						<div class="col-md-4">
+						<div class="col-md-2">
 							<label class="form-label">상사 평가 완료 여부</label> <input type="text"
 								value="0 / 2" class="form-control" />
 						</div>
-						<div class="col-md-4">
-							<label class="form-label">부하 평가 완료 여부</label> <input type="text"
+						<div class="col-md-2">
+							<label class="form-label">동료 평가 완료 여부</label> <input type="text"
 								value="0 / 5" class="form-control" />
 						</div>
-
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-
-	<div class="row">
-		<div class="col-md-2">
-			<div class="card">
-				<div class="menu-item" onclick="chTitle(this)">
-					<i class="fa fa-edit"></i>본인 평가
-				</div>
-				<div class="menu-item" onclick="chTitle(this)">
-					<i class="fa fa-edit"></i>상사 평가
-				</div>
-				<div class="menu-item" onclick="chTitle(this)">
-					<i class="fa fa-edit"></i>부하 평가
-				</div>
-				<div class="menu-item" onclick="chTitle(this)">
-					<i class="fa fa-edit"></i>결과지 확인
-				</div>
-			</div>
-		</div>
-		<!-- 검색조건 -->
-		<div class="col-md-10">
-			<!-- 사원목록 -->
-			<div id="mlssUser" class="card">
-				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-				<div
-					class="card-header d-flex justify-content-between align-items-center">
-					<div class="card-header-left">
-						<!-- collapse 토글 버튼으로 변경 -->
-						<h5 class="card-title mb-0">
-							<a id="collapseToggle" class="text-dark text-decoration-none"
-								data-bs-toggle="collapse" href="#selfEvalCollapse" role="button"
-								aria-expanded="false" aria-controls="selfEvalCollapse"> 본인
-								평가 </a>
-						</h5>
-					</div>
-					<div class="card-header-right">
-						<button type="button" class="btn btn-outline-dark">임시저장</button>
-						<button type="button" class="btn btn-outline-dark">제출</button>
-					</div>
-				</div>
-				<div id="selfEvalCollapse" class="collapse">
-					<div class="card-body">
-						<div class="row mb-2">
-							<div class="col-md-4">
-								<label class="form-label">이름</label> <input type="text"
-									value="0 / 3" class="form-control" />
-							</div>
-							<div class="col-md-4">
-								<label class="form-label">부서</label> <input type="text"
-									value="0 / 2" class="form-control" />
-							</div>
-							<div class="col-md-4">
-								<label class="form-label">직급</label> <input type="text"
-									value="0 / 5" class="form-control" />
-							</div>
-						</div>
-						<div class="row mb-2">
-							<div class="col-md-12">
+						<div class="col-md-6">
 								<label for="userName" class="form-label">기간</label>
 								<div class="d-flex align-items-center js-date-range">
 
@@ -144,19 +81,80 @@
 
 									</div>
 							</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="row">
+		<div class="col-md-2">
+			<div class="card">
+				<div class="menu-item" onclick="chTitle(this)">
+					<i class="fa fa-edit"></i>본인 평가
+				</div>
+				<div class="menu-item" onclick="chTitle(this)">
+					<i class="fa fa-edit"></i>상사 평가
+				</div>
+				<div class="menu-item" onclick="chTitle(this)">
+					<i class="fa fa-edit"></i>동료 평가
+				</div>
+				<div class="menu-item" onclick="chTitle(this)">
+					<i class="fa fa-edit"></i>결과지 확인
+				</div>
+			</div>
+		</div>
+		<!-- 검색조건 -->
+		<div class="col-md-10">
+			<!-- 사원목록 -->
+			<div id="mlssUser" class="card">
+				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+				<div
+					class="card-header d-flex justify-content-between align-items-center">
+					<div class="card-header-left">
+						<!-- collapse 토글 버튼으로 변경 -->
+						<h5 class="card-title mb-0" id="collapseToggle">본인 평가</h5>
+					</div>
+					<div class="card-header-right">
+						<button type="button" class="btn btn-outline-dark">임시저장</button>
+						<button type="button" class="btn btn-outline-dark">제출</button>
+					</div>
+				</div>
+				
+					<div class="card-body">
+						<div class="row mb-2">
+							<div class="col-md-4">
+								<label class="form-label">이름</label> <input type="text"
+									value="김철수" class="form-control" />
+							</div>
+							<div class="col-md-4">
+								<label class="form-label">부서</label> <input type="text"
+									value="영업" class="form-control" />
+							</div>
+							<div class="col-md-4">
+								<label class="form-label">직급</label> <input type="text"
+									value="사원" class="form-control" />
+							</div>
+						</div>
+						<div class="row mb-2">
+							
 							
 						</div>
-						<h5 class="card-title">역량 그룹별 평가 항목</h5>
+						<div style="height: 375px; overflow:auto;" >
+						<h5 id="yeocRyangGrp" class="card-title">역량 그룹별 평가 항목</h5>
 						<p>직무 역량</p>
 						<div id="toastGrid" style="margin: 20px;"></div>
 						<p>협업 역량</p>
 						<div id="toastGrid2" style="margin: 20px;"></div>
 						<p>자기관리 역량</p>
 						<div id="toastGrid3" style="margin: 20px;"></div>
+						</div>
 					</div>
-				</div>
+				
 			</div>
-			<div id="mlssResult" class="card stIsShow">
+			<div id="mlssResult" class="card stIsShow" style="height: 550px; overflow-y:auto; overflow-x:hidden;">
 				<div class="row mb-2">
 					<div class="col-md-6">
 						<div id="radar" style="width: 400px; height: 400px;"></div>
@@ -214,16 +212,7 @@
 				
 			}
 
-			const gridData = [ {
-				id : 1,
-				ability : "업무 이해도"
-			}, {
-				id : 2,
-				ability : "전문성"
-			}, {
-				id : 3,
-				ability : "문제 해결 능력"
-			} ];
+			
 let gridColums = [
 	{
 		header : '평가 항목',
@@ -235,7 +224,7 @@ let gridColums = [
 		name : 'score1',
 		align : 'center',
 		formatter : function(props) {
-			return `<input type="radio" name="row-${props.row.id}" value="1">`;
+			return `<input type="radio" name="row-${props.row.mlssIemId}" value="1">`;
 		}
 	},
 	{
@@ -243,7 +232,7 @@ let gridColums = [
 		name : 'score2',
 		align : 'center',
 		formatter : function(props) {
-			return `<input type="radio" name="row-${props.row.id}" value="2">`;
+			return `<input type="radio" name="row-${props.row.mlssIemId}" value="2">`;
 		}
 	},
 	{
@@ -251,7 +240,7 @@ let gridColums = [
 		name : 'score3',
 		align : 'center',
 		formatter : function(props) {
-			return `<input type="radio" name="row-${props.row.id}" value="3">`;
+			return `<input type="radio" name="row-${props.row.mlssIemId}" value="3">`;
 		}
 	},
 	{
@@ -259,7 +248,7 @@ let gridColums = [
 		name : 'score4',
 		align : 'center',
 		formatter : function(props) {
-			return `<input type="radio" name="row-${props.row.id}" value="4">`;
+			return `<input type="radio" name="row-${props.row.mlssIemId}" value="4">`;
 		}
 	},
 	{
@@ -267,28 +256,23 @@ let gridColums = [
 		name : 'score5',
 		align : 'center',
 		formatter : function(props) {
-			return `<input type="radio" name="row-${props.row.id}" value="5">`;
+			return `<input type="radio" name="row-${props.row.mlssIemId}" value="5">`;
 		}
 	} ];
-			const grid = new tui.Grid(
-					{
-						el : document.getElementById('toastGrid'),
-						data : gridData,
-						rowKey : 'id',
-						scrollX : false,
-						scrollY : false,
-						minBodyHeight : 0,
-						autoWidth : true,
-						columns : gridColums
-					});
-
-			// 아코디언 열릴 때 레이아웃 갱신
-			const collapseEl = document.getElementById('selfEvalCollapse');
-			collapseEl.addEventListener('shown.bs.collapse', function() {
-				grid.refreshLayout();
-				grid2.refreshLayout();
-				grid3.refreshLayout();
-			});
+			
+			let grpTag = $("#yeocRyangGrp");
+			
+			
+			const gridData = [ {
+				id : 1,
+				ability : "업무 이해도"
+			}, {
+				id : 2,
+				ability : "전문성"
+			}, {
+				id : 3,
+				ability : "문제 해결 능력"
+			} ];
 
 			const gridData2 = [ {
 				id : 4,
@@ -303,6 +287,31 @@ let gridColums = [
 				ability : "문제해결 및 기여도",
 
 			}, ];
+			
+			const gridData3 = [ {
+				id : 7,
+				ability : "시간 및  업무관리",
+			}, {
+				id : 8,
+				ability : "자기개발 및 학습태도",
+			}, {
+				id : 9,
+				ability : "책임감 및 규율 준수",
+			}, ];
+			
+			
+			
+			const grid = new tui.Grid(
+					{
+						el : document.getElementById('toastGrid'),
+						data : gridData,
+						rowKey : 'id',
+						scrollX : false,
+						scrollY : false,
+						minBodyHeight : 0,
+						autoWidth : true,
+						columns : gridColums
+					});
 
 			// Grid 생성
 			const grid2 = new tui.Grid(
@@ -316,16 +325,7 @@ let gridColums = [
 						columns : gridColums
 					});
 
-			const gridData3 = [ {
-				id : 7,
-				ability : "시간 및  업무관리",
-			}, {
-				id : 8,
-				ability : "자기개발 및 학습태도",
-			}, {
-				id : 9,
-				ability : "책임감 및 규율 준수",
-			}, ];
+			
 
 			// Grid 생성
 			const grid3 = new tui.Grid(
@@ -435,7 +435,7 @@ let gridColums = [
 											name : 'score1',
 											align : 'left',												
 										},{
-											header : '부하',
+											header : '동료',
 											name : 'score1',
 											align : 'left',												
 										},{

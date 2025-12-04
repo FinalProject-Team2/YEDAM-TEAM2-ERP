@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>mlss.html</title>
+  
+<!-- ✅ Date / Time Picker -->
+  <link rel="stylesheet"
+        href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
+<!-- ✅ Grid -->
+  <link rel="stylesheet"
+        href="https://uicdn.toast.com/grid/latest/tui-grid.css">
+  
+<style>
+.form-select {
+	color: #000 !important;
+}
+/* 추가 CSS */
+.readonly-input[readonly] {
+	background-color: #e9ecef; /* Bootstrap 기본 disabled 색상 */
+	cursor: not-allowed; /* 마우스 커서도 입력 불가 느낌 */
+}
+
+.stIsShow {
+	display: none;
+}
+
+.menu-item {
+	cursor: pointer; /* 마우스 올리면 손가락 모양 */
+}
+</style>
+</head>
+<body layout:fragment="content">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card mb-3">
+				<!-- 카드 헤더 : 제목 + 조회 버튼 -->
+				<div
+					class="card-header d-flex justify-content-between align-items-center">
+					<h5 class="card-title mb-0">조회</h5>
+					<div>
+						<button class="btn btn-outline-dark">조회</button>
+					</div>
+				</div>
+
+				<!-- 카드 바디 : 검색 폼 -->
+				<div class="card-body">
+					<div class="row g-3">
+						<div class="col-md-3">
+							<label for="edcNm" class="form-label">교육명</label> <input
+								type="text" id="edcNm" class="form-control edcJohoe"
+								placeholder="Value">
+						</div>
+						<div class="col-md-3">
+							<label for="v_creaDt" class="form-label">등록일</label>
+							<div class="input-group date js-date-single">
+								<input type="text" class="form-control datepicker js-date-input"
+									placeholder="날짜 선택" id="v_creaDt"> <span
+									class="input-group-text js-date-icon"> <i
+									class="bi bi-calendar"></i>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mb-3">
+		<div
+			class="card-header d-flex justify-content-between align-items-center">
+			<h5 class="card-title mb-0">다면평가 목록</h5>
+			<div>
+				<button class="btn btn-outline-dark">삭제</button>
+				<button id="mlssAdd" class="btn btn-outline-dark">행 추가</button>
+				<button id="mlssRegist" class="btn btn-outline-dark">저장</button>
+			</div>
+		</div>
+		<div class="card-body">
+			<div id="toastGrid" style="margin: 20px;"></div>
+		</div>
+	</div>
+	<!-- ✅ Date / Time Picker -->
+<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
+<!-- ✅ Grid -->
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+	<script>
+	
+	let v = [
+		  {
+			    mlssId: 1,
+			    mlssNm: "2025년 상반기 다면평가",
+			    evlBeginDt: "2025-01-10",
+			    evlEndDt: "2025-01-20",
+			    creaDt: "2024-12-15"
+			  },
+			  {
+			    mlssId: 2,
+			    mlssNm: "2025년 하반기 다면평가",
+			    evlBeginDt: "2025-07-01",
+			    evlEndDt: "2025-07-15",
+			    creaDt: "2025-06-10"
+			  },
+			  {
+			    mlssId: 3,
+			    mlssNm: "신입사원 교육 평가",
+			    evlBeginDt: "2025-03-05",
+			    evlEndDt: "2025-03-12",
+			    creaDt: "2025-02-28"
+			  }
+			];
+
+	
+	const grid = new tui.Grid({
+		  el: $("#toastGrid")[0],
+		  data: v,		  
+		  editingType: 'cell',
+		  bodyHeight: 560,
+		  scrollX: false,
+		  scrollY: true,
+		  rowHeaders: ['checkbox'],
+		  columnOptions: {
+		    minWidth: 80,
+		    resizable: true
+		  },
+		  columns: [
+		    { header: '다면평가ID', name: 'mlssId', hidden: true},
+		    { header: '다면평가 명', name: 'mlssNm', editor: 'text'},
+		    { header: '평가시작일시', name: 'evlBeginDt', editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' }}},		    
+		    { header: '평가종료일시', name: 'evlEndDt', editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' }}},	    
+		    { header: '등록일', name: 'creaDt', editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' }}},		    
+		  ]
+		});
+	
+	let registBtn = $("#mlssRegist");
+	let addBtn = $("#mlssAdd");
+		let n = 3;
+	addBtn.on("click", () => {
+		if(n == 4){alert("등록버튼 누르고 추가하세요!"); return}
+		grid.prependRow({
+		    mlssId: ++n,
+		    mlssNm: "신입사원 교육 평가",
+		    evlBeginDt: "2025-03-05",
+		    evlEndDt: "2025-03-12",
+		    creaDt: "2025-02-28"
+		  });
+	});
+	</script>
+
+</body>
+
+</html>
