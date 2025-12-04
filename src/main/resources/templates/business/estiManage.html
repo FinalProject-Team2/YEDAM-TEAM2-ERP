@@ -341,7 +341,7 @@
 	}); // 2-4. 반려 버튼 이벤트 끝
 
 	
-// =====================================================모달
+// ====================================================================================================================== 모달
 	// 0-1. 고객사Id 자동완성
 	if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
 
@@ -569,6 +569,7 @@ class ProductAutoComplete {
 		$('#autoCustcomName').val('');
 		$('#autoDueDt').val('');
 		$('#autoRemark').val('');
+		$('#applyDate').val('');
 		
 		// 2) 그리드 데이터 초기화
 		if (window.newEstiGrid) {
@@ -614,6 +615,82 @@ class ProductAutoComplete {
 	
 	    // 선택된 row 제거
 	    window.newEstiGrid.removeRows(rowKeys);
+	});
+	
+	// 4. 모달 저장버튼 이벤트
+	document.getElementById("btnEstiSave").addEventListener("click", function () {
+	
+	    // 1) 그리드 데이터
+	    const rows = window.newEstiGrid.getData();
+	
+	    const detailList = rows.map(row => ({
+	        estiDetailNo: null,                 // 신규이므로 null
+	        estiId: null,                       // 서버에서 vo.estiId 로 세팅
+	        version: null,                      // 서버에서 계산
+	        vendId: row.vendId || null,         // 필요 없으면 null
+	        productId: row.productId,
+	        qy: Number(row.qy || 0),
+	        price: Number(row.basisSaleAmt || 0),
+	        supplyAmt: Number(row.finalAmt || 0),
+	        rm: row.rm || null
+	    }));
+	
+	    // 2) 헤더 폼 값
+	    const estiIdVal   = document.getElementById("estiIdHidden").value;           // 신규: "", 수정: 기존값
+	    const custcomId   = document.getElementById("autoCustcomId").value;
+	    const custcomName = document.getElementById("autoCustcomName").value;
+	    const dueDt       = document.getElementById("applyDate").value;             // yyyy-MM-dd
+	
+	    const payload = {
+	        estiId: estiIdVal ? estiIdVal : null,    // null 이면 신규, 값 있으면 이력 INSERT
+	        custcomId: custcomId,
+	        custcomName: custcomName,
+	        dueDt: dueDt,
+	        soDt: null,            // 필요하면 today 등으로 채우기
+	        cdtlnNo: null,
+	        cdtlnLmt: null,
+	        estiSt: "es1",
+	        recallResn: null,
+	        rm: null,
+	
+	        detailList: detailList
+	    };
+	
+	    console.log("esti 저장 payload >>> ", payload);
+	
+	    fetch("/esti/save", {
+	        method: "POST",
+	        headers: { "Content-Type": "application/json" },
+	        body: JSON.stringify(payload)
+	    })
+	        .then(res => res.json())
+	        .then(result => {
+	            if (result.success) {
+	                alert("저장 완료\nestiId : " + result.estiId);
+	
+	                // 신규일 때는 서버에서 생성된 estiId 를 hidden 에 세팅해서
+	                // 다음 저장부터는 같은 estiId 로 새 version 이 쌓이도록 함
+	                document.getElementById("estiIdHidden").value = result.estiId;
+	                
+	             	// 1) 모달 닫기 - Bootstrap API 사용
+	                const modalEl = document.getElementById("estiModal"); // 실제 모달 id로 맞추기
+	                if (modalEl) {
+	                    const estiModal = bootstrap.Modal.getInstance(modalEl) 
+	                                   || new bootstrap.Modal(modalEl);
+	                    estiModal.hide();
+	                }
+
+	                // 2) 그리드 재조회
+	                document.getElementById("btnSearch").click();
+	                
+	            } else {
+	                alert("저장 실패");
+	            }
+	        })
+	        .catch(err => {
+	            console.error(err);
+	            alert("저장 중 오류가 발생했습니다.");
+	        });
 	});
 	
 </script>
