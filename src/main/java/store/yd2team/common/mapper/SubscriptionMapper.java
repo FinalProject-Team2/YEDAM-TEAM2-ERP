@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import store.yd2team.common.dto.SubscriptionUsageDto;
+import store.yd2team.common.service.SubscriptionVO;
 import store.yd2team.common.service.subscriptionPlanVO;
 
 @Mapper
@@ -32,5 +33,15 @@ public interface SubscriptionMapper {
 	
 	// 로그인 사용자의 vendId 기준 현재 구독 + 사용량 조회
 	SubscriptionUsageDto selectSubscriptionUsageByVendId(@Param("vendId") String vendId);
+	
+	// === 신규 추가: 구독(tb_subsp) ID 채번 및 등록 ===
+	// 현재 연월 기준 최대 구독 ID 시퀀스 조회 (예: subsp_202512001 중 001 부분)
+	String getMaxSubspSeqOfMonth(@Param("prefix") String prefix);
+	
+	// 구독(tb_subsp) 등록
+	int insertSubscription(SubscriptionVO vo);
+	
+	// 신규 추가: vendId 기준 tb_subsp 구독 삭제 (구독 해지)
+	int deleteSubscriptionByVendId(@Param("vendId") String vendId);
 	
 }// end interface

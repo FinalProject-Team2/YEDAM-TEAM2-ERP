@@ -54,8 +54,8 @@
 						<h5 class="card-title">구독 결제</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark">홈으로</button>
-						<button class="btn btn-outline-dark">이전</button>
+						<button type="button" class="btn btn-outline-dark" onclick="goHome()">홈으로</button>
+						<button type="button" class="btn btn-outline-dark" onclick="goBackToChoice()">이전</button>
 					</div>
 				</div>
 				<div class="card-body">
@@ -120,6 +120,14 @@
                 alert('토스 결제 중 오류가 발생했습니다. 콘솔 로그를 확인해 주세요.');
             }
         });
+    }
+
+    function goHome() {
+        window.location.href = '/';
+    }
+
+    function goBackToChoice() {
+        window.location.href = '/SubscriptionChoice';
     }
 
     document.addEventListener('DOMContentLoaded', function () {
