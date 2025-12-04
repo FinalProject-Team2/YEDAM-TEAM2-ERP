@@ -166,7 +166,8 @@
 			    </if>
 		</select>
 
-		<select id="getMonthlySalesChange" resultType="store.yd2team.business.service.MonthlySalesDTO">
+	<select id="getMonthlySalesChange"
+        resultType="store.yd2team.business.service.MonthlySalesDTO">
 
 WITH MONTHLY_SALES AS (
     SELECT
@@ -263,21 +264,58 @@ FREQ_SCORE AS (
 SELECT
     t.CUSTOMER_ID AS customerId,
     t.TREND_SCORE AS trendScore,
-    r.REC_SCORE AS recScore,
+    r.REC_SCORE  AS recScore,
     f.FREQ_SCORE AS freqScore,
     (t.TREND_SCORE * 0.4) + (r.REC_SCORE * 0.4) + (f.FREQ_SCORE * 0.2) AS finalScore,
     CASE
-        WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 80 THEN '정상 고객'
+        WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 80 THEN '이탈위험 고객'
         WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 60 THEN '주의 고객'
         WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 40 THEN '휴먼 고객'
-        ELSE '이탈 고객'
+        ELSE '정상 고객'
     END AS customerStatus
 FROM TREND_SCORE t
 JOIN RECENCY_SCORE r ON t.CUSTOMER_ID = r.CUSTOMER_ID
-JOIN FREQ_SCORE f ON t.CUSTOMER_ID = f.CUSTOMER_ID
-ORDER BY finalScore DESC
+JOIN FREQ_SCORE    f ON t.CUSTOMER_ID = f.CUSTOMER_ID
+WHERE 1 = 1
+    <!-- 업체명(고객ID) -->
+    <if test="customerId != null and customerId != ''">
+        AND t.CUSTOMER_ID LIKE '%' || #{customerId} || '%'
+    </if>
 
+    <!-- 휴면/이탈 상태 -->
+<if test="customerStatus != null and customerStatus != ''">
+    AND (
+        CASE
+            WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) >= 80 THEN '이탈위험 고객'
+            WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) >= 60 THEN '주의 고객'
+            WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) >= 40 THEN '휴먼 고객'
+            ELSE '정상 고객'
+        END
+        LIKE '%' || #{customerStatus} || '%'
+    )
+</if>
+
+    <!-- 점수 하한 -->
+    <if test="trendScore != null">
+        AND t.TREND_SCORE &gt;= #{trendScore}
+    </if>
+
+    <if test="recScore != null">
+        AND r.REC_SCORE &gt;= #{recScore}
+    </if>
+
+    <if test="freqScore != null">
+        AND f.FREQ_SCORE &gt;= #{freqScore}
+    </if>
+
+    <if test="finalScore != null">
+        AND (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= #{finalScore}
+    </if>
+
+ORDER BY finalScore DESC
 </select>
+
+
 
 		
 </mapper>

@@ -1,6 +1,7 @@
 package store.yd2team.business.web;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,6 @@ import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
-import store.yd2team.business.service.SalesChangeDTO;
 import store.yd2team.business.service.churnRiskVO;
 
 @Controller
@@ -50,27 +50,25 @@ public class BusinessController {
 	//휴면,이탈 조회페이지열람 
 	@GetMapping("/churnRiskList")
 	public String churnRiskListForm(Model model) {
+
+	    // 페이지 처음 로딩 시 완전히 빈 리스트 제공
+	    model.addAttribute("getMonthlySalesList", Collections.emptyList());
+
 	    return "business/churnRiskList";
 	}
 	// 휴면,이탈고객검색조회
 	@PostMapping("/churnRiskList")
-	public String selectall(churnRiskVO vo, SalesChangeDTO vo1, Model model) {
+	public String selectall(churnRiskVO vo, MonthlySalesDTO cond, Model model) {
 		System.out.println("=== churnRiskList.selectall() 호출됨 ===");
-		//검색조회
-		List<churnRiskVO> getchurnRiskList = businessService.getchurnRiskList(vo);
-		model.addAttribute("getchurnRiskList", getchurnRiskList);
-		//매출변동
-		return "business/churnRiskList";
-	}
-	// 휴면,이탈 조건조회 및 점수화
-	@PostMapping("/churnRiskListLead")
-	public String getstdrlead(MonthlySalesDTO vo, Model model) {
-		System.out.println("=== churnRiskList.selectall() 호출됨 ===");
-		//검색조회
-		List<MonthlySalesDTO> getchurnRiskList = businessService.getMonthlySalesChange(vo);
-		model.addAttribute("getchurnRiskList", getchurnRiskList);
-		//매출변동
-		return "business/churnRiskList";
+
+		  // 휴먼/이탈 조건별 점수화 + 검색조건 적용
+	    List<MonthlySalesDTO> getMonthlySalesList = businessService.getMonthlySalesChange(cond);
+
+	    model.addAttribute("getMonthlySalesList", getMonthlySalesList);
+	    // 검색조건 다시 화면에 뿌려주고 싶으면
+	    model.addAttribute("cond", cond);
+
+	    return "business/churnRiskList";
 	}
 	//
 	//
