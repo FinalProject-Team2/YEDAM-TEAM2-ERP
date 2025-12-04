@@ -1,6 +1,7 @@
 package store.yd2team.business.service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -11,7 +12,9 @@ public class EstiSoVO {
 
 	// ====== 검색 조건 ======
     private String custcomName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dueStart;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dueEnd;
 
     // ====== 조회 결과 컬럼 ======
@@ -36,5 +39,18 @@ public class EstiSoVO {
     //===== 모달 고객사 auto complete
     private String custcomId;     // 고객사ID
     private String vendId;       // 거래처ID
+    
+    private String cdtlnNo;        // cdtln_no
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private String soDt;           // so_dt (견적일자 or 주문일자)
+    private Long ttSupplyAmt;      // tt_supply_amt (상세 합계)
+    private String rm;             // rm
+
+    // 공통
+    private String creaBy;         // 등록자
+    private String updtBy;         // 수정자
+
+    // 상세 리스트
+    private List<EstiSoDetailVO> detailList;
 }
 
