@@ -48,6 +48,8 @@
 	
 	<!-- teamUtil.js -->
 	<script src="/assets/js/teamUtil.js"></script>
+	<!-- 정재민 비밀번호 변경 모달 js -->
+	<script src="/assets/js/pwChangeModal.js"></script>
 
   </head>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -166,14 +168,13 @@
               <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
                 <div class="dropdown-header text-center">
                   <img class="img-md rounded-circle" src="/assets/images/faces/face8.jpg" alt="Profile image">
-                  <p class="mb-1 mt-3 fw-semibold">Jung Jaemin</p>
+                  <p class="mb-1 mt-3 fw-semibold">Jeong Jaemin</p>
                   <p class="fw-light text-muted mb-0">jamin312@gmail.com</p>
                 </div>
                 <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile <span class="badge badge-pill badge-danger">1</span></a>
                 <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"></i> Messages</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> Activity</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-help-circle-outline text-primary me-2"></i> FAQ</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i>Sign Out</a>
+                <a class="dropdown-item" id="pwChangeMenuItem"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> 비밀번호 변경</a>
+                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i> 로그 아웃</a>
               </div>
             </li>
           </ul>
@@ -331,7 +332,9 @@
         <!-- main-panel ends -->
       </div>
       <!-- page-body-wrapper ends -->
-    </div>
+
+    
+    <div th:replace="~{common/modal/pwChangeModal :: pwChangeModal}"></div>
     <!-- container-scroller -->
     <!-- plugins:js -->
 
