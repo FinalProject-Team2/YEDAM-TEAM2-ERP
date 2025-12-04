@@ -111,21 +111,14 @@
          , b.vend_id      AS vendId
          , b.atdc_tm      AS atdcTm
          , b.afwk_tm      AS afwkTm
-         , b.hldy_ty      AS hldyTy
-         , b.wk_de        AS wkDe
-         , b.hldy_de      AS hldyDe
          , b.crea_dt      AS creaDt
          , b.crea_by      AS creaBy
          , b.updt_dt      AS updtDt
          , b.updt_by      AS updtBy
          , d.dept_nm      AS deptNm
-         , c.code_nm      AS hldyTyNm
     FROM   tb_hldy_wk_basi b
            LEFT JOIN tb_dept d
              ON b.dept_id = d.dept_id
-           LEFT JOIN tb_code c
-             ON b.hldy_ty = c.code_id
-            AND c.grp_id  = 'HLDY_TY'  
     WHERE  b.vend_id = #{vendId}
     <if test="deptId != null and deptId != ''">
       AND b.dept_id = #{deptId}
@@ -146,9 +139,6 @@
          , b.vend_id      AS vendId
          , b.atdc_tm      AS atdcTm
          , b.afwk_tm      AS afwkTm
-         , b.hldy_ty      AS hldyTy
-         , b.wk_de        AS wkDe
-         , b.hldy_de      AS hldyDe
          , b.crea_dt      AS creaDt
          , b.crea_by      AS creaBy
          , b.updt_dt      AS updtDt
@@ -174,9 +164,6 @@
         , vend_id
         , atdc_tm
         , afwk_tm
-        , hldy_ty
-        , wk_de
-        , hldy_de
         , crea_dt
         , crea_by
     ) VALUES (
@@ -186,9 +173,6 @@
         , #{vendId}
         , #{atdcTm}
         , #{afwkTm}
-        , #{hldyTy}
-        , #{wkDe}
-        , #{hldyDe}
         , SYSDATE
         , #{creaBy}
     )
@@ -202,9 +186,6 @@
          , basi_nm = #{basiNm}
          , atdc_tm = #{atdcTm}
          , afwk_tm = #{afwkTm}
-         , hldy_ty = #{hldyTy}
-         , wk_de   = #{wkDe}
-         , hldy_de = #{hldyDe}
          , updt_dt = SYSDATE
          , updt_by = #{updtBy}
      WHERE basi_no = #{basiNo}
@@ -283,4 +264,55 @@
        )
   </delete>
 
+  <!-- ================= 법정 공휴일 자동등록용 ================= -->
+
+  <!--
+      법정 공휴일(공통, vend_id IS NULL) 중
+      같은 날짜(YYYYMMDD)가 이미 있는지 체크
+   -->
+  <select id="existsLegalHlDyByLocdate"
+          parameterType="string"
+          resultType="int">
+    SELECT COUNT(*)
+    FROM tb_hldy_basi h
+    WHERE h.vend_id IS NULL
+      AND TO_CHAR(h.hldy_mmdd, 'YYYYMMDD') = #{locdate}
+  </select>
+
+  <!--
+      공공데이터 법정 공휴일 INSERT
+      - dateName  → hldy_nm
+      - locdate   → hldy_mmdd (YYYYMMDD → DATE)
+      - vend_id   → NULL (법정 공휴일 = 공통)
+   -->
+  <insert id="insertLegalHlDyFromApi">
+    INSERT INTO tb_hldy_basi (
+      hldy_no,
+      hldy_nm,
+      hldy_mmdd,
+      yn,
+      vend_id,
+      crea_dt,
+      crea_by
+    )
+    VALUES (
+      seq_tb_hldy_basi_no.NEXTVAL,
+      #{hldyNm},
+      TO_DATE(#{locdate}, 'YYYYMMDD'),
+      'e1',
+      NULL,
+      SYSDATE,
+      'SYSTEM'
+    )
+  </insert>
+
+  <!-- ================= 법정 공휴일(공통) 기존 사용분(e1) → 미사용(e2) 처리 ================= -->
+  <update id="deactivateAllLegalHlDy">
+    UPDATE tb_hldy_basi
+       SET yn      = 'e2',
+           updt_dt = SYSDATE,
+           updt_by = 'SYSTEM'
+     WHERE vend_id IS NULL
+       AND yn      = 'e1'
+  </update>
 </mapper>
