@@ -32,12 +32,12 @@ public class SecPolicyController {
     public SecPolicyResponseDto saveSecPolicy(@RequestBody SecPolicyVO reqVo) {
 
         String vendId  = LoginSession.getVendId();
-        String loginId = LoginSession.getLoginId();
+        String empId  = LoginSession.getEmpId();
 
         boolean exists = secPolicyService.existsForVend(vendId);
 
         try {
-            SecPolicyVO saved = secPolicyService.saveForVend(vendId, loginId, reqVo);
+            SecPolicyVO saved = secPolicyService.saveForVend(vendId, empId, reqVo);
 
             String msg = exists
                     ? "보안 정책이 수정되었습니다."

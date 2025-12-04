@@ -54,9 +54,9 @@
             WHERE   vend_id = #{vendId}
                OR   vend_id IS NULL
                OR   vend_id = ''
+            ORDER BY sort_order
         )
         WHERE ROWNUM = 1
-        ORDER BY sort_order
     </select>
     
     <select id="countByVendId">
@@ -143,5 +143,30 @@
             updt_by             = #{updtBy}
         WHERE vend_id = #{vendId}
     </update>
+	
+	<select id="selectDefaultPolicy">
+        SELECT  policy_id,
+                vend_id,
+                pw_fail_cnt,
+                auto_unlock_tm,
+                pw_len_min,
+                pw_len_max,
+                use_upper_yn,
+                use_lower_yn,
+                use_num_yn,
+                use_spcl_yn,
+                captcha_yn,
+                captcha_fail_cnt,
+                otp_yn,
+                otp_valid_min,
+                otp_fail_cnt,
+                session_timeout_min,
+                timeout_action,
+                crea_dt,
+                crea_by
+        FROM    tb_sec_policy    
+        WHERE   vend_id IS NULL 
+        AND     policy_id = 'default'       
+    </select>
 	
 </mapper>

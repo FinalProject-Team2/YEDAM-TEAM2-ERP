@@ -54,6 +54,7 @@ dependencies {
 	implementation 'com.solapi:sdk:1.0.3'
 	// 비밀번호 해시(BCrypt)용
 	implementation 'org.springframework.security:spring-security-crypto'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
 
 dependencyManagement {

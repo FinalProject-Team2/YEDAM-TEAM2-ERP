@@ -9,4 +9,6 @@ public interface EmpLoginService {
 	boolean isCaptchaRequired(String vendId, String loginId);
 	
 	SecPolicyVO getSecPolicy(String vendId);
+	
+	void increaseLoginFailByOtp(EmpAcctVO empAcct);
 }
