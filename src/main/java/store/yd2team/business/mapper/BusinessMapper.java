@@ -44,7 +44,7 @@ public interface BusinessMapper {
     //
 	//휴면, 이탈고객 평균
     int getAVG();
-    //휴면, 이탈 매출변동
+    //휴면, 이탈 조건별 점수화
     List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo);
 	
 	//단건조회
