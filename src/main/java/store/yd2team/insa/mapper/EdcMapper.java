@@ -2,9 +2,11 @@ package store.yd2team.insa.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
+
 import store.yd2team.insa.service.EdcVO;
 import store.yd2team.insa.service.EmpVO;
-
+@Mapper
 public interface EdcMapper {
 
 	//다중조건 조회

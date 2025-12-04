@@ -43,7 +43,7 @@
 					class="card-header d-flex justify-content-between align-items-center">
 					<h5 class="card-title mb-0">조회</h5>
 					<div>
-						<button class="btn btn-outline-dark">조회</button>
+						<button id="joHoe" class="btn btn-outline-dark">조회</button>
 					</div>
 				</div>
 
@@ -51,15 +51,15 @@
 				<div class="card-body">
 					<div class="row g-3">
 						<div class="col-md-3">
-							<label for="edcNm" class="form-label">교육명</label> <input
-								type="text" id="edcNm" class="form-control edcJohoe"
+							<label for="mlssNm" class="form-label">다면평가 명</label> <input
+								type="text" id="mlssNm" class="form-control mlssJohoe"
 								placeholder="Value">
 						</div>
 						<div class="col-md-3">
-							<label for="v_creaDt" class="form-label">등록일</label>
+							<label for="evlBeginDt" class="form-label">평가시작일시</label>
 							<div class="input-group date js-date-single">
-								<input type="text" class="form-control datepicker js-date-input"
-									placeholder="날짜 선택" id="v_creaDt"> <span
+								<input type="text" class="form-control datepicker js-date-input mlssJohoe"
+									placeholder="날짜 선택" id="evlBeginDt"> <span
 									class="input-group-text js-date-icon"> <i
 									class="bi bi-calendar"></i>
 								</span>
@@ -115,6 +115,7 @@
 			  }
 			];
 
+	let lastAddedRowKey = null;
 	
 	const grid = new tui.Grid({
 		  el: $("#toastGrid")[0],
@@ -137,18 +138,95 @@
 		  ]
 		});
 	
+	/* =========================
+	   ✅ 4. ✅ "추가된 행만 수정 가능" 제어
+	========================= */
+	grid.on('editingStart', (ev) => {
+	  const { rowKey } = ev;
+
+	  // ✅ 마지막 추가 행이 아니면 수정 차단
+	  if (rowKey !== lastAddedRowKey) {
+	    ev.stop();  // ❌ 수정 막기
+	  }
+	});
+	
 	let registBtn = $("#mlssRegist");
 	let addBtn = $("#mlssAdd");
-		let n = 3;
+	let n = v.length;
+	let n2 = v.length;
+	
+	//행 추가 눌렀을 때 실행되는 코드
 	addBtn.on("click", () => {
-		if(n == 4){alert("등록버튼 누르고 추가하세요!"); return}
+		if(n == n2+1){alert("등록버튼 누르고 추가하세요!"); return}
 		grid.prependRow({
 		    mlssId: ++n,
-		    mlssNm: "신입사원 교육 평가",
-		    evlBeginDt: "2025-03-05",
-		    evlEndDt: "2025-03-12",
-		    creaDt: "2025-02-28"
-		  });
+		    mlssNm: "",
+		    evlBeginDt: "",
+		    evlEndDt: "",
+		    creaDt: dateFormat(new Date(), 'yyyy-MM-dd')
+		  }, { focus: true });
+		
+		// 포커스가 이동한 셀에서 rowKey를 얻음
+		  const focused = grid.getFocusedCell && grid.getFocusedCell();
+		  if (focused && focused.rowKey !== undefined && focused.rowKey !== null) {
+		    lastAddedRowKey = focused.rowKey;
+		  } else {
+		    // 안전장치: 포커스 정보가 없으면 첫번째 행의 key 사용 (대개 0 혹은 내부키)
+		    // grid.getRowKey? 직접 API가 없으면 getRowAt(0) 등을 사용해야 하는데, 여기서는 안전하게 null 처리
+		    lastAddedRowKey = null;
+		  }
+	});
+	
+	//등록버튼 눌럿을 때 실행되는 코드
+	registBtn.on("click", () =>{
+		if (lastAddedRowKey !== null) {
+			console.log(lastAddedRowKey);
+			
+			// ✅ 추가된 행의 전체 데이터 가져오기
+		    const rowData = grid.getRow(lastAddedRowKey);
+			console.log(rowData);
+		     $.ajax({
+			    url: "/mlssRegist",                // 요청 URL
+			    type: "post",                     // GET 방식 (fetch 코드와 동일)
+			    contentType: "application/json",
+			    data: JSON.stringify(rowData),     // 쿼리 파라미터 자동 변환			        
+			})
+			.done((result) => {
+			    alert(result+"건 등록되었습니다.");			    
+			})
+			.fail((error) => {
+			    console.error(error);
+			    alert("데이터 요청 중 오류 발생");
+			}); 
+			
+		    //alert("등록 완료!");
+		    lastAddedRowKey = null; // 등록 후 다시 전체 수정 잠금
+		  } else {
+		    alert("등록할 행이 없습니다.");
+		  }
+	});
+	
+	//조회버튼 눌럿을 때
+	$("#joHoe").on("click", () =>{
+		
+		let datas = [];
+		$(".mlssJohoe").each(function(idx, ele) {
+			datas[$(ele).attr("id")] = $(ele).val()
+		});
+		console.log(datas);
+		
+		/* $.ajax({
+		    url: "/edcDetaJohoe",                // 요청 URL
+		    type: "get",                     // GET 방식 (fetch 코드와 동일)
+		    data: dto
+		})
+		.done((result) => {		    
+		    grid.resetData(result);          // 결과를 grid에 반영
+		})
+		.fail((error) => {
+		    console.error(error);
+		    alert("데이터 요청 중 오류 발생");
+		}); */
 	});
 	</script>
 
