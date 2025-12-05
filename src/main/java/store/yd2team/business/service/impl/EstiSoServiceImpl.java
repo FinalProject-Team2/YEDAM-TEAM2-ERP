@@ -64,12 +64,12 @@ public class EstiSoServiceImpl implements EstiSoService {
         }
 
         // 1) 상세 합계
-        long total = 0L;
+        Long total = 0L;
         List<EstiSoDetailVO> list = vo.getDetailList();
         if (list != null) {
             for (EstiSoDetailVO d : list) {
                 if (d.getSupplyAmt() != null) {
-                    total += d.getSupplyAmt();
+                	total = d.getSupplyAmt();
                 }
             }
         }
@@ -125,5 +125,75 @@ public class EstiSoServiceImpl implements EstiSoService {
             header.setDetailList(estiSoMapper.selectEstiDetailList(estiId));
         }
         return header;
+    }
+    
+    
+    
+    // 주문서 등록버튼
+    @Override
+    public EstiSoVO getOrderInitFromEsti(String estiId) {
+        EstiSoVO header = estiSoMapper.selectEstiHeader(estiId);
+        List<EstiSoDetailVO> detailList = estiSoMapper.selectEstiDetailList(estiId);
+
+        header.setDetailList(detailList);
+        return header;
+    }
+
+    @Override
+    public String saveOrderFromEsti(EstiSoVO vo) {
+
+        // 1) 주문번호 생성
+        String soId = estiSoMapper.createSoId();
+        vo.setSoId(soId);
+
+        // 2) 합계 계산
+        Long ttSupply = 0L;
+        Long ttQty = 0L;
+        long ttVat    = 0L;
+
+        if (vo.getDetailList() != null) {
+        	for (EstiSoDetailVO d : vo.getDetailList()) {
+        	    long supply = d.getSupplyAmt() == null ? 0L : d.getSupplyAmt();
+        	    long qy     = d.getQy()         == null ? 0L : d.getQy();
+
+        	    ttSupply += supply;
+        	    ttQty    += qy;
+
+        	    // 부가세 10% (소수점은 버림 기준 예시)
+        	    ttVat    += supply / 10;   // 10% = supply * 0.1
+        	}
+
+        	vo.setTtSupplyPrice(ttSupply);
+        	vo.setTtSurtaxPrice(ttVat);           // tb_so.TT_SURTAX_PRICE
+        	vo.setTtPrice(ttSupply + ttVat);      // tb_so.TT_PRICE
+        	vo.setTtSoQy(ttQty);
+        }
+
+        vo.setTtSupplyPrice(ttSupply);
+        vo.setTtSoQy(ttQty);
+
+        // 3) 주문 헤더 INSERT
+        estiSoMapper.insertSo(vo);
+
+        // 4) 주문 상세 INSERT
+        if (vo.getDetailList() != null) {
+            for (EstiSoDetailVO d : vo.getDetailList()) {
+                d.setSoId(soId);
+                estiSoMapper.insertSoDetail(d);
+            }
+        }
+        
+        // 5) 견적 상태 es4(예: 주문완료)로 변경
+        estiSoMapper.updateEstiStatusToOrdered(vo.getEstiId(), vo.getVersion());
+        
+
+        return soId;
+    }
+    
+    // ================================================== 주문서관리
+    // 주문서 조회
+    @Override
+    public List<EstiSoVO> selectSoList(EstiSoVO so) {
+        return estiSoMapper.selectSo(so);
     }
 }

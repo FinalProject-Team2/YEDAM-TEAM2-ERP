@@ -25,6 +25,33 @@
   margin-left: 4px; 
 }
 
+/* 모달 합계 css */
+.order-summary-bar {
+  margin-top: 8px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background-color: #fff9e6;   /* 옅은 노랑 */
+  display: flex;
+  justify-content: flex-end;
+  gap: 32px;
+  font-size: 14px;
+}
+
+.order-summary-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.order-summary-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.order-summary-value {
+  color: #222;
+  font-weight: 700;
+}
 </style>
 
 </head>
@@ -126,6 +153,7 @@
 
 
 <div th:replace="business/modal/newEstiModal :: newEstiModal"></div>
+<div th:replace="business/modal/newSoModal :: newSoModal"></div>
 
 
 <script>
@@ -692,6 +720,202 @@ class ProductAutoComplete {
 	            alert("저장 중 오류가 발생했습니다.");
 	        });
 	});
+	
+	
+// ========================================================================== 주문서 등록 버튼 모달
+	// 0. 주문서 그리드 전역
+	window.newSoGrid = null;
+	
+	// 0-1. 주문서 상세 그리드 생성
+	function loadNewSoGrid(data = []) {
+	  if (window.newSoGrid) {
+	    window.newSoGrid.resetData(data);
+	    return;
+	  }
+	
+	  window.newSoGrid = new tui.Grid({
+	    el: document.getElementById("newSoGrid"),
+	    data: data,
+	    scrollX: true,
+	    scrollY: true,
+	    bodyHeight: 250,
+	    rowHeaders: [],    // 읽기 전용이면 체크박스 없어도 됨
+	    columns: [
+	      { name: 'productId', header: '상품ID', hidden: true },
+	      { name: 'productName', header: '상품명', width: 302 },
+	      { name: 'qy', header: '수량', width: 100, align: 'right' },
+	      { name: 'price', header: '단가', width: 200, align: 'right' },
+	      { name: 'supplyAmt', header: '공급가액', width: 200, align: 'right' }
+	    ]
+	  });
+	}
+	
+	// 1. 견적 그리드 - 주문서 등록 버튼 클릭
+	$(document).on("click", ".order-btn", function () {
+	  const estiId = $(this).data("id");
+	
+	  fetch(`/so/fromEsti/${estiId}`)
+	    .then(res => {
+	      if (!res.ok) {
+	        return res.text().then(text => {
+	          console.error("GET /so/fromEsti 에러 응답 >>>", text);
+	          throw new Error("server error");
+	        });
+	      }
+	      return res.json();
+	    })
+	    .then(data => {
+		  const header = data.header;
+		  const detailList = data.detailList || [];
+		
+		  $("#newSoEstiId").val(header.estiId);
+		  $("#newSoEstiIdView").val(header.estiId);
+		  $("#newSoVersion").val(header.version);
+		  $("#newSoCustcomId").val(header.custcomId);
+		  $("#newSoCustcomName").val(header.custcomNameResult);
+		  $("#newSoDueDt").val(header.dueDt);
+		
+		  // ▶ 공급가 합계 계산
+		  const totalSupply = detailList.reduce((sum, row) => {
+		    return sum + (Number(row.supplyAmt || 0));
+		  }, 0);
+/* 		  $("#newSoTtSupplyPrice").val(
+		    totalSupply ? totalSupply.toLocaleString() : ""
+		  ); */
+		
+		  loadNewSoGrid(detailList);
+		  
+		  // 하단 합계 갱신
+	      updateOrderSummary(detailList);
+		  
+		  openNewSoModal();
+		})
+	    .catch(err => {
+	      console.error(err);
+	      alert("주문서 정보를 불러오지 못했습니다.");
+	    });
+	});
+	
+	// 2. 모달 열기/닫기
+	function openNewSoModal() {
+	  const modal = document.getElementById("newSoModal");
+	  const back  = document.getElementById("newSoBackdrop");
+	
+	  modal.classList.add("show");
+	  modal.style.display = "block";
+	  back.style.display  = "block";
+	
+	  if (window.newSoGrid) window.newSoGrid.refreshLayout();
+	}
+	
+	function closeNewSoModal() {
+	  document.getElementById("newSoModal").classList.remove("show");
+	  document.getElementById("newSoModal").style.display = "none";
+	  document.getElementById("newSoBackdrop").style.display = "none";
+	
+	  resetNewSoForm();
+	}
+	
+	function resetNewSoForm() {
+	  $("#newSoEstiId").val("");
+	  $("#newSoId").val("");
+	  $("#newSoEstiIdView").val("");
+	  $("#newSoVersion").val("");
+	  $("#newSoCustcomName").val("");
+	  $("#newSoDueDt").val("");
+	  $("#newSoShipAddr").val("");
+	  $("#newSoRm").val("");
+	
+	  if (window.newSoGrid) {
+	    window.newSoGrid.resetData([]);
+	  }
+	}
+	
+	// 모달 바깥 클릭 시 닫기
+	document.getElementById("newSoModal")
+	  .addEventListener("click", (event) => {
+	    if (!event.target.closest(".modal-content")) {
+	      closeNewSoModal();
+	    }
+	  });
+	
+	// 3. 모달 초기화 버튼
+	$("#newSoModalInit").on("click", function () {
+	  resetNewSoForm();
+	});
+	
+	// 4. 모달 저장 버튼
+	$("#newSoModalSaveBtn").on("click", function () {
+	  // ▶ id 이름 newSoXXX 로 맞추기
+	  const estiId   = $("#newSoEstiId").val();
+	  const version  = $("#newSoVersion").val();  // 견적 버전
+	  const custcomId = $("#newSoCustcomId").val();
+	  const dueDt     = $("#newSoDueDt").val();
+	  const shipAddr = $("#newSoShipAddr").val();
+	  const orderRm  = $("#newSoRm").val();
+	
+	  // ▶ grid 객체 이름 newSoGrid 사용
+	  const rows = window.newSoGrid ? window.newSoGrid.getData() : [];
+	
+	  const detailList = rows.map(r => ({
+	    productId: r.productId,
+	    qy: Number(r.qy || 0),
+	    price: Number(r.price || 0),
+	    supplyAmt: Number(r.supplyAmt || 0)
+	  }));
+	
+	  const payload = {
+	    estiId: estiId,
+	    version: version,     // tb_so.version ← 견적 버전
+	    custcomId: custcomId,
+	    dueDt: dueDt,
+	    shipAddr: shipAddr,
+	    rm: orderRm,
+	    detailList: detailList
+	  };
+	
+	  fetch("/so/fromEsti/save", {
+	    method: "POST",
+	    headers: { "Content-Type": "application/json" },
+	    body: JSON.stringify(payload)
+	  })
+	    .then(res => res.json())
+	    .then(result => {
+	      if (result.success) {
+	        alert("주문서 등록 완료\n주문번호 : " + result.soId);
+	        closeNewSoModal();          // 함수 이름도 newSoModal로
+	
+	        // 견적 목록 재조회
+	        $("#btnSearch").click();
+	      } else {
+	        alert("저장 실패");
+	      }
+	    })
+	    .catch(err => {
+	      console.error(err);
+	      alert("저장 중 오류가 발생했습니다.");
+	    });
+	});
+	
+	// 주문서등록 모달 합계등록 함수
+	function updateOrderSummary(detailList) {
+	  const supplyTotal = detailList.reduce((sum, row) => {
+	    return sum + Number(row.supplyAmt || 0);
+	  }, 0);
+	
+	  const vatTotal = Math.floor(supplyTotal * 0.1);
+	  const grandTotal = supplyTotal + vatTotal;
+	
+	  $("#sumSupply").text(
+	    supplyTotal ? supplyTotal.toLocaleString() : "0"
+	  );
+	  $("#sumVat").text(
+	    vatTotal ? vatTotal.toLocaleString() : "0"
+	  );
+	  $("#sumTotal").text(
+	    grandTotal ? grandTotal.toLocaleString() : "0"
+	  );
+	}
 	
 </script>
 

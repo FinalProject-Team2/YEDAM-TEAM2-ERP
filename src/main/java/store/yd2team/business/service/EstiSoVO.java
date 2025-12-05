@@ -52,5 +52,17 @@ public class EstiSoVO {
 
     // 상세 리스트
     private List<EstiSoDetailVO> detailList;
+    
+    // 주문 헤더 (tb_so)
+    private String soId;
+    private String hp;
+    private Long ttSupplyPrice;
+    private Long ttSurtaxPrice;
+    private Long ttPrice;
+    private Long ttSoQy;
+    private String progsSt;
+    private String stResn;
+    private String accpDt;
+    private String shipAddr;
 }
 
