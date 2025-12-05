@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import store.yd2team.common.dto.SignUpRequestDTO;
 import store.yd2team.common.mapper.SignUpMapper;
@@ -18,6 +19,10 @@ public class SignUpServiceImpl implements SignUpService {
 		
 	@Autowired
 	SignUpMapper signUpMapper;
+	
+	// 비밀번호 암호화를 위한 PasswordEncoder 주입
+	@Autowired
+	PasswordEncoder passwordEncoder;
 	
 	// 아이디 중복체크
 	@Override
@@ -103,7 +108,10 @@ public class SignUpServiceImpl implements SignUpService {
 		// 최초 가입 계정이므로 empId는 별도 발번 전까지 null 허용 (DB 기본값 사용 또는 추후 업데이트)
 		empAcct.setEmpId(null);
 		empAcct.setLoginId(dto.getUserId());
-		empAcct.setLoginPwd(dto.getPassword());
+		// 평문 비밀번호를 BCrypt로 암호화하여 저장
+		String rawPassword = dto.getPassword();
+		String encodedPassword = passwordEncoder.encode(rawPassword);
+		empAcct.setLoginPwd(encodedPassword);
 		// 관리자 여부 mas_yn = 'e1' 고정
 		empAcct.setMasYn("e1");
 		
