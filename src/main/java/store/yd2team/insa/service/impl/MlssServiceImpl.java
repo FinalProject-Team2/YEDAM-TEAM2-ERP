@@ -2,7 +2,10 @@ package store.yd2team.insa.service.impl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -40,6 +43,47 @@ public class MlssServiceImpl implements MlssService{
 		}
 		
 		return mlssMapper.insertMlssList(empIdList);
+	}
+
+	@Override
+	public List<MlssVO> mlssListJohoe(MlssVO val) {
+		
+		return mlssMapper.mlssSearchList(val);
+	}
+
+	@Override
+	public Map<String, List<MlssVO>> mlssLoadBefore() {
+		Map<String, List<MlssVO>> result = new HashMap<>();
+		String empId = LoginSession.getEmpId();
+		//평가항목 다 불러오기
+		List<MlssVO> iemList = mlssMapper.mlssIemList();
+		
+		for (MlssVO vo : iemList) {
+		    String ability = vo.getAbility();
+
+		    // 해당 ability 키가 없으면 새 리스트 생성
+		    result.putIfAbsent(ability, new ArrayList<>());
+
+		    // 해당 ability 리스트에 vo 추가
+		    result.get(ability).add(vo);
+		}
+
+		// 확인용 출력
+		for (Map.Entry<String, List<MlssVO>> entry : result.entrySet()) {
+		    System.out.println("Ability: " + entry.getKey());
+		    for (MlssVO vo : entry.getValue()) {
+		        System.out.println("  - " + vo.getMlssIem());
+		    }
+		}
+
+		//내꺼다면평가 등록된 건 조회
+		
+		return result;
+	}
+
+	@Override
+	public int mlssVisitChk(String val) {		
+		return mlssMapper.mlssDtChk(val);
 	}
 
 }

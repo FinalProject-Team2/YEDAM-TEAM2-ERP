@@ -27,4 +27,36 @@ WHERE SUBSTR(mlss_id, 5, 4) = TO_CHAR(SYSDATE, 'YYMM')
   SELECT 1 FROM DUAL
 </insert>
 
+<select id="mlssSearchList">
+SELECT DISTINCT 
+ mlss_nm
+ ,evl_begin_dt
+ ,evl_end_dt
+ ,crea_dt
+FROM    tb_mlss
+<where>
+    <if test="mlssNm != null and mlssNm != ''">
+      AND mlss_nm LIKE '%'|| #{mlssNm}|| '%'
+    </if>
+    <if test="evlBeginDt != null and evlBeginDt != ''">
+      AND evl_begin_dt >= #{evlBeginDt}
+    </if>    
+</where>
+</select>
+
+<select id="mlssDtChk">
+<![CDATA[
+        SELECT COUNT(*)
+        FROM tb_mlss
+        WHERE emp_id = #{empId}
+          AND evl_begin_dt <= trunc (SYSDATE)
+          AND evl_end_dt >= trunc (SYSDATE)
+    ]]>
+</select>
+
+<select id="mlssIemList">
+select *
+from tb_mlss_iem
+</select>
+
 </mapper>

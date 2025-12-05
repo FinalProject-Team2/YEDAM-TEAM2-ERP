@@ -32,6 +32,11 @@ public class MlssVO {
     private Long crk; // 평가완료카운트 기록 (동료/하위)    
     private Long self; // 평가완료카운트 기록 (자기평가)
     
+    //mlss_iem 에만 있는 컬럼
+    private String mlssIemId; //mlssIemId 
+    private String ability; //다면평가 그룹 
+    private String mlssIem; //다면평가 세부항목 
+    
     //비즈니스 로직에 필요한 컬럼
     private String vendId;       // 구독시 생성된ID FK
 
