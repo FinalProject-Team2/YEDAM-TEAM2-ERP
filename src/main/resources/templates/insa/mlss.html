@@ -35,8 +35,7 @@
 				<div class="card-header">
 					<div class="card-header-left">
 						<h5 class="card-title">평가 진행 현황 박스</h5>
-					</div>
-
+					</div>					
 				</div>
 				<div class="card-body">
 
@@ -111,11 +110,15 @@
 			<!-- 사원목록 -->
 			<div id="mlssUser" class="card">
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-				<div
-					class="card-header d-flex justify-content-between align-items-center">
-					<div class="card-header-left">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<div class="card-header-left d-flex align-items-center">
 						<!-- collapse 토글 버튼으로 변경 -->
-						<h5 class="card-title mb-0" id="collapseToggle">본인 평가</h5>
+						<h5 class="card-title mb-0 me-2" id="collapseToggle">본인평가</h5>
+						<select th:if="${Session != null and Session == 'testone'}" id="evaleRelate" class="form-select form-select-sm w-auto">
+								<option>김상사</option>
+								<option>이동료</option>
+								<option>박동료2</option>								
+							</select>													
 					</div>
 					<div class="card-header-right">
 						<button type="button" class="btn btn-outline-dark">임시저장</button>
@@ -142,7 +145,7 @@
 							
 							
 						</div>
-						<div style="height: 375px; overflow:auto;" >
+						<div style="height: 450px; overflow:auto;" >
 						<h5 id="yeocRyangGrp" class="card-title">역량 그룹별 평가 항목</h5>
 						<p>직무 역량</p>
 						<div id="toastGrid" style="margin: 20px;"></div>
@@ -178,134 +181,106 @@
 			</div>
 		</div>
 	</div>
-	<script>
-			function chTitle(el) {
-				 // div 안의 텍스트 가져오기 (아이콘 제외)
-				const text = el.innerText.trim();
-				if (text == "결과지 확인") {					
-					document.getElementById("mlssUser").classList
-							.add("stIsShow");
-					document.getElementById("mlssResult").classList
-							.remove("stIsShow");
-				} else {
-					document.getElementById("mlssUser").classList
-							.remove("stIsShow");
-					document.getElementById("mlssResult").classList
-							.add("stIsShow");
-				}
-				// a 태그의 텍스트 변경
-				document.getElementById("collapseToggle").innerText = text;
+	<script th:inline="javascript">
+function chTitle(el) {
+	 // div 안의 텍스트 가져오기 (아이콘 제외)
+	const text = $(el).text().trim();
 
-				// 📌 div가 화면에 보이는 순간 차트를 생성
-		        if (!radarChart) {
-		            showRadarChart();
-		        } else {		        	
-		        	// 📌 div가 보이는 순간 차트 생성
-		            setTimeout(() => {
-		                showRadarChart();
-		            }, 50); // 화면 갱신 후 실행
-		            // 📌 이미 생성한 차트라면 갱신
-		            radarChart.resize();   // 또는 radarChart.refresh();
-		            pieChart.resize();   // 또는 radarChart.refresh();
-		            columnChart.resize();   // 또는 radarChart.refresh();
-		        }
-				
-			}
+    if (text === "결과지 확인") {
+        $("#mlssUser").addClass("stIsShow");
+        $("#mlssResult").removeClass("stIsShow");
+    } else {
+        $("#mlssUser").removeClass("stIsShow");
+        $("#mlssResult").addClass("stIsShow");
+    }
+
+    // a 태그의 텍스트 변경
+    $("#collapseToggle").text(text);
+
+	// 📌 div가 화면에 보이는 순간 차트를 생성
+       if (!radarChart) {
+           showRadarChart();
+       } else {		        	
+       	// 📌 div가 보이는 순간 차트 생성
+           setTimeout(() => {
+               showRadarChart();
+           }, 50); // 화면 갱신 후 실행
+           // 📌 이미 생성한 차트라면 갱신
+           radarChart.resize();   
+           pieChart.resize();   
+           columnChart.resize();   
+       }
+	
+}
 
 			
 let gridColums = [
-	{
-		header : '평가 항목',
-		name : 'ability',
-		sortable : true
-	},
-	{
-		header : '매우 부족',
-		name : 'score1',
-		align : 'center',
-		formatter : function(props) {
-			return `<input type="radio" name="row-${props.row.mlssIemId}" value="1">`;
-		}
-	},
-	{
-		header : '부족',
-		name : 'score2',
-		align : 'center',
-		formatter : function(props) {
-			return `<input type="radio" name="row-${props.row.mlssIemId}" value="2">`;
-		}
-	},
-	{
-		header : '보통',
-		name : 'score3',
-		align : 'center',
-		formatter : function(props) {
-			return `<input type="radio" name="row-${props.row.mlssIemId}" value="3">`;
-		}
-	},
-	{
-		header : '우수',
-		name : 'score4',
-		align : 'center',
-		formatter : function(props) {
-			return `<input type="radio" name="row-${props.row.mlssIemId}" value="4">`;
-		}
-	},
-	{
-		header : '매우 우수',
-		name : 'score5',
-		align : 'center',
-		formatter : function(props) {
-			return `<input type="radio" name="row-${props.row.mlssIemId}" value="5">`;
-		}
-	} ];
-			
+    { header: 'ID', name: 'mlssIemId', hidden: true },
+    { header: '평가 항목', name: 'mlssIem', sortable: true },
+    {
+    	  header: '점수',
+    	  name: 'score',
+    	  align: 'center',
+    	  formatter: function (props) {
+    		  console.log(props);
+    	    const rowKey = props.row._attributes.rowNum; // ✅ 구버전 핵심
+
+    	    return `
+    	      <input type="radio" name="row-${rowKey}" onchange="updateScore(${rowKey},1)">1
+    	      <input type="radio" name="row-${rowKey}" onchange="updateScore(${rowKey},2)">2
+    	      <input type="radio" name="row-${rowKey}" onchange="updateScore(${rowKey},3)">3
+    	      <input type="radio" name="row-${rowKey}" onchange="updateScore(${rowKey},4)">4
+    	      <input type="radio" name="row-${rowKey}" onchange="updateScore(${rowKey},5)">5
+    	    `;
+    	  }
+    	}
+
+
+
+];
+function updateScore(rowKey, value) {
+	  grid.setValue(rowKey, 'score', value);
+	  console.log(grid.getData()); // 바로 확인용
+	}
+
+
+
+
 			let grpTag = $("#yeocRyangGrp");
 			
 			
-			const gridData = [ {
-				id : 1,
-				ability : "업무 이해도"
-			}, {
-				id : 2,
-				ability : "전문성"
-			}, {
-				id : 3,
-				ability : "문제 해결 능력"
-			} ];
-
-			const gridData2 = [ {
-				id : 4,
-				ability : "의사소통 능력",
-
-			}, {
-				id : 5,
-				ability : "협력 태도",
-
-			}, {
-				id : 6,
-				ability : "문제해결 및 기여도",
-
-			}, ];
-			
-			const gridData3 = [ {
-				id : 7,
-				ability : "시간 및  업무관리",
-			}, {
-				id : 8,
-				ability : "자기개발 및 학습태도",
-			}, {
-				id : 9,
-				ability : "책임감 및 규율 준수",
-			}, ];
 			
 			
+			const iemList = [[${iemList}]];
+			
+			const gridData = [];
+
+			// 직무 역량 데이터
+		    const jobData = iemList['직무 역량'].map(vo => ({
+		    	mlssIemId: vo.mlssIemId,
+		        ability: vo.ability,
+		        mlssIem: vo.mlssIem
+		    }));
+
+		    // 협업 역량 데이터
+		    const coopData = iemList['협업 역량'].map(vo => ({
+		    	mlssIemId: vo.mlssIemId,
+		        ability: vo.ability,
+		        mlssIem: vo.mlssIem
+		    }));
+
+		    // 자기관리 역량 데이터
+		    const selfData = iemList['자기관리 역량'].map(vo => ({
+		    	mlssIemId: vo.mlssIemId,
+		        ability: vo.ability,
+		        mlssIem: vo.mlssIem
+		    }));
+
 			
 			const grid = new tui.Grid(
 					{
 						el : document.getElementById('toastGrid'),
-						data : gridData,
-						rowKey : 'id',
+						data : jobData,						
 						scrollX : false,
 						scrollY : false,
 						minBodyHeight : 0,
@@ -317,7 +292,7 @@ let gridColums = [
 			const grid2 = new tui.Grid(
 					{
 						el : document.getElementById('toastGrid2'),
-						data : gridData2,
+						data : coopData,						
 						scrollX : false,
 						scrollY : false,
 						minBodyHeight : 0,
@@ -331,7 +306,7 @@ let gridColums = [
 			const grid3 = new tui.Grid(
 					{
 						el : document.getElementById('toastGrid3'),
-						data : gridData3,
+						data : selfData,						
 						scrollX : false,
 						scrollY : false,
 						minBodyHeight : 0,
@@ -461,11 +436,11 @@ import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
 grid.on('click', function(ev) {
     const rowData = grid.getRow(ev.rowKey);
     if (!rowData) return;
-
-    bindGridToForm(rowData);    
     
-    const dto = formToJson();  
-    console.log(dto);
+    console.log(rowData );
+    console.log(grid.getData() );
+
+    
 });
 
 

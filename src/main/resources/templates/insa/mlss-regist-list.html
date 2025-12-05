@@ -89,39 +89,15 @@
 <script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
 <!-- ✅ Grid -->
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-	<script>
-	
-	let v = [
-		  {
-			    mlssId: 1,
-			    mlssNm: "2025년 상반기 다면평가",
-			    evlBeginDt: "2025-01-10",
-			    evlEndDt: "2025-01-20",
-			    creaDt: "2024-12-15"
-			  },
-			  {
-			    mlssId: 2,
-			    mlssNm: "2025년 하반기 다면평가",
-			    evlBeginDt: "2025-07-01",
-			    evlEndDt: "2025-07-15",
-			    creaDt: "2025-06-10"
-			  },
-			  {
-			    mlssId: 3,
-			    mlssNm: "신입사원 교육 평가",
-			    evlBeginDt: "2025-03-05",
-			    evlEndDt: "2025-03-12",
-			    creaDt: "2025-02-28"
-			  }
-			];
+	<script>	
 
 	let lastAddedRowKey = null;
 	
 	const grid = new tui.Grid({
 		  el: $("#toastGrid")[0],
-		  data: v,		  
+		  data: [],		  
 		  editingType: 'cell',
-		  bodyHeight: 560,
+		  bodyHeight: 440,
 		  scrollX: false,
 		  scrollY: true,
 		  rowHeaders: ['checkbox'],
@@ -132,9 +108,12 @@
 		  columns: [
 		    { header: '다면평가ID', name: 'mlssId', hidden: true},
 		    { header: '다면평가 명', name: 'mlssNm', editor: 'text'},
-		    { header: '평가시작일시', name: 'evlBeginDt', editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' }}},		    
-		    { header: '평가종료일시', name: 'evlEndDt', editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' }}},	    
-		    { header: '등록일', name: 'creaDt', editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' }}},		    
+		    { header: '평가시작일시', name: 'evlBeginDt', editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' }}
+		    ,formatter: function({ value }) { return value ? dateFormat(value, 'yyyy-MM-dd') : ''; } },		    
+		    { header: '평가종료일시', name: 'evlEndDt', editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' }}
+		    ,formatter: function({ value }) { return value ? dateFormat(value, 'yyyy-MM-dd') : ''; } },	    
+		    { header: '등록일', name: 'creaDt', editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' }}
+		    ,formatter: function({ value }) { return value ? dateFormat(value, 'yyyy-MM-dd') : ''; } },		    
 		  ]
 		});
 	
@@ -152,8 +131,8 @@
 	
 	let registBtn = $("#mlssRegist");
 	let addBtn = $("#mlssAdd");
-	let n = v.length;
-	let n2 = v.length;
+	let n = grid.getRowCount();
+	let n2 = grid.getRowCount();
 	
 	//행 추가 눌렀을 때 실행되는 코드
 	addBtn.on("click", () => {
@@ -215,18 +194,19 @@
 		});
 		console.log(datas);
 		
-		/* $.ajax({
-		    url: "/edcDetaJohoe",                // 요청 URL
+		 $.ajax({
+		    url: "/mlssListJohoe",                // 요청 URL
 		    type: "get",                     // GET 방식 (fetch 코드와 동일)
-		    data: dto
+		    data: datas
 		})
-		.done((result) => {		    
+		.done((result) => {	
+			console.log(result);
 		    grid.resetData(result);          // 결과를 grid에 반영
 		})
 		.fail((error) => {
 		    console.error(error);
 		    alert("데이터 요청 중 오류 발생");
-		}); */
+		}); 
 	});
 	</script>
 
