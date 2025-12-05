@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="store.yd2team.business.mapper.BusinessMapper">
-  <!-- 목록 조회 -->
-    <select id="getList" resultType="store.yd2team.business.service.BusinessVO">
-        SELECT
+ <!-- 목록 조회 -->
+   <select id="getList" resultType="store.yd2team.business.service.BusinessVO">
+       SELECT
 	            potential_info_no  as potentialInfoNo,
 	            potential_cond_no  as potentialCondNo,
 	            vend_id            as vendId,
@@ -13,43 +13,42 @@
 	            company_size       as companySize,
 	            region             as region,
 	             establish_date AS establishDate
-        FROM 	tb_potential_cust_list
-       ORDER BY potential_info_no desc
-    </select>
-    
-    <select id="existsPotentialInfoNo">
+       FROM 	tb_potential_cust_list
+      ORDER BY potential_info_no desc
+   </select>
+  
+   <select id="existsPotentialInfoNo">
 	    SELECT COUNT(*)
 	    FROM tb_potential_cust_list
 	    WHERE potential_info_no = #{potentialInfoNo}
-    </select>
-
-    <!-- 공공데이터 insert -->
-    <insert id="insertPotential" parameterType="store.yd2team.business.service.BusinessVO">
-        INSERT INTO TB_POTENTIAL_CUST_LIST (
-            potential_info_no,
-            potential_cond_no,
-            vend_id,
-            rank,
-            vend_nm,
-            industry_type,
-            company_size,
-            region,
-            establish_date
-        ) VALUES (
-            #{potentialInfoNo},
-            seq_potential_cond_no.nextval,   <!-- ★ 여기 수정 -->
-           'CUST' || LPAD(seq_vend_id.NEXTVAL, 3, '0'),
-            seq_rank.nextval,
-            #{vendNm},
-            #{industryType},
-            #{companySize},
-            #{region},
-            to_date(#{establishDate}, 'yyyy-mm-dd')
-        )
-    </insert>
-    
-    <select id="getBusinessList" parameterType="store.yd2team.business.service.BusinessVO"> 
-    SELECT
+   </select>
+   <!-- 공공데이터 insert -->
+   <insert id="insertPotential" parameterType="store.yd2team.business.service.BusinessVO">
+       INSERT INTO TB_POTENTIAL_CUST_LIST (
+           potential_info_no,
+           potential_cond_no,
+           vend_id,
+           rank,
+           vend_nm,
+           industry_type,
+           company_size,
+           region,
+           establish_date
+       ) VALUES (
+           #{potentialInfoNo},
+           seq_potential_cond_no.nextval,   <!-- ★ 여기 수정 -->
+          'CUST' || LPAD(seq_vend_id.NEXTVAL, 3, '0'),
+           seq_rank.nextval,
+           #{vendNm},
+           #{industryType},
+           #{companySize},
+           #{region},
+           to_date(#{establishDate}, 'yyyy-mm-dd')
+       )
+   </insert>
+  
+   <select id="getBusinessList" parameterType="store.yd2team.business.service.BusinessVO">
+   SELECT
 	        potential_info_no,
 	        potential_cond_no,
 	        vend_id,
@@ -63,9 +62,9 @@
 	        crea_by,
 	        updt_dt,
 	        updt_by
-    FROM
-      	  	tb_potential_cust_list
-    WHERE 1 = 1
+   FROM
+     	  	tb_potential_cust_list
+   WHERE 1 = 1
 	    <if test="industryType != null and industryType != ''">
 	        AND industry_type LIKE '%' || #{industryType} || '%'
 	    </if>
@@ -81,9 +80,8 @@
 	    <if test="endEstablishDate != null and endEstablishDate != ''">
 	        AND establish_date &lt;= TO_DATE(#{endEstablishDate}, 'YYYY-MM-DD')
 	    </if>
-    ORDER BY rank
+   ORDER BY rank
 </select>
-
 	<!-- 잠재고객지기준상세목록조회 -->
 	<select id="getStdrDetailAll" parameterType="store.yd2team.business.service.PotentialStdrVO">
 		SELECT
@@ -98,16 +96,15 @@
 	
 	<select id="selectByCondGb" parameterType="store.yd2team.business.service.PotentialStdrVO">
 		    SELECT
-              STDR_DETAIL_ID   AS stdrDetailId
-            , STDR_ID          AS stdrId
-            , VEND_ID          AS vendId
-            , STDR_ITEAM_INFO  AS stdrIteamInfo
-            , INFO_SCORE       AS infoScore
-        FROM TB_POTENTIAL_STDR_DETAIL
-        WHERE STDR_ID = #{condGb}
-        ORDER BY STDR_ID, STDR_DETAIL_ID
+             STDR_DETAIL_ID   AS stdrDetailId
+           , STDR_ID          AS stdrId
+           , VEND_ID          AS vendId
+           , STDR_ITEAM_INFO  AS stdrIteamInfo
+           , INFO_SCORE       AS infoScore
+       FROM TB_POTENTIAL_STDR_DETAIL
+       WHERE STDR_ID = #{condGb}
+       ORDER BY STDR_ID, STDR_DETAIL_ID
 </select>
-
 		<insert id="insertDetail"
 		        parameterType="store.yd2team.business.service.PotentialStdrVO">
 				  INSERT INTO TB_POTENTIAL_STDR_DETAIL (
@@ -126,20 +123,19 @@
 		            , SYSDATE
 		        )
 		</insert>
-
 		<update id="updateDetail"
 		        parameterType="store.yd2team.business.service.PotentialStdrVO">
 		  UPDATE TB_POTENTIAL_STDR_DETAIL
-           SET STDR_ITEAM_INFO = #{stdrIteamInfo}
-             , INFO_SCORE      = #{infoScore}
-             , UPDT_DT         = SYSDATE
-         WHERE STDR_DETAIL_ID  = #{stdrDetailId}
+          SET STDR_ITEAM_INFO = #{stdrIteamInfo}
+            , INFO_SCORE      = #{infoScore}
+            , UPDT_DT         = SYSDATE
+        WHERE STDR_DETAIL_ID  = #{stdrDetailId}
 		</update>
 		
 		
 		<!-- 휴면/이탈고객검색조회 -->
 		<select id="getchurnRiskList" parameterType="store.yd2team.business.service.churnRiskVO">
-			SELECT 
+			SELECT
 				cust_aggregate_no as custAggregateNo,
 				vend_id           as vendId,
 				purc_stop_dt      as purcStopDt,
@@ -165,157 +161,148 @@
 			        AND churnRiskScore LIKE '%' || #{churnRiskScore} || '%'
 			    </if>
 		</select>
-
 	<select id="getMonthlySalesChange"
-        resultType="store.yd2team.business.service.MonthlySalesDTO">
-
+       resultType="store.yd2team.business.service.MonthlySalesDTO">
 WITH MONTHLY_SALES AS (
-    SELECT
-        a.CUSTcom_ID CUSTOMER_ID,
-        TRUNC(a.SALE_DATE, 'MM') AS MONTH,
-        SUM(d.supply_price) AS TOTAL_AMOUNT
-    FROM tb_SALE a 
-    JOIN tb_sale_detail d ON a.sale_slip_no = d.sale_slip_no
-    GROUP BY a.CUSTcom_ID, TRUNC(a.SALE_DATE, 'MM')
+   SELECT
+       a.CUSTcom_ID CUSTOMER_ID,
+       TRUNC(a.SALE_DATE, 'MM') AS MONTH,
+       SUM(d.supply_price) AS TOTAL_AMOUNT
+   FROM tb_SALE a
+   JOIN tb_sale_detail d ON a.sale_slip_no = d.sale_slip_no
+   GROUP BY a.CUSTcom_ID, TRUNC(a.SALE_DATE, 'MM')
 ),
-
 LATEST_6 AS (
-    SELECT CUSTOMER_ID, SUM(TOTAL_AMOUNT) AS AMT_6
-    FROM MONTHLY_SALES
-    WHERE MONTH &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
-    GROUP BY CUSTOMER_ID
+   SELECT CUSTOMER_ID, SUM(TOTAL_AMOUNT) AS AMT_6
+   FROM MONTHLY_SALES
+   WHERE MONTH &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
+   GROUP BY CUSTOMER_ID
 ),
-
 PREV_6 AS (
-    SELECT CUSTOMER_ID, SUM(TOTAL_AMOUNT) AS AMT_PREV_6
-    FROM MONTHLY_SALES
-    WHERE MONTH &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
-      AND MONTH &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -11)
-    GROUP BY CUSTOMER_ID
+   SELECT CUSTOMER_ID, SUM(TOTAL_AMOUNT) AS AMT_PREV_6
+   FROM MONTHLY_SALES
+   WHERE MONTH &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
+     AND MONTH &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -11)
+   GROUP BY CUSTOMER_ID
 ),
-
 TREND AS (
-    SELECT
-        a.CUSTOMER_ID,
-        CASE
-            WHEN b.AMT_PREV_6 = 0 THEN 100
-            ELSE ((a.AMT_6 - b.AMT_PREV_6) / b.AMT_PREV_6) * 100
-        END AS GROWTH_RATE
-    FROM LATEST_6 a
-    LEFT JOIN PREV_6 b ON a.CUSTOMER_ID = b.CUSTOMER_ID
+   SELECT
+       a.CUSTOMER_ID,
+       CASE
+           WHEN b.AMT_PREV_6 = 0 THEN 100
+           ELSE ((a.AMT_6 - b.AMT_PREV_6) / b.AMT_PREV_6) * 100
+       END AS GROWTH_RATE
+   FROM LATEST_6 a
+   LEFT JOIN PREV_6 b ON a.CUSTOMER_ID = b.CUSTOMER_ID
 ),
-
 TREND_SCORE AS (
-    SELECT
-        CUSTOMER_ID,
-        CASE
-            WHEN GROWTH_RATE &gt;= 20 THEN 100
-            WHEN GROWTH_RATE BETWEEN 5 AND 19 THEN 80
-            WHEN GROWTH_RATE BETWEEN -5 AND 4 THEN 60
-            WHEN GROWTH_RATE BETWEEN -20 AND -6 THEN 40
-            ELSE 20
-        END AS TREND_SCORE
-    FROM TREND
+   SELECT
+       CUSTOMER_ID,
+       CASE
+           WHEN GROWTH_RATE &gt;= 20 THEN 100
+           WHEN GROWTH_RATE BETWEEN 5 AND 19 THEN 80
+           WHEN GROWTH_RATE BETWEEN -5 AND 4 THEN 60
+           WHEN GROWTH_RATE BETWEEN -20 AND -6 THEN 40
+           ELSE 20
+       END AS TREND_SCORE
+   FROM TREND
 ),
-
 LAST_PURCHASE AS (
-    SELECT
-        CUSTCOM_ID CUSTOMER_ID,
-        MAX(SALE_DATE) AS LAST_DATE,
-        TRUNC(SYSDATE - MAX(SALE_DATE)) AS DAYS_SINCE
-    FROM tb_sale
-    GROUP BY CUSTCOM_ID
+   SELECT
+       CUSTCOM_ID CUSTOMER_ID,
+       MAX(SALE_DATE) AS LAST_DATE,
+       TRUNC(SYSDATE - MAX(SALE_DATE)) AS DAYS_SINCE
+   FROM tb_sale
+   GROUP BY CUSTCOM_ID
 ),
-
 RECENCY_SCORE AS (
-    SELECT
-        CUSTOMER_ID,
-        CASE
-            WHEN DAYS_SINCE &lt;= 30 THEN 100
-            WHEN DAYS_SINCE &lt;= 60 THEN 80
-            WHEN DAYS_SINCE &lt;= 90 THEN 60
-            WHEN DAYS_SINCE &lt;= 180 THEN 30
-            ELSE 10
-        END AS REC_SCORE
-    FROM LAST_PURCHASE
+   SELECT
+       CUSTOMER_ID,
+       CASE
+           WHEN DAYS_SINCE &lt;= 30 THEN 100
+           WHEN DAYS_SINCE &lt;= 60 THEN 80
+           WHEN DAYS_SINCE &lt;= 90 THEN 60
+           WHEN DAYS_SINCE &lt;= 180 THEN 30
+           ELSE 10
+       END AS REC_SCORE
+   FROM LAST_PURCHASE
 ),
-
 FREQ AS (
-    SELECT
-        CUSTCOM_ID CUSTOMER_ID,
-        SUM(CASE WHEN SALE_DATE &gt;= ADD_MONTHS(SYSDATE, -3) THEN 1 END) AS FREQ_3,
-        SUM(CASE WHEN SALE_DATE &gt;= ADD_MONTHS(SYSDATE, -12) THEN 1 END) AS FREQ_12
-    FROM TB_SALE
-    GROUP BY CUSTCOM_ID
+   SELECT
+       CUSTCOM_ID CUSTOMER_ID,
+       SUM(CASE WHEN SALE_DATE &gt;= ADD_MONTHS(SYSDATE, -3) THEN 1 END) AS FREQ_3,
+       SUM(CASE WHEN SALE_DATE &gt;= ADD_MONTHS(SYSDATE, -12) THEN 1 END) AS FREQ_12
+   FROM TB_SALE
+   GROUP BY CUSTCOM_ID
 ),
-
 FREQ_SCORE AS (
-    SELECT
-        CUSTOMER_ID,
-        CASE
-            WHEN FREQ_12 = 0 THEN 20
-            WHEN (FREQ_3 / (FREQ_12/12*3)) &gt;= 1.5 THEN 90
-            WHEN (FREQ_3 / (FREQ_12/12*3)) &gt;= 0.8 THEN 60
-            ELSE 30
-        END AS FREQ_SCORE
-    FROM FREQ
+   SELECT
+       CUSTOMER_ID,
+       CASE
+           WHEN FREQ_12 = 0 THEN 20
+           WHEN (FREQ_3 / (FREQ_12/12*3)) &gt;= 1.5 THEN 90
+           WHEN (FREQ_3 / (FREQ_12/12*3)) &gt;= 0.8 THEN 60
+           ELSE 30
+       END AS FREQ_SCORE
+   FROM FREQ
 )
-
 SELECT
-    t.CUSTOMER_ID AS customerId,
-    t.TREND_SCORE AS trendScore,
-    r.REC_SCORE  AS recScore,
-    f.FREQ_SCORE AS freqScore,
-    (t.TREND_SCORE * 0.4) + (r.REC_SCORE * 0.4) + (f.FREQ_SCORE * 0.2) AS finalScore,
-    CASE
-        WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 80 THEN '이탈위험 고객'
-        WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 60 THEN '주의 고객'
-        WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 40 THEN '휴먼 고객'
-        ELSE '정상 고객'
-    END AS customerStatus
+   t.CUSTOMER_ID AS customerId,
+   t.TREND_SCORE AS trendScore,
+   r.REC_SCORE  AS recScore,
+   f.FREQ_SCORE AS freqScore,
+   (t.TREND_SCORE * 0.4) + (r.REC_SCORE * 0.4) + (f.FREQ_SCORE * 0.2) AS finalScore,
+   CASE
+       WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 80 THEN '이탈위험 고객'
+       WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 60 THEN '주의 고객'
+       WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= 40 THEN '휴먼 고객'
+       ELSE '정상 고객'
+   END AS customerStatus
 FROM TREND_SCORE t
 JOIN RECENCY_SCORE r ON t.CUSTOMER_ID = r.CUSTOMER_ID
 JOIN FREQ_SCORE    f ON t.CUSTOMER_ID = f.CUSTOMER_ID
 WHERE 1 = 1
-    <!-- 업체명(고객ID) -->
-    <if test="customerId != null and customerId != ''">
-        AND t.CUSTOMER_ID LIKE '%' || #{customerId} || '%'
-    </if>
-
-    <!-- 휴면/이탈 상태 -->
+   <!-- 업체명(고객ID) -->
+   <if test="customerId != null and customerId != ''">
+       AND t.CUSTOMER_ID LIKE '%' || #{customerId} || '%'
+   </if>
+   <!-- 휴면/이탈 상태 -->
 <if test="customerStatus != null and customerStatus != ''">
-    AND (
-        CASE
-            WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) >= 80 THEN '이탈위험 고객'
-            WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) >= 60 THEN '주의 고객'
-            WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) >= 40 THEN '휴먼 고객'
-            ELSE '정상 고객'
-        END
-        LIKE '%' || #{customerStatus} || '%'
-    )
+   AND (
+       CASE
+           WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) >= 80 THEN '이탈위험 고객'
+           WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) >= 60 THEN '주의 고객'
+           WHEN (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) >= 40 THEN '휴먼 고객'
+           ELSE '정상 고객'
+       END
+       LIKE '%' || #{customerStatus} || '%'
+   )
 </if>
-
-    <!-- 점수 하한 -->
-    <if test="trendScore != null">
-        AND t.TREND_SCORE &gt;= #{trendScore}
-    </if>
-
-    <if test="recScore != null">
-        AND r.REC_SCORE &gt;= #{recScore}
-    </if>
-
-    <if test="freqScore != null">
-        AND f.FREQ_SCORE &gt;= #{freqScore}
-    </if>
-
-    <if test="finalScore != null">
-        AND (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= #{finalScore}
-    </if>
-
+   <!-- 점수 하한 -->
+   <if test="trendScore != null">
+       AND t.TREND_SCORE &gt;= #{trendScore}
+   </if>
+   <if test="recScore != null">
+       AND r.REC_SCORE &gt;= #{recScore}
+   </if>
+   <if test="freqScore != null">
+       AND f.FREQ_SCORE &gt;= #{freqScore}
+   </if>
+   <if test="finalScore != null">
+       AND (t.TREND_SCORE * 0.4 + r.REC_SCORE * 0.4 + f.FREQ_SCORE * 0.2) &gt;= #{finalScore}
+   </if>
 ORDER BY finalScore DESC
 </select>
-
-
-
-		
+	<select id="getAction" parameterType="store.yd2team.business.service.ContactVO">
+			SELECT  contact_no contactNo,
+			        potential_info_no potentialInfoNo,
+			        vend_id vendId,
+			        contact_dt contactDt,
+			        contact_manager contactManager,
+			        contact_way contactWay,
+			        contact_cntn contactCntn
+			FROM    tb_contact
+	</select>
 </mapper>
+
+
