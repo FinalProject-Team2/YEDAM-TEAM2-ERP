@@ -1,11 +1,21 @@
 package store.yd2team.business.web;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
+import store.yd2team.business.service.EstiSoService;
+import store.yd2team.business.service.EstiSoVO;
 
 
 @Controller
@@ -13,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SoController {
 
-	/* private final PriceService priceService; */
+	 private final EstiSoService estiSoService; 
 
 	@GetMapping("/soMain")
 	public String selectall(Model model) {
@@ -22,68 +32,48 @@ public class SoController {
 		return "business/soManage";
 
 	}
-/*
-	// 조회
+	
+	 // 주문 모달 초기 데이터 (견적 → 주문)
+    @GetMapping("/fromEsti/{estiId}")
+    @ResponseBody
+    public Map<String, Object> getOrderFromEsti(@PathVariable("estiId") String estiId) {
+
+        EstiSoVO header = estiSoService.getOrderInitFromEsti(estiId);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("header", header);
+        result.put("detailList", header.getDetailList());
+
+        return result;
+    }
+
+    // 주문 저장
+    @PostMapping("/fromEsti/save")
+    @ResponseBody
+    public Map<String, Object> saveOrderFromEsti(@RequestBody EstiSoVO vo) {
+
+        String soId = estiSoService.saveOrderFromEsti(vo);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("soId", soId);
+
+        return result;
+    }
+    
+    
+	// 주문서 조회(그리드)
 	@PostMapping("/list")
-	@ResponseBody
-	public List<PriceVO> getPriceList(@RequestBody PriceVO vo) {
-		
-		System.out.println("검색조건 >>> " + vo.toString());
-		
-		return priceService.getPricePolicyList(vo);
-	}
-	
-	// 공통코드로 정책유형
-	@GetMapping("/type-codes")
-	@ResponseBody
-	public List<CommonCodeVO> getPriceType() {
-	    return priceService.getPriceType();
-	}
-	
-	// 등록 및 수정
-	@PostMapping("/save")
-	@ResponseBody
-	public Map<String, Object> savePricePolicy(@RequestBody PriceVO vo) {
-	    Map<String, Object> result = new HashMap<>();
+    @ResponseBody
+    public List<EstiSoVO> soList(@RequestBody EstiSoVO so) {
 
-	    try {
-	        System.out.println("### Controller Request VO : " + vo);
+        System.out.println("검색조건 >>> " + so);
 
-	        int saveResult = priceService.savePricePolicy(vo);
+        // 서비스 호출
+        List<EstiSoVO> soList = estiSoService.selectSoList(so);
 
-	        result.put("result", saveResult > 0 ? "success" : "success"); // 무조건 success 처리
-	        result.put("message", "단가정책 저장 완료");
-
-	    } catch (Exception e) {
-	        System.out.println("### Exception : " + e.getMessage());
-	        result.put("result", "fail");
-	        result.put("message", e.getMessage());
-	    }
-
-	    System.out.println("### Final Response : " + result);
-	    return result;
-	}
-	
-	// 삭제
-	@PostMapping("/delete")
-	@ResponseBody
-	public Map<String, Object> deletePricePolicy(@RequestBody Map<String, Object> param) {
-	    Map<String, Object> result = new HashMap<>();
-	    
-	    try {
-	        List<String> priceIdList = (List<String>) param.get("priceIdList");
-	        System.out.println("삭제 요청 ID 리스트 >>> " + priceIdList);
-
-	        priceService.deletePricePolicy(priceIdList);
-
-	        result.put("result", "success");
-	    } catch (Exception e) {
-	        result.put("result", "fail");
-	        result.put("message", e.getMessage());
-	    }
-
-	    return result;
-	}
-*/	
+        // JSON 으로 반환 (뷰 이름 X)
+        return soList;
+    }
 	
 }

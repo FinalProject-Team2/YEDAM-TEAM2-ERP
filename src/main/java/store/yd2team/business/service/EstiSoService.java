@@ -25,4 +25,14 @@ public interface EstiSoService {
 
     /** 최신버전 기준 조회 (필요시 버전별 조회는 추가로 만들면 됨) */
     EstiSoVO getEsti(String estiId);
+    
+    // 주문서 모달 초기 데이터 (견적 기반)
+    EstiSoVO getOrderInitFromEsti(String estiId);
+
+    // 견적 → 주문 저장
+    String saveOrderFromEsti(EstiSoVO vo);
+    
+    // ========================================================= 주문서 관리
+    // 주문서 목록 조회
+    List<EstiSoVO> selectSoList(EstiSoVO so);
 }

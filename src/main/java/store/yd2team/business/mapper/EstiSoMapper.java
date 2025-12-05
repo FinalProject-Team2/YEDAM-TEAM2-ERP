@@ -40,4 +40,17 @@ public interface EstiSoMapper {
     EstiSoVO selectEstiHeader(String estiId);
 
     List<EstiSoDetailVO> selectEstiDetailList(String estiId);
+    
+    
+    // === 주문 관련 추가 ===
+    String createSoId();
+    int insertSo(EstiSoVO vo);
+    int insertSoDetail(EstiSoDetailVO vo);
+    
+    // 주문서등록 모달 저장버튼 클릭 시 견적 상태 es4 로 변경
+    void updateEstiStatusToOrdered(@Param("estiId") String estiId, @Param("version") String version);
+    
+    // ==================================================== 주문서관리
+    // 주문서 조회
+    List<EstiSoVO> selectSo(EstiSoVO so);
 }

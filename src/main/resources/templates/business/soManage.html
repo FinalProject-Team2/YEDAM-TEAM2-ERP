@@ -20,8 +20,8 @@
 							<h5 class="card-title">주문서 조회</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-dark">초기화</button>
-							<button type="button" class="btn btn-outline-dark">조회</button>
+							<button type="button" class="btn btn-dark" id="SearchInitBtn">초기화</button>
+							<button type="button" class="btn btn-outline-dark" id="SearchBtn">조회</button>
 						</div>
 					</div>
 					<!-- end card-header -->
@@ -29,9 +29,8 @@
 					<div class="card-body">
 						<div class="row g-2">
 							<div class="col-md-3">
-								<label for="clientName" class="form-label">거래처 명</label> <input
-									id="clientName" type="text" class="form-control"
-									placeholder="YEDAM">
+								<label for="custcomName" class="form-label">고객사 명</label>
+								<input id="custcomName" type="text" class="form-control" placeholder="고객사 명 입력">
 							</div>
 
 							<div class="col-md-6">
@@ -84,9 +83,11 @@
 						<div class="card-header-left">
 							<h5 class="card-title">주문서 목록</h5>
 						</div>
-<!-- 						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark" id="insertSoBtn">신규</button>
-						</div> -->
+						<div class="card-header-right">
+							<button type="button" class="btn btn-outline-dark" id="insertSoBtn">승인</button>
+							<button type="button" class="btn btn-outline-dark" id="insertSoBtn">보류</button>
+							<button type="button" class="btn btn-danger" id="deleteRowBtn">삭제</button>
+						</div>
 					</div>
 
 					<div class="card-body">
@@ -104,6 +105,7 @@
 	<script>
 	// 0. 데이터
 	const soData = [];
+	const loadedSoSet = new Set();  // 어떤 so_id 의 상세를 이미 불러왔는지 체크용
 
 	// 1-1. Grid 공통 옵션
 	const soGridOptions = {
@@ -117,11 +119,15 @@
 	    }
 	}; // 1-1. 끝
 
-	// 1-2. 견적서 목록 그리드 생성
+	// 1-2. 주문서 목록 그리드 생성
 	const soGrid = new tui.Grid({
 		el: document.getElementById('soGrid'),
 		data: soData,
 		...soGridOptions,
+		treeColumnOptions: {
+		  name: 'productName',        // 이 컬럼에 펼침/접기 아이콘 표시
+		  useIcon: true
+		},
 		columns: [
 			{ header: '주문서코드', name: 'soId' },
 			{ header: '고객사명', name: 'custcomName' },
@@ -133,12 +139,105 @@
 			{ header: '총주문수량', name: 'ttSoQy' },
 			{ header: '재고수량', name: 'currStockQy' },
 			{ header: '진행상태', name: 'progrsSt' },
-		]
-	}); // 1-2. 견적서목록 그리드 생성 끝
+		]	
+	}); // 1-2. 주문서목록 그리드 생성 끝
 	
-	// 2. 버튼 이벤트
+	// expand 이벤트에서 상품별 상세 + 재고를 동적으로 추가
+	soGrid.on('expand', function (ev) {
+	  const rowKey = ev.rowKey;
+	  const row    = soGrid.getRow(rowKey);
+	  if (!row) return;
+	
+	  const soId = row.soId;
+	
+	  // 이미 한 번 로딩한 주문이면 다시 안 불러오기
+	  if (loadedSoSet.has(soId)) {
+	    return;
+	  }
+	
+	  fetch(`/so/detailStock/${soId}`)
+	    .then(res => {
+	      if (!res.ok) {
+	        return res.text().then(t => {
+	          console.error('GET /so/detailStock 에러 >>> ', t);
+	          throw new Error('server error');
+	        });
+	      }
+	      return res.json();
+	    })
+	    .then(detailList => {
+	      detailList.forEach(d => {
+	        // 자식 행 추가
+	        soGrid.appendRow(
+	          {
+	            rowType: 'detail',          // 나중에 formatter에서 구분할 때 쓰고 싶으면 추가
+	            soId:    soId,              // 필요 없으면 빼도 됨
+	            productId:    d.productId,
+	            productName:  d.productName,
+	            qy:           d.qy,
+	            price:        d.price,
+	            ttSupplyAmt:  d.supplyAmt,  // 자식 행에서는 "공급가액" 으로 사용
+	            currStockQy:  d.currStockQy // 상품별 재고수량
+	            // 다른 컬럼은 필요하다면 추가
+	          },
+	          { parentRowKey: rowKey }      // 이 행을 rowKey 의 자식으로 붙임
+	        );
+	      });
+	
+	      loadedSoSet.add(soId);
+	    })
+	    .catch(err => {
+	      console.error(err);
+	      alert('주문 상세를 불러오지 못했습니다.');
+	    });
+	});
+
+	
+	
+	// ======================================================================== 2. 버튼 이벤트
 	// 2-1. 초기화 버튼 이벤트
+	document.getElementById("SearchInitBtn").addEventListener("click", function () {
+	
+	    // 1) searchForm 객체 초기화
+	    searchForm = {
+	        custcomName: "",
+	        dueStart: "",
+	        dueEnd: ""
+	    };
+	
+	    // 2) 화면 Input 값 초기화
+	    document.querySelector("#custcomName").value = "";
+	    document.querySelector(".js-date-range-start").value = "";
+	    document.querySelector(".js-date-range-end").value = "";
+	
+	    // datepicker 를 쓰는 경우 UI 리프레시
+	    $('.js-date-range-start').datepicker('update', '');
+	    $('.js-date-range-end').datepicker('update', '');
+	
+	    console.log("검색조건 초기화:", searchForm);
+	});
+	
 	// 2-2. 조회 버튼 이벤트
+	document.getElementById("SearchBtn").addEventListener("click", function () {
+	
+	    // 1) 화면 입력값 → searchForm 에 세팅
+	    searchForm.custcomName = document.querySelector("#custcomName").value.trim();
+	    searchForm.dueStart = document.querySelector(".js-date-range-start").value;
+	    searchForm.dueEnd = document.querySelector(".js-date-range-end").value;
+	
+	    console.log("보낼 searchForm >>> ", searchForm);
+	
+	    // 2) 백엔드 조회 요청 (POST /esti/list)
+	    axios.post("/esti/list", searchForm)
+	        .then(res => {
+	            console.log("조회결과 >>> ", res.data);
+	
+	            // 3) 그리드 데이터 반영
+	            estiGrid.resetData(res.data);
+	        })
+	        .catch(err => console.error("조회 중 오류:", err));
+	});
+	
 	
 </script>
 

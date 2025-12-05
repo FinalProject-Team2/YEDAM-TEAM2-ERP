@@ -11,10 +11,19 @@ public class EstiSoDetailVO {
     private String version;     // version
     private String vendId;       // vend_id
     private String productId;      // product_id
-    private Integer qy;          // qy
+    private Long qy;          // qy
     private Long price;          // price
     private Long supplyAmt;      // supply_amt
     private String rm;           // rm
+    
+    // 주문 상세(tb_so_detail)
+    private Long soDetailNo;
+    private String soId;
+    private Long supplyPrice;
+    private Long surtaxPrice;
+
+    // 화면용
+    private String productName;
 
     // 공통
     private String creaBy;

@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout}">
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+     layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
 <script src="/assets/js/teamUtil.js"></script>
@@ -11,332 +10,477 @@
 <style type="text/css">
 /* 그리드 버튼 스타일 */
 .grid-btn {
-    padding: 4px 10px;
-    border: 1px solid #bbb;
-    background-color: #fff;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
+   padding: 4px 10px;
+   border: 1px solid #bbb;
+   background-color: #fff;
+   border-radius: 4px;
+   cursor: pointer;
+   font-size: 12px;
 }
 .grid-btn:hover {
-    background-color: #eee;
+   background-color: #eee;
+}
+/* 악성여신 / 출하정지 표시용 배지 */
+.bad-credit-badge {
+   display: inline-block;
+   padding: 2px 6px;
+   font-size: 11px;
+   border-radius: 4px;
+   color: #fff;
+   background-color: #dc3545; /* 빨간색 */
+}
+.ship-hold-badge {
+   display: inline-block;
+   padding: 2px 6px;
+   font-size: 11px;
+   border-radius: 4px;
+   color: #fff;
+   background-color: #343a40; /* 진한 회색 */
 }
 </style>
 </head>
-
 <body layout:fragment="content">
-	<div class="lock-account-wrapper">
-
-		<!-- 여신 조회 -->
-		<div class="row mb-3">
-			<div class="col-md-12">
-				<div class="card">
-
-					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-					<div class="card-header with-actions">
-						<div class="card-header-left">
-							<h5 class="card-title">검색 조건</h5>
-						</div>
-						<div class="card-header-right">
-							<button type="button" class="btn btn-dark" id="creditInit">초기화</button>
-							<button type="button" class="btn btn-outline-dark" id="searchCredit">조회</button>
-						</div>
-					</div>
-
-					<!-- /card-body start -->
-					<div class="card-body">
-						<div class="row">
-							<div class="col-md-4">
-							<label for="autoCustcomId" class="form-label">고객사코드</label>
-
-								<!-- [자동완성][추가] 고객사Id input + 추천 목록을 함께 감싸는 래퍼 -->
-								<div class="position-relative">
-									<!-- [자동완성][기존 input에 autocomplete="off"만 추가] -->
-									<input id="autoCustcomId" type="text" class="form-control" placeholder="고객사코드를 입력해주세요" autocomplete="off">
-									<!-- 브라우저 기본 자동완성 끄기 -->
-
-									<!-- [자동완성][추가] 사용자Id 자동완성 후보 리스트 -->
-									<ul id="autoCustcomIdSuggest" class="list-group position-absolute w-100" style="z-index: 2000;">
-										<!-- JS에서 <li> 항목이 동적으로 추가됨 -->
-									</ul>
-								</div>
-				            </div>
-				            
-							<div class="col-md-4">
-								<label for="autoCustcomName" class="form-label">고객사명</label>
-
-								<!-- [자동완성][추가] 고객사명 input + 추천 목록을 함께 감싸는 래퍼 -->
-								<div class="position-relative">
-									<!-- [자동완성][기존 input에 autocomplete="off"만 추가] -->
-									<input id="autoCustcomName" type="text" class="form-control" placeholder="고객사명을 입력해주세요" autocomplete="off">
-									<!-- 브라우저 기본 자동완성 끄기 -->
-
-									<!-- [자동완성][추가] 고객사명 자동완성 후보 리스트 -->
-									<ul id="autoCustcomNameSuggest" class="list-group position-absolute w-100" style="z-index: 2000;">
-										<!-- JS에서 <li> 항목이 동적으로 추가됨 -->
-									</ul>
-								</div>
-				            </div>
-						</div><!-- row end -->
-							
-						</div>
-					</div>
-					<!-- /card-body end -->
-				</div>
-			</div>
-		</div>
-
-		<!-- 여신한도 카드 -->
-		<div class="row">
-			<div class="col-md-12 d-flex">
-				<div class="card w-100 h-100">
-
-					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
-					<div class="card-header with-actions">
-						<div class="card-header-left">
-							<h5 class="card-title">여신한도설정</h5>
-						</div>
-						<div class="card-header-right">
-							<button type="button" class="btn btn-dark" id="limitInit">초기화</button>
-							<button type="button" class="btn btn-outline-dark" id="limitSave">저장</button>
-						</div>
-
-					</div>
-
-					<div class="card-body">
-						<div class="creditGridWrap">
-							<div id="creditGrid"></div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-
-
-<div th:replace="business/modal/creditCustModal :: creditModal"></div>
-
+<div class="lock-account-wrapper">
+   <!-- 여신 조회 -->
+   <div class="row mb-3">
+       <div class="col-md-12">
+           <div class="card">
+               <!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+               <div class="card-header with-actions">
+                   <div class="card-header-left">
+                       <h5 class="card-title">검색 조건</h5>
+                   </div>
+                   <div class="card-header-right">
+                       <button type="button" class="btn btn-dark" id="creditInit">초기화</button>
+                       <button type="button" class="btn btn-outline-dark" id="searchCredit">조회</button>
+                   </div>
+               </div>
+               <!-- /card-body start -->
+               <div class="card-body">
+                   <div class="row">
+                       <div class="col-md-4">
+                           <label for="autoCustcomId" class="form-label">고객사코드</label>
+                           <div class="position-relative">
+                               <input id="autoCustcomId" type="text" class="form-control"
+                                      placeholder="고객사코드를 입력해주세요" autocomplete="off">
+                               <ul id="autoCustcomIdSuggest"
+                                   class="list-group position-absolute w-100"
+                                   style="z-index: 2000;">
+                               </ul>
+                           </div>
+                       </div>
+                       <div class="col-md-4">
+                           <label for="autoCustcomName" class="form-label">고객사명</label>
+                           <div class="position-relative">
+                               <input id="autoCustcomName" type="text" class="form-control"
+                                      placeholder="고객사명을 입력해주세요" autocomplete="off">
+                               <ul id="autoCustcomNameSuggest"
+                                   class="list-group position-absolute w-100"
+                                   style="z-index: 2000;">
+                               </ul>
+                           </div>
+                       </div>
+                   </div><!-- row end -->
+               </div>
+               <!-- /card-body end -->
+           </div>
+       </div>
+   </div>
+   <!-- 여신한도 카드 -->
+   <div class="row">
+       <div class="col-md-12 d-flex">
+           <div class="card w-100 h-100">
+               <!-- 카드 헤더 : 제목 + 버튼 -->
+               <div class="card-header with-actions">
+                   <div class="card-header-left">
+                       <h5 class="card-title">여신한도설정 / 여신현황</h5>
+                   </div>
+                   <div class="card-header-right">
+                       <!-- 여신 평가 버튼 추가 -->
+                       <button type="button" class="btn btn-outline-danger me-2" id="creditEval">여신평가</button>
+                       <button type="button" class="btn btn-dark" id="limitInit">초기화</button>
+                       <button type="button" class="btn btn-outline-dark" id="limitSave">저장</button>
+                   </div>
+               </div>
+               <div class="card-body">
+                   <!-- 간단한 범례 -->
+                   <div class="mb-2" style="font-size: 12px;">
+                       <span class="badge bg-secondary">※ 사용률(%) = 현재잔액 / 여신한도 × 100</span>
+                       <span class="ms-2 bad-credit-badge">악성여신</span>
+                       <span class="ms-2 ship-hold-badge">출하정지</span>
+                   </div>
+                   <div class="creditGridWrap">
+                       <div id="creditGrid"></div>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
+   <!-- 고객사 상세 모달 -->
+   <div th:replace="business/modal/creditCustModal :: creditModal"></div>
+</div><!-- /.lock-account-wrapper -->
 <script>
-    // 1. Toast UI Grid 테마
-tui.Grid.applyTheme('default', {
-  cell: {
-    normal: {
-      border: '#dedede',
-      background: '#ffffff',
-      showVerticalBorder: true
-    },
-    header: {
-      border: '#dedede',
-      background: '#f5f5f5',
-      showVerticalBorder: true
-    },
-    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
-    rowHeader: {
-      border: '#dedede',
-      background: '#ffffff',
-      showVerticalBorder: true
-    },
-    editable: {
-      background: '#FFFDF0',
-      text: '#000'
-    },
-    selectedHeader: {
-      background: '#f5f5f5'
-    },
-    selected: {
-      background: '#ffffff'
-    }
-  }
-});
-
-
-
-    // 2. 더미 데이터
-    const creditData = [];
-
-    // 3. Grid 공통 옵션
-    const businessGridOptions = {
-        bodyHeight: 260,
-        scrollX: true,
-        scrollY: true,
-        rowHeaders: [],// 좌측 체크박스
-        rowHeight: 40,
-        columnOptions: {
-            minWidth: 80,
-            resizable: true
-        }
-    };
-
-    // 4. 여신한도 목록 Grid 생성
-    const creditGrid = new tui.Grid({
-        el: document.getElementById('creditGrid'),
-        data: creditData,
-        ...businessGridOptions,
-        columns: [
-            { header: '고객코드', name: 'custcomId', width: 140 },
-            { header: '고객사', name: 'custcomName', width: 180 },
-            {
-           	  header: '고객사상세조회',
-           	  name: 'clientSelect',
-           	  width: 120,
-           	  align: 'center',
-	          formatter: ({ rowKey, row }) => {   // ← rowKey 같이 받기
-	              const label = row.custcomNameResult || '고객사조회';
-	              return `
-	                <button type="button"
-	                        class="grid-btn open-client-modal-btn"
-	                        data-row-key="${rowKey}">
-	                  ${label}
-	                </button>
-	              `;
-           	  }
-           	},
-            { header: '신용등급', name: 'creditGrad', width: 120 },
-            { header: '여신체크', name: 'cdtlnCheck', width: 120 },
-            { header: '담보한도', name: 'mrtggLmt', width: 180 },
-            { header: '신용한도', name: 'creditLmt', width: 180 },
-            { header: '여신한도', name: 'cdtlnLmt', width: 180 },
-            { header: '한도초과여부', name: 'lmtoverCheck', width: 110 },
-        ]
-    });
-
- 	// 5-1 초기화버튼
-    document.getElementById("creditInit").addEventListener("click", function () {
-
-        // 1) searchForm 객체 초기화
-        const searchForm = {
-            custcomId: "",
-            custcomName: "",
-        };
-
-        // 2) 화면 Input 값 초기화
-        document.querySelector("#autoCustcomId").value = "";
-        document.querySelector("#autoCustcomName").value = "";
-
-        console.log("검색조건 초기화:", searchForm);
-    });
-
-	// 5-2 조회버튼 (jQuery 버전)
-	$(document).on("click", "#searchCredit", function () {
-
-	    // 1) 화면 입력값 → searchForm 에 세팅
-	    let searchForm = {
-	    		custcomId: $("#autoCustcomId").val().trim(),
-	    		custcomName: $("#autoCustcomName").val().trim(),
-	    };
-
-	    console.log("보낼 searchForm >>> ", searchForm);
-
-	    // 2) AJAX 요청
-	    $.ajax({
-	        url: "/credit/list",
-	        type: "POST",
-	        contentType: "application/json",
-	        data: JSON.stringify(searchForm),
-	        success: function (res) {
-	            console.log("조회결과 >>> ", res);
-
-	            // 3) 그리드 데이터 반영
-	            creditGrid.resetData(res);
-	        },
-	        error: function (err) {
-	            console.error("조회 중 오류:", err);
-	        }
-	    });
-	});   
-
-    
-    
-
-	// 5-3. 고객코드 자동완성
-	if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
-     TeamCommon.autocomplete.init({
-       inputSelector: '#autoCustcomId',
-       listSelector: '#autoCustcomIdSuggest',
-       url: '/credit/custcomIdSearch',
-       paramName: 'keyword',
-       minLength: 1,
-       delay: 300,
-       preventClose: true,
-       mapResponse: item => ({
-           id: item.customId,
-           label: item.custcomId,      // 자동완성 목록에 실제로 보이는 값
-           value: item.custcomId,      // input에 입력될 기본값
-           name: item.custcomName      // 추가 저장된 고객사명
-       }),
-       onSelect: item => {
-           $('#autoCustcomId').val(item.value);
-           $('#autoCustcomName').val(item.name);
+   // 1. Toast UI Grid 테마
+   tui.Grid.applyTheme('default', {
+       cell: {
+           normal: {
+               border: '#dedede',
+               background: '#ffffff',
+               showVerticalBorder: true
+           },
+           header: {
+               border: '#dedede',
+               background: '#f5f5f5',
+               showVerticalBorder: true
+           },
+           rowHeader: {
+               border: '#dedede',
+               background: '#ffffff',
+               showVerticalBorder: true
+           },
+           editable: {
+               background: '#FFFDF0',
+               text: '#000'
+           },
+           selectedHeader: {
+               background: '#f5f5f5'
+           },
+           selected: {
+               background: '#ffffff'
+           }
        }
-     });
+   });
+   // 2. 더미 데이터 (백엔드에서 내려주는 컬럼 예시)
+   // custcomId, custcomName, creditGrad, cdtlnCheck,
+   // mrtggLmt, creditLmt, cdtlnLmt, lmtoverCheck,
+   // applcBeginDt, applcEndDt,
+   // remainAmt, maxOverdueMm, badCreditYn, shipHoldYn, turnoverDays
+   const creditData = [];
+   // 3. Grid 공통 옵션
+   const businessGridOptions = {
+       bodyHeight: 260,
+       scrollX: true,
+       scrollY: true,
+       rowHeaders: [],
+       rowHeight: 40,
+       columnOptions: {
+           minWidth: 80,
+           resizable: true
+       }
+   };
+   // 숫자 변환 유틸 (빈값/콤마 처리)
+   function toNumber(val) {
+       if (val === null || val === undefined) return 0;
+       const str = String(val).replace(/,/g, '').trim();
+       if (str === '') return 0;
+       return Number(str) || 0;
+   }
+   // 4. 여신한도 / 여신현황 Grid 생성
+   const creditGrid = new tui.Grid({
+       el: document.getElementById('creditGrid'),
+       data: creditData,
+       ...businessGridOptions,
+       columns: [
+           { header: '고객코드', name: 'custcomId', width: 120 },
+           { header: '고객사',   name: 'custcomName', width: 180 },
+           {
+               header: '고객사상세조회',
+               name: 'clientSelect',
+               width: 120,
+               align: 'center',
+               formatter: ({ rowKey, row }) => {
+                   const label = row.custcomNameResult || '고객사조회';
+                   return `
+                     <button type="button"
+                             class="grid-btn open-client-modal-btn"
+                             data-row-key="${rowKey}"
+                             data-custcom-id="${row.custcomId || ''}">
+                       ${label}
+                     </button>
+                   `;
+               }
+           },
+           { header: '신용등급',    name: 'creditGrad',  width: 80,  align: 'center' },
+           { header: '여신체크',    name: 'cdtlnCheck',  width: 80,  align: 'center' },
+           {
+               header: '담보한도',
+               name: 'mrtggLmt',
+               editor: 'text',
+               width: 110,
+               align: 'right',
+               formatter: ({ value }) => {
+                   const num = toNumber(value);
+                   return num ? num.toLocaleString() : '';
+               }
+           },
+           {
+               header: '신용한도',
+               name: 'creditLmt',
+               editor: 'text',
+               width: 110,
+               align: 'right',
+               formatter: ({ value }) => {
+                   const num = toNumber(value);
+                   return num ? num.toLocaleString() : '';
+               }
+           },
+           {
+               header: '여신한도',
+               name: 'cdtlnLmt',
+               editor: 'text',
+               width: 110,
+               align: 'right',
+               formatter: ({ value }) => {
+                   const num = toNumber(value);
+                   return num ? num.toLocaleString() : '';
+               }
+           },
+           /* ▼ 여기부터 여신현황 컬럼들 추가 ▼ */
+           {
+               header: '현재잔액',
+               name: 'remainAmt',
+               width: 110,
+               align: 'right',
+               formatter: ({ value }) => {
+                   const num = toNumber(value);
+                   return num ? num.toLocaleString() : '';
+               }
+           },
+           {
+               header: '사용률(%)',
+               name: 'useRate',
+               width: 90,
+               align: 'right',
+               formatter: ({ row }) => {
+                   const limit = toNumber(row.cdtlnLmt);     // 여신한도
+                   const remain = toNumber(row.remainAmt);   // 현재잔액
+                   if (!limit) return '';
+                   const rate = (remain / limit) * 100;
+                   return rate.toFixed(1);
+               }
+           },
+           {
+               header: '최대연체(개월)',
+               name: 'maxOverdueMm',
+               width: 110,
+               align: 'right'
+           },
+           {
+               header: '악성여신',
+               name: 'badCreditYn',
+               width: 80,
+               align: 'center',
+               formatter: ({ value }) => {
+                   if (value === 'Y') {
+                       return '<span class="bad-credit-badge">Y</span>';
+                   }
+                   return '';
+               }
+           },
+           {
+               header: '출하정지',
+               name: 'shipHoldYn',
+               width: 80,
+               align: 'center',
+               formatter: ({ value }) => {
+                   if (value === 'Y') {
+                       return '<span class="ship-hold-badge">정지</span>';
+                   }
+                   return '';
+               }
+           },
+           {
+               header: '회전일수',
+               name: 'turnoverDays',
+               width: 90,
+               align: 'right'
+           },
+           /* ▲ 여신현황 컬럼 끝 ▲ */
+           { header: '한도초과여부', name: 'lmtoverCheck', width: 110, align: 'center' },
+           {
+               header: '적용시작일',
+               name: 'applcBeginDt',
+               width: 130,
+               editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' } }
+           },
+           {
+               header: '적용종료일',
+               name: 'applcEndDt',
+               width: 130,
+               editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' } }
+           }
+       ]
+   });
+   // 담보/신용 변경 시 여신한도 자동 계산
+   creditGrid.on('afterChange', (ev) => {
+       ev.changes.forEach(change => {
+           const { rowKey, columnName } = change;
+           if (columnName === 'mrtggLmt' || columnName === 'creditLmt') {
+               const row = creditGrid.getRow(rowKey);
+               const mrtgg  = toNumber(row.mrtggLmt);
+               const credit = toNumber(row.creditLmt);
+               const total  = mrtgg + credit;
+               creditGrid.setValue(rowKey, 'cdtlnLmt', total);
+           }
+       });
+   });
+   // 5-1 검색조건 초기화 버튼
+   document.getElementById("creditInit").addEventListener("click", function () {
+       const searchForm = { custcomId: "", custcomName: "" };
+       document.querySelector("#autoCustcomId").value = "";
+       document.querySelector("#autoCustcomName").value = "";
+       console.log("검색조건 초기화:", searchForm);
+   });
+   // 5-2 조회버튼
+   $(document).on("click", "#searchCredit", function () {
+       let searchForm = {
+           custcomId: $("#autoCustcomId").val().trim(),
+           custcomName: $("#autoCustcomName").val().trim()
+       };
+       console.log("보낼 searchForm >>> ", searchForm);
+       $.ajax({
+           url: "/credit/list",
+           type: "POST",
+           contentType: "application/json",
+           data: JSON.stringify(searchForm),
+           success: function (res) {
+               console.log("조회결과 >>> ", res);
+               creditGrid.resetData(res);
+           },
+           error: function (err) {
+               console.error("조회 중 오류:", err);
+           }
+       });
+   });
+   // 5-3 고객코드 자동완성
+   if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
+       TeamCommon.autocomplete.init({
+           inputSelector: '#autoCustcomId',
+           listSelector: '#autoCustcomIdSuggest',
+           url: '/credit/custcomIdSearch',
+           paramName: 'keyword',
+           minLength: 1,
+           delay: 300,
+           preventClose: true,
+           mapResponse: item => ({
+               id: item.customId,
+               label: item.custcomId,
+               value: item.custcomId,
+               name: item.custcomName
+           }),
+           onSelect: item => {
+               $('#autoCustcomId').val(item.value);
+               $('#autoCustcomName').val(item.name);
+           }
+       });
    } else {
-     console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
+       console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
    }
    // 5-4 고객사명 자동완성
    if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
-     TeamCommon.autocomplete.init({
-       inputSelector: '#autoCustcomName',
-       listSelector: '#autoCustcomNameSuggest',
-       url: '/credit/custcomNameSearch',
-       paramName: 'keyword',
-       minLength: 1,
-       delay: 300,
-       preventClose: true,
-       mapResponse: item => ({
-           id: item.custcomId,
-           label: item.custcomName,
-           value: item.custcomName
-       }),
-       onSelect: item => {
-           $('#autoCustcomName').val(item.value);
-           $('#autoCustcomId').val(item.id);
-       }
-     });
+       TeamCommon.autocomplete.init({
+           inputSelector: '#autoCustcomName',
+           listSelector: '#autoCustcomNameSuggest',
+           url: '/credit/custcomNameSearch',
+           paramName: 'keyword',
+           minLength: 1,
+           delay: 300,
+           preventClose: true,
+           mapResponse: item => ({
+               id: item.custcomId,
+               label: item.custcomName,
+               value: item.custcomName
+           }),
+           onSelect: item => {
+               $('#autoCustcomName').val(item.value);
+               $('#autoCustcomId').val(item.id);
+           }
+       });
    } else {
-     console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
+       console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
    }
-   
-
-
-	// 6.고객사정보 모달
-		const modal   = document.getElementById("creditModal");
-		const back    = document.getElementById("creditBackdrop");
-		
-		function openCreditModal() {
-			modal.classList.add("show");
-			modal.style.display = "block";
-			back.style.display = "block";
-			
-		}
-		
-		function closeCreditModal() {
-			modal.classList.remove("show");
-			modal.style.display = "none";
-			back.style.display = "none";
-		}
-		
-		// 바깥 클릭 시 닫기
-		modal.addEventListener("click", (event) => {
-			if (!event.target.closest(".modal-content")) {
-			  closeCreditModal();
-			}
-		});
-		
-		document.addEventListener('click', (e) => {
-
-		  if (e.target.classList.contains('open-client-modal-btn')) {
-
-		    const cell = creditGrid.getFocusedCell();
-		    const row = cell ? creditGrid.getRow(cell.rowKey) : null;
-		    if (!row) return;
-
-		    // 바깥 버튼과 동일하게 모달 열기
-		    openCreditModal();
-		  }
-		}); // end 모달
-	   
-
-
+   // 6. 고객사정보 모달
+   const modal = document.getElementById("creditModal");
+   const back  = document.getElementById("creditBackdrop");
+   function openCreditModal() {
+       modal.classList.add("show");
+       modal.style.display = "block";
+       back.style.display = "block";
+   }
+   function closeCreditModal() {
+       modal.classList.remove("show");
+       modal.style.display = "none";
+       back.style.display = "none";
+   }
+   function resetCreditModalForm() {
+       $('#bizAddr').val('');
+       $('#bizTel').val('');
+       $('#bizFax').val('');
+       $('#psch').val('');
+       $('#pschTel').val('');
+       $('#pschEmail').val('');
+   }
+   modal.addEventListener("click", (event) => {
+       if (!event.target.closest(".modal-content")) {
+           closeCreditModal();
+       }
+   });
+   // 고객사상세조회 버튼 클릭
+   document.addEventListener('click', (e) => {
+       if (!e.target.classList.contains('open-client-modal-btn')) {
+           return;
+       }
+       const custcomId = e.target.dataset.custcomId;
+       if (!custcomId) {
+           alert('고객사 코드가 없습니다.');
+           return;
+       }
+       resetCreditModalForm();
+       $.ajax({
+           url: '/credit/custcomDetail',
+           type: 'GET',
+           data: { custcomId: custcomId },
+           success: function (res) {
+               $('#bizAddr').val(res.bizAddr || '');
+               $('#bizTel').val(res.bizTel || '');
+               $('#bizFax').val(res.bizFax || '');
+               $('#psch').val(res.psch || '');
+               $('#pschTel').val(res.pschTel || '');
+               $('#pschEmail').val(res.pschEmail || '');
+               openCreditModal();
+           },
+           error: function (err) {
+               console.error('업체정보 조회 실패', err);
+               alert('업체 정보를 가져오지 못했습니다.');
+           }
+       });
+   });
+   // 7. 여신 평가 버튼 클릭 (악성여신 / 출하정지 등 계산 트리거)
+   $('#creditEval').on('click', function () {
+       const searchForm = {
+           custcomId: $("#autoCustcomId").val().trim(),
+           custcomName: $("#autoCustcomName").val().trim()
+       };
+       if (!confirm('현재 검색조건 기준으로 여신 평가를 실행하시겠습니까?')) {
+           return;
+       }
+       $.ajax({
+           url: '/credit/eval',          // 여신 평가용 API (백엔드 구현 필요)
+           type: 'POST',
+           contentType: 'application/json',
+           data: JSON.stringify(searchForm),
+           success: function (res) {
+               alert('여신 평가가 완료되었습니다.\n(악성여신 / 출하정지 / 회전일수 갱신)');
+               // 평가 후 다시 조회
+               $('#searchCredit').click();
+           },
+           error: function (err) {
+               console.error('여신 평가 중 오류', err);
+               alert('여신 평가 중 오류가 발생했습니다.');
+           }
+       });
+   });
 </script>
 </body>
 </html>
+
