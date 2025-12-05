@@ -5,7 +5,7 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<title>churn_risk_list</title>
+<title>potentialCustList</title>
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
@@ -23,89 +23,189 @@
 </style>
 <body layout:fragment="content">
 
-	<div class="row">
-		<div class="col-md-12 mb-3">
-			<div class="card">
+	<span th:text="${list != null ? #lists.size(list) : 0}">0</span>
+	<form th:action="@{/potential/sync}" method="post" class="mb-2">
+		<button class="btn btn-primary">공공데이터 동기화</button>
+	</form>
+	<!-- <div
+		style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;">
+		<table class="table" style="height: 300px;">
+			연습테이블
+			<thead>
+				<tr>
+					<th>잠재정보번호</th>
+					<th>조건번호</th>
+					<th>거래처ID</th>
+					<th>순위</th>
+					<th>거래처명</th>
+					<th>업종</th>
+					<th>규모</th>
+					<th>지역</th>
+					<th>설립일</th>
+					<th>리드점수</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="row : ${list}">
+					<td th:text="${row.potentialInfoNo}"></td>
+					<td th:text="${row.potentialCondNo}"></td>
+					<td th:text="${row.vendId}"></td>
+					<td th:text="${row.rank}"></td>
+					<td th:text="${row.vendNm}"></td>
+					<td th:text="${row.industryType}"></td>
+					<td th:text="${row.companySize}"></td>
+					<td th:text="${row.region}"></td>
+					<td
+						th:text="${row.establishDate.substring(0,4) + '년 ' 
+					            + row.establishDate.substring(5,7) + '월 ' 
+					            + row.establishDate.substring(8,10) + '일'}"></td>
+					 <td th:text="${row.leadScore}"></td>   여기
+				</tr>
+			</tbody>
+		</table>
+	</div> -->
+	<form th:action="@{/salesActivity}" method="post">
+		<div class="row">
+			<div class="col-md-12 mb-3">
+				<div class="card">
 					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 					<div class="card-header">
 						<div class="card-header-left">
 							<h5 class="card-title">조회조건</h5>
 						</div>
 						<div class="card-header-right">
+							<form th:action="@{/potential/sync}" method="post" class="mb-2">
+								<button class="btn btn-primary">공공데이터 동기화</button>
+							</form>
 							<button class="btn btn-dark">초기화</button>
-							<button class="btn btn-outline-dark">조회</button>
+							<button class="btn btn-outline-dark" type="submit">조회</button>
 						</div>
 					</div>
-						<div class="card-body">
+					<div class="card-body">
+						<div class="row mb-2">
 							<div class="row mb-2">
 								<div class="col-md-3">
-									<label class="form-label">마지막 거래일</label> <input type="text" class="form-control" placeholder="Value">
+									<label class="form-label">업종</label> <input class="form-select"
+										name="industryType">
+									<!-- <option>코딩</option>
+										<option>분석</option>
+										<option>제과</option>
+										<option>의류</option> -->
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">갱신여부</label> <input type="text" class="form-control" placeholder="Value">
+									<label class="form-label">업체규모</label> <input type="text"
+										class="form-control" placeholder="Value" name="companySize">
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">미갱신기간</label> <input type="text" class="form-control" placeholder="Value">
-								</div>
-								<div class="col-md-3">
-									<label class="form-label">매출변동</label> <input type="text" class="form-control" placeholder="Value">
+									<label class="form-label">지역/상권</label> <input type="text"
+										class="form-control" placeholder="Value" name="region">
 								</div>
 							</div>
-							<div class="row mb-2">
-								<div class="col-md-3">
-									<label class="form-label">최근 웹활동</label> <input type="text" class="form-control" placeholder="Value">
+							<div class="col-md-6">
+								<label class="form-label">설립일</label>
+								<div class="d-flex align-items-center js-date-range">
+									<!-- 시작일 -->
+									<div class="input-group date">
+										<input type="text"
+											class="form-control datepicker js-date-range-start"
+											placeholder="시작일" name="startEstablishDate"> <span
+											class="input-group-text js-date-range-icon-start"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+
+									<span class="mx-1 fw-bold fs-5">~</span>
+
+									<!-- 종료일 -->
+									<div class="input-group date ms-2">
+										<input type="text"
+											class="form-control datepicker js-date-range-end"
+											placeholder="종료일" name="endEstablishDate"> <span
+											class="input-group-text js-date-range-icon-end"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
 								</div>
-								<div class="col-md-3">
-									<label class="form-label">평균 구매주기</label> <input type="text" class="form-control" placeholder="Value">
-								</div>
-								<div class="col-md-3">
-									<label class="form-label">평균 구매주기</label> <input type="text" class="form-control" placeholder="Value">
-								</div>	
 							</div>
 						</div>
+					</div>
 				</div>
 			</div>
 		</div>
-		
-		
-		
-	<!-- 휴먼고객 -->
-	<div class="card mb-3">
-		<div class="card-header">
-			<div class="card-header-left">
-				<h5 class="card-title">휴먼고객목록</h5>
+	</form>
+
+
+
+	<!-- 결과 테이블 -->
+	<!--  <div class="card mb-3" style="height: 500px; overflow-y: auto; overflow-x: auto;">
+    <table border="1">
+        <thead>
+            <tr>
+                <th>잠재정보번호</th>
+                <th>거래처명</th>
+                <th>업종</th>
+                <th>규모</th>
+                <th>지역</th>
+                <th>설립일</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="row : ${potentialstdrList}">
+                <td th:text="${row.potentialInfoNo}"></td>
+                <td th:text="${row.vendNm}"></td>
+                <td th:text="${row.industryType}"></td>
+                <td th:text="${row.companySize}"></td>
+                <td th:text="${row.region}"></td>
+                <td th:text="${row.establishDate}"></td>
+            </tr>
+        </tbody>
+    </table>
+    </div> -->
+
+
+
+	<!-- 잠재고객 -->
+	<form th:action="@{/potentialCustList}" method="post">
+		<div class="card mb-3">
+			<div class="card-header">
+				<div class="card-header-left">
+					<h5 class="card-title">잠재고객목록</h5>
+				</div>
+				<!-- card-header-left end  -->
 			</div>
-			<!-- card-header-left end -->
-		<!-- 	<div class="card-header-right">
-				<button class="btn btn-dark">초기화</button>
-				<button class="btn btn-outline-dark">조회</button>
-			</div> //card-header right end -->
-		</div> <!-- //card-header wihy-actions end -->
-		<div class="card-body">
-			<div id="dormancygrid" style="margin: 20px;"></div>
+			<div class="card-body">
+				<div id="potentialgrid"
+					style="height: 300px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+			</div>
 		</div>
-	</div>
-	
-	
-	
+	</form>
+
+
 	<!-- 접촉사항 -->
-	<div class="card mb-3">
-		<div class="card-header">
-			<div class="card-header-left">
-				<h5 class="card-title">접촉사항</h5>
-			</div>
-			<!-- card-header-left end -->
-		<!-- 	<div class="card-header-right">
+	<form th:action="@{/salesActivity/contact}" method="post">
+		<div class="card mb-3">
+			<div class="card-header">
+				<div class="card-header-left">
+					<h5 class="card-title">접촉사항</h5>
+				</div>
+				<!-- card-header-left end -->
+				<div class="card-header-right">
 				<button class="btn btn-dark">초기화</button>
+				<form th:action="@{/salesActivity/contact}" method="post">
 				<button class="btn btn-out	line-dark">조회</button>
-			</div> //card-header right end -->
-		</div> <!-- //card-header wihy-actions end -->
-		<div class="card-body">
-			<div id="contactgrid" style="margin: 20px;"></div>
+				</form>
+			</div> 
+			</div>
+			<!-- //card-header wihy-actions end -->
+			<div class="card-body">
+				<div id="contactgrid" style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+			</div>
 		</div>
-	</div>
-	<script>
-		
+	</form>
+
+
+
+	<script th:inline="javascript">
 		// 휴먼/이탈고객 데이터
 		tui.Grid.applyTheme('default', {
 			cell : {
@@ -131,65 +231,59 @@
 				}
 			}
 		});
-		const dormancygridData = [ {
-			custName: "코드예담",
-			dormancyBreakaway: "이탈",
-			inactivePeriodDays: "11개월",
-			nonRenewalPeriodDays: "6개월",
-			revenueChg: "-73%",
-			avgPurchaseCycleDays: "2개월",
-			churnRiskScore: "100"
-		}, {
-			custName: "건설예담",
-			dormancyBreakaway: "휴면",
-			inactivePeriodDays: "8개월",
-			nonRenewalPeriodDays: "3개월",
-			revenueChg: "-34%",
-			avgPurchaseCycleDays: "2개월",
-			churnRiskScore: "67"
-		} ];
+		
+		
+		const potentialData = /*[[${potentialstdrList}]]*/ [];
+	    console.log(potentialData);
+
 		// Grid 생성
-		const dormancygrid = new tui.Grid({
-			el : document.getElementById('dormancygrid'),
-			data : dormancygridData,
-			scrollX : false,
+		const potentialgrid = new tui.Grid({
+			el : document.getElementById('potentialgrid'),
+			data : potentialData,
+			scrollX : true,
 			scrollY : true,
 			minBodyHeight : 0,
 			autoWidth : true,
 			columns : [ {
-				header : '업체명',
-				name : 'custName',
-				sortable : 'true'
-			},{
-				header : '휴면/이탈',
-				name : 'dormancyBreakaway',
-				sortable : 'true'
+				header : '순위',
+				name : 'rank',
+				sortable : 'true',
+				align : 'center'
 			}, {
-				header : '거래중단기간',
-				name : 'inactivePeriodDays',
+				header : '업체명',
+				name : 'vendNm',
 				editor : 'text'
 			}, {
-				header : '미갱신기간',
-				name : 'nonRenewalPeriodDays',
-				align : 'center'
-			},{
-				header : '매출변동',
-				name : 'revenueChg',
-				align : 'center'
-			},{
-				header : '평균구매주기',
-				name : 'avgPurchaseCycleDays',
+				header : '업종',
+				name : 'industryType',
+				sortable : 'true',
 				align : 'center'
 			}, {
-				header : '이탈위험점수',
-				name : 'churnRiskScore',
+				header : '규모',
+				name : 'companySize',
 				align : 'center'
+			}, {
+	            header: '설립일',
+	            name: 'establishDate',
+	            formatter: ({ value }) => {
+	                const d = new Date(value);
+	                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
+	            },
+	            align : 'center'
+	        }, {
+				header : '지역/상권',
+				name : 'region',
+				align : 'center'
+			},{
+			    header : '리드점수',
+			    name   : 'leadScore',   // leadscore → leadScore 로 수정
+			    align  : 'center',
+			    sortable : 'true'
 			} ]
 		});
 		
 		
-		
-		// 휴먼/이탈고객 데이터
+		// 영업활동 접촉
 		tui.Grid.applyTheme('default', {
 			cell : {
 				normal : { // 일반 셀(본문)
@@ -215,112 +309,50 @@
 			}
 		});
 		
-		const contactgridData = [
-			{
-				contactdate: "2025-11-16",
-				managername: "허길동",
-				contactchannel: "대면",
-				contactdetails: "신규 기능 데모 일정 협의 진행함."
-			},
-			{
-				contactdate: "2025-11-14",
-				managername: "허길동",
-				contactchannel: "전화",
-				contactdetails: "제품 가격과 서비스 범위 관련 안내 진행함."
-			},
-			{
-				contactdate: "2025-11-12",
-				managername: "허길동",
-				contactchannel: "이메일",
-				contactdetails: "요청된 제품 사양서 전달 진행함."
-			},
-			{
-				contactdate: "2025-11-10",
-				managername: "허길동",
-				contactchannel: "대면",
-				contactdetails: "도입 일정과 내부 검토 일정 확인 진행함."
-			},
-			{
-				contactdate: "2025-11-08",
-				managername: "허길동",
-				contactchannel: "메신저",
-				contactdetails: "계약서 초안 관련 의견 공유 및 조정 방향 논의 진행함."
-			},
-			{
-				contactdate: "2025-11-06",
-				managername: "허길동",
-				contactchannel: "전화",
-				contactdetails: "추가 요구사항 세부 확인 진행함."
-			},
-			{
-				contactdate: "2025-11-05",
-				managername: "허길동",
-				contactchannel: "이메일",
-				contactdetails: "수정된 견적서 재전달 진행함."
-			},
-			{
-				contactdate: "2025-11-03",
-				managername: "허길동",
-				contactchannel: "대면",
-				contactdetails: "업무 흐름 파악을 위한 현장 미팅 진행함."
-			},
-			{
-				contactdate: "2025-11-02",
-				managername: "허길동",
-				contactchannel: "전화",
-				contactdetails: "납기 일정 관련 조정 가능 여부 안내 진행함."
-			},
-			{
-				contactdate: "2025-10-31",
-				managername: "허길동",
-				contactchannel: "메신저",
-				contactdetails: "요청 자료 공유 및 추가 문의 응대 진행함."
-			},
-			{
-				contactdate: "2025-10-29",
-				managername: "허길동",
-				contactchannel: "대면",
-				contactdetails: "고객 업무 프로세스 파악을 위한 미팅 진행함."
-			},
-			{
-				contactdate: "2025-10-27",
-				managername: "허길동",
-				contactchannel: "이메일",
-				contactdetails: "고객 문의 목록 정리 후 답변 회신 진행함."
-			}
-		];
-
 		
+		const contactData = /*[[${contactrList}]]*/ [];
+	    console.log(potentialData);
+
 		// Grid 생성
-		const contactgrid = new tui.Grid({
+			const contactgrid = new tui.Grid({
 			el : document.getElementById('contactgrid'),
-			data : contactgridData,
-			scrollX : false,
+			data : contactData,
+			scrollX : true,
 			scrollY : true,
 			minBodyHeight : 0,
 			autoWidth : true,
 			columns : [ {
-				header : '날짜',
-				name : 'contactdate',
+				header : 'contactNo',
+				name : 'contactNo',
 				sortable : 'true',
-				align : 'center',
-				width: 150
+				align : 'center'
+			}, {
+				header : 'potentialInfoNo',
+				name : 'potentialInfoNo',
+				editor : 'text'
+			}, {
+				header : 'vendId',
+				name : 'vendId',
+				sortable : 'true',
+				align : 'center'
+			}, {
+				header : 'contactDt',
+				name : 'contactDt',
+				align : 'center'
+			}, {
+	            header: 'contactManager',
+	            name: 'contactManager',
+	            align : 'center'
+	        }, {
+				header : 'contactWay',
+				name : 'contactWay',
+				align : 'center'
 			},{
-				header : '담당자',
-				name : 'managername',
-				sortable : 'true',
-				align : 'center',
-				width: 150
-			}, {
-				header : '접촉채널',
-				name : 'contactchannel',
-				editor : 'text',
-				align : 'center',
-				width: 150
-			}, {
-				header : '접촉내용',
-				name : 'contactdetails',
-			}]
+			    header : 'contactWay',
+			    name   : 'contactWay',   // leadscore → leadScore 로 수정
+			    align  : 'center',
+			    sortable : 'true'
+			} ]
 		});
 	</script>
 </body>

@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
 import store.yd2team.business.service.BusinessVO;
+import store.yd2team.business.service.ContactVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.churnRiskVO;
@@ -47,5 +48,10 @@ public interface BusinessMapper {
     //휴면, 이탈 조건별 점수화
     List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo);
 	
-	//단건조회
+	//접촉사항조회
+    List<ContactVO> getAction();
+    
 }
+
+
+
