@@ -24,26 +24,27 @@
 				<div class="card-header">
 					<h5 class="card-title">검색조건</h5>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark">조회</button>
+						<button type="button" class="btn btn-dark" id="searchInitBtn">초기화</button>
+						<button class="btn btn-outline-dark" id="searchBtn">조회</button>
 					</div>
 				</div>
 				<div class="card-body">
 					<div class="row">
 						<div class="col-md-3">
-							<label class="form-label">고객코드</label> <input type="text"
-								class="form-control">
+							<label for="custcomId" class="form-label">고객코드</label>
+							<input id="custcomId" type="text" class="form-control">
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">고객사</label> <select id="dept"
-								class="form-control">
+							<label for="custcomName" class="form-label">고객사</label>
+							<select id="custcomName" class="form-control">
 								<option>전체</option>
 								<option>무신사</option>
 								<option>29cm</option>
 							</select>
 						</div>
 						<div class="col-md-2">
-							<label class="form-label">담당자</label> <select id="pay_yn"
-								class="form-control">
+							<label class="form-label">담당자</label>
+							<select id="psch" class="form-control">
 								<option>전체</option>
 								<option>논개</option>
 								<option>구론산</option>
@@ -51,25 +52,29 @@
 						</div>
 						<div class="col-md-4">
 							<label class="form-label">기간</label>
-							<div class="d-flex align-items-center">
-								<!-- 시작일 -->
-								<div class="input-group date me-2" id="applyDatePickerStart">
-									<input type="text" class="form-control" id="applyDateStart"
-										placeholder="날짜 선택"> <span class="input-group-text"
-										id="icon-calendar-start"> <i class="bi bi-calendar"></i>
-									</span>
-								</div>
+								<div class="d-flex align-items-center js-date-range">
 
-								<!-- ~ -->
-								<span class="mx-1 fw-bold fs-5">~</span>
+									<!-- 시작일 -->
+									<div class="input-group date">
+										<input type="text"
+											class="form-control datepicker js-date-range-start"
+											placeholder="시작일"> <span
+											class="input-group-text js-date-range-icon-start"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
 
-								<!-- 종료일 -->
-								<div class="input-group date ms-2" id="applyDatePickerEnd">
-									<input type="text" class="form-control" id="applyDateEnd"
-										placeholder="날짜 선택"> <span class="input-group-text"
-										id="icon-calendar-end"> <i class="bi bi-calendar"></i>
-									</span>
-								</div>
+									<span class="mx-1 fw-bold fs-5">~</span>
+
+									<!-- 종료일 -->
+									<div class="input-group date ms-2">
+										<input type="text"
+											class="form-control datepicker js-date-range-end"
+											placeholder="종료일"> <span
+											class="input-group-text js-date-range-icon-end"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
 							</div>
 						</div>
 					</div>
@@ -96,7 +101,16 @@
 	</div>
 	<div th:replace="business/modal/rciptTretModal :: rciptTretModal"></div>
 	<div th:replace="business/modal/delayModal :: delayModal"></div>
-	<script>
+	
+<script>
+	let searchForm = {
+			custcomId: "",
+		    custcomName: "",
+		    psch: "",
+		    dueStart: "",
+		    dueEnd: ""
+	};
+
     const gridData = [
     	  {
     		custcomId: "251126-0001",
@@ -109,80 +123,10 @@
     		rciptAppoAmt: "",
     		rciptAppoDt: "2025-11-27",
     		ltstRciptDt: "2025-11-30"
-    	  },
-    	  {
-    		custcomId: "251126-0002",
-    		custcomName: "29cm",
-    		trnsDate: "2025-02-12",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  },
-    	  {
-    		custcomId: "251126-0003",
-    		custcomName: "에이블리",
-    		trnsDate: "2025-01-11",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  },
-    	  {
-    		custcomId: "251126-0004",
-    		custcomName: "쿠팡",
-    		trnsDate: "2025-01-22",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  },
-    	  {
-    		custcomId: "251126-0005",
-    		custcomName: "스타일난다",
-    		trnsDate: "2025-02-28",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  },
-    	  {
-    		custcomId: "251126-0006",
-    		custcomName: "LF",
-    		trnsDate: "2025-03-10",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  },
-    	  {
-    		custcomId: "251126-0007",
-    		custcomName: "뮈메프",
-    		trnsDate: "2025-03-22",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
     	  }
     	];
+    
+    
         // Grid 생성
         const grid = new tui.Grid({
             el: document.getElementById('grid'),
@@ -204,6 +148,59 @@
             	  { header: '최근납입일', name: 'ltstRciptDt' },
             	]
         });
+        
+// =============== 버튼 이벤트
+	// 2-1. 초기화 버튼 이벤트
+	document.getElementById("searchInitBtn").addEventListener("click", function () {
+	
+	    // 1) searchForm 객체 초기화
+	    searchForm = {
+			custcomId: "",
+		    custcomName: "",
+		    psch: "",
+		    dueStart: "",
+		    dueEnd: ""
+	    };
+	
+	    // 2) 화면 Input 값 초기화
+	    document.querySelector("#custcomId").value = "";
+	    document.querySelector("#custcomName").value = "";
+	    document.querySelector("#psch").value = "";
+	    document.querySelector(".js-date-range-start").value = "";
+	    document.querySelector(".js-date-range-end").value = "";
+	
+	    // datepicker 를 쓰는 경우 UI 리프레시
+	    $('.js-date-range-start').datepicker('update', '');
+	    $('.js-date-range-end').datepicker('update', '');
+	
+	    console.log("검색조건 초기화:", searchForm);
+	});
+
+	// 2-2. 조회 버튼 이벤트
+	document.getElementById("searchBtn").addEventListener("click", function () {
+	
+	    // 1) 화면 입력값 → searchForm 에 세팅
+	    searchForm.custcomId = document.querySelector("#custcomId").value.trim();
+	    searchForm.custcomName = document.querySelector("#custcomName").value.trim();
+	    searchForm.psch = document.querySelector("#psch").value.trim();
+	    searchForm.dueStart = document.querySelector(".js-date-range-start").value;
+	    searchForm.dueEnd = document.querySelector(".js-date-range-end").value;
+	
+	    console.log("보낼 searchForm >>> ", searchForm);
+	
+	    // 2) 백엔드 조회 요청 (POST /esti/list)
+	    axios.post("/atmpt/list", searchForm)
+	        .then(res => {
+	            console.log("조회결과 >>> ", res.data);
+	
+	            // 3) 그리드 데이터 반영
+	            grid.resetData(res.data);
+	        })
+	        .catch(err => console.error("조회 중 오류:", err));
+	});
+        
+        
+        
         
 
         //행추가버튼

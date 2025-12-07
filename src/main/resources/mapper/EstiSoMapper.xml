@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="store.yd2team.business.mapper.EstiSoMapper">
 <!-- 견적서 조회 -->
-	  <select id="selectEsti" parameterType="EstiSoVO"  resultType="EstiSoVO">
+	  <select id="selectEsti" parameterType="store.yd2team.business.service.EstiSoVO"  resultType="store.yd2team.business.service.EstiSoVO">
 		SELECT
 	           x.esti_id AS estiId          <!-- 견적서 코드 -->
 	         , x.version AS version         <!-- 버전 -->
@@ -74,7 +74,7 @@
 	</select>
 
 <!-- 승인 반려 상태값 업데이트 -->
-	<update id="updateStatus" parameterType="EstiSoVO">
+	<update id="updateStatus" parameterType="store.yd2team.business.service.EstiSoVO">
 	    UPDATE tb_esti
 	       SET esti_st     = #{estiSt}
 	         , recall_resn = #{recallResn}
@@ -86,7 +86,7 @@
 	
 <!-- 견적서 모달 상품 auto complete -->
     <!-- 상품명 자동완성 검색 -->
-    <select id="searchProduct" resultType="EstiSoVO">
+    <select id="searchProduct" resultType="store.yd2team.business.service.EstiSoVO">
         SELECT
                product_id AS productId,
                product_name AS productName,
@@ -97,7 +97,7 @@
     </select>
 
     <!-- 상품 상세조회 (단가 가져오기) -->
-    <select id="getProductDetail" resultType="EstiSoVO">
+    <select id="getProductDetail" resultType="store.yd2team.business.service.EstiSoVO">
         SELECT
                product_id,
                product_name,

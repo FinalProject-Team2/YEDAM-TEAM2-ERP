@@ -1,0 +1,102 @@
+package store.yd2team.business.web;
+
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import lombok.RequiredArgsConstructor;
+import store.yd2team.business.service.AtmptService;
+import store.yd2team.business.service.AtmptVO;          // 미수채권(그리드) VO
+
+@Controller
+@RequestMapping("/atmpt")
+@RequiredArgsConstructor
+public class AtmptController {
+
+    private final AtmptService atmptService;
+
+    /**
+     * 미수채권관리 메인 화면
+     */
+    @GetMapping("/atmptMain")
+    public String atmptMain(Model model) {
+        // 필요 시 공통코드/콤보 데이터 모델에 담아서 내려주기
+        return "business/atmpt";   // templates/business/atmpt.html
+    }
+    
+    // 조회 고객사 auto complete (ID)
+    @GetMapping("/custcomIdSearch")
+    @ResponseBody
+    public List<AtmptVO> searchCustcomId(@RequestParam("keyword") String keyword) {
+        return atmptService.searchCustcomId(keyword);
+    }
+    // 조회 고객사 auto complete (Name)
+    @GetMapping("/custcomNameSearch")
+    @ResponseBody
+    public List<AtmptVO> searchCustcomName(@RequestParam("keyword") String keyword) {
+        return atmptService.searchCustcomName(keyword);
+    }
+
+    /* 미수채권 목록 조회 (/atmpt/list)
+     * - 검색조건: 고객코드, 고객사, 담당자, 기간(fromDt, toDt) 등을 AtmptVO에 포함
+     * - 결과: 그리드에 뿌릴 미수/입출금 내역 리스트
+     */
+    @PostMapping("/list")
+    @ResponseBody
+    public List<AtmptVO> getAtmptList(@RequestBody AtmptVO searchVO) {
+        return atmptService.searchAtmpt(searchVO);
+    }
+
+    /**
+     * 입금처리 저장 (/atmpt/depositSave)
+     * - tb_atmpt_detail 에 INSERT
+     * - 필요 시 tb_atmpt의 ATMPT_BLCE(잔액) 갱신
+     */
+/*
+    @PostMapping("/depositSave")
+    @ResponseBody
+    public Map<String, Object> saveDeposit(@RequestBody DepositVO vo) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            int cnt = atmptService.saveDeposit(vo);
+            result.put("result", "success");
+            result.put("count", cnt);
+            result.put("message", "입금처리가 저장되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("result", "fail");
+            result.put("message", "입금처리 저장 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        return result;
+    }
+*/
+    /**
+     * 연체관리이력 저장 (/atmpt/delaySave)
+     * - tb_dely_mvg_hist 에 INSERT
+     */
+/*
+    @PostMapping("/delaySave")
+    @ResponseBody
+    public Map<String, Object> saveDelayHistory(@RequestBody DelayHistVO vo) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            int cnt = atmptService.saveDelayHistory(vo);
+            result.put("result", "success");
+            result.put("count", cnt);
+            result.put("message", "연체관리이력이 저장되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("result", "fail");
+            result.put("message", "연체관리이력 저장 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        return result;
+    }
+*/
+}
