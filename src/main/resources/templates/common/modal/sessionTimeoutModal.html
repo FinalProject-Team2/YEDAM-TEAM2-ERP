@@ -1,0 +1,56 @@
+<!-- /templates/common/modal/sessionTimeoutModal.html -->
+<div th:fragment="sessionTimeoutModal">
+
+  <!-- 전체 래퍼 (show/hide 대상) -->
+  <div id="session-timeout-modal" style="display: none;">
+
+    <!-- 모달 배경 -->
+    <div class="modal-backdrop fade show"></div>
+
+    <!-- 모달 본체 -->
+    <div class="modal show" tabindex="-1" role="dialog" aria-modal="true"
+         aria-labelledby="sessionTimeoutModalLabel"
+         style="display: block;">
+      <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 420px;">
+        <div class="modal-content">
+
+          <!-- HEADER -->
+          <div class="modal-header py-2">
+            <h5 class="modal-title" id="sessionTimeoutModalLabel">세션 만료 예정</h5>
+            <button type="button" class="btn-close" aria-label="Close"
+                    onclick="document.getElementById('session-timeout-modal').style.display='none';"></button>
+          </div>
+
+          <!-- BODY -->
+          <div class="modal-body">
+            <p id="session-timeout-message" class="mb-2">
+              일정 시간 동안 사용이 없어 곧 로그아웃됩니다.<br>
+              계속 사용하시려면 [세션 연장] 버튼을 눌러주세요.
+            </p>
+            <p class="small text-muted mb-0">
+              보안을 위해 세션이 자동으로 만료됩니다.<br>
+              공용 PC를 사용 중이라면 [지금 로그아웃]을 눌러주세요.
+            </p>
+          </div>
+
+          <!-- FOOTER -->
+          <div class="modal-footer justify-content-center">
+			<button type="button"
+			        class="btn btn-outline-secondary"
+			        id="session-logout-btn">
+			  지금 로그아웃
+			</button>
+			<button type="button"
+			        class="btn btn-primary"
+			        id="session-modal-extend-btn"> <!-- ★ id 변경 -->
+			  세션 연장
+			</button>
+		  </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

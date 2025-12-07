@@ -37,7 +37,6 @@
                ON a.VEND_ID = v.VEND_ID
         WHERE a.VEND_ID  = #{vendId}
         AND a.LOGIN_ID = #{loginId}
-        AND a.YN = 'e1'
     </select>
     
     <update id="updateLoginSuccess">

@@ -1,11 +1,19 @@
 package store.yd2team.common.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-@Configuration
-public class WebConfig implements WebMvcConfigurer{
 
+import lombok.RequiredArgsConstructor;
+import store.yd2team.common.interceptor.LoginCheckInterceptor;
+
+@Configuration
+@RequiredArgsConstructor
+public class WebConfig implements WebMvcConfigurer{
+	
+	private final LoginCheckInterceptor loginCheckInterceptor;
+	
 	@Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		System.out.println(System.getProperty("user.dir"));
@@ -28,4 +36,22 @@ public class WebConfig implements WebMvcConfigurer{
 	                .setCachePeriod(20);
 
 	}
+	
+	@Override
+    public void addInterceptors(InterceptorRegistry registry) {
+
+        registry.addInterceptor(loginCheckInterceptor)
+                .order(1)
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/logIn/**",
+                        "/signUp/**",
+                        "/assets/**",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/error",
+                        "/favicon.ico"
+                );
+    }
 }

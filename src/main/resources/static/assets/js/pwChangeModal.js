@@ -20,6 +20,15 @@ document.addEventListener('DOMContentLoaded', function () {
   const policyLengthEl = document.getElementById('pwPolicyLength');  // lengthText
   const policyRulesEl  = document.getElementById('pwPolicyRules');   // ruleHtml
 
+  // ================== 강제 비밀번호 변경 모드 여부 ==================
+  let forcePwChangeMode = false;
+
+  // URL 파라미터에서 forcePwChange 체크
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('forcePwChange') === 'true') {
+    forcePwChangeMode = true;
+  }
+
   // ================== 공통 함수 ==================
 
   function showPwError(msg) {
@@ -40,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (confirmPwInput) confirmPwInput.value = '';
   }
 
-  // 🔹 비밀번호 정책 불러오기: /mypage/pwPolicyInfo (하나만 사용)
+  // 🔹 비밀번호 정책 불러오기: /mypage/pwPolicyInfo
   function loadPwPolicy() {
     if (!policyGuideEl || !policyLengthEl || !policyRulesEl) {
       return;
@@ -70,10 +79,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ================== 모달 열기/닫기 ==================
 
-  function openPwChangeModal() {
+  /**
+   * 모달 열기
+   * @param {boolean} forceOpen - true면 강제 모드로 열기 (닫기 막힘)
+   */
+  function openPwChangeModal(forceOpen) {
     hidePwError();
     resetPwInputs();
     loadPwPolicy();
+
+    // 서버에서 강제로 부른 경우(forceOpen=true)에는 강제 모드 ON
+    if (forceOpen === true) {
+      forcePwChangeMode = true;
+    }
+
+    // 강제 모드면 X/취소 버튼 숨기기
+    if (forcePwChangeMode) {
+      if (pwCloseBtn)  pwCloseBtn.style.display  = 'none';
+      if (pwCancelBtn) pwCancelBtn.style.display = 'none';
+    } else {
+      if (pwCloseBtn)  pwCloseBtn.style.display  = '';
+      if (pwCancelBtn) pwCancelBtn.style.display = '';
+    }
 
     if (!pwModal || !pwBackdrop) {
       console.warn('[PW MODAL] 모달 요소를 찾을 수 없습니다.');
@@ -85,7 +112,17 @@ document.addEventListener('DOMContentLoaded', function () {
     pwBackdrop.style.display = 'block';
   }
 
-  function closePwChangeModal() {
+  /**
+   * 모달 닫기
+   * @param {boolean} forceClose - true면 강제 모드라도 닫기 허용 (비번 변경 성공 시)
+   */
+  function closePwChangeModal(forceClose) {
+    // 강제 모드 + 일반 닫기 시도 → 막기
+    if (forcePwChangeMode && !forceClose) {
+      alert('비밀번호를 변경해 주세요.');
+      return;
+    }
+
     if (!pwModal || !pwBackdrop) return;
     pwModal.classList.remove('show');
     pwModal.style.display = 'none';
@@ -95,23 +132,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ================== 이벤트 바인딩 ==================
 
-  // 메뉴 클릭 → 모달 열기
+  // 메뉴 클릭 → 모달 열기 (이건 강제 모드 아님)
   if (pwMenuItem) {
     pwMenuItem.addEventListener('click', function (e) {
       e.preventDefault();
-      openPwChangeModal();
+      openPwChangeModal(false);
     });
   }
 
   // 닫기/취소 버튼
-  if (pwCloseBtn)  pwCloseBtn.addEventListener('click', closePwChangeModal);
-  if (pwCancelBtn) pwCancelBtn.addEventListener('click', closePwChangeModal);
+  if (pwCloseBtn) {
+    pwCloseBtn.addEventListener('click', function () {
+      closePwChangeModal(false);
+    });
+  }
+  if (pwCancelBtn) {
+    pwCancelBtn.addEventListener('click', function () {
+      closePwChangeModal(false);
+    });
+  }
 
   // 모달 바깥 클릭 시 닫기
   if (pwModal) {
     pwModal.addEventListener('click', function (e) {
       if (!e.target.closest('.modal-content')) {
-        closePwChangeModal();
+        closePwChangeModal(false);
       }
     });
   }
@@ -128,8 +173,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       const payload = {
-        currentPassword: currentPwInput.value,
-        newPassword:     newPwInput.value,
+        currentPassword:    currentPwInput.value,
+        newPassword:        newPwInput.value,
         newPasswordConfirm: confirmPwInput.value
       };
 
@@ -146,19 +191,37 @@ document.addEventListener('DOMContentLoaded', function () {
             // 서버에서 내려준 메시지가 있으면 그대로 사용 (비밀번호 규칙 위반 등)
             showPwError(data && data.message ? data.message : '비밀번호 변경에 실패했습니다.');
             confirmPwInput.value = '';
-            newPwInput.value = '';
+            newPwInput.value     = '';
             newPwInput.focus();
             return;
           }
 
           alert(data.message || '비밀번호가 변경되었습니다.');
-          closePwChangeModal();
+
+          // ✅ 비밀번호 변경 성공 시:
+          //  1) 강제 모드라도 모달 닫기 허용
+          //  2) URL에서 forcePwChange 파라미터 제거
+          closePwChangeModal(true);
+
+          const url = new URL(window.location.href);
+          url.searchParams.delete('forcePwChange');
+          window.history.replaceState({}, '', url.toString());
+
+          // 이후부터는 일반 계정처럼 메뉴로 열고 자유롭게 닫을 수 있도록
+          forcePwChangeMode = false;
         })
         .catch(err => {
           console.error('비밀번호 변경 오류:', err);
           showPwError('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         });
     });
+  }
+
+  // ================== 페이지 최초 로드 시 강제 모달 띄우기 ==================
+
+  if (forcePwChangeMode) {
+    // 서버에서 /?forcePwChange=true 로 보낸 경우 → 자동으로 모달 강제 오픈
+    openPwChangeModal(true);
   }
 
 });

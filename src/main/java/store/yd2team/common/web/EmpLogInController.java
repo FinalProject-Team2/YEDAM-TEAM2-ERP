@@ -10,8 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.consts.SessionConst;
 import store.yd2team.common.dto.EmpLoginResultDto;
 import store.yd2team.common.dto.SessionDto;
-import store.yd2team.common.service.EmpLoginService;
 import store.yd2team.common.service.EmpAcctVO;
+import store.yd2team.common.service.EmpLoginService;
+import store.yd2team.common.service.SecPolicyService;
 import store.yd2team.common.service.SecPolicyVO;
 import store.yd2team.common.service.SmsService;
 
@@ -22,6 +23,7 @@ public class EmpLogInController {
 
     final EmpLoginService empAcctService;
     final SmsService smsService;
+    final SecPolicyService secPolicyService;
 
     // OTP 기본값 (정책이 비어있을 때 대비)
     private static final int DEFAULT_OTP_VALID_MIN  = 5;  // 5분
@@ -79,7 +81,9 @@ public class EmpLogInController {
 
             SessionDto loginEmp = buildSessionEmp(empAcct);
             session.setAttribute(SessionConst.LOGIN_EMP, loginEmp);
-
+            
+            applySessionPolicy(session, loginEmp.getVendId());
+            
             log.info(">>> 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={}, empId={}, loginId={}, vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={}",
                     session.getId(),
                     loginEmp.getEmpAcctId(), loginEmp.getEmpNm(),
@@ -210,6 +214,8 @@ public class EmpLogInController {
 
         SessionDto loginEmp = buildSessionEmp(empAcct);
         session.setAttribute(SessionConst.LOGIN_EMP, loginEmp);
+        
+        applySessionPolicy(session, loginEmp.getVendId());
 
         log.info(">>> OTP 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={}, empId={}, loginId={}, vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={}",
                 session.getId(),
@@ -260,12 +266,11 @@ public class EmpLogInController {
         loginEmp.setDeptId(empAcct.getDeptId());
         loginEmp.setDeptNm(empAcct.getDeptNm());
         loginEmp.setMasYn(empAcct.getMasYn());
-
-        // 업체/연락처 정보
         loginEmp.setBizcnd(empAcct.getBizcnd());
         loginEmp.setAddr(empAcct.getAddr());
         loginEmp.setCttpc(empAcct.getCttpc());
         loginEmp.setHp(empAcct.getHp());
+        loginEmp.setTempYn(empAcct.getTempYn());
 
         return loginEmp;
     }
@@ -319,31 +324,55 @@ public class EmpLogInController {
 	         otpValidMin = policy.getOtpValidMin();
 	     }
 
-     // 새 OTP 생성 + 만료시간 갱신
-     String otpCode = generateOtpCode(6);
-     long now = System.currentTimeMillis();
-     long expireTimeMillis = now + (otpValidMin * 60L * 1000L);
+	     // 새 OTP 생성 + 만료시간 갱신
+	     String otpCode = generateOtpCode(6);
+	     long now = System.currentTimeMillis();
+	     long expireTimeMillis = now + (otpValidMin * 60L * 1000L);
+	
+	     session.setAttribute(SessionConst.LOGIN_OTP_CODE, otpCode);
+	     session.setAttribute(SessionConst.LOGIN_OTP_EXPIRE, expireTimeMillis);
+	
+	     String targetMobile = selectOtpTargetNumber(pendingEmp);
+	     if (targetMobile != null && !targetMobile.isBlank()) {
+	         // 나중에 주석으로 막을 예정
+	         // smsService.sendOtpSms(targetMobile, otpCode, otpValidMin);
+	
+	         log.info(">>> [DEV ONLY] OTP 재발급: to={}, otpCode={}, validMin={}",
+	                 targetMobile, otpCode, otpValidMin);
+	     } else {
+	         log.warn("OTP 재발급 문자 발송 불가 - hp/cttpc 모두 없음: empAcctId={}", pendingEmp.getEmpAcctId());
+	         log.info(">>> [DEV ONLY] OTP 재발급 (문자 미발송, 번호 없음): vendId={}, loginId={}, otpCode={}, validMin={}",
+	                 pendingEmp.getVendId(), pendingEmp.getLoginId(), otpCode, otpValidMin);
+	     }
+	
+	     // 프론트에서는 OTP 입력 박스 그대로 두고 메시지만 띄우면 되므로
+	     return EmpLoginResultDto.otpStep(pendingEmp, "새 OTP를 전송했습니다.");
+	 }
+	 
+	// ==========================
+    // 세션 타임아웃 정책 적용 유틸
+    // ==========================
+    private void applySessionPolicy(HttpSession session, String vendId) {
 
-     session.setAttribute(SessionConst.LOGIN_OTP_CODE, otpCode);
-     session.setAttribute(SessionConst.LOGIN_OTP_EXPIRE, expireTimeMillis);
+        // 거래처별(또는 default) 보안 정책 조회
+        SecPolicyVO policy = secPolicyService.getByVendIdOrDefault(vendId);
 
-     String targetMobile = selectOtpTargetNumber(pendingEmp);
-     if (targetMobile != null && !targetMobile.isBlank()) {
-         // 나중에 주석으로 막을 예정
-         // smsService.sendOtpSms(targetMobile, otpCode, otpValidMin);
+        Integer timeoutMin = policy.getSessionTimeoutMin();
+        if (timeoutMin == null || timeoutMin <= 0) {
+            timeoutMin = 30; // 안전장치 (VO 기본값과 맞춤)
+        }
 
-         log.info(">>> [DEV ONLY] OTP 재발급: to={}, otpCode={}, validMin={}",
-                 targetMobile, otpCode, otpValidMin);
-     } else {
-         log.warn("OTP 재발급 문자 발송 불가 - hp/cttpc 모두 없음: empAcctId={}", pendingEmp.getEmpAcctId());
-         log.info(">>> [DEV ONLY] OTP 재발급 (문자 미발송, 번호 없음): vendId={}, loginId={}, otpCode={}, validMin={}",
-                 pendingEmp.getVendId(), pendingEmp.getLoginId(), otpCode, otpValidMin);
-     }
+        // 실제 세션 타임아웃 설정 (초 단위)
+        session.setMaxInactiveInterval(timeoutMin * 60);
 
-     // 프론트에서는 OTP 입력 박스 그대로 두고 메시지만 띄우면 되므로
-     return EmpLoginResultDto.otpStep(pendingEmp, "새 OTP를 전송했습니다.");
- }
+        // 나중에 세션 연장 API에서 재사용할 수 있도록 세션에 정책 저장
+        session.setAttribute(SessionConst.SESSION_TIMEOUT_MIN, timeoutMin);
+        session.setAttribute(SessionConst.SESSION_TIMEOUT_ACTION, policy.getTimeoutAction());
 
+        log.info("세션 정책 적용: vendId={}, timeoutMin={}, timeoutAction={}",
+                vendId, timeoutMin, policy.getTimeoutAction());
+    }
+    
     // ==========================
     // 로그아웃
     // ==========================

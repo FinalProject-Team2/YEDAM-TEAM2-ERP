@@ -35,7 +35,8 @@ public class EmpLoginServiceImpl implements EmpLoginService {
     @Override
     public EmpLoginResultDto login(String vendId, String loginId, String password) {
 
-    	 // 1) 계정 조회
+
+        // 1) 계정 조회
         EmpAcctVO empAcct = empLoginMapper.selectByLogin(vendId, loginId);
         if (empAcct == null) {
             // 계정이 존재하지 않을 때
@@ -62,8 +63,8 @@ public class EmpLoginServiceImpl implements EmpLoginService {
             autoUnlockTm = policy.getAutoUnlockTm();
         }
 
-        log.info(">>> 로그인 잠금 체크: st={}, lockDttm={}, autoUnlockTm={}",
-                empAcct.getSt(), empAcct.getLockDttm(), autoUnlockTm);
+        log.info(">>> 로그인 잠금 체크: empAcctId={}, st={}, lockDttm={}, autoUnlockTm={}",
+                empAcct.getEmpAcctId(), empAcct.getSt(), empAcct.getLockDttm(), autoUnlockTm);
 
         // 3) 잠금 상태인지 확인 + 자동 잠금 해제
         if (LOCKED.equals(empAcct.getSt())) {   // LOCKED == "r2" 라고 가정
@@ -92,15 +93,28 @@ public class EmpLoginServiceImpl implements EmpLoginService {
         }
 
         // 4) 상태(st) / 사용여부(yn) 공통 체크
-        String st = empAcct.getSt();     // 자동해지로 ACTIVE 로 바뀌었을 수도 있음
-        String yn = empAcct.getYn();    // e1(사용), e2(중지)
+        String st = empAcct.getSt();   // 자동 해지로 ACTIVE 로 바뀌었을 수도 있음
+        String yn = empAcct.getYn();   // e1(사용), e2(중지 등)
 
-        // yn = e2 → 사용 중지
-        if (!Y.equals(yn)) { // CodeConst.Yn.Y == "e1"
+        log.info(">>> [LOGIN] 상태/사용여부 체크: empAcctId={}, st={}, yn={}",
+                empAcct.getEmpAcctId(), st, yn);
+
+        // 4-1) 사용 여부(yn) 먼저 체크
+        if ("e2".equals(yn)) {
+            // 명시적으로 "사용 중지" 상태
+            log.info(">>> [LOGIN BLOCK] 사용 중지 계정 로그인 시도: empAcctId={}, vendId={}, loginId={}",
+                    empAcct.getEmpAcctId(), empAcct.getVendId(), empAcct.getLoginId());
+
             return EmpLoginResultDto.fail("사용 중지된 계정입니다.");
+        } else if (!Y.equals(yn)) {
+            // e2도 아니고, Y(e1)도 아니고, null/기타 코드인 경우
+            log.warn(">>> [LOGIN BLOCK] 알 수 없는 사용여부(yn) 상태: empAcctId={}, yn={}",
+                    empAcct.getEmpAcctId(), yn);
+
+            return EmpLoginResultDto.fail("로그인할 수 없는 계정 상태입니다. 관리자에게 문의하세요.");
         }
 
-        // st = ACTIVE 가 아닌 모든 상태는 로그인 불가
+        // 4-2) 상태(st) 체크 (ACTIVE가 아니면 로그인 불가)
         if (!ACTIVE.equals(st)) {
 
             // r3 → 비활성 / 관리자 처리 대상
@@ -119,8 +133,7 @@ public class EmpLoginServiceImpl implements EmpLoginService {
 
         // ===========================
         // 5) 여기까지 온 계정만
-        //    st = r1(ACTIVE), yn = e1 인 정상 로그인 가능 계정
-        //    → 기존 비밀번호/캡챠/OTP 로직 그대로 수행
+        //    st = r1(ACTIVE), yn = e1 인 정상 계정
         // ===========================
 
         // 비밀번호 검증

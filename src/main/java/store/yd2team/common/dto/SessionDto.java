@@ -2,9 +2,15 @@ package store.yd2team.common.dto;
 
 import java.io.Serializable;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SessionDto implements Serializable{
 	// Serializable: “직렬화 가능하다”는 표시만 해주는 인터페이스 
 	
@@ -20,5 +26,5 @@ public class SessionDto implements Serializable{
     private String bizcnd;    // 거래처 업종
     private String cttpc;	  // 사원 연락처
     private String hp;        // 거래처 핸드폰 번호
-    
+    private String tempYn;    // 임시 비밀번호 여부
 }
