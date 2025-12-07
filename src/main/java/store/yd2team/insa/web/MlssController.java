@@ -1,6 +1,7 @@
 package store.yd2team.insa.web;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import store.yd2team.common.dto.SessionDto;
 import store.yd2team.common.util.LoginSession;
+import store.yd2team.insa.service.EmpVO;
+import store.yd2team.insa.service.MlssRequestVO;
 import store.yd2team.insa.service.MlssService;
 import store.yd2team.insa.service.MlssVO;
 
@@ -21,23 +25,65 @@ public class MlssController {
 	
 	@Autowired MlssService mlssService;
 
+	private int rankValue(String clsf) {
+	    switch (clsf) {
+	        case "k1": return 1; // 사원
+	        case "k2": return 2; // 대리
+	        case "k3": return 3; // 과장
+	        case "k4": return 4; // 부장
+	        case "k5": return 5; // 이사
+	        default: return 0;
+	    }
+	}
 	
 	@GetMapping("/mlss")
 	public String mlssRender(Model model) {
-		
-		if(LoginSession.getLoginSession() == null) {
+		SessionDto session = LoginSession.getLoginSession();
+		if(session == null) {
 			return "common/logIn";
 		}
 		
-		int v = mlssService.mlssVisitChk( LoginSession.getEmpId() );
-		if( v > 0) {	
+		String empId = session.getEmpId();
+		List<EmpVO> empList = mlssService.mlssEmpList( session.getDeptId() );
+		String targetClsf = "";
+		Iterator<EmpVO> it = empList.iterator();
+		while (it.hasNext()) {
+		    EmpVO vo = it.next();
+		    if (vo.getEmpId().equals(empId)) {
+		        // 삭제 전에 값 저장
+		        targetClsf = vo.getClsf();
+		        // 안전하게 삭제
+		        it.remove();
+		        break; // 한 건만 삭제한다면 break
+		    }
+		}
+		List<EmpVO> uprList = new ArrayList<>();
+		List<EmpVO> lwrList = new ArrayList<>();
+
+		int targetRank = rankValue(targetClsf);
+
+		for (EmpVO vo : empList) {
+		    int voRank = rankValue(vo.getClsf());
+		    if (voRank > targetRank) {
+		        uprList.add(vo); // 상급
+		    } else {
+		        lwrList.add(vo); // 같거나 하급
+		    }
+		}
+		String v = mlssService.mlssVisitChk( empId );
+		if( v != null) {	
 			
 		} else {
 			model.addAttribute("mlss", "평가 기간이 아닙니다");
 			return "index";
 		}
 		Map<String, List<MlssVO>> list = mlssService.mlssLoadBefore();
-		
+		List<MlssVO> userWrterList = mlssService.mlssWrterLoadBefore(v, empId);
+		model.addAttribute("userWrterList", userWrterList);
+		model.addAttribute("evaleRelateUpr", uprList);
+		model.addAttribute("evaleRelateLwr", lwrList);
+		model.addAttribute("empId", empId);
+		model.addAttribute("mlssId", v);
 		model.addAttribute("iemList", list);
 		model.addAttribute("Session", "testone");
 		return "insa/mlss";
@@ -62,7 +108,7 @@ public class MlssController {
 	//다면평가 등록
 	@PostMapping("/mlssRegist")
 	@ResponseBody
-	public int vcatnDelete(@RequestBody MlssVO keyword) {		
+	public int mlssRegist(@RequestBody MlssVO keyword) {		
 		return mlssService.mlssRegist(keyword);	
 	}
 	
@@ -71,7 +117,16 @@ public class MlssController {
 		@ResponseBody
 		public List<MlssVO> mlssJohoe(MlssVO keyword) {			
 			System.out.println("모나오니 다중입력조회"+keyword);				
-			return mlssService.mlssListJohoe(keyword);
+			return mlssService.mlssListJohoe(keyword);			
+		}
+		
+	//다면평가 평가하는 페이지 관련
+	//다면평가 평가한후 등록하는 기능		
+		@PostMapping("/mlssUserRegist")
+		@ResponseBody
+		public int mlssUserRegist(@RequestBody MlssRequestVO keyword) {	
+			
+			return mlssService.mlssWrterRegist(keyword);	
 		}
 	
 

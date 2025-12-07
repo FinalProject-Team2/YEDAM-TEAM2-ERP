@@ -46,17 +46,56 @@ FROM    tb_mlss
 
 <select id="mlssDtChk">
 <![CDATA[
-        SELECT COUNT(*)
-        FROM tb_mlss
-        WHERE emp_id = #{empId}
-          AND evl_begin_dt <= trunc (SYSDATE)
-          AND evl_end_dt >= trunc (SYSDATE)
+        SELECT mlss_id
+		FROM (
+		    SELECT mlss_id
+		    FROM tb_mlss
+		    WHERE emp_id = #{empId}
+		      AND evl_begin_dt <= TRUNC(SYSDATE)
+		      AND evl_end_dt >= TRUNC(SYSDATE)
+		    ORDER BY crea_dt DESC
+		)
+		WHERE ROWNUM = 1          
     ]]>
 </select>
 
 <select id="mlssIemList">
 select *
 from tb_mlss_iem
+</select>
+
+<insert id="mlssWrterRegist">
+INSERT ALL
+  <foreach collection="list" item="item">
+    INTO tb_mlss_wrter (mlss_id, mlss_iem_id, emp_id, score, evale_relate, crea_by)
+    VALUES (#{item.mlssId}, #{item.mlssIemId}, #{item.empId}, #{item.score}, #{item.evaleRelate}, 'myk')
+  </foreach>
+SELECT 1 FROM DUAL
+</insert>
+
+<update id="mlssMasterUpdate">
+UPDATE tb_mlss
+SET
+ <if test="self != null">self = #{self}</if>
+ <if test="suprr != null">suprr = #{suprr}</if>
+ <if test="crk != null">crk = #{crk}</if>
+where mlss_id = #{mlssId}
+</update>
+
+<select id="mlssEmpList">
+select
+ emp_id
+ ,nm
+ ,clsf
+from tb_emp
+where dept_id = #{deptId}
+</select>
+
+<select id="mlssWrterLoadBefore">
+select *
+from tb_mlss_wrter
+where mlss_id = #{mlssId}
+and emp_id = #{empId}
 </select>
 
 </mapper>
