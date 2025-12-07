@@ -34,6 +34,10 @@ public interface BusinessService {
    //
    //접촉사항 조회
    List<ContactVO> getAction();
+   //잠재고객항목 선택시 해당 접촉사항조회
+   public List<ContactVO> getContactListByVend(String vendId);
+   //접촉사항 내용 저장
+   public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> list);
 }
 
 

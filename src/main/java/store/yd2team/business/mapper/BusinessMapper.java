@@ -47,10 +47,16 @@ public interface BusinessMapper {
     int getAVG();
     //휴면, 이탈 조건별 점수화
     List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo);
-	
+    //
+    //
 	//접촉사항조회
     List<ContactVO> getAction();
-    
+    //리드분석조회
+    List<ContactVO> getLeadGenerar();
+    //잠재고객항목 선택시 해당접촉사항 조회
+    List<ContactVO> selectContactListByVend(String vendId);
+    int deleteContactsByVend(String vendId);
+    int insertContact(ContactVO vo);
 }
 
 

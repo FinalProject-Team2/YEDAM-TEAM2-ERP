@@ -2,10 +2,13 @@ package store.yd2team.business.service.impl;
 import java.net.URI;
 import java.util.List;
 import java.util.Random;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import lombok.RequiredArgsConstructor;
 import store.yd2team.AiService;
 import store.yd2team.business.mapper.BusinessMapper;
@@ -21,6 +24,7 @@ import store.yd2team.common.util.LoginSession;
 @Service
 @RequiredArgsConstructor
 public class BusineServiceImpl implements BusinessService {
+	
    private final BusinessMapper businessMapper;
    private final AiService aiService;
    @Value("${publicdata.service-key}")
@@ -190,6 +194,37 @@ public class BusineServiceImpl implements BusinessService {
 	public List<ContactVO> getAction() {
 		return businessMapper.getAction();
 	}
+
+	@Override
+    public List<ContactVO> getContactListByVend(String vendId) {
+        return businessMapper.selectContactListByVend(vendId);
+    }
+
+	 @Override
+	    @Transactional
+	    public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> list) {
+
+	        // 1) 해당 거래처 기존 접촉내역 전체 삭제
+		 businessMapper.deleteContactsByVend(vendId);
+
+	        // 2) 새로 전부 INSERT
+	        if (list == null) return;
+
+	        for (ContactVO row : list) {
+	            // 완전 빈 행은 스킵
+	            if ((row.getContactDt() == null || row.getContactDt().isBlank())
+	             && (row.getContactManager() == null || row.getContactManager().isBlank())
+	             && (row.getContactWay() == null || row.getContactWay().isBlank())
+	             && (row.getContactCntn() == null || row.getContactCntn().isBlank())) {
+	                continue;
+	            }
+
+	            row.setVendId(vendId);
+	            row.setPotentialInfoNo(potentialInfoNo);
+
+	            businessMapper.insertContact(row);
+	        }
+	    }
 }
 
 
