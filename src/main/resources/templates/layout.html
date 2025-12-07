@@ -78,6 +78,20 @@
             </li>
           </ul>
           <ul class="navbar-nav ms-auto">
+            <li class="nav-item d-flex align-items-center gap-2">
+			  <span id="session-remaining-badge"
+			        class="btn btn-outline-primary btn-sm disabled"
+			        style="cursor: default; pointer-events: none;">
+			    세션 남은 시간:
+			    <span id="session-remaining-text">--:--</span>
+			  </span>
+			  <button type="button"
+			          id="session-extend-btn"
+			          class="btn btn-primary btn-sm">
+			    세션 연장
+			  </button>
+			</li>
+          
             <li class="nav-item">
               <form class="search-form" action="#">
                 <i class="icon-search"></i>
@@ -174,7 +188,7 @@
                 <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile <span class="badge badge-pill badge-danger">1</span></a>
                 <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"></i> Messages</a>
                 <a class="dropdown-item" id="pwChangeMenuItem"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> 비밀번호 변경</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i> 로그 아웃</a>
+                <a class="dropdown-item" id="logoutMenuItem"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i> 로그 아웃</a>
               </div>
             </li>
           </ul>
@@ -336,6 +350,7 @@
 
     
     <div th:replace="~{common/modal/pwChangeModal :: pwChangeModal}"></div>
+    <div th:replace="~{common/modal/sessionTimeoutModal :: sessionTimeoutModal}"></div>
     <!-- container-scroller -->
     <!-- plugins:js -->
 
@@ -357,7 +372,20 @@
     <!-- <script src="assets/js/Chart.roundedBarCharts.js"></script> -->
     <!-- End custom js for this page-->
     <!-- 팀별로 필요한 유틸 모음-->
-    
+	
+	<!-- 세션 정책 값을 JS 전역 변수로 노출 -->
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+	  window.SESSION_TIMEOUT_MIN =
+	      /*[[${session.SESSION_TIMEOUT_MIN} ?: 0]]*/ 0;
+	
+	  window.SESSION_TIMEOUT_ACTION =
+	      /*[[${session.SESSION_TIMEOUT_ACTION} ?: 't1']]*/ 't1';
+	/*]]>*/
+	</script>
+	
+	<script src="/assets/js/sessionTimeout.js"></script>
+	    
 
     <script src="/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.ko.min.js"></script>

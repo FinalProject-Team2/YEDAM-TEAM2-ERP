@@ -123,6 +123,11 @@ public class PwChangeController {
                 form.getVendId(),
                 form.getLoginId()
         );
+        
+        // 5) 세션에도 반영: 이제 임시 비밀번호 아님
+        loginEmp.setTempYn("e2"); // 위에서 이미 가져온 객체 그대로 사용
+        session.setAttribute(SessionConst.LOGIN_EMP, loginEmp);
+
 
         return PwChangeResultDto.ok("비밀번호가 정상적으로 변경되었습니다.");
     }

@@ -816,3 +816,184 @@ const dateFormat = function (value, format) {
   let result = format.replace('yyyy', year).replace('MM', month).replace('dd', day)
   return result
 }
+
+
+
+// ==========================
+// 세션 남은 시간 표시 + 세션 연장
+// ==========================
+$(function () {
+
+  var timeoutMin = window.SESSION_TIMEOUT_MIN || 0;
+
+  var $label = $('#session-remaining-text');
+  var $extendBtn = $('#session-extend-btn');
+
+  // 로그인 전 화면 같은 경우: label 없거나 timeoutMin=0 이면 그냥 --:-- 로 두고 종료
+  if ($label.length === 0 || timeoutMin <= 0) {
+    if ($label.length) {
+      $label.text('--:--');
+    }
+    return;
+  }
+
+  var remainMs = timeoutMin * 60 * 1000;
+  var timerId = null;
+
+  function formatRemain(ms) {
+    if (ms < 0) ms = 0;
+    var totalSec = Math.floor(ms / 1000);
+    var mm = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    var ss = String(totalSec % 60).padStart(2, '0');
+    return mm + ':' + ss;
+  }
+
+  function renderRemain() {
+    $label.text(formatRemain(remainMs));
+  }
+
+  function startTimer() {
+    renderRemain();
+
+    timerId = setInterval(function () {
+      remainMs -= 1000;
+
+      if (remainMs <= 0) {
+        remainMs = 0;
+        renderRemain();
+        clearInterval(timerId);
+        // 실제 세션 만료시 동작(모달 뜨는 것)은 기존 스크립트에서 처리
+        return;
+      }
+
+      renderRemain();
+    }, 1000);
+  }
+
+  // 세션 연장 버튼
+  $extendBtn.on('click', function () {
+    $.ajax({
+      url: '/api/session/extend',
+      type: 'POST'
+    }).done(function (data) {
+
+      // ===== 방어 로직 추가 부분 =====
+      if (!data || data.success === false) {
+
+        // 서버에서 내려준 메시지 우선 출력
+        alert((data && data.message) || '세션 연장에 실패했습니다.');
+
+        // 이미 세션이 만료된 상태라면 → 모달 닫고 로그인 화면으로 이동
+        if (data && data.code === 'SESSION_EXPIRED') {
+          $('#session-timeout-modal').hide();
+          window.location.href = '/logIn';
+        }
+
+        return;
+      }
+      // =============================
+
+      // 서버가 준 timeoutMin 으로 다시 초기화
+      var newMin = data.timeoutMin || timeoutMin;
+      timeoutMin = newMin;
+      window.SESSION_TIMEOUT_MIN = newMin;
+
+      remainMs = newMin * 60 * 1000;
+
+      if (timerId) {
+        clearInterval(timerId);
+      }
+      startTimer();
+
+      console.log('세션 연장 완료, timeoutMin=', newMin);
+    }).fail(function () {
+      alert('세션 연장 요청 중 오류가 발생했습니다.');
+    });
+  });
+
+  // 페이지 로드 시 타이머 시작
+  startTimer();
+});
+
+
+// ==========================
+// 세션 만료 경고 모달 버튼 처리
+// ==========================
+$(function () {
+
+  var $modalWrapper   = $('#session-timeout-modal');
+  var $modalExtendBtn = $('#session-modal-extend-btn'); // ★ 모달 안 "세션 연장" 버튼
+  var $modalLogoutBtn = $('#session-logout-btn');
+
+  function hideSessionModal() {
+    if ($modalWrapper.length) {
+      $modalWrapper.hide();  // style="display:none"
+    }
+  }
+
+  // 1) 모달의 "세션 연장" 버튼
+  if ($modalExtendBtn.length) {
+    $modalExtendBtn.on('click', function () {
+
+      // 상단 바 버튼 클릭을 강제로 실행 → 같은 AJAX + 타이머 리셋 로직 재사용
+      var topBtn = $('#session-extend-btn');
+      if (topBtn.length) {
+        topBtn.trigger('click');
+      }
+
+      // 세션이 살아있는 경우에는 모달만 닫고 계속 사용
+      hideSessionModal();
+    });
+  }
+
+  // 2) 모달의 "지금 로그아웃" 버튼
+  if ($modalLogoutBtn.length) {
+    $modalLogoutBtn.on('click', function () {
+      $.ajax({
+        url: '/logIn/logout',
+        type: 'POST'
+      }).always(function () {
+        hideSessionModal();
+        // 로그아웃 후 로그인 화면으로
+        window.location.href = '/logIn';
+      });
+    });
+  }
+
+});
+
+
+// ==========================
+// 공통 로그아웃 버튼 처리
+// ==========================
+$(function () {
+  const $logoutMenuItem = $('#logoutMenuItem');
+
+  if ($logoutMenuItem.length) {
+    $logoutMenuItem.on('click', function (e) {
+      e.preventDefault(); // a 태그의 기본 이동 막기
+
+      if (!confirm('로그아웃 하시겠습니까?')) {
+        return;
+      }
+
+      $.ajax({
+        url: '/logIn/logout',
+        type: 'POST'
+      })
+        .done(function (res) {
+          // EmpLoginResultDto.ok() 구조를 쓴다고 가정
+          if (!res || res.success === false) {
+            alert((res && res.message) || '로그아웃 중 오류가 발생했습니다.');
+            return;
+          }
+
+          // 성공 → 로그인 화면으로 이동
+          location.href = '/logIn';
+        })
+        .fail(function () {
+          alert('로그아웃 요청에 실패했습니다.');
+        });
+    });
+  }
+});
