@@ -27,48 +27,12 @@
 	<form th:action="@{/potential/sync}" method="post" class="mb-2">
 		<button class="btn btn-primary">공공데이터 동기화</button>
 	</form>
-	<!-- <div
-		style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;">
-		<table class="table" style="height: 300px;">
-			연습테이블
-			<thead>
-				<tr>
-					<th>잠재정보번호</th>
-					<th>조건번호</th>
-					<th>거래처ID</th>
-					<th>순위</th>
-					<th>거래처명</th>
-					<th>업종</th>
-					<th>규모</th>
-					<th>지역</th>
-					<th>설립일</th>
-					<th>리드점수</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr th:each="row : ${list}">
-					<td th:text="${row.potentialInfoNo}"></td>
-					<td th:text="${row.potentialCondNo}"></td>
-					<td th:text="${row.vendId}"></td>
-					<td th:text="${row.rank}"></td>
-					<td th:text="${row.vendNm}"></td>
-					<td th:text="${row.industryType}"></td>
-					<td th:text="${row.companySize}"></td>
-					<td th:text="${row.region}"></td>
-					<td
-						th:text="${row.establishDate.substring(0,4) + '년 ' 
-					            + row.establishDate.substring(5,7) + '월 ' 
-					            + row.establishDate.substring(8,10) + '일'}"></td>
-					 <td th:text="${row.leadScore}"></td>   여기
-				</tr>
-			</tbody>
-		</table>
-	</div> -->
+
+
 	<form th:action="@{/salesActivity}" method="post">
 		<div class="row">
 			<div class="col-md-12 mb-3">
 				<div class="card">
-					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 					<div class="card-header">
 						<div class="card-header-left">
 							<h5 class="card-title">조회조건</h5>
@@ -104,7 +68,6 @@
 							<div class="col-md-6">
 								<label class="form-label">설립일</label>
 								<div class="d-flex align-items-center js-date-range">
-									<!-- 시작일 -->
 									<div class="input-group date">
 										<input type="text"
 											class="form-control datepicker js-date-range-start"
@@ -113,10 +76,7 @@
 											class="bi bi-calendar"></i>
 										</span>
 									</div>
-
 									<span class="mx-1 fw-bold fs-5">~</span>
-
-									<!-- 종료일 -->
 									<div class="input-group date ms-2">
 										<input type="text"
 											class="form-control datepicker js-date-range-end"
@@ -135,60 +95,49 @@
 	</form>
 
 
-
-	<!-- 결과 테이블 -->
-	<!--  <div class="card mb-3" style="height: 500px; overflow-y: auto; overflow-x: auto;">
-    <table border="1">
-        <thead>
-            <tr>
-                <th>잠재정보번호</th>
-                <th>거래처명</th>
-                <th>업종</th>
-                <th>규모</th>
-                <th>지역</th>
-                <th>설립일</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="row : ${potentialstdrList}">
-                <td th:text="${row.potentialInfoNo}"></td>
-                <td th:text="${row.vendNm}"></td>
-                <td th:text="${row.industryType}"></td>
-                <td th:text="${row.companySize}"></td>
-                <td th:text="${row.region}"></td>
-                <td th:text="${row.establishDate}"></td>
-            </tr>
-        </tbody>
-    </table>
-    </div> -->
-
-
-
-	<!-- 잠재고객 -->
 	<form th:action="@{/potentialCustList}" method="post">
 		<div class="card mb-3">
 			<div class="card-header">
 				<div class="card-header-left">
 					<h5 class="card-title">잠재고객목록</h5>
 				</div>
-				<!-- card-header-left end  -->
 			</div>
 			<div class="card-body">
 				<div id="potentialgrid"
-					style="height: 300px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+					style="height: 400px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 			</div>
 		</div>
 	</form>
 
 
-	<!-- 접촉사항 -->
 	<form th:action="@{/salesActivity/contact}" method="post">
 		<div class="card mb-3">
 			<div class="card-header">
 				<div class="card-header-left">
 					<h5 class="card-title">접촉사항</h5>
 				</div>
-				<!-- card-header-left end -->
+				<div class="card-header-right">
+					<button type="button" class="btn btn-outline-dark" id="btnContactAdd">추가</button>
+					<button type="button" class="btn btn-primary" id="btnContactSave">저장</button>
+					<form th:action="@{/salesActivity/contact}" method="post">
+						<button class="btn btn-out	line-dark">조회</button>
+					</form>
+				</div>
+			</div>
+			<div class="card-body">
+				<div id="contactgrid"
+					style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+			</div>
+		</div>
+	</form>
+
+	<!-- 리드분석
+	<form th:action="@{/salesActivity/contact}" method="post">
+		<div class="card mb-3">
+			<div class="card-header">
+				<div class="card-header-left">
+					<h5 class="card-title">접촉사항</h5>
+				</div>
 				<div class="card-header-right">
 				<button class="btn btn-dark">초기화</button>
 				<form th:action="@{/salesActivity/contact}" method="post">
@@ -196,17 +145,16 @@
 				</form>
 			</div> 
 			</div>
-			<!-- //card-header wihy-actions end -->
 			<div class="card-body">
 				<div id="contactgrid" style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 			</div>
 		</div>
-	</form>
+	</form> -->
 
 
 
 	<script th:inline="javascript">
-		// 휴먼/이탈고객 데이터
+		// 잠재고객그리드 디자인
 		tui.Grid.applyTheme('default', {
 			cell : {
 				normal : { // 일반 셀(본문)
@@ -231,12 +179,10 @@
 				}
 			}
 		});
-		
-		
+		// 잠재고객데이터
 		const potentialData = /*[[${potentialstdrList}]]*/ [];
 	    console.log(potentialData);
-
-		// Grid 생성
+		// 잠재고객 Grid 생성
 		const potentialgrid = new tui.Grid({
 			el : document.getElementById('potentialgrid'),
 			data : potentialData,
@@ -244,7 +190,17 @@
 			scrollY : true,
 			minBodyHeight : 0,
 			autoWidth : true,
-			columns : [ {
+			columns : [
+			{
+			    header: '잠재번호',
+			    name: 'potentialInfoNo',
+			    hidden: true
+			},
+			{ 
+			    header: '거래처ID', 
+			    name: 'vendId', 
+			    hidden: true 	
+			}, {
 				header : '순위',
 				name : 'rank',
 				sortable : 'true',
@@ -281,9 +237,144 @@
 			    sortable : 'true'
 			} ]
 		});
+		// ★ 잠재고객 한 줄 클릭 시 – vendId 기준으로 접촉내역 조회
+		potentialgrid.on('click', function(ev) {
+		    const row = potentialgrid.getRow(ev.rowKey);
+		    if (!row) return;
+
+		    const vendId = row.vendId;
+		    if (!vendId) {
+		        console.warn('vendId 없음', row);
+		        return;
+		    }
+
+		    console.log('접촉내역 조회 요청, vendId =', vendId);
+
+		    fetch('/salesActivity/contactByVend?vendId=' + encodeURIComponent(vendId))
+		        .then(res => res.json())
+		        .then(data => {
+		            console.log('받은 접촉내역', data);
+		            contactGrid.resetData(data);
+		        })
+		        .catch(err => {
+		            console.error('접촉내역 조회 오류', err);
+		        });
+		});
+			//
+			//
+			//
+			//
+			// 접촉 그리드 디자인
+			tui.Grid.applyTheme('default', {
+				cell : {
+					normal : { // 일반 셀(본문)
+						border : '#ccc',
+						background : "#fff",
+						showVerticalBorder : true, // 세로 라인 표시
+					},
+					header : { // 헤더 셀
+						border : '#ccc',
+						background : '#E3E6ED',
+						showVerticalBorder : true,
+					},
+					editable : { // ★ 편집 가능한 셀 공통 스타일
+						background : '#FFFDF0', // 연노랑 같은 색으로 표시
+						text : '#000'
+					},
+					selectedHeader : { // 헤더 클릭했을 때 색
+						background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
+					},
+					selected : { // 선택된 셀 색
+						background : '#ffffff' // 필요하면 여기도 조정
+					}
+				}
+			});
+			// 접촉데이터
+			const contactData = /*[[${contactrList}]]*/ [];
+		    console.log(potentialData);
+			// 접촉Grid 생성
+			const contactGrid = new tui.Grid({
+	    el: document.getElementById('contactgrid'),
+	    scrollX: false,
+	    scrollY: true,
+	    columns: [
+	        {   header : '날짜',
+	            name : 'contactDt',
+	            editor: 'text',
+	            formatter: ({ value }) => {
+	                if (!value) return '';
+	                const d = new Date(value);
+	                if (isNaN(d.getTime())) return '';
+	                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
+	            }, align : 'center', editor: 'text', width: 150 },
+	        { header: '담당자', name: 'contactManager', width: 150,  align : 'center', editor: 'text' },
+	        { header: '방법',   name: 'contactWay', width: 150,  align : 'center', editor: 'text' },
+	        { header: '내용',   name: 'contactCntn', editor: 'text' }
+	    ]
+	});
+		// "추가" 버튼 클릭 시, 맨 아래에 새 행 추가
+		document.getElementById('btnContactAdd').addEventListener('click', function() {
+		    const today = new Date();
+		    const yyyy = today.getFullYear();
+		    const mm = String(today.getMonth() + 1).padStart(2, '0');
+		    const dd = String(today.getDate()).padStart(2, '0');
+		    const todayStr = `${yyyy}-${mm}-${dd}`;
 		
+		    contactGrid.prependRow({
+		        contactDt: todayStr,
+		        contactManager: '',
+		        contactWay: '',
+		        contactCntn: ''
+		    });
 		
-		// 영업활동 접촉
+		    contactGrid.focus(0, 'contactDt');
+		});
+		
+		// 저장 버튼 클릭
+		document.getElementById('btnContactSave').addEventListener('click', function () {
+
+			    contactGrid.finishEditing();
+			
+			    const contactList = contactGrid.getData();
+			
+			    // 날짜 포맷 정리
+			    contactList.forEach(row => {
+			        if (row.contactDt) {
+			            row.contactDt = row.contactDt.substring(0, 10); // "YYYY-MM-DD"
+			        }
+			    });
+			
+			    const focusedCell = potentialgrid.getFocusedCell();
+			    if (!focusedCell) {
+			        alert("잠재고객을 먼저 선택해.");
+			        return;
+			    }
+			
+			    const selected = potentialgrid.getRow(focusedCell.rowKey);
+			    const vendId = selected.vendId;
+			    const potentialInfoNo = selected.potentialInfoNo;
+			
+			    fetch('/salesActivity/contact/saveAll', {
+			        method: 'POST',
+			        headers: { 'Content-Type': 'application/json' },
+			        body: JSON.stringify({
+			            vendId: vendId,
+			            potentialInfoNo: potentialInfoNo,
+			            contactList: contactList
+			        })
+			    })
+			        .then(res => res.text())
+			        .then(msg => {
+			            alert("저장되었습니다.");
+			        })
+			        .catch(err => console.error(err));
+			});
+
+
+
+		//
+		//
+		// 리드그리드 디자인
 		tui.Grid.applyTheme('default', {
 			cell : {
 				normal : { // 일반 셀(본문)
@@ -308,48 +399,46 @@
 				}
 			}
 		});
-		
-		
-		const contactData = /*[[${contactrList}]]*/ [];
+		// 리드데이터
+		const leadData = /*[[${contactrList}]]*/ [];
 	    console.log(potentialData);
-
-		// Grid 생성
-			const contactgrid = new tui.Grid({
-			el : document.getElementById('contactgrid'),
-			data : contactData,
+		// 리드Grid 생성
+			const leadgrid = new tui.Grid({
+			el : document.getElementById('leadgrid'),
+			data : leadData,
 			scrollX : true,
 			scrollY : true,
 			minBodyHeight : 0,
 			autoWidth : true,
 			columns : [ {
-				header : 'contactNo',
-				name : 'contactNo',
+				header : 'lead_dt',
+				name : 'lead_dt',
 				sortable : 'true',
 				align : 'center'
 			}, {
-				header : 'potentialInfoNo',
-				name : 'potentialInfoNo',
+				header : 'lead_manager',
+				name : 'lead_manager',
 				editor : 'text'
 			}, {
-				header : 'vendId',
-				name : 'vendId',
+				header : 'required_dt',
+				name : 'required_dt',
 				sortable : 'true',
 				align : 'center'
 			}, {
-				header : 'contactDt',
-				name : 'contactDt',
+				header : 'competitor_yn',
+				name : 'competitor_yn',
 				align : 'center'
 			}, {
-	            header: 'contactManager',
-	            name: 'contactManager',
+	            header: 'budget_avail_yn',
+	            name: 'budget_avail_yn',
 	            align : 'center'
 	        }, {
-				header : 'contactWay',
-				name : 'contactWay',
+				header : 'leadscore',
+				name : 'leadScore',
 				align : 'center'
 			},{
-			    header : 'contactWay',
-			    name   : 'contactWay',   // leadscore → leadScore 로 수정
+			    header : 'outcontact',
+			    name   : 'outcontact',   // leadscore → leadScore 로 수정
 			    align  : 'center',
 			    sortable : 'true'
 			} ]

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,12 +12,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ContactVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.churnRiskVO;
+
 @Controller
 public class BusinessController {
 	@Autowired
@@ -161,12 +164,23 @@ public class BusinessController {
 	@PostMapping("/salesActivity/contact")
 	public String getAction(Model model) {
 		System.out.println("=== salesActivity.saelesAction() 호출됨 ===");
+		List<ContactVO> contactrList = businessService.getAction();
+		// 위에서 span이 쓰는 list도 채워주기
+		model.addAttribute("contactrList", contactrList);
+//		model.addAttribute("stdrvo", vo);
+		
+		return "business/salesactivity";
+	}
+	//영업활동관리.리드분석
+	@PostMapping("/salesActivity/LeadGenerar")
+	public String getLeadgenerar(Model model) {
+		System.out.println("=== salesActivity.saelesAction() 호출됨 ===");
 	
 		List<ContactVO> contactrList = businessService.getAction();
 	
 		// 위에서 span이 쓰는 list도 채워주기
 		model.addAttribute("contactrList", contactrList);
-//		model.addAttribute("stdrvo", vo);
+//			model.addAttribute("stdrvo", vo);
 		
 		return "business/salesactivity";
 	}

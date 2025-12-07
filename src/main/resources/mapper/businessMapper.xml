@@ -303,6 +303,72 @@ ORDER BY finalScore DESC
 			        contact_cntn contactCntn
 			FROM    tb_contact
 	</select>
+	
+	<select id="getLeadGenerar" parameterType="store.yd2team.business.service.ContactVO">
+			SELECT  LEAD_NO,
+			        VEND_ID,
+			        LEAD_DT,
+			        LEAD_MANAGER,
+			        REQUIRED_DT,
+			        COMPETITOR_YN,
+			        BUDGET_AVAIL_YN
+			FROM    tb_lead;
+	</select>
+	
+		<!-- 1. List-->
+	  <select id="selectContactListByVend"
+            parameterType="string"
+            resultType="store.yd2team.business.service.ContactVO">
+        SELECT
+            CONTACT_NO        AS contactNo,
+            POTENTIAL_INFO_NO AS potentialInfoNo,
+            VEND_ID           AS vendId,
+            TO_CHAR(CONTACT_DT, 'YYYY-MM-DD') AS contactDt,
+            CONTACT_MANAGER   AS contactManager,
+            CONTACT_WAY       AS contactWay,
+            CONTACT_CNTN      AS contactCntn,
+            CREA_DT           AS creaDt,
+            CREA_BY           AS creaBy,
+            UPDT_DT           AS updtDt,
+            UPDT_BY           AS updtBy
+        FROM TB_CONTACT
+        WHERE VEND_ID = #{vendId}
+        ORDER BY CONTACT_DT DESC
+    </select>
+    
+     <!-- 전체 삭제 -->
+    <delete id="deleteContactsByVend" parameterType="string">
+        DELETE FROM TB_CONTACT
+        WHERE VEND_ID = #{vendId}
+    </delete>
+    
+       <!-- INSERT -->
+    <insert id="insertContact"
+            parameterType="store.yd2team.business.service.ContactVO">
+        INSERT INTO TB_CONTACT
+        (
+            CONTACT_NO,
+            POTENTIAL_INFO_NO,
+            VEND_ID,
+            CONTACT_DT,
+            CONTACT_MANAGER,
+            CONTACT_WAY,
+            CONTACT_CNTN
+        )
+        VALUES
+        (
+            CONTACT_SEQ.NEXTVAL,
+            #{potentialInfoNo},
+            #{vendId},
+            TO_DATE(#{contactDt}, 'YYYY-MM-DD'),
+            #{contactManager},
+            #{contactWay},
+            #{contactCntn}
+        )
+    </insert>
+
+  
+	
 </mapper>
 
 
