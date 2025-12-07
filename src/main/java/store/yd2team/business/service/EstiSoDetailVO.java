@@ -22,9 +22,14 @@ public class EstiSoDetailVO {
     private Long supplyPrice;
     private Long surtaxPrice;
 
+    private Long currStockQy; // 재고량
+    
     // 화면용
     private String productName;
-
+    private Long ttSupplyAmt;
+    private Long ttSupplyPrice;
+    private Long ttSoQy;
+    
     // 공통
     private String creaBy;
     private String updtBy;

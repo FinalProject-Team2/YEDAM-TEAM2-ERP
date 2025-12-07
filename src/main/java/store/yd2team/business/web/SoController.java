@@ -63,17 +63,33 @@ public class SoController {
     
     
 	// 주문서 조회(그리드)
-	@PostMapping("/list")
-    @ResponseBody
-    public List<EstiSoVO> soList(@RequestBody EstiSoVO so) {
-
-        System.out.println("검색조건 >>> " + so);
-
-        // 서비스 호출
-        List<EstiSoVO> soList = estiSoService.selectSoList(so);
-
-        // JSON 으로 반환 (뷰 이름 X)
-        return soList;
-    }
+	/*
+	 * @PostMapping("/list")
+	 * 
+	 * @ResponseBody public List<EstiSoVO> soList(@RequestBody EstiSoVO so) {
+	 * 
+	 * System.out.println("검색조건 >>> " + so);
+	 * 
+	 * // 서비스 호출 List<EstiSoVO> soList = estiSoService.selectSoList(so);
+	 * 
+	 * // JSON 으로 반환 (뷰 이름 X) return soList; }
+	 */
 	
+	// 주문서 조회 (AJAX)
+    @PostMapping("/list")
+    @ResponseBody   // JSON으로 리턴하기 위해 필요
+    public List<EstiSoVO> selectSoList(@RequestBody EstiSoVO vo) {
+        return estiSoService.selectSoList(vo);
+    }
+    
+    // 주문서관리 승인버튼
+    /** 주문 승인 */
+    @PostMapping("/approve")
+    @ResponseBody
+    public Map<String, Object> approveOrders(@RequestBody Map<String, Object> param) {
+
+        List<String> soIds = (List<String>) param.get("soIds");
+
+        return estiSoService.approveOrders(soIds);
+    }
 }
