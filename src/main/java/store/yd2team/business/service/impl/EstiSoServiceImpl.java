@@ -1,6 +1,8 @@
 package store.yd2team.business.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -190,10 +192,96 @@ public class EstiSoServiceImpl implements EstiSoService {
         return soId;
     }
     
+    
+    
     // ================================================== 주문서관리
     // 주문서 조회
     @Override
-    public List<EstiSoVO> selectSoList(EstiSoVO so) {
-        return estiSoMapper.selectSo(so);
+    public List<EstiSoVO> selectSoList(EstiSoVO vo) {
+
+        // 1) 헤더 목록 조회
+        List<EstiSoVO> headerList = estiSoMapper.selectSoHeaderList(vo);
+
+        // 2) 상세 조회 후 각 header에 매핑
+        for (EstiSoVO header : headerList) {
+            List<EstiSoDetailVO> details = estiSoMapper.selectSoDetailList(header.getSoId());
+            header.setDetailList(details);
+
+            // 대표상품명 + 외 n건 텍스트 만들기
+            if (!details.isEmpty()) {
+                header.setProductName(details.get(0).getProductName());
+                if (details.size() > 1) {
+                    header.setProductName(details.get(0).getProductName() + " 외 " + (details.size() - 1) + "건");
+                }
+
+				/*
+				 * // 총수량 / 재고수량은 첫 번째 상품 기준 header.setTtSoQy(details.get(0).getQy());
+				 * header.setCurrStockQy(details.get(0).getCurrStockQy());
+				 */
+            }
+        }
+
+        return headerList;
+    }
+    
+    // 주문서관리화면 승인버튼
+    /** 승인 처리 */
+    @Transactional
+    @Override
+    public Map<String, Object> approveOrders(List<String> soIds) {
+
+        StringBuilder msg = new StringBuilder();
+
+        for (String soId : soIds) {
+
+            EstiSoVO header = estiSoMapper.getOrderHeader(soId);
+
+            // 존재 X
+            if (header == null) {
+                msg.append(soId).append(" : 존재하지 않는 주문서입니다.\n");
+                continue;
+            }
+
+            String status = header.getProgrsSt();
+
+            // 이미 승인된 상태
+            if ("es2".equals(status)) {
+                msg.append(soId).append(" : 이미 승인된 주문서입니다.\n");
+                continue;
+            }
+
+            // 승인 가능한 상태(es1, es5) 외는 거부
+            if (!("es1".equals(status) || "es5".equals(status))) {
+                msg.append(soId).append(" : 승인할 수 없는 상태입니다.\n");
+                continue;
+            }
+
+            // 상세 조회
+            List<EstiSoDetailVO> details = estiSoMapper.selectSoDetailList(soId);
+
+            // 재고 부족 체크
+            for (EstiSoDetailVO d : details) {
+                if (d.getCurrStockQy() < d.getTtSoQy()) {
+                    msg.append(soId).append(" : ")
+                       .append(d.getProductName())
+                       .append(" 재고가 부족합니다.\n");
+                    continue;
+                }
+            }
+
+            // 재고 업데이트 + 출고 생성
+            for (EstiSoDetailVO d : details) {
+                estiSoMapper.updateReserveStock(d);  // 출고예약 += 주문수량
+                estiSoMapper.insertOust(d);          // 출고 insert
+            }
+
+            // 승인처리
+            estiSoMapper.updateApproveStatus(soId);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", msg.length() == 0);
+        result.put("message", msg.length() == 0 ? "승인 완료되었습니다." : msg.toString());
+        return result;
     }
 }

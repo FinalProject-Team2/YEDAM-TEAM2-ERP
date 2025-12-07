@@ -42,7 +42,7 @@ public class EstiSoVO {
     
     private String cdtlnNo;        // cdtln_no
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private String soDt;           // so_dt (견적일자 or 주문일자)
+    private LocalDate soDt;           // so_dt (견적일자 or 주문일자)
     private Long ttSupplyAmt;      // tt_supply_amt (상세 합계)
     private String rm;             // rm
 
@@ -53,16 +53,23 @@ public class EstiSoVO {
     // 상세 리스트
     private List<EstiSoDetailVO> detailList;
     
+    private Long currStockQy;   // 재고수량 (첫 상품 기준)
+    private Long ttSoQy;        // 총 주문수량 (첫 상품 기준)
+    
     // 주문 헤더 (tb_so)
     private String soId;
     private String hp;
     private Long ttSupplyPrice;
     private Long ttSurtaxPrice;
     private Long ttPrice;
-    private Long ttSoQy;
-    private String progsSt;
+    private String progrsSt;
     private String stResn;
     private String accpDt;
     private String shipAddr;
+    private String psch;
+    private String pschTel;
+    
+    private String codeId;
+    private String codeNm;
 }
 

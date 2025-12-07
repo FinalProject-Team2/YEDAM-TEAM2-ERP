@@ -52,5 +52,17 @@ public interface EstiSoMapper {
     
     // ==================================================== 주문서관리
     // 주문서 조회
-    List<EstiSoVO> selectSo(EstiSoVO so);
+    List<EstiSoVO> selectSoHeaderList(EstiSoVO so);
+
+    List<EstiSoDetailVO> selectSoDetailList(String soId);
+    
+    // 주문서관리화면 승인버튼
+    EstiSoVO getOrderHeader(String soId);
+
+    int updateReserveStock(EstiSoDetailVO detail);
+
+    int insertOust(EstiSoDetailVO detail);
+
+    int updateApproveStatus(String soId);
+
 }

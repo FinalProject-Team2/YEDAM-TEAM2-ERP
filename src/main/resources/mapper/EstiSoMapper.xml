@@ -344,50 +344,89 @@
 
 
 <!-- ================= 주문서 관리 화면 ======================= -->
-	<!-- 주문서 목록(부모행) 조회 -->
-	<select id="selectSo"
-	        parameterType="store.yd2team.business.service.EstiSoVO"
-	        resultType="store.yd2team.business.service.EstiSoVO">
-	
+	<!-- 주문서 헤더 조회 -->
+	<select id="selectSoHeaderList" parameterType="store.yd2team.business.service.EstiSoVO" resultType="store.yd2team.business.service.EstiSoVO">
 	    SELECT
-	          s.so_id           AS soId
-	        , c.custcom_name    AS custcomName
-	        , c.psch            AS psch
-	        , c.psch_tel        AS pschTel
-	        , s.due_dt          AS dueDt
-	
-	        , CASE
-	              WHEN x.item_cnt > 1 THEN
-	                   x.main_product_name || ' 외 ' || (x.item_cnt - 1) || '건'
-	              ELSE x.main_product_name
-	          END               AS productName
-	
-	        , s.tt_supply_price AS ttSupplyAmt
-	        , s.tt_so_qy        AS ttSoQy
-	        , NULL              AS currStockQy   -- 필요하면 재고 집계 조인해서 채우기
-	
-	        , s.progrs_st       AS progrsSt
-	        , cd.code_nm        AS progrsStNm
-	    FROM tb_so s
+	        so.so_id,
+	        c.custcom_name,
+	        c.psch,
+	        c.psch_tel,
+	        so.so_dt,
+	        so.due_dt,
+	        so.tt_supply_price AS ttSupplyAmt,
+	        so.tt_so_qy AS ttSoQy,
+	        so.progrs_st,
+	        code.code_id,
+	        code.code_nm
+	    FROM tb_so so
 	    JOIN tb_custcom c
-	      ON c.custcom_id = s.custcom_id
-	    JOIN (
-	        SELECT
-	              d.so_id                 AS so_id
-	            , COUNT(DISTINCT d.product_id) AS item_cnt
-	            , MIN(p.product_name)
-	                  KEEP (DENSE_RANK FIRST ORDER BY d.so_detail_no)
-	              AS main_product_name
-	        FROM tb_so_detail d
-	        LEFT JOIN tb_product p
-	          ON p.product_id = d.product_id
-	        GROUP BY d.so_id
-	    ) x
-	      ON x.so_id = s.so_id
-	    LEFT JOIN tb_code cd
-	      ON cd.grp_id  = 'soSt'
-	     AND cd.code_id = s.progrs_st
-	    ORDER BY s.so_id DESC
-	
+	      ON so.custcom_id = c.custcom_id
+	    JOIN tb_code code
+	      ON so.progrs_st = code.code_id
+	    WHERE (#{custcomName} IS NULL OR c.custcom_name LIKE '%' || #{custcomName} || '%')
+	      AND (#{dueStart} IS NULL OR so.due_dt >= #{dueStart})
+	      AND (#{dueEnd} IS NULL OR so.due_dt &lt;= #{dueEnd})
+	    ORDER BY so.so_id DESC
 	</select>
+	
+	<!-- 주문 상세 조회 -->
+	<select id="selectSoDetailList" parameterType="string" resultType="store.yd2team.business.service.EstiSoDetailVO">
+	    SELECT
+	        d.so_detail_no,
+	        d.so_id,
+	        d.product_id,
+	        p.product_name,
+	        d.qy AS ttSoQy,
+	        d.price,
+	        d.supply_price AS ttSupplyAmt,
+	        (NVL(s.curr_stock_qy, 0) - NVL(s.oust_reserv_qy, 0)) AS currStockQy
+	    FROM tb_so_detail d
+	    JOIN tb_product p
+	      ON d.product_id = p.product_id
+	    LEFT JOIN tb_stock s
+	      ON d.product_id = s.product_id
+	    WHERE d.so_id = #{soId}
+	    ORDER BY d.so_detail_no
+	</select>
+	
+	<!-- 주문서관리화면 승인버튼 -->
+	<!-- 단건 조회 (상태 확인용) -->
+    <select id="getOrderHeader"
+            parameterType="string"
+            resultType="store.yd2team.business.service.EstiSoVO">
+        SELECT so_id, progrs_st
+        FROM tb_so
+        WHERE so_id = #{soId}
+    </select>
+
+
+    <!-- 출고예약수량 += 주문수량 -->
+    <update id="updateReserveStock" parameterType="store.yd2team.business.service.EstiSoDetailVO">
+        UPDATE tb_stock
+        SET oust_reserv_qy = oust_reserv_qy + #{ttSoQy}
+        WHERE product_id = #{productId}
+    </update>
+
+
+    <!-- 출고 INSERT -->
+    <insert id="insertOust" parameterType="store.yd2team.business.service.EstiSoDetailVO">
+        INSERT INTO tb_oust (
+            oust_id, so_id, product_id, oust_qy, oust_request_dt, oust_progrs_st
+        ) VALUES (
+            'OUST_' || TO_CHAR(SYSTIMESTAMP, 'YYYYMMDDHH24MISSFF3'),
+            #{soId},
+            #{productId},
+            #{ttSoQy},
+            SYSDATE,
+            'os1'
+        )
+    </insert>
+
+
+    <!-- 승인 상태 변경 -->
+    <update id="updateApproveStatus" parameterType="string">
+        UPDATE tb_so
+        SET progras_st = 'es2'
+        WHERE so_id = #{soId}
+    </update>
 </mapper>

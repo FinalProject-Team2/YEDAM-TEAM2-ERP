@@ -1,6 +1,7 @@
 package store.yd2team.business.service;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EstiSoService {
 
@@ -35,4 +36,7 @@ public interface EstiSoService {
     // ========================================================= 주문서 관리
     // 주문서 목록 조회
     List<EstiSoVO> selectSoList(EstiSoVO so);
+    
+    // 주문서관리화면 승인버튼
+    Map<String, Object> approveOrders(List<String> soIds);
 }
