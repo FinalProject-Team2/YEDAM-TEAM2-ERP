@@ -113,16 +113,21 @@
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<div class="card-header-left d-flex align-items-center">
 						<!-- collapse 토글 버튼으로 변경 -->
-						<h5 class="card-title mb-0 me-2" id="collapseToggle">본인평가</h5>
-						<select th:if="${Session != null and Session == 'testone'}" id="evaleRelate" class="form-select form-select-sm w-auto">
-								<option>김상사</option>
-								<option>이동료</option>
-								<option>박동료2</option>								
+						<h5 class="card-title mb-0 me-2" id="collapseToggle">본인 평가</h5>
+						<select id="evaleRelate1" class="form-select form-select-sm w-auto">
+								<th:block th:each="val : ${evaleRelateUpr}">
+									<option class="clsf" th:value="${val.empId}" th:text="${val.nm}"></option>									
+								</th:block>																															
+							</select>													
+						<select id="evaleRelate2" class="form-select form-select-sm w-auto">								
+								<th:block th:each="val : ${evaleRelateLwr}">
+									<option class="clsf" th:value="${val.empId}" th:text="${val.nm}"></option>																	
+								</th:block>																								
 							</select>													
 					</div>
 					<div class="card-header-right">
 						<button type="button" class="btn btn-outline-dark">임시저장</button>
-						<button type="button" class="btn btn-outline-dark">제출</button>
+						<button id="mlssUserRegist" type="button" class="btn btn-outline-dark">제출</button>
 					</div>
 				</div>
 				
@@ -181,7 +186,9 @@
 			</div>
 		</div>
 	</div>
-	<script th:inline="javascript">
+	<script th:inline="javascript">	
+	$("#evaleRelate1").hide();
+	$("#evaleRelate2").hide();
 function chTitle(el) {
 	 // div 안의 텍스트 가져오기 (아이콘 제외)
 	const text = $(el).text().trim();
@@ -192,11 +199,24 @@ function chTitle(el) {
     } else {
         $("#mlssUser").removeClass("stIsShow");
         $("#mlssResult").addClass("stIsShow");
+    }    
+    
+    // a 태그의 텍스트 변경    
+    $("#collapseToggle").text(text);    
+    if ($("#collapseToggle").text() == "상사 평가") {
+        $("#evaleRelate1").show();        
+        $("#evaleRelate2").hide();        
+    } else if($("#collapseToggle").text() == "동료 평가"){
+    	$("#evaleRelate1").hide();    	
+    	$("#evaleRelate2").show();    	
+    } else {
+    	$("#evaleRelate1").hide();
+    	$("#evaleRelate2").hide();
     }
-
-    // a 태그의 텍스트 변경
-    $("#collapseToggle").text(text);
-
+    
+    $(".clsf").each(function(el) {
+    	//console.log( $(".clsf")[el] );
+    });
 	// 📌 div가 화면에 보이는 순간 차트를 생성
        if (!radarChart) {
            showRadarChart();
@@ -205,14 +225,70 @@ function chTitle(el) {
            setTimeout(() => {
                showRadarChart();
            }, 50); // 화면 갱신 후 실행
-           // 📌 이미 생성한 차트라면 갱신
+           // 📌 이미 생성한 차트라면 갱신      
+	
            radarChart.resize();   
            pieChart.resize();   
            columnChart.resize();   
        }
 	
+	
+       
+	
 }
 
+function makeRadarData(iemList, myWrterList, evaleRelate) {
+	  // 결과 배열 (직무, 협업, 자기관리 순서)
+	  const result = [];
+
+	  // 각 그룹별 처리
+	  for (const groupName of ["직무 역량", "협업 역량", "자기관리 역량"]) {
+	    const items = iemList[groupName]; // 해당 그룹의 항목들
+
+	    // 해당 그룹의 점수 모으기
+	    const scores = items.map(item => {
+	      // myWrterList에서 같은 mlssIemId + evaleRelate인 점수 찾기
+	      const wrter = myWrterList.find(
+	        w => w.mlssIemId === item.mlssIemId && w.evaleRelate === evaleRelate
+	      );
+	      return wrter ? wrter.score : null;
+	    }).filter(s => s !== null);
+
+	    // 평균 계산
+	    const avg = scores.length > 0
+	      ? scores.reduce((sum, s) => sum + s, 0) / scores.length
+	      : 0;
+
+	    result.push(avg);
+	  }
+
+	  return { name: evaleRelate, data: result };
+	}
+
+
+class ScoreRadioRenderer {
+	  constructor(props) {
+	    this.el = document.createElement('div');	    
+	    const rowKey = props.rowKey;	   
+	    const radioName = props.grid.store.data.filteredRawData[rowKey].mlssIemId;
+
+	    this.el.innerHTML = [1,2,3,4,5].map(v =>
+	      `<label><input type="radio" name="${radioName}" value="${v}">${v}</label>`
+	    ).join(' ');
+
+	    this.el.querySelectorAll('input[type="radio"]').forEach(input => {
+	      input.addEventListener('change', (e) => {
+	        const value = Number(e.target.value);
+	        props.grid.setValue(rowKey, 'score', value);
+	        //console.log('row', rowKey, 'score', value);
+	      });
+	    });
+	  }
+
+	  getElement() {
+	    return this.el;
+	  }
+	}
 			
 let gridColums = [
     { header: 'ID', name: 'mlssIemId', hidden: true },
@@ -221,38 +297,65 @@ let gridColums = [
     	  header: '점수',
     	  name: 'score',
     	  align: 'center',
-    	  formatter: function (props) {
-    		  console.log(props);
-    	    const rowKey = props.row._attributes.rowNum; // ✅ 구버전 핵심
-
-    	    return `
-    	      <input type="radio" name="row-${rowKey}" onchange="updateScore(${rowKey},1)">1
-    	      <input type="radio" name="row-${rowKey}" onchange="updateScore(${rowKey},2)">2
-    	      <input type="radio" name="row-${rowKey}" onchange="updateScore(${rowKey},3)">3
-    	      <input type="radio" name="row-${rowKey}" onchange="updateScore(${rowKey},4)">4
-    	      <input type="radio" name="row-${rowKey}" onchange="updateScore(${rowKey},5)">5
-    	    `;
-    	  }
+    	  renderer: { type: ScoreRadioRenderer }
     	}
-
-
-
 ];
-function updateScore(rowKey, value) {
-	  grid.setValue(rowKey, 'score', value);
-	  console.log(grid.getData()); // 바로 확인용
-	}
-
-
-
 
 			let grpTag = $("#yeocRyangGrp");
+			$("#mlssUserRegist").on("click", () => {				
+				let payLoad = {};				
+				let master = {};				
+				let datas = [...grid.getData(), ...grid2.getData(), ...grid3.getData()];				
+				for(let data of datas) {
+					$(`input[name="${data.mlssIemId}"]`).each(function() {
+						  if ($(this).prop("checked")) {
+						    data["score"] = Number($(this).val());
+						    data["mlssId"] = [[${mlssId}]];
+						    data["empId"] = [[${empId}]];
+						    if($("#collapseToggle").text() == "본인 평가") {
+						    	data["evaleRelate"] = "본인";
+						    }else{
+						    	data["evaleRelate"] = "타인";
+						    }
+						  }
+						});					
+				}
+				datas = datas.filter(data => data.score != null);
+				let total = 0;
+				for(let selNum of datas) {
+					total += selNum.score;
+				}
+				if($("#collapseToggle").text() == "본인 평가") {
+					master["self"] = total/datas.length;
+				}else{
+					master["crk"] = total/datas.length;
+				}
+				master["mlssId"] = [[${mlssId}]];
+				payLoad["master"] = master;
+				payLoad["datas"] = datas;
+				console.log(payLoad);
+				
+				$.ajax({
+				    url: "/mlssUserRegist",                // 요청 URL
+				    type: "post",                     // GET 방식 (fetch 코드와 동일)
+				    contentType: "application/json",
+				    data: JSON.stringify(payLoad),     // 쿼리 파라미터 자동 변환			        
+				})
+				.done((result) => {
+				    alert("등록되었습니다.");			    
+				})
+				.fail((error) => {
+				    console.error(error);
+				    alert("데이터 요청 중 오류 발생");
+				});
+				
+			});
 			
 			
 			
 			
 			const iemList = [[${iemList}]];
-			
+			console.log(iemList);
 			const gridData = [];
 
 			// 직무 역량 데이터
@@ -313,6 +416,18 @@ function updateScore(rowKey, value) {
 						autoWidth : true,
 						columns : gridColums
 					});
+			//기존에 평가했다면 내꺼는 페이지 로드시 출력되게 하는 코드
+			let myWrterList = [[${userWrterList}]]
+			console.log(myWrterList);
+			for(let myWrter of myWrterList) {
+				$(`input[name="${myWrter.mlssIemId}"]`).each(function(el) {
+					if($(this).val() == myWrter.score) {
+						$(this).prop("checked", true);
+					}
+				});				
+			};
+			
+			
 			
 			let radarChart;   // 전역 변수로 선언하여 어디서든 접근 가능
 			let pieChart;   // 전역 변수로 선언하여 어디서든 접근 가능
@@ -336,29 +451,33 @@ function updateScore(rowKey, value) {
 			    radarChart = toastui.Chart.radarChart({
 			        el: radarEl,
 			        data: {
-			            categories: ['힘', '지능', '스피드'],
+			            categories: ['직무 역량', '협업 역량', '자기관리 역량'],
 			            series: [
-			                { name: 'Player', data: [60, 65, 90] },
-			                { name: '상사', data: [80, 35, 20] },
-			                { name: '부하', data: [40, 90, 50] },
+			            	makeRadarData(iemList, myWrterList, "본인"),
+			          	   { name: '상사', data: [4, 4, 4] },
+			                 { name: '부하', data: [3, 3.7, 3.5] }, 
 			            ]
 			        },
 			        options: {
-			            series: { showArea: true }
-			        }
-			    });
+			            series: { showArea: true },
+			            chart: {
+				            width: 600,   // 원하는 너비
+				            height: 600   // 원하는 높이
+				          }
+			        },		        
+			    });			    
 			    pieChart = toastui.Chart.pieChart({
 			        el: pieEl,
 			        data: {
 			            series: [
-			                { name: '진단1', data: 60 },
-			                { name: '진단2', data: 65 },
-			                { name: '진단3', data: 90 }
+			                { name: '직무 역량', data: 6 },
+			                { name: '협업 역량', data: 5 },
+			                { name: '자기관리 역량', data: 9 }
 			            ]
 			        },
 			        options: {
 			            chart: {
-			                title: 'Player 능력 비율'
+			                title: '본인 역량 비율'
 			            }
 			        }
 			    });
@@ -366,17 +485,30 @@ function updateScore(rowKey, value) {
 			    columnChart = toastui.Chart.columnChart({
 			        el: columnEl,
 			        data: {
-			        	categories: ['업무 이해도', '전문성', '문제 해결 능력', '의사소통능력', '협력 태도', '문제해결 및 기여도', '시간 및 업무관리', '자기개발 및 학습태도', '책임감 및 규율 준수'],
+			            categories: [
+			              '업무 이해도', '전문성', '문제 해결 능력',
+			              '의사소통능력', '협력 태도', '문제해결 및 기여도',
+			              '시간 및 업무관리', '자기개발 및 학습태도', '책임감 및 규율 준수'
+			            ],
 			            series: [
-			                { name: '진단4', data: [60, 80, 100, 10, 70, 50, 20, 90, 30] },
-			                { name: '진단5', data: [60, 80, 100, 10, 70, 50, 20, 90, 30] },
-			                { name: '진단6', data: [60, 80, 100, 10, 70, 50, 20, 90, 30] }			                
+			              {
+			                name: '본인',
+			                data: [6, 8, 10, 10, 7, 5, 2, 9, 3]
+			              },
+			              {
+			                name: '상사',
+			                data: [7, 9, 9, 8, 8, 6, 3, 8, 4]
+			              },
+			              {
+			                name: '동료',
+			                data: [5, 7, 8, 9, 6, 5, 4, 7, 5]
+			              }
 			            ]
-			        },
+			          },
 			        options: {
-			            chart: { title: 'Column 차트 예시' },
+			            chart: { title: '역량별 세부 항목 점수' },
 			            yAxis: { title: '점수' },
-			            xAxis: { title: '항목' },
+			            xAxis: { title: '역량 그룹' },
 			            width: 900,
 			            height: 400
 			        }			        
@@ -429,22 +561,7 @@ function updateScore(rowKey, value) {
 
 		</script>
 
-	<script type="module">
-import { bindGridToForm, formToJson } from '/assets/js/teamExportUtil.js';
-
-//그리드 행 클릭 시 상세정보 입력
-grid.on('click', function(ev) {
-    const rowData = grid.getRow(ev.rowKey);
-    if (!rowData) return;
-    
-    console.log(rowData );
-    console.log(grid.getData() );
-
-    
-});
-
-
-</script>
+	
 
 
 </body>

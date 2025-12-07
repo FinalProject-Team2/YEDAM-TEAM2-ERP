@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import store.yd2team.common.util.LoginSession;
 import store.yd2team.insa.mapper.MlssMapper;
+import store.yd2team.insa.service.EmpVO;
+import store.yd2team.insa.service.MlssRequestVO;
 import store.yd2team.insa.service.MlssService;
 import store.yd2team.insa.service.MlssVO;
 
@@ -82,8 +84,31 @@ public class MlssServiceImpl implements MlssService{
 	}
 
 	@Override
-	public int mlssVisitChk(String val) {		
+	public String mlssVisitChk(String val) {		
 		return mlssMapper.mlssDtChk(val);
+	}
+
+	@Override
+	public int mlssWrterRegist(MlssRequestVO val) {
+		String wrterId = val.getMaster().getMlssWrterId();
+		if(wrterId == null) {
+			mlssMapper.mlssMasterUpdate( val.getMaster() );
+			return mlssMapper.mlssWrterRegist( val.getDatas() );
+		}
+		
+		return 0;
+	}
+
+	@Override
+	public List<EmpVO> mlssEmpList(String val) {
+		
+		return mlssMapper.mlssEmpList(val);
+	}
+
+	@Override
+	public List<MlssVO> mlssWrterLoadBefore(String mlssId, String empId) {
+		
+		return mlssMapper.mlssWrterLoadBefore(mlssId, empId);
 	}
 
 }
