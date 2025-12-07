@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.business.mapper.AtmptMapper">
+	<select id="selectAtmpt"
+		parameterType="store.yd2team.business.service.AtmptVO"
+		resultType="store.yd2team.business.service.AtmptVO">
+		SELECT
+	        a.ATMPT_NO,
+	        a.CUSTCOM_ID,
+	        cust.CUSTCOM_NAME,
+	
+	        /* 미수잔액 */
+	        a.ATMPT_BLCE AS remainAmt,
+	
+	        /* 가장 최근 입금일 */
+	        (SELECT MAX(d.RPAY_AT)
+	           FROM tb_atmpt_detail d
+	          WHERE d.ATMPT_NO = a.ATMPT_NO) AS lastPayDt,
+	
+	        /* 입금 예정일 (detail 중 가장 가까운 예정일 하나) */
+	        (SELECT MIN(d.RECPT_EXPC_DT)
+	           FROM tb_atmpt_detail d
+	          WHERE d.ATMPT_NO = a.ATMPT_NO) AS expectDt,
+	
+	        /* 총 입금액: DETAIL 합계 */
+	        (SELECT NVL(SUM(d.ATMPT_AMT), 0)
+	           FROM tb_atmpt_detail d
+	          WHERE d.ATMPT_NO = a.ATMPT_NO) AS paidAmt
+	
+	    FROM tb_atmpt a
+	    LEFT JOIN tb_custcom cust
+	           ON a.CUSTCOM_ID = cust.CUSTCOM_ID
+	
+	    WHERE 1 = 1
+	    <if test="custcomId != null and custcomId != ''">
+	        AND a.CUSTCOM_ID = #{custcomId}
+	    </if>
+	
+	    <if test="fromDt != null and fromDt != ''">
+	        AND EXISTS (
+	            SELECT 1
+	            FROM tb_atmpt_detail d
+	            WHERE d.ATMPT_NO = a.ATMPT_NO
+	              AND d.RECPT_EXPC_DT >= #{fromDt}
+	        )
+	    </if>
+	
+	    <if test="toDt != null and toDt != ''">
+	        AND EXISTS (
+	            SELECT 1
+	            FROM tb_atmpt_detail d
+	            WHERE d.ATMPT_NO = a.ATMPT_NO
+	              AND d.RECPT_EXPC_DT &lt;= #{toDt}
+	        )
+	    </if>
+	
+	    ORDER BY a.CUSTCOM_ID, a.ATMPT_NO
+	</select>
+
+
+</mapper>
