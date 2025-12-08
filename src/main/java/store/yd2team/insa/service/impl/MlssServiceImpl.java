@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import store.yd2team.common.util.LoginSession;
@@ -24,6 +25,8 @@ public class MlssServiceImpl implements MlssService{
 	
 	private final MlssMapper mlssMapper;
 	
+	
+	@Transactional
 	@Override
 	public int mlssRegist(MlssVO val) {
 		
@@ -33,17 +36,24 @@ public class MlssServiceImpl implements MlssService{
 		String baseId = mlssMapper.mlssCreateId();
 		int seq = Integer.parseInt(baseId.substring(baseId.length() - 3)); // 마지막 3자리 숫자
 		
+		//헤더등록
+		MlssVO mvo = new MlssVO();
+		mvo.setMlssNm( val.getMlssNm() );
+		mvo.setEvlBeginDt( val.getEvlBeginDt() );
+		mvo.setEvlEndDt( val.getEvlEndDt() );
+		
+		mlssMapper.insertMlssHead(mvo);
+		
+		String ym = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMM"));
 		for (int i = 0; i < empIdList.size(); i++) {
-			MlssVO vo = empIdList.get(i);			
-			vo.setMlssNm( val.getMlssNm() );
-			vo.setEvlBeginDt( val.getEvlBeginDt() );
-			vo.setEvlEndDt( val.getEvlEndDt() );
+			MlssVO vo = empIdList.get(i);
+			vo.setMlssId(mvo.getMlssId());
 			vo.setCreaDt( val.getCreaDt() );
-			String newId = "mlss" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyMM"))
-	                 + String.format("%03d", seq + i);
-			vo.setMlssId(newId);
+			String newId = "mlss" + ym  + String.format("%03d", seq + i);
+			vo.setMlssEmpId(newId);
 		}
 		
+		//
 		return mlssMapper.insertMlssList(empIdList);
 	}
 
@@ -84,7 +94,7 @@ public class MlssServiceImpl implements MlssService{
 	}
 
 	@Override
-	public String mlssVisitChk(String val) {		
+	public MlssVO mlssVisitChk(String val) {		
 		return mlssMapper.mlssDtChk(val);
 	}
 
@@ -92,17 +102,18 @@ public class MlssServiceImpl implements MlssService{
 	public int mlssWrterRegist(MlssRequestVO val) {
 		String wrterId = val.getMaster().getMlssWrterId();
 		if(wrterId == null) {
+			mlssMapper.mlssWrterRegist( val.getDatas() );
 			mlssMapper.mlssMasterUpdate( val.getMaster() );
-			return mlssMapper.mlssWrterRegist( val.getDatas() );
+			return 0;
 		}
 		
 		return 0;
 	}
 
 	@Override
-	public List<EmpVO> mlssEmpList(String val) {
+	public List<MlssVO> mlssEmpList(String empId, String deptId) {
 		
-		return mlssMapper.mlssEmpList(val);
+		return mlssMapper.mlssEmpList(empId, deptId);
 	}
 
 	@Override

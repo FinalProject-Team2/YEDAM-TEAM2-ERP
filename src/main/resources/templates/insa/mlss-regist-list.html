@@ -158,11 +158,12 @@
 	
 	//등록버튼 눌럿을 때 실행되는 코드
 	registBtn.on("click", () =>{
+		lastAddedRowKey = grid.getCheckedRowKeys();
 		if (lastAddedRowKey !== null) {
 			console.log(lastAddedRowKey);
 			
 			// ✅ 추가된 행의 전체 데이터 가져오기
-		    const rowData = grid.getRow(lastAddedRowKey);
+		    const rowData = grid.getRow(lastAddedRowKey[0]);
 			console.log(rowData);
 		     $.ajax({
 			    url: "/mlssRegist",                // 요청 URL

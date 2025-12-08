@@ -15,10 +15,10 @@ public interface MlssService {
 	Map<String, List<MlssVO>> mlssLoadBefore();
 	
 	//다면평가 페이지 방문시 평가 기간인지 아닌지 확인하기
-	String mlssVisitChk(String val);
+	MlssVO mlssVisitChk(String val);
 	
 	//다면평가 상사 및 동료 리스트 불러오기
-	List<EmpVO> mlssEmpList(String val);
+	List<MlssVO> mlssEmpList(String empId, String deptId);
 	
 	//다면평가 기평가 리스트 불러오기
 	List<MlssVO> mlssWrterLoadBefore(String mlssId, String empId);

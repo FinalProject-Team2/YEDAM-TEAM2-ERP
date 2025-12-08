@@ -44,11 +44,11 @@ public class MlssController {
 		}
 		
 		String empId = session.getEmpId();
-		List<EmpVO> empList = mlssService.mlssEmpList( session.getDeptId() );
+		List<MlssVO> empList = mlssService.mlssEmpList( session.getEmpId(), session.getDeptId() );
 		String targetClsf = "";
-		Iterator<EmpVO> it = empList.iterator();
+		Iterator<MlssVO> it = empList.iterator();
 		while (it.hasNext()) {
-		    EmpVO vo = it.next();
+			MlssVO vo = it.next();
 		    if (vo.getEmpId().equals(empId)) {
 		        // 삭제 전에 값 저장
 		        targetClsf = vo.getClsf();
@@ -57,12 +57,12 @@ public class MlssController {
 		        break; // 한 건만 삭제한다면 break
 		    }
 		}
-		List<EmpVO> uprList = new ArrayList<>();
-		List<EmpVO> lwrList = new ArrayList<>();
+		List<MlssVO> uprList = new ArrayList<>();
+		List<MlssVO> lwrList = new ArrayList<>();
 
 		int targetRank = rankValue(targetClsf);
 
-		for (EmpVO vo : empList) {
+		for (MlssVO vo : empList) {
 		    int voRank = rankValue(vo.getClsf());
 		    if (voRank > targetRank) {
 		        uprList.add(vo); // 상급
@@ -70,20 +70,21 @@ public class MlssController {
 		        lwrList.add(vo); // 같거나 하급
 		    }
 		}
-		String v = mlssService.mlssVisitChk( empId );
-		if( v != null) {	
+		MlssVO v = mlssService.mlssVisitChk( empId );				
+		if( v.getMlssId() != null) {	
 			
 		} else {
 			model.addAttribute("mlss", "평가 기간이 아닙니다");
 			return "index";
 		}
 		Map<String, List<MlssVO>> list = mlssService.mlssLoadBefore();
-		List<MlssVO> userWrterList = mlssService.mlssWrterLoadBefore(v, empId);
+		List<MlssVO> userWrterList = mlssService.mlssWrterLoadBefore(v.getMlssEmpId(), empId);
 		model.addAttribute("userWrterList", userWrterList);
 		model.addAttribute("evaleRelateUpr", uprList);
 		model.addAttribute("evaleRelateLwr", lwrList);
 		model.addAttribute("empId", empId);
-		model.addAttribute("mlssId", v);
+		model.addAttribute("mlssId", v.getMlssId());
+		model.addAttribute("mlssEmpId", v.getMlssEmpId());
 		model.addAttribute("iemList", list);
 		model.addAttribute("Session", "testone");
 		return "insa/mlss";
@@ -128,6 +129,14 @@ public class MlssController {
 			
 			return mlssService.mlssWrterRegist(keyword);	
 		}
+		
+	//다중입력조회
+			@GetMapping("/selectMlssChkJohoe")
+			@ResponseBody
+			public List<MlssVO> selectMlssChkJohoe(MlssVO keyword) {			
+				System.out.println("모나오니 다중입력조회"+keyword);				
+				return null;			
+			}
 	
 
 }
