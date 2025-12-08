@@ -24,19 +24,14 @@ import store.yd2team.business.service.churnRiskVO;
 public class BusinessController {
 	@Autowired
 	BusinessService businessService;
-	/*
-	 * @GetMapping("/churnRiskStdrRegister") public String insert(Model model) {
-	 *
-	 * model.addAttri bute("test", "testone"); return
-	 * "/business/churnRiskStdrRegister"; // return "여기까지는 BusinessController 들어옴";
-	 * }
-	 */
+
 	@GetMapping("/samplepage")
 	public String sample(Model model) {
 		System.out.println("=== BusinessController.insert() 호출됨 ===");
 		model.addAttribute("test", "testone");
 		return "business/samplepage"; // /는 빼도 됨
 	}
+	//휴면,이탈객 기준등록 페이지열람
 	@GetMapping("/churnRiskStdrRegister")
 	public String insert(Model model) {
 		System.out.println("=== BusinessController.insert() 호출됨 ===");
@@ -44,15 +39,14 @@ public class BusinessController {
 		return "business/churnRiskStdrRegister"; // /는 빼도 됨
 	}
 	//
-	//
-	//휴면,이탈 조회페이지열람
+	//휴면,이탈고객 조회페이지열람
 	@GetMapping("/churnRiskList")
 	public String churnRiskListForm(Model model) {
 	    // 페이지 처음 로딩 시 완전히 빈 리스트 제공
 	    model.addAttribute("getMonthlySalesList", Collections.emptyList());
 	    return "business/churnRiskList";
 	}
-	// 휴면,이탈고객검색조회
+	// 휴면,이탈고객 검색조회
 	@PostMapping("/churnRiskList")
 	public String selectall(churnRiskVO vo, MonthlySalesDTO cond, Model model) {
 		System.out.println("=== churnRiskList.selectall() 호출됨 ===");
@@ -66,7 +60,7 @@ public class BusinessController {
 	//
 	//
 	//
-	// 잠재고객기준상세목록조회
+	// 잠재고객기준상세목록 가져오기
 	@GetMapping("/potentialCustRegister")
 	public String churnRiskStdrRegister(Model model) {
 		   List<PotentialStdrVO> allList = businessService.getStdrDetailAll();
@@ -98,11 +92,26 @@ public class BusinessController {
 		    model.addAttribute("regionList",    regionList);
 	    	return "business/potentialCustRegister";
 	}
-	// 페이지열람시 잠재고객전체조회
+	//
+	//잠재고객조건상세목록수정
+	@PostMapping("/potentialCustRegister")
+	@ResponseBody
+	public Map<String, List<BusinessVO>> saveAll(
+			@RequestBody List<BusinessVO> list) {
+		businessService.saveAll(list);
+		Map<String, List<BusinessVO>> result = new HashMap<>();
+		result.put("industryList",  businessService.getListByCond("IND"));
+		result.put("sizeList",      businessService.getListByCond("SIZE"));
+		result.put("establishList", businessService.getListByCond("EST"));
+		result.put("regionList",    businessService.getListByCond("REG"));
+		return result;
+	}
+	//
+	// 잠재고객조회 페이지열람
 	@GetMapping("/potentialCustList")
 	public String list(Model model) {
 		System.out.println("=== BusinessController.list() 호출됨 ===");
-//		model.addAttribute("list", businessService.getList());
+	  //model.addAttribute("list", businessService.getList());
 		model.addAttribute("test", "testone");
 		
 		return "business/potentialCustList";
@@ -119,20 +128,6 @@ public class BusinessController {
 		model.addAttribute("stdrvo", vo);
 		
 		return "business/potentialCustList";
-	}
-	//
-	//잠재고객조건상세목록수정
-	@PostMapping("/potentialCustRegister")
-	@ResponseBody
-	public Map<String, List<BusinessVO>> saveAll(
-	        @RequestBody List<BusinessVO> list) {
-		businessService.saveAll(list);
-	    Map<String, List<BusinessVO>> result = new HashMap<>();
-	    result.put("industryList",  businessService.getListByCond("IND"));
-	    result.put("sizeList",      businessService.getListByCond("SIZE"));
-	    result.put("establishList", businessService.getListByCond("EST"));
-	    result.put("regionList",    businessService.getListByCond("REG"));
-	    return result;
 	}
 	// 잠재고객데이터매핑
 	@PostMapping("/potential/sync")
@@ -162,30 +157,8 @@ public class BusinessController {
 		
 		return "business/salesactivity";
 	}
-	//영업활동관리.접촉사항
-	@PostMapping("/salesActivity/contact")
-	public String getAction(Model model) {
-		System.out.println("=== salesActivity.saelesAction() 호출됨 ===");
-		List<ContactVO> contactrList = businessService.getAction();
-		// 위에서 span이 쓰는 list도 채워주기
-		model.addAttribute("contactrList", contactrList);
-//		model.addAttribute("stdrvo", vo);
-		
-		return "business/salesactivity";
-	}
-	//영업활동관리.리드분석
-	@PostMapping("/salesActivity/LeadGenerar")
-	public String getLeadgenerar(Model model) {
-		System.out.println("=== salesActivity.saelesAction() 호출됨 ===");
 	
-		List<ContactVO> contactrList = businessService.getAction();
-	
-		// 위에서 span이 쓰는 list도 채워주기
-		model.addAttribute("contactrList", contactrList);
-//			model.addAttribute("stdrvo", vo);
-		
-		return "business/salesactivity";
-	}
+
 }
 	
 

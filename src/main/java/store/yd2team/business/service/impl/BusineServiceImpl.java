@@ -194,17 +194,18 @@ public class BusineServiceImpl implements BusinessService {
 	}
 	//
 	//
+	//
 	//접촉사항조회
 	@Override
 	public List<ContactVO> getAction() {
 		return businessMapper.getAction();
 	}
-
+	//
+	//진짜 접촉사항 조회
 	@Override
     public List<ContactVO> getContactListByVend(String vendId) {
         return businessMapper.selectContactListByVend(vendId);
     }
-	//
 	//
 	// 접촉내역 저장
     @Override
@@ -230,10 +231,11 @@ public class BusineServiceImpl implements BusinessService {
             
         }
     }
-	//리드내역 조회 및 저장
+    //
+	//리드내역 조회
 	@Override
-	public List<LeadVO> selectLeadListByVend(String vendId) {
-		return selectLeadListByVend(vendId);
+	public List<LeadVO> getLeadListByVend(String vendId) {
+		return businessMapper.getLeadListByVend(vendId);
 	}
 
 	@Override
@@ -246,14 +248,6 @@ public class BusineServiceImpl implements BusinessService {
         if (list == null) return;
 
         for (LeadVO row : list) {
-//            // 완전 빈 행은 스킵
-//            if ((row.getLeadDt() == null || row.getLeadDt().isBlank())
-//             && (row.getLeadManager() == null || row.getLeadManager().isBlank())
-//             && (row.getRequiredDt() == null || row.getRequiredDt().isBlank())
-//             && (row.getCompetitorYn() == null || row.getContactCntn().isBlank())) {
-//            	&& (row.getContactCntn() == null || row.getContactCntn().isBlank())) {
-//                continue;
-//            }
             row.setVendId(vendId);
             row.setPotentialInfoNo(potentialInfoNo);
 			if( row.getLeadNo()  == null  || row.getLeadNo().equals("") ) {
