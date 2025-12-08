@@ -105,7 +105,7 @@
                <div class="card-body">
                    <!-- 간단한 범례 -->
                    <div class="mb-2" style="font-size: 12px;">
-                       <span class="badge bg-secondary">※ 사용률(%) = 현재잔액 / 여신한도 × 100</span>
+                       <span class="badge bg-secondary">※ 사용률(%) = 원금잔액 / 여신한도 × 100</span>
                        <span class="ms-2 bad-credit-badge">악성여신</span>
                        <span class="ms-2 ship-hold-badge">출하정지</span>
                    </div>
@@ -166,7 +166,9 @@
        columnOptions: {
            minWidth: 80,
            resizable: true
-       }
+       },
+       // ✅ 셀 더블클릭 시 편집 시작
+       editingEvent: 'dblclick'
    };
    // 숫자 변환 유틸 (빈값/콤마 처리)
    function toNumber(val) {
@@ -200,8 +202,41 @@
                    `;
                }
            },
-           { header: '신용등급',    name: 'creditGrad',  width: 80,  align: 'center' },
-           { header: '여신체크',    name: 'cdtlnCheck',  width: 80,  align: 'center' },
+           // ✅ 신용등급: 더블클릭 시 셀렉트 박스로 편집
+           {
+             header: '신용등급',
+             name: 'creditGrad',
+             width: 90,
+             align: 'center',
+             editor: {
+               type: 'select',
+               options: {
+                 listItems: [
+                   { text: 'A', value: 'A' },
+                   { text: 'B', value: 'B' },
+                   { text: 'C', value: 'C' },
+                   { text: 'D', value: 'D' }
+                 ]
+               }
+             }
+           },
+
+           // ✅ 여신체크: 더블클릭 시 Y/N 선택
+           {
+             header: '여신체크',
+             name: 'cdtlnCheck',
+             width: 90,
+             align: 'center',
+             editor: {
+               type: 'select',
+               options: {
+                 listItems: [
+                   { text: 'Y', value: 'Y' },
+                   { text: 'N', value: 'N' }
+                 ]
+               }
+             }
+           },
            {
                header: '담보한도',
                name: 'mrtggLmt',
@@ -235,29 +270,31 @@
                    return num ? num.toLocaleString() : '';
                }
            },
-           /* ▼ 여기부터 여신현황 컬럼들 추가 ▼ */
+           // 현재잔액 (조회 결과 내려오는 값, 필요하면 직접 수정 가능)
            {
-               header: '현재잔액',
-               name: 'remainAmt',
-               width: 110,
-               align: 'right',
-               formatter: ({ value }) => {
-                   const num = toNumber(value);
-                   return num ? num.toLocaleString() : '';
-               }
+             header: '원금잔액',
+             name: 'remainAmt',
+             width: 110,
+             align: 'right',
+             editor: 'text',   // 사용자가 직접 수정할 수 있게 하려면 유지, 읽기전용이면 삭제
+             formatter: ({ value }) => {
+               const num = toNumber(value);
+               return num ? num.toLocaleString() : '';
+             }
            },
+
+           // 사용률 = 현재잔액 / 여신한도 * 100
            {
-               header: '사용률(%)',
-               name: 'useRate',
-               width: 90,
-               align: 'right',
-               formatter: ({ row }) => {
-                   const limit = toNumber(row.cdtlnLmt);     // 여신한도
-                   const remain = toNumber(row.remainAmt);   // 현재잔액
-                   if (!limit) return '';
-                   const rate = (remain / limit) * 100;
-                   return rate.toFixed(1);
-               }
+             header: '사용률(%)',
+             name: 'useRate',
+             width: 90,
+             align: 'right',
+             formatter: ({ value }) => {
+               if (value === null || value === undefined || value === '') return '';
+               const num = Number(value);
+               if (isNaN(num)) return '';
+               return num.toFixed(1); // 소수 1자리
+             }
            },
            {
                header: '최대연체(개월)',
@@ -311,6 +348,62 @@
            }
        ]
    });
+   
+   // ================================================================== 그리드 내 자동 계산 함수
+   // 숫자 변환 유틸 (기존 그대로 사용)
+   function toNumber(val) {
+     if (val === null || val === undefined) return 0;
+     const str = String(val).replace(/,/g, '').trim();
+     if (str === '') return 0;
+     return Number(str) || 0;
+   }
+
+   // 담보/신용/현재잔액 변경 시 여신한도 & 사용률 자동 계산
+   creditGrid.on('afterChange', (ev) => {
+
+     if (!ev.changes || ev.changes.length === 0) return;
+
+     const affectedRowKeys = new Set();
+
+     ev.changes.forEach(change => {
+       const { rowKey, columnName } = change;
+
+       // 1) 담보한도 또는 신용한도 변경 시 → 여신한도 = 담보 + 신용
+/*        if (columnName === 'mrtggLmt' || columnName === 'creditLmt') {
+         const row = creditGrid.getRow(rowKey);
+         const mrtgg  = toNumber(row.mrtggLmt);
+         const credit = toNumber(row.creditLmt);
+         const total  = mrtgg + credit;
+
+         creditGrid.setValue(rowKey, 'cdtlnLmt', total);
+       } */
+
+       // 2) 사용률 계산에 영향을 주는 컬럼이면 rowKey 기록
+       if (columnName === 'mrtggLmt' ||
+           columnName === 'creditLmt' ||
+           columnName === 'cdtlnLmt' ||
+           columnName === 'remainAmt') {
+         affectedRowKeys.add(rowKey);
+       }
+     });
+
+     // 3) 각 행별로 사용률 재계산
+     affectedRowKeys.forEach(rowKey => {
+       const row    = creditGrid.getRow(rowKey);
+       const limit  = toNumber(row.cdtlnLmt);   // 여신한도
+       const remain = toNumber(row.remainAmt);  // 현재잔액
+
+       let rate = 0;
+       if (limit > 0) {
+         rate = (remain / limit) * 100;
+       }
+
+       // useRate 컬럼에 1자리 소수로 저장
+       creditGrid.setValue(rowKey, 'useRate', rate.toFixed(1));
+     });
+   });
+   
+   
    // 담보/신용 변경 시 여신한도 자동 계산
    creditGrid.on('afterChange', (ev) => {
        ev.changes.forEach(change => {

@@ -5,265 +5,342 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<title>미수상세관리</title>
 
-<title>receivables</title>
+
 <style>
-.form-select {
-	color: #000 !important;
+/* 위 리스트 카드 아래쪽 여백 */
+.arrear-list-area {
+  margin-bottom: 16px;   /* 적당한 값으로 조절 (px, rem 모두 가능) */
+}
+
+/* 아래 상세 카드 위쪽 여백 (필요하면) */
+.arrear-detail-area {
+  margin-top: 0;         /* 기본 간격 없애고 싶으면 0, 더 띄우고 싶으면 값 조정 */
+}
+
+
+.lock-account-wrapper .card-title {
+	font-weight: 600;
+}
+
+/* 공통 카드 헤더 (제목 왼쪽, 버튼 오른쪽) */
+.card-header.with-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.card-header-left h5.card-title {
+	margin: 0;
+	font-size: 1.05rem;
+}
+
+.card-header-right .btn+.btn {
+	margin-left: .25rem;
+}
+
+/* Grid 영역 */
+.lock-account-wrapper #accountGrid {
+	width: 100%;
+	margin-top: 4px;
+}
+
+/* 상단 헤더의 체크박스(행 헤더) 셀만 회색 */
+.tui-grid-header-area .tui-grid-cell-row-header {
+	background-color: #f5f5f5;
+}
+
+/* 데이터 행의 체크박스 셀은 흰색 유지 */
+.tui-grid-body-area .tui-grid-cell-row-header {
+	background-color: #ffffff;
+}
+
+/* 그리드 버튼 스타일 */
+.grid-btn {
+	padding: 4px 10px;
+	border: 1px solid #bbb;
+	background-color: #fff;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.grid-btn:hover {
+	background-color: #eee;
 }
 </style>
 </head>
+
 <body layout:fragment="content">
-	<div class="row">
-		<!-- 검색조건 -->
-		<div class="col-md-12">
-			<div class="card mb-3">
-				<div class="card-header">
-					<h5 class="card-title">검색조건</h5>
-					<div class="card-header-right">
-						<button type="button" class="btn btn-dark" id="searchInitBtn">초기화</button>
-						<button class="btn btn-outline-dark" id="searchBtn">조회</button>
+	<div class="lock-account-wrapper">
+
+		<!-- 미수상세 조회 -->
+		<div class="row mb-3">
+			<div class="col-md-12">
+				<div class="card">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">조회 조건</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark">초기화</button>
+							<button type="button" class="btn btn-outline-dark">조회</button>
+						</div>
 					</div>
-				</div>
-				<div class="card-body">
-					<div class="row">
-						<div class="col-md-3">
-							<label for="custcomId" class="form-label">고객코드</label>
-							<input id="custcomId" type="text" class="form-control">
-						</div>
-						<div class="col-md-3">
-							<label for="custcomName" class="form-label">고객사</label>
-							<select id="custcomName" class="form-control">
-								<option>전체</option>
-								<option>무신사</option>
-								<option>29cm</option>
-							</select>
-						</div>
-						<div class="col-md-2">
-							<label class="form-label">담당자</label>
-							<select id="psch" class="form-control">
-								<option>전체</option>
-								<option>논개</option>
-								<option>구론산</option>
-							</select>
-						</div>
-						<div class="col-md-4">
-							<label class="form-label">기간</label>
-								<div class="d-flex align-items-center js-date-range">
 
-									<!-- 시작일 -->
-									<div class="input-group date">
-										<input type="text"
-											class="form-control datepicker js-date-range-start"
-											placeholder="시작일"> <span
-											class="input-group-text js-date-range-icon-start"> <i
-											class="bi bi-calendar"></i>
-										</span>
-									</div>
-
-									<span class="mx-1 fw-bold fs-5">~</span>
-
-									<!-- 종료일 -->
-									<div class="input-group date ms-2">
-										<input type="text"
-											class="form-control datepicker js-date-range-end"
-											placeholder="종료일"> <span
-											class="input-group-text js-date-range-icon-end"> <i
-											class="bi bi-calendar"></i>
-										</span>
-									</div>
+					<!-- /card-body start -->
+					<div class="card-body">
+						<div class="row g-2">
+							<div class="col-md-3">
+								<label>고객사코드</label> <select class="form-select">
+									<option>251125-001</option>
+									<option>251125-002</option>
+								</select>
+							</div>
+							<div class="col-md-3">
+								<label>고객사명</label> <select class="form-select">
+									<option>무신사</option>
+									<option>29cm</option>
+								</select>
+							</div>
+							<div class="col-md-3">
+								<label>신용등급</label> <select class="form-select">
+									<option>A</option>
+									<option>B</option>
+									<option>C</option>
+									<option>D</option>
+								</select>
+							</div>
+							<div class="col-md-3">
+								<label>연체구분</label> <select class="form-select">
+									<option>정상</option>
+									<option>연체</option>
+									<option>장기연체</option>
+									<option>대손처리</option>
+								</select>
 							</div>
 						</div>
 					</div>
-				</div>
-			</div>
-
-			<!-- 사원목록 -->
-			<div class="card">
-				<div class="card-header">
-					<h5 class="card-title">입출금관리</h5>
-					<div class="card-header-right">
-						<button class="btn btn-outline-dark" id="openRciptTretModal">입금처리</button>
-						<button class="btn btn-outline-dark" id="openDelayModal">연체관리이력</button>
-						<button id="addRowBtn" class="btn btn-outline-dark">행추가</button>
-						<button type="button" class="btn btn-dark">초기화</button>
-						<button class="btn btn-outline-dark" id="openRciptTretModal">저장</button>
-					</div>
-				</div>
-				<div class="card-body">
-					<div id="grid"></div>
+					<!-- /card-body end -->
 				</div>
 			</div>
 		</div>
 	</div>
-	<div th:replace="business/modal/rciptTretModal :: rciptTretModal"></div>
-	<div th:replace="business/modal/delayModal :: delayModal"></div>
-	
-<script>
-	let searchForm = {
-			custcomId: "",
-		    custcomName: "",
-		    psch: "",
-		    dueStart: "",
-		    dueEnd: ""
-	};
+	<!-- 미수/연체리스트 카드 -->
+	<div class="row arrear-list-area">
 
-    const gridData = [
-    	  {
-    		custcomId: "251126-0001",
-    		custcomName: "무신사",
-    		trnsDate: "2025-01-20",
-    		saleCtnt: "",
-    		salAmt: "",
-    		borwAmt: "",
-    		prinsumBaln: "",
-    		rciptAppoAmt: "",
-    		rciptAppoDt: "2025-11-27",
-    		ltstRciptDt: "2025-11-30"
-    	  }
-    	];
+		<!-- 미수/연체리스트 그리드 -->
+		<div class="col-md-12 d-flex">
+			<div class="card w-100 h-100">
+
+				<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
+				<div class="card-header with-actions">
+						<h5 class="card-title">미수/연체리스트</h5>
+					<div class="card-header-left">
+					<button class="btn btn-outline-dark" id="openDelayModal">연체관리이력</button>
+					</div>
+
+				</div>
+
+				<div class="card-body">
+					<div class="priceGridWrap">
+						<div id="detailGrid"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 미수 처리 상세 -->
+	<div class="card arrear-detail-area">
+			<h5 class="card-title">미수 처리 상세</h5>
+		<div class="card-header-left">
+		<button class="btn btn-outline-dark" id="openDelayModal">연체관리이력</button>
+		</div>
+
+		<div class="card-body">
+			<!-- 1행 : 금액 / 수금구분 -->
+			<div class="row g-2">
+				<!-- 매출금액 -->
+				<div class="col-md-3">
+					<label for="saleAmt" class="form-label">매출금액</label> <input
+						type="text" id="saleAmt" class="form-control text-end"
+						placeholder="0" />
+				</div>
+
+				<!-- 수금누계금액 -->
+				<div class="col-md-3">
+					<label for="rcvTotalAmt" class="form-label">수금누계금액</label> <input
+						type="text" id="rcvTotalAmt" class="form-control text-end"
+						placeholder="0" />
+				</div>
+
+				<!-- 미수금액 -->
+				<div class="col-md-3">
+					<label for="arrearAmt" class="form-label">미수금액</label> <input
+						type="text" id="arrearAmt" class="form-control text-end"
+						placeholder="0" />
+				</div>
+
+				<!-- 수금구분 -->
+				<div class="col-md-3">
+					<label for="rcvType" class="form-label">수금구분</label> <select
+						id="rcvType" class="form-select">
+						<option value="">선택</option>
+						<option value="CASH">현금</option>
+						<option value="BANK">계좌이체</option>
+						<option value="CARD">카드</option>
+						<option value="NOTE">어음</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- 2행 : 수금예정일 / 연체구분 / 상환여부 -->
+			<div class="row g-2 mt-3">
+				<!-- 수금예정일 -->
+				<div class="col-md-3">
+					<label for="planRcvDt" class="form-label">수금예정일</label>
+					<div class="input-group">
+						<input type="text" id="planRcvDt" class="form-control"
+							placeholder="YYYY-MM-DD" /> <span class="input-group-text">
+							<i class="bi bi-calendar"></i>
+						</span>
+					</div>
+				</div>
+
+				<!-- 연체구분 -->
+				<div class="col-md-3">
+					<label for="delayType" class="form-label">연체구분</label> <select
+						id="delayType" class="form-select">
+						<option value="">선택</option>
+						<option value="NORM">정상</option>
+						<option value="SHORT">단기연체</option>
+						<option value="LONG">장기연체</option>
+						<option value="LOSS">대손처리</option>
+					</select>
+				</div>
+
+				<!-- 상환여부 -->
+				<div class="col-md-3 ms-4">
+					<label class="form-label d-block mb-1">상환여부</label>
+
+					<div class="d-flex align-items-center gap-3">
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="repayYn"
+								id="repayY" value="Y" checked /> <label
+								class="form-check-label" for="repayY">Y</label>
+						</div>
+
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="repayYn"
+								id="repayN" value="N" /> <label class="form-check-label"
+								for="repayN">N</label>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<script>
+
+
+	
+    // 1. Toast UI Grid 테마
+tui.Grid.applyTheme('default', {
+  cell: {
+    normal: {
+      border: '#dedede',
+      background: '#ffffff',
+      showVerticalBorder: true
+    },
+    header: {
+      border: '#dedede',
+      background: '#f5f5f5',
+      showVerticalBorder: true
+    },
+    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
+    rowHeader: {
+      border: '#dedede',
+      background: '#ffffff',
+      showVerticalBorder: true
+    },
+    editable: {
+      background: '#FFFDF0',
+      text: '#000'
+    },
+    selectedHeader: {
+      background: '#f5f5f5'
+    },
+    selected: {
+      background: '#ffffff'
+    }
+  }
+});
+
+
+
+    // 2. 더미 데이터
+    const detailData = [
+        {
+        	custcomId: '251126-0001',
+        	custcomName: '무신사',
+        	creditGrade: 'A',
+        	delayFg: 'Y',
+        	monthSaleAmt: '200,000,000',
+        	basisAtmptBlce: '800,000,000',
+        	recpt:'1,000,000,000',
+        	atmptAmt:'N'
+        },
+        {
+        	custcomId: '251126-0002',
+        	custcomName: '29cm',
+        	creditGrade: 'B',
+        	delayFg: 'Y',
+        	monthSaleAmt: '300,000,000',
+        	basisAtmptBlce:'500,000,000',
+        	recpt:'800,000,000',
+        	atmptAmt:'N'
+        }
+    ];
+
+    // 3. Grid 공통 옵션
+    const businessGridOptions = {
+        bodyHeight: 180,
+        scrollX: false,
+        scrollY: true,
+        rowHeight: 40,
+        autoWidth: true,
+        columnOptions: {
+            minWidth: 80,
+            resizable: true
+        }
+    };
+
+    // 4. 미수상세 목록 Grid 생성
+    const detailGrid = new tui.Grid({
+        el: document.getElementById('detailGrid'),
+        data: detailData,
+        ...businessGridOptions,
+        columns: [
+            { header: '고객코드', name: 'custcomId' },
+            { header: '고객사', name: 'custcomName' },
+            { header: '신용등급', name: 'creditGrade' },
+            { header: '연체구분', name: 'delayFg' },
+            { header: '당월매출금액', name: 'monthSaleAmt' },
+            { header: '기초미수잔액', name: 'basicAtmptBlce' },
+            { header: '수금', name: 'recpt' },
+            { header: '미수금액', name: 'atmptAmt' },
+        ]
+    });
+
     
     
-        // Grid 생성
-        const grid = new tui.Grid({
-            el: document.getElementById('grid'),
-            data: gridData,
-            scrollX: true,
-            scrollY: true,
-            minBodyHeight: 0,
-            autoWidth: true,
-            columns: [
-            	  { header: '고객코드', name: 'custcomId', align: 'center' },
-            	  { header: '고객사', name: 'custcomName', align: 'center' },
-            	  { header: '거래일자', name: 'trnsDate' },
-            	  { header: '매출내역', name: 'saleCtnt', align: 'right' },
-            	  { header: '매출금액', name: 'salAmt', editor: 'text' },
-            	  { header: '대출금액', name: 'borwAmt', editor: 'text' },
-            	  { header: '원금잔액', name: 'prinsumBaln', align: 'right', editor: 'text' },
-            	  { header: '입금약속액', name: 'rciptAppoAmt', editor: 'text' },
-            	  { header: '입금약속일', name: 'rciptAppoDt' },
-            	  { header: '최근납입일', name: 'ltstRciptDt' },
-            	]
-        });
-        
-// =============== 버튼 이벤트
-	// 2-1. 초기화 버튼 이벤트
-	document.getElementById("searchInitBtn").addEventListener("click", function () {
-	
-	    // 1) searchForm 객체 초기화
-	    searchForm = {
-			custcomId: "",
-		    custcomName: "",
-		    psch: "",
-		    dueStart: "",
-		    dueEnd: ""
-	    };
-	
-	    // 2) 화면 Input 값 초기화
-	    document.querySelector("#custcomId").value = "";
-	    document.querySelector("#custcomName").value = "";
-	    document.querySelector("#psch").value = "";
-	    document.querySelector(".js-date-range-start").value = "";
-	    document.querySelector(".js-date-range-end").value = "";
-	
-	    // datepicker 를 쓰는 경우 UI 리프레시
-	    $('.js-date-range-start').datepicker('update', '');
-	    $('.js-date-range-end').datepicker('update', '');
-	
-	    console.log("검색조건 초기화:", searchForm);
-	});
 
-	// 2-2. 조회 버튼 이벤트
-	document.getElementById("searchBtn").addEventListener("click", function () {
-	
-	    // 1) 화면 입력값 → searchForm 에 세팅
-	    searchForm.custcomId = document.querySelector("#custcomId").value.trim();
-	    searchForm.custcomName = document.querySelector("#custcomName").value.trim();
-	    searchForm.psch = document.querySelector("#psch").value.trim();
-	    searchForm.dueStart = document.querySelector(".js-date-range-start").value;
-	    searchForm.dueEnd = document.querySelector(".js-date-range-end").value;
-	
-	    console.log("보낼 searchForm >>> ", searchForm);
-	
-	    // 2) 백엔드 조회 요청 (POST /esti/list)
-	    axios.post("/atmpt/list", searchForm)
-	        .then(res => {
-	            console.log("조회결과 >>> ", res.data);
-	
-	            // 3) 그리드 데이터 반영
-	            grid.resetData(res.data);
-	        })
-	        .catch(err => console.error("조회 중 오류:", err));
-	});
-        
-        
-        
-        
-
-        //행추가버튼
-        const addRowBtn = document.getElementById('addRowBtn');
-
-        addRowBtn.addEventListener('click', () => {
-            // 1) 최상단에 빈 행 추가
-            const { rowKey } = grid.prependRow(
-                {
-                	custcomId: '',
-            		custcomName: '',
-            		trnsDate: '',
-            		saleCtnt: '',
-            		salAmt: '',
-            		borwAmt: '',
-            		prinsumBaln: '',
-            		rciptAppoAmt: '',
-            		rciptAppoDt: '',
-            		ltstRciptDt: ''
-                },
-                { focus: true }      // 새로 추가된 행에 포커스 옵션
-            );
-
-            // 2) 특정 컬럼부터 바로 편집하고 싶으면
-            grid.focus(rowKey, 'custcomId');    
-            grid.startEditing(rowKey, 'custcomName');
-        });
-
-        
-        
-        
-        
-        
-        
-    	// 입금처리 모달창
-        const openRciptTretBtn = document.getElementById("openRciptTretModal");
-        const rciptTretModal = document.getElementById("rciptTretModal");
-        const rciptTretModalClose = document.getElementById("rciptTretModalClose");
-        const rciptTretBackdrop = document.getElementById("rciptTretBackdrop");
-
-        // 입금처리 열기
-        openRciptTretBtn.addEventListener("click", () => {
-        rciptTretModal.classList.add("show");
-        rciptTretModal.style.display = "block";
-        rciptTretBackdrop.style.display = "block";
-        document.body.classList.add("modal-open");
-        });
-        
-       	// 연체이력관리 모달창
-        const openDelayBtn = document.getElementById("openDelayModal");
-        const DelayModal = document.getElementById("delayModal");
-        const DelayModalClose = document.getElementById("delayModalClose");
-        const DelayModalBackdrop = document.getElementById("delayModalBackdrop");
-
-        // 연체이력관리 열기
-        openDelayBtn.addEventListener("click", () => {
-        delayModal.classList.add("show");
-        delayModal.style.display = "block";
-        delayModalBackdrop.style.display = "block";
-        document.body.classList.add("modal-open");
-        });
-        
-        
-    </script>
+</script>
 </body>
 </html>

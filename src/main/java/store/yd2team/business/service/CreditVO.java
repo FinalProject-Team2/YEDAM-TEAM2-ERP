@@ -30,6 +30,8 @@ public class CreditVO {
    private String psch;
    private String pschTel;
    private String pschEmail;
+   // 원금잔액
+   private Long prinsumBaln;
 }
 
 

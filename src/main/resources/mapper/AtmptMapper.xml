@@ -1,61 +1,130 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="store.yd2team.business.mapper.AtmptMapper">
-	<select id="selectAtmpt"
-		parameterType="store.yd2team.business.service.AtmptVO"
-		resultType="store.yd2team.business.service.AtmptVO">
-		SELECT
-	        a.ATMPT_NO,
-	        a.CUSTCOM_ID,
-	        cust.CUSTCOM_NAME,
-	
-	        /* 미수잔액 */
-	        a.ATMPT_BLCE AS remainAmt,
-	
-	        /* 가장 최근 입금일 */
-	        (SELECT MAX(d.RPAY_AT)
-	           FROM tb_atmpt_detail d
-	          WHERE d.ATMPT_NO = a.ATMPT_NO) AS lastPayDt,
-	
-	        /* 입금 예정일 (detail 중 가장 가까운 예정일 하나) */
-	        (SELECT MIN(d.RECPT_EXPC_DT)
-	           FROM tb_atmpt_detail d
-	          WHERE d.ATMPT_NO = a.ATMPT_NO) AS expectDt,
-	
-	        /* 총 입금액: DETAIL 합계 */
-	        (SELECT NVL(SUM(d.ATMPT_AMT), 0)
-	           FROM tb_atmpt_detail d
-	          WHERE d.ATMPT_NO = a.ATMPT_NO) AS paidAmt
-	
-	    FROM tb_atmpt a
-	    LEFT JOIN tb_custcom cust
-	           ON a.CUSTCOM_ID = cust.CUSTCOM_ID
-	
-	    WHERE 1 = 1
-	    <if test="custcomId != null and custcomId != ''">
-	        AND a.CUSTCOM_ID = #{custcomId}
-	    </if>
-	
-	    <if test="fromDt != null and fromDt != ''">
-	        AND EXISTS (
-	            SELECT 1
-	            FROM tb_atmpt_detail d
-	            WHERE d.ATMPT_NO = a.ATMPT_NO
-	              AND d.RECPT_EXPC_DT >= #{fromDt}
-	        )
-	    </if>
-	
-	    <if test="toDt != null and toDt != ''">
-	        AND EXISTS (
-	            SELECT 1
-	            FROM tb_atmpt_detail d
-	            WHERE d.ATMPT_NO = a.ATMPT_NO
-	              AND d.RECPT_EXPC_DT &lt;= #{toDt}
-	        )
-	    </if>
-	
-	    ORDER BY a.CUSTCOM_ID, a.ATMPT_NO
-	</select>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
+<mapper namespace="store.yd2team.business.mapper.AtmptMapper">
+
+    <!-- 1. 미수/연체 고객 리스트 조회 -->
+    <select id="selectAtmptList" parameterType="store.yd2team.business.service.AtmptVO"
+            resultType="store.yd2team.business.service.AtmptVO">
+        SELECT 
+            a.ATMPT_NO,
+            a.CUSTCOM_ID,
+            c.CUSTCOM_NAME,
+            cg.CREDIT_GRAD,
+            a.BASIS_ATMPT_BLCE,
+            a.ATMPT_BLCE,
+            
+            -- 당월 매출금액
+            (SELECT NVL(SUM(s.SALE_AMT),0)
+               FROM TB_SALE s
+              WHERE s.CUSTCOM_ID = a.CUSTCOM_ID
+                AND TO_CHAR(s.SALE_DT,'YYYYMM') = TO_CHAR(SYSDATE,'YYYYMM')
+            ) AS thisMonthSaleAmt,
+
+            -- 수금금액
+            (SELECT NVL(SUM(d.RECEIPT_ADSM_AMT),0)
+               FROM TB_ATMPT_DETAIL d
+              WHERE d.ATMPT_NO = a.ATMPT_NO
+            ) AS rciptAmt
+
+        FROM TB_AMTPT a
+        JOIN TB_CUSTCOM c ON a.CUSTCOM_ID = c.CUSTCOM_ID
+        LEFT JOIN TB_CREDIT cg ON a.CDTLN_NO = cg.CDTLN_NO
+        
+        WHERE 1=1
+        <if test="searchCustcomId != null and searchCustcomId != ''">
+            AND a.CUSTCOM_ID = #{searchCustcomId}
+        </if>
+        <if test="searchCustcomName != null and searchCustcomName != ''">
+            AND c.CUSTCOM_NAME LIKE '%' || #{searchCustcomName} || '%'
+        </if>
+        <if test="searchCreditGrad != null and searchCreditGrad != ''">
+            AND cg.CREDIT_GRAD = #{searchCreditGrad}
+        </if>
+        <if test="searchArrrgFg != null and searchArrrgFg != ''">
+            AND cg.ARRRG_FG = #{searchArrrgFg}
+        </if>
+        
+        ORDER BY a.ATMPT_NO DESC
+    </select>
+
+
+    <!-- 2. 미수 상세 조회 -->
+    <select id="selectAtmptDetail" parameterType="string"
+            resultType="store.yd2team.business.service.AtmptVO">
+        SELECT
+            d.ATMPT_DETAIL_ID,
+            d.ATMPT_NO,
+            d.VEND_ID,
+            d.CUSTCOM_ID,
+            d.RECEIPT_ADSM_AMT,
+            d.ATMPT_AMT,
+            d.RECPT_FG,
+            TO_CHAR(d.RECPT_EXPC_DT,'YYYY-MM-DD') AS recptExpcDt,
+            d.ARRRG_FG,
+            d.RPAY_AT
+        FROM TB_ATMPT_DETAIL d
+        WHERE d.ATMPT_NO = #{atmptNo}
+        ORDER BY d.ATMPT_DETAIL_ID
+    </select>
+
+
+    <!-- 3. 미수 상세 등록 -->
+    <insert id="insertAtmptDetail" parameterType="store.yd2team.business.service.AtmptVO">
+        INSERT INTO TB_ATMPT_DETAIL (
+            ATMPT_DETAIL_ID,
+            ATMPT_NO,
+            VEND_ID,
+            CUSTCOM_ID,
+            RECEIPT_ADSM_AMT,
+            ATMPT_AMT,
+            RECPT_FG,
+            RECPT_EXPC_DT,
+            ARRRG_FG,
+            RPAY_AT
+        ) VALUES (
+            'ADT' || TO_CHAR(SYSDATE,'YYMMDD') || LPAD(SEQ_ATMPT_DETAIL.NEXTVAL, 5, '0'),
+            #{atmptNo},
+            #{vendId},
+            #{custcomId},
+            #{receiptAdsmAmt},
+            #{atmptAmt},
+            #{recptFg},
+            #{recptExpcDt},
+            #{arrrgFg},
+            #{rpayAt}
+        )
+    </insert>
+
+
+    <!-- 4. 헤더 미수잔액 업데이트 -->
+    <update id="updateAtmptBlce" parameterType="store.yd2team.business.service.AtmptVO">
+        UPDATE TB_ATMPT
+        SET ATMPT_BLCE = #{atmptBlce}
+        WHERE ATMPT_NO = #{atmptNo}
+    </update>
+
+
+    <!-- 5. 연체 이력 등록 -->
+    <insert id="insertDelyHist" parameterType="store.yd2team.business.service.AtmptVO">
+        INSERT INTO TB_DELY_MVG_HIST (
+            HIST_NO,
+            CUSTOM_ID,
+            ATMTP_NO,
+            CONT_DT,
+            MVG_RSLT,
+            COCT_FG,
+            CNTN
+        ) VALUES (
+            'HST' || TO_CHAR(SYSDATE,'YYMMDD') || LPAD(SEQ_DELY_HIST.NEXTVAL, 5, '0'),
+            #{customId},
+            #{atmptNo},
+            SYSDATE,
+            #{mvgRslt},
+            #{coctFg},
+            #{cntn}
+        )
+    </insert>
 
 </mapper>

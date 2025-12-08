@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.business.mapper.RciptMapper">
+	<select id="selectRciptList" parameterType="store.yd2team.business.service.RciptVO" resultType="store.yd2team.business.service.RciptVO">
+	    SELECT 
+	           r.custcom_id,
+	           c.custcom_name,
+	           r.trns_dt,
+	           r.sale_ctnt,
+	           r.sale_amt,
+	           r.borw_amt,
+	           r.prinsum_baln,
+	           r.rcipt_appo_amt AS rciptAppoAmt,
+	           r.rcipt_appo_dt  AS rciptAppoDt,
+	           r.ltst_rcipt_dt  AS ltstRciptDt
+	    FROM tb_rcipt r
+	    JOIN tb_custcom c
+	      ON r.custcom_id = c.custcom_id
+	    WHERE 1 = 1
+	    
+	    <!-- 1) 고객코드 -->
+	    <if test="custcomId != null and custcomId != ''">
+	        AND r.custcom_id = #{custcomId}
+	    </if>
+	
+	    <!-- 2) 고객사명 (부분검색) -->
+	    <if test="custcomName != null and custcomName != ''">
+	        AND c.custcom_name LIKE '%' || #{custcomName} || '%'
+	    </if>
+	
+	    <!-- 3) 담당자 (psch, 부분검색) -->
+	    <if test="psch != null and psch != ''">
+	        AND c.psch LIKE '%' || #{psch} || '%'
+	    </if>
+	
+	    <!-- 4) 거래일자 범위 (trns_dt 기준) -->
+	    <!-- 시작일 이상 -->
+	    <if test="startDt != null and startDt != ''">
+	        AND r.trns_dt &gt;= TO_DATE(#{startDt}, 'YYYY-MM-DD')
+	    </if>
+	
+	    <!-- 종료일 이하 -->
+	    <if test="endDt != null and endDt != ''">
+	        AND r.trns_dt &lt;= TO_DATE(#{endDt}, 'YYYY-MM-DD')
+	    </if>
+	
+	    ORDER BY r.trns_dt DESC
+	</select>
+
+
+</mapper>
