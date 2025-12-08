@@ -5,48 +5,236 @@
   <div class="modal" id="guideModal">
     <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 1200px;">
       <div class="modal-content">
+
+        <!-- ✅ 이 모달 전용 스타일 -->
+        <style>
+          /* 모달 전체 높이 제한 + 내부 스크롤 */
+          #guideModal .modal-dialog {
+            max-height: 90vh;
+          }
+          #guideModal .modal-content {
+            max-height: 90vh;
+            overflow: hidden;
+          }
+          #guideModal .modal-body {
+            max-height: calc(90vh - 60px);
+            overflow-y: auto;
+          }
+
+          /* 코드/강조 색: 진한 블루 계열로 */
+          #guideModal code {
+            color: #2563eb;             /* 파란색 */
+            background-color: #eef3ff;  /* 아주 옅은 파랑 */
+            padding: 0 2px;
+            border-radius: 3px;
+          }
+
+          /* 카드 헤더 톤 조정 */
+          #guideModal .card-header {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-bottom: 1px solid #e5e7eb;
+          }
+
+          #guideModal .card-title {
+            margin: 0;
+            font-size: 0.95rem;
+          }
+
+          #guideModal table td {
+            vertical-align: middle;
+            font-size: 0.88rem;
+          }
+
+          #guideModal ul {
+            padding-left: 18px;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+          }
+
+          #guideModal p {
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+          }
+
+          #guideModal small {
+            font-size: 0.78rem;
+          }
+        </style>
+
         <div class="modal-body">
-          <h5 class="modal-title">가이드</h5>
-          <div class="row">
-            <!-- 검색조건 -->
+          <h5 class="modal-title mb-3">수당/공제 계산식 가이드</h5>
+
+          <div class="row g-3">
+
+            <!-- =========================
+                 1. 계산식 작성 규칙
+                 ========================= -->
             <div class="col-md-6">
               <div class="card border mb-3">
                 <div class="card-header">
-                  <h5 class="card-title">수당 계산식</h5>
+                  <h5 class="card-title mb-0">계산식 작성 규칙 (공통)</h5>
                 </div>
                 <div class="card-body">
+                  <p class="mb-2">
+                    수당/공제 계산식은 <strong>숫자 · 연산자 · 토큰(변수)</strong>을 조합해서 작성합니다.
+                  </p>
+
+                  <ul>
+                    <li>
+                      사용 가능한 연산자
+                      <ul>
+                        <li><code>+</code> 더하기 (예: <code>a + b</code>)</li>
+                        <li><code>-</code> 빼기 (예: <code>a - b</code>)</li>
+                        <li><code>*</code> 곱하기 (예: <code>a * b</code>)</li>
+                        <li><code>/</code> 나누기 (예: <code>a / b</code>)</li>
+                        <li><code>( )</code> 우선순위 (예: <code>(a + b) * c</code>)</li>
+                      </ul>
+                    </li>
+                    <li>
+                      사용 가능한 함수(예시)
+                      <ul>
+                        <li>
+                          <code>ROUND(x)</code> 또는 <code>ROUND(x, 0)</code> :
+                          소수점 첫째 자리에서 반올림 (원 단위 금액 만들 때 사용)
+                        </li>
+                        <li>
+                          <code>ROUND(x, 1)</code> :
+                          소수점 한 자리까지, <code>ROUND(x, 2)</code> :
+                          소수점 둘째 자리까지 반올림
+                        </li>
+                        <li>
+                          함수 이름은 대소문자 구분 없이 사용 가능
+                          (예: <code>round</code>, <code>ROUND</code> 모두 가능)
+                        </li>
+                      </ul>
+                    </li>
+                    <li>숫자는 정수/실수 모두 가능 (예: <code>100000</code>, <code>0.5</code>)</li>
+                    <li>공백은 무시됩니다. (띄어쓰기 자유)</li>
+                  </ul>
+
+                  <p class="mb-1"><strong>특수 키워드</strong></p>
+                  <ul class="mb-2">
+                    <li><code>MANUAL</code> : 매달 금액을 직접 입력해서 사용하는 항목</li>
+                    <li><code>FIXED</code>  : 별도 설정된 <strong>고정 금액</strong>을 사용하는 항목</li>
+                  </ul>
+
+                  <small class="text-muted">
+                    ※ <code>MANUAL</code>, <code>FIXED</code>는 계산식이 아닌 상태값입니다.
+                  </small>
                 </div>
               </div>
             </div>
+
+            <!-- =========================
+                 2. 사용 가능한 토큰
+                 ========================= -->
+            <div class="col-md-6">
+              <div class="card border mb-3">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">사용 가능한 토큰(변수)</h5>
+                </div>
+                <div class="card-body">
+                  <p class="mb-2">
+                    급여 계산 프로시저 <code>prc_calc_saly_items</code> 기준 토큰입니다.
+                  </p>
+
+                  <div class="table-responsive">
+                    <table class="table table-sm mb-2">
+                      <thead>
+                        <tr>
+                          <th style="width: 120px;">토큰</th>
+                          <th>설명</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr><td><code>basePay</code></td><td>한 달 기본급 총액</td></tr>
+                        <tr><td><code>HourRate</code></td><td>시간당 단가</td></tr>
+                        <tr><td><code>WorkTime</code></td><td>유급 근무시간</td></tr>
+                        <tr><td><code>OT</code></td><td>연장근무 시간</td></tr>
+                        <tr><td><code>HollyDay</code></td><td>휴일근무 시간</td></tr>
+                        <tr><td><code>UnpaidTime</code></td><td>지각/조퇴/결근 시간</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- =========================
+                 3. 수당 예시
+                 ========================= -->
             <div class="col-md-6">
               <div class="card border">
                 <div class="card-header">
-                  <h5 class="card-title">공제 계산식</h5>
+                  <h5 class="card-title mb-0">수당 계산식 예시</h5>
                 </div>
                 <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-sm mb-2">
+                      <thead>
+                        <tr>
+                          <th style="width: 140px;">수당 종류</th>
+                          <th>예시 계산식</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr><td>기본급</td><td><code>basePay</code></td></tr>
+                        <tr><td>연장근로 수당</td><td><code>HourRate * 1.5 * OT</code></td></tr>
+                        <tr><td>휴일근로 수당</td><td><code>HourRate * 2 * HollyDay</code></td></tr>
+                        <tr><td>야간근로 수당</td><td><code>HourRate * 0.5 * OT</code></td></tr>
+                        <tr><td>식대(정액)</td><td><code>100000</code></td></tr>
+                        <tr><td>직책수당 (10%)</td><td><code>basePay * 0.1</code></td></tr>
+                        <tr><td>성과급 (50%)</td><td><code>basePay * 0.5</code></td></tr>
+
+                        <!-- ✅ 여기만 추가 -->
+                        <tr><td>반올림 지급 수당</td><td><code>ROUND(basePay * 0.1, 0)</code></td></tr>
+
+                        <tr><td>수동 입력</td><td><code>MANUAL</code></td></tr>
+                        <tr><td>고정 수당</td><td><code>FIXED</code></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
-             </div>
-             <div class="col-md-6">
+            </div>
+
+            <!-- =========================
+                 4. 공제 예시
+                 ========================= -->
+            <div class="col-md-6">
               <div class="card border">
                 <div class="card-header">
-                  <h5 class="card-title">수당 예시</h5>
+                  <h5 class="card-title mb-0">공제 계산식 예시</h5>
                 </div>
                 <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-sm mb-2">
+                      <thead>
+                        <tr>
+                          <th style="width: 150px;">공제 항목</th>
+                          <th>예시 계산식</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr><td>소득세</td><td><code>basePay * 0.03</code></td></tr>
+                        <tr><td>지방세</td><td><code>basePay * 0.03 * 0.1</code></td></tr>
+                        <tr><td>4대보험</td><td><code>basePay * 0.09</code></td></tr>
+                        <tr><td>무급시간</td><td><code>HourRate * UnpaidTime</code></td></tr>
+                        <tr><td>벌금</td><td><code>HourRate * 1.2 * UnpaidTime</code></td></tr>
+                        <tr><td>정액 공제</td><td><code>50000</code></td></tr>
+                        <tr><td>수동</td><td><code>MANUAL</code></td></tr>
+                        <tr><td>고정</td><td><code>FIXED</code></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
-             </div>
-             <div class="col-md-6">
-              <div class="card border">
-                <div class="card-header">
-                  <h5 class="card-title">공제 예시</h5>
-                </div>
-                <div class="card-body">
-                </div>
-              </div>
-             </div>
+            </div>
+
           </div>
         </div>
+
       </div>
     </div>
   </div>
