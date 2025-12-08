@@ -70,8 +70,8 @@
       margin-right: 6px;
     }
     
-    .role-auth-wrapper .tui-grid-row.sys-role > .tui-grid-cell {
-	  background-color: #f5f5f5 !important;
+    .role-auth-wrapper .tui-grid-cell.sys-role {
+	  background-color: #ffffff !important;
 	  color: #999 !important;
 	}
   </style>
@@ -820,95 +820,89 @@
 
     // 권한 저장
     $('#btnAuthSave').on('click', function () {
-    	
-   	 // 1) 좌측 그리드 편집 종료
-   	  roleGrid.finishEditing();
 
-   	  // 2) 현재 선택된 행이 있는지
-   	  if (currentRoleRowKey == null) {
-   	    alert('먼저 좌측에서 역할을 선택해 주세요.');
-   	    return;
-   	  }
-
-   	  const selectedRole = roleGrid.getRow(currentRoleRowKey);
-
-   	  // 3) 선택된 행은 있는데 roleId 가 아직 없음 = 신규 행인데 미저장
-   	  if (!selectedRole || !selectedRole.roleId) {
-   	    alert('새로 추가한 역할입니다.\n먼저 좌측 역할 정보를 저장한 뒤 권한을 저장해 주세요.');
-   	    return;
-   	  }
-   	  
-  	  if (!selectedRole.vendId) {
-        alert('이 역할은 권한을 수정할 수 없습니다.');
-        // 혹시 체크를 건드렸으면 DB 기준으로 다시 로딩
-        loadRoleList();
-        return;
-      }
-
-   	  // 4) 여기까지 왔으면 DB에 있는 역할이므로 roleId 확정
-   	  currentRoleId = selectedRole.roleId;
-      
-      authGridHr.finishEditing();
-      authGridSales.finishEditing();
-      authGridCommon.finishEditing();
-
-      const authList = [];
-
-      ['hr', 'sales', 'common'].forEach(function (key) {
-        const info = moduleGridMap[key];
-        if (!info) return;
-
-        const rows = info.grid.getData();
-        rows.forEach(function (row) {
-          authList.push({
-            roleId: currentRoleId,
-            moduleId: info.moduleId,
-            menuId: row.menuId,
-            selYn: row.selYn || 'e2',
-            insYn: row.insYn || 'e2',
-            updtYn: row.insYn || 'e2',
-            delYn: row.delYn || 'e2'
-          });
-        });
-      });
-      
-      
-      $.ajax({
-  	    url: '/api/auth/menus/save',
-  	    method: 'POST',
-  	    contentType: 'application/json',
-  	    data: JSON.stringify(authList)
-  	  }).done(function (res) {
-  	    const mode  = res && res.mode;           // "insert" or "update"
-  	    const count = (res && res.count) || 0;
-
-  	    let msg;
-  	    if (mode === 'insert') {
-  	    /* (count || authList.length) + '건의  */	
-  	      msg = '권한이 저장되었습니다.';
-  	    } else if (mode === 'update') {
-  	      msg = '권한이 수정되었습니다.';
-  	    } else {
-  	      msg = '권한이 저장되었습니다.';
-  	    }
-
-  	    alert(msg);
-  	    loadAllAuthGrids(currentRoleId);
-  	  }).fail(function (xhr) {
-          const res = xhr.responseJSON;
-          const msg = (res && res.message) ? res.message : '권한 저장 중 오류가 발생했습니다.';
-          alert(msg);
-
-       	  // 실패 시에도 해당 역할 기준으로 DB 롤백
-          if (currentRoleId) {
-            loadAllAuthGrids(currentRoleId);
-          } else if (selectedRole && selectedRole.roleId) {
-            loadAllAuthGrids(selectedRole.roleId);
-          } else {
-            loadAllAuthGrids(null);
-          }
-        });
-    });
+	  // 1) 좌측 그리드 편집 종료
+	  roleGrid.finishEditing();
+	
+	  // 2) 현재 선택된 행이 있는지
+	  if (currentRoleRowKey == null) {
+	    alert('먼저 좌측에서 역할을 선택해 주세요.');
+	    return;
+	  }
+	
+	  const selectedRole = roleGrid.getRow(currentRoleRowKey);
+	
+	  // 3) 신규 행인데 아직 저장 안 된 경우
+	  if (!selectedRole || !selectedRole.roleId) {
+	    alert('새로 추가한 역할입니다.\n먼저 좌측 역할 정보를 저장한 뒤 권한을 저장해 주세요.');
+	    return;
+	  }
+	
+	  // 🔹 vend_id 없는 시스템 역할 → 선택된 역할의 DB 값으로 롤백
+	  if (!selectedRole.vendId) {
+	    alert('이 역할은 권한을 수정할 수 없습니다.');
+	    loadAllAuthGrids(selectedRole.roleId);   // ★ null 말고 이 역할 기준
+	    return;
+	  }
+	
+	  // 4) 여기까지 왔으면 DB에 있는 역할
+	  currentRoleId = selectedRole.roleId;
+	
+	  authGridHr.finishEditing();
+	  authGridSales.finishEditing();
+	  authGridCommon.finishEditing();
+	
+	  const authList = [];
+	
+	  ['hr', 'sales', 'common'].forEach(function (key) {
+	    const info = moduleGridMap[key];
+	    if (!info) return;
+	
+	    const rows = info.grid.getData();
+	    rows.forEach(function (row) {
+	      authList.push({
+	        roleId: currentRoleId,
+	        moduleId: info.moduleId,
+	        menuId: row.menuId,
+	        selYn: row.selYn || 'e2',
+	        insYn: row.insYn || 'e2',
+	        updtYn: row.insYn || 'e2',
+	        delYn: row.delYn || 'e2'
+	      });
+	    });
+	  });
+	
+	  $.ajax({
+	    url: '/api/auth/menus/save',
+	    method: 'POST',
+	    contentType: 'application/json',
+	    data: JSON.stringify(authList)
+	  }).done(function (res) {
+	    const mode  = res && res.mode;
+	    const count = (res && res.count) || 0;
+	
+	    let msg;
+	    if (mode === 'insert') {
+	      msg = '권한이 저장되었습니다.';
+	    } else if (mode === 'update') {
+	      msg = '권한이 수정되었습니다.';
+	    } else {
+	      msg = '권한이 저장되었습니다.';
+	    }
+	
+	    alert(msg);
+	    loadAllAuthGrids(currentRoleId);   // 정상 저장 시도 이 역할 기준
+	  }).fail(function (xhr) {
+	    const res = xhr.responseJSON;
+	    const msg = (res && res.message) ? res.message : '권한 저장 중 오류가 발생했습니다.';
+	    alert(msg);
+	
+	    // 🔹 실패(권한 없음 포함) 시에도 선택된 역할 기준으로 롤백
+	    if (selectedRole && selectedRole.roleId) {
+	      loadAllAuthGrids(selectedRole.roleId);
+	    }
+	  });
+	});
     
     // 창 크기 변경 시 레이아웃 보정
     window.addEventListener('resize', function () {
