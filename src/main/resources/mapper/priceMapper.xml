@@ -9,7 +9,7 @@
 	           p.price_policy_id AS priceId
 	         , p.vend_id AS vendId
 	         , p.price_policy_name AS priceName
-	         , p.price_ty AS type
+	         , p.price_ty AS priceType
 	         , p.basis_dc_rate AS percent
 	         , p.applc_begin_dt AS beginDt
 	         , p.applc_end_dt AS endDt
@@ -113,18 +113,14 @@
 	</delete>
 	
 	
-	<!-- 고객사모달 저장버튼 이벤트 -->
-	<!-- ===================================================== -->
+	<!-- ===========================고객사모달============================= -->
     <!-- detail 삭제 -->
-    <!-- ===================================================== -->
     <delete id="deletePriceDetail">
         DELETE FROM tb_price_detail
         WHERE price_policy_id = #{priceId}
     </delete>
 
-    <!-- ===================================================== -->
     <!-- detail insert (고객사만 저장) -->
-    <!-- ===================================================== -->
     <insert id="insertPriceDetail">
         INSERT INTO tb_price_detail (
             price_detail_no,
@@ -150,17 +146,61 @@
         )
     </insert>
 
-    <!-- ===================================================== -->
     <!-- detail 조회 (checkbox 자동 체크용) -->
-    <!-- ===================================================== -->
-    <select id="selectPriceDetail" resultType="map">
-        SELECT 
-            custcom_id as custcomId
-        FROM tb_price_detail
-        WHERE price_policy_id = #{priceId}
-    </select>
+    <select id="selectPricePolicyDetail" parameterType="String" resultType="map">
+	    SELECT 
+	        custcom_id AS "custcomId"
+	    FROM tb_price_detail
+	    WHERE price_policy_id = #{priceId}
+	</select>
+	
+	
+	<!-- ===============================상품모달============================== -->
+	<select id="selectProductList" parameterType="String" resultType="map">
+	    SELECT 
+	        product_id AS "productId",
+	        product_name AS "productName",
+	        unit,
+	        basis_sale_amt AS "basisSaleAmt"
+	    FROM tb_product
+	    WHERE 1 = 1
+	      <if test="_parameter != null and _parameter != ''">
+	          AND product_name LIKE '%' || #{_parameter} || '%'
+	      </if>
+	    ORDER BY product_name
+	</select>
+	
+	
+	<select id="selectPricePolicyProduct" parameterType="String" resultType="map">
+	    SELECT product_id AS "productId"
+	    FROM tb_price_detail
+	    WHERE price_policy_id = #{priceId}
+	      AND product_id IS NOT NULL
+	</select>
 	
 
+	<delete id="deletePriceProductDetail" parameterType="String">
+	    DELETE FROM tb_price_detail
+	    WHERE price_policy_id = #{priceId}
+	      AND product_id IS NOT NULL
+	</delete>
 
+	<insert id="insertPriceProductDetail" parameterType="map">
+	    INSERT INTO tb_price_detail (
+	        price_policy_id,
+	        price_detail_no,
+	        product_id,
+	        applc_start_dt,
+	        applc_end_dt,
+	        dc_rate
+	    ) VALUES (
+	        #{priceId},
+	        SEQ_PRICE_DETAIL.NEXTVAL,
+	        #{productId},
+	        #{applcStartDt},
+	        #{applcEndDt},
+	        #{dcRate}
+	    )
+	</insert>
 
 </mapper>

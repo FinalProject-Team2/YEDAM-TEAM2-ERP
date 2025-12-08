@@ -21,4 +21,13 @@ public interface PriceService {
     int savePricePolicyDetail(PriceVO vo);
 
     List<Map<String, Object>> selectPricePolicyDetail(String priceId);
+    
+    
+    // 상품모달 조회
+    List<Map<String, Object>> selectProductList(String productName);
+    
+    // 상품모달 저장 이벤트
+    List<Map<String, Object>> selectPricePolicyProduct(String priceId);
+
+    int savePricePolicyProduct(PriceVO vo);
 }
