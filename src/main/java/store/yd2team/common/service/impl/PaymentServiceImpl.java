@@ -34,8 +34,8 @@ public class PaymentServiceImpl implements PaymentService {
 		// 2) 세션에서 로그인 사용자 정보 가져오기
 		String vendId = LoginSession.getVendId();
 		String empId = LoginSession.getEmpId();
-		if (vendId == null || empId == null) {
-			throw new IllegalStateException("로그인 세션 정보(vendId/empId)가 없습니다.");
+		if (vendId == null) {
+			throw new IllegalStateException("로그인 세션 정보(vendId)가 없습니다.");
 		}
 		
 		// 3) subsp_id 채번: subsp_YYYYMM + 3자리 시퀀스
