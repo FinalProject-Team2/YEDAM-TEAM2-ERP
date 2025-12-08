@@ -1,6 +1,8 @@
 package store.yd2team.business.service;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -23,6 +25,9 @@ public class PriceVO {
     private String creaBy;
     private String updtBy;
     
+ // 다건 디테일 목록 (VO 분리 안 할 때)
+    private List<Map<String, Object>> detailList;
+    
     
     // 조회조건
     private String searchPriceName; 
@@ -30,4 +35,8 @@ public class PriceVO {
     private String searchType;
     // 적용일 검색(특정 날짜 1개로 BETWEEN 조건)
     private String searchApplcDt;
+    
+    // 고객사모달 저장된 고객사 선택
+    private String custcomId;
+    private String custcomName;
 }

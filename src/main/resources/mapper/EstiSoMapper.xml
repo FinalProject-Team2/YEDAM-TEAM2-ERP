@@ -347,6 +347,7 @@
 	<!-- 주문서 헤더 조회 -->
 	<select id="selectSoHeaderList" parameterType="store.yd2team.business.service.EstiSoVO" resultType="store.yd2team.business.service.EstiSoVO">
 	    SELECT
+	        'h' AS header,
 	        so.so_id,
 	        c.custcom_name,
 	        c.psch,
@@ -355,9 +356,10 @@
 	        so.due_dt,
 	        so.tt_supply_price AS ttSupplyAmt,
 	        so.tt_so_qy AS ttSoQy,
-	        so.progrs_st,
+	        so.progrs_st AS progrsSt,
 	        code.code_id,
-	        code.code_nm
+	        code.code_nm,
+	        so.st_resn AS stResn
 	    FROM tb_so so
 	    JOIN tb_custcom c
 	      ON so.custcom_id = c.custcom_id
@@ -429,4 +431,23 @@
         SET progras_st = 'es2'
         WHERE so_id = #{soId}
     </update>
+    
+    
+    <!-- 주문 보류 처리 -->
+	<update id="updateRejectStatus">
+	    UPDATE tb_so
+	       SET progrs_st = 'es5',
+	           st_resn = #{reason},
+	           updt_dt = SYSDATE
+	     WHERE so_id = #{soId}
+	</update>
+	
+	<!-- 주문 취소 처리 -->
+	<update id="updateCancelStatus">
+	    UPDATE tb_so
+	       SET progrs_st = 'es9',   -- 취소 상태
+	           st_resn = #{reason},
+	           updt_dt = SYSDATE
+	     WHERE so_id = #{soId}
+	</update>
 </mapper>

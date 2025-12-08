@@ -228,7 +228,7 @@
 
 <script>
 	// 0. 단가정책유형 공통코드 매핑
-	const priceTypeMap = {}; // { p1: '거래처별', p2: '품목별' }
+	const priceTypeMap = {}; // { p1: '고객사별', p2: '품목별' }
 
 	
 	// 공통코드(단가정책유형) 로딩 + select 채우기 + map 만들기
@@ -243,7 +243,7 @@
 	                data.forEach(item => {
 	                    const opt = document.createElement('option');
 	                    opt.value = item.codeId;       // p1, p2
-	                    opt.textContent = item.codeNm; // 거래처별, 품목별
+	                    opt.textContent = item.codeNm; // 고객사별, 품목별
 	                    select.appendChild(opt);
 	                });
 	            });
@@ -341,13 +341,13 @@
             },
             {
            	  header: '고객사선택',
-           	  name: 'clientSelect',
+           	  name: 'custcomSelect',
            	  width: 120,
            	  align: 'center',
            	  formatter: ({ row }) => {
            	    // row.type 이 p1일 때만 활성 버튼
            	    const disabled = row.type === 'p1' ? '' : 'disabled style="opacity:0.5;cursor:not-allowed;"';
-           	    return `<button class="grid-btn open-client-modal-btn" ${disabled}>거래처선택</button>`;
+           	    return `<button class="grid-btn open-client-modal-btn" ${disabled}>고객사선택</button>`;
            	  }
            	},
            	{
@@ -386,7 +386,7 @@
     // 6. 행 클릭 시 폼에 데이터 세팅
    	priceGrid.on('click', ev => {
     		
-      // 버튼(거래처설정/품목설정) 클릭은 무시
+      // 버튼(고객사설정/품목설정) 클릭은 무시
       if (ev.columnName === 'clientSetting' || ev.columnName === 'itemSetting') {
         return;
       }
@@ -417,7 +417,7 @@
     
     // 7. 모달 호출 버튼
     
-    // 7-1 거래처 선택 모달
+    // 7-1 고객사 선택 모달
 	const openBtn = document.getElementById("custcomBtn");
 	const modal   = document.getElementById("custcomModal");
 	const back    = document.getElementById("custcomBackdrop");
@@ -461,7 +461,7 @@
 	    // 바깥 버튼과 동일하게 모달 열기
 	    openCustcomModal();
 	  }
-	}); // end 거래처모달
+	}); // end 고객사모달
 	
 
 	// 7-2 상품 선택 모달
@@ -679,7 +679,7 @@
 	    document.getElementById('formPriceType').value = "";
 	}
 	
-// ---------------------------- 거래처 모달 스크립트
+// ---------------------------- 고객사 모달 스크립트
 	//1. 그리드 생성
 	window.custcomGrid = null;
 
@@ -696,6 +696,7 @@
 	    bodyHeight: 350,
 	    rowHeaders: ['checkbox'],
 	    columns: [
+	      { header: '고객사ID', name: 'custcomId', hidden: true },
 	      { header: '고객사명', name: 'custcomName', width: 200 },
 	      { header: '담당자', name: 'psch', width: 120 },
 	      { header: '연락처', name: 'pschTel', width: 140 },
@@ -704,7 +705,7 @@
 	  });
 	}
 
-	// 2. 조회버튼 거래처 조회
+	// 2. 조회버튼 고객사 조회
 	document.getElementById('searchCustcomBtn').addEventListener('click', () => {
 	  const keyword = document.getElementById('custcomName').value;
 	
@@ -718,18 +719,53 @@
 	    .catch(err => console.error('고객사 조회 오류:', err));
 	});
 
-	// 3. 입력버튼 거래처 입력
+	
+	// 3. 고객사모달 저장버튼
+	
+	// 선택한 고객사 정보 가져오는 함수
+	function getSelectedCustcomList() {
+	  if (!window.custcomGrid) return [];
+	
+	  const checked = window.custcomGrid.getCheckedRows();
+	
+	  return checked.map(row => ({
+	    custcomId: row.custcomId,   // 실제 컬럼명
+	    custcomName: row.custcomName
+	  }));
+	}
+	
+	// 고객사모달 저장버튼 이벤트
 	document.getElementById('insertCustcomBtn').addEventListener('click', () => {
-	  const checkedRows = window.custcomGrid.getCheckedRows();  // window 사용
 
-	  if (!checkedRows.length) {
-	    alert("선택된 거래처가 없습니다.");
-	    return;
-	  }
-
-	  console.log("선택된 거래처 목록:", checkedRows);
-
-	  bootstrap.Modal.getInstance(document.getElementById('custcomModal')).hide();
+	  // 1) 기본 헤더 값
+	  const payload = {
+	    priceId: priceForm.priceId.value,
+	    priceName: priceForm.priceName.value,
+	    type: priceForm.priceType.value,
+	    percent: priceForm.percent.value,
+	    beginDt: priceForm.beginDt.value,
+	    endDt: priceForm.endDt.value,
+	    rm: priceForm.rm.value,
+	
+	    // 2) 고객사 선택 목록 추가
+	    detailList: getSelectedCustcomList()
+	  };
+	
+	  axios.post('/price/policy/save', payload)
+	    .then(res => {
+	      if (res.data.result === 'success') {
+	        alert('저장 완료');
+	
+	        document.getElementById('btnInsertInit').click();
+	        reloadPriceGrid();
+	      } else {
+	        alert(res.data.message || '저장 실패');
+	      }
+	    })
+	    .catch(err => {
+	      console.error('저장 오류: ', err);
+	      alert('저장 중 오류 발생');
+	    });
 	});
 	
 	
@@ -758,7 +794,7 @@
 	  });
 	}
 
-	// 2. 조회버튼 거래처 조회
+	// 2. 조회버튼 고객사 조회
 	document.getElementById('searchProductBtn').addEventListener('click', () => {
 	  const keyword = document.getElementById('productName').value;
 	
@@ -772,7 +808,7 @@
 	    .catch(err => console.error('상품 조회 오류:', err));
 	});
 
-	// 3. 입력버튼 거래처 입력
+	// 3. 상품모달 저장버튼
 	document.getElementById('insertProductBtn').addEventListener('click', () => {
 	  const checkedRows = window.productGrid.getCheckedRows();  // window 사용
 

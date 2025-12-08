@@ -49,6 +49,8 @@ public class EstiSoVO {
     // 공통
     private String creaBy;         // 등록자
     private String updtBy;         // 수정자
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate updtDt;
 
     // 상세 리스트
     private List<EstiSoDetailVO> detailList;
@@ -71,5 +73,7 @@ public class EstiSoVO {
     
     private String codeId;
     private String codeNm;
+    
+    private String header;
 }
 
