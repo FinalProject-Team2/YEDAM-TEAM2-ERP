@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.common.mapper.AuthManageMapper">
+
+	<select id="selectRoleList">
+        SELECT
+            r.role_id,
+            r.vend_id,
+            r.role_nm,
+            r.role_ty,
+            r.role_dc,
+            r.yn,
+            r.crea_by,
+            r.updt_by
+        FROM tb_role r
+        WHERE 1 = 1
+          <if test="vendId != null and vendId != ''">
+            AND (r.vend_id = #{vendId} OR r.vend_id IS NULL)
+          </if>
+          <if test="roleNm != null and roleNm != ''">
+            AND r.role_nm LIKE '%' || #{roleNm} || '%'
+          </if>
+          <if test="roleTy != null and roleTy != ''">
+            AND r.role_ty = #{roleTy}
+          </if>
+          <if test="useYn != null and useYn != ''">
+            AND r.yn = #{useYn}
+          </if>
+        ORDER BY r.role_nm
+    </select>
+    
+    <select id="selectMenuAuthByRoleAndModule">
+	    SELECT
+	        m.menu_id,
+	        m.vend_id,
+	        m.menu_nm,
+	        m.menu_url,
+	        m.module_id,
+	        m.prnt_menu_id,
+	        m.sort_ord,
+	        a.role_id  AS role_id,
+	        a.vend_id  AS auth_vend_id,
+	        NVL(a.sel_yn,  'e2') AS sel_yn,
+	        NVL(a.ins_yn,  'e2') AS ins_yn,
+	        NVL(a.updt_yn, 'e2') AS updt_yn,
+	        NVL(a.del_yn,  'e2') AS del_yn
+	    FROM tb_menu m
+	    LEFT JOIN tb_auth a
+	      ON a.menu_id = m.menu_id
+	     AND a.role_id = #{roleId}
+	     <if test="vendId != null and vendId != ''">
+	       AND a.vend_id = #{vendId}
+	     </if>
+	    WHERE 1 = 1
+	      <if test="vendId != null and vendId != ''">
+	        AND (m.vend_id = #{vendId} OR m.vend_id IS NULL)
+	      </if>
+	      <if test="moduleId != null and moduleId != ''">
+	        AND m.module_id = #{moduleId}
+	      </if>
+	      AND NVL(m.yn, 'e1') = 'e1'
+	    ORDER BY m.sort_ord, m.menu_id
+	</select>
+    
+    <update id="mergeMenuAuth">
+      <selectKey keyProperty="authId" resultType="string" order="BEFORE">
+	      <![CDATA[
+	      SELECT 'auth'
+	             || TO_CHAR(SYSDATE, 'YYYYMM')
+	             || LPAD(
+	                  NVL(MAX(TO_NUMBER(SUBSTR(auth_id, -3))), 0) + 1,
+	                   3,
+	                  '0'
+	              )
+	       FROM tb_auth
+	      WHERE auth_id LIKE 'auth' || TO_CHAR(SYSDATE, 'YYYYMM') || '%'
+	        ]]>
+	  </selectKey>
+	    MERGE INTO tb_auth a
+	    USING (
+	        SELECT
+	            #{vendId} AS vend_id,
+	            #{roleId} AS role_id,
+	            #{item.menuId} AS menu_id
+	        FROM dual
+	    ) s
+	    ON (
+	            a.vend_id = s.vend_id
+	        AND a.role_id = s.role_id
+	        AND a.menu_id = s.menu_id
+	    )
+	    WHEN MATCHED THEN
+	        UPDATE SET
+	            sel_yn  = #{item.selYn},
+	            ins_yn  = #{item.insYn},
+	            updt_yn = #{item.updtYn},
+	            del_yn  = #{item.delYn},
+	            updt_dt = SYSDATE,
+	            updt_by = #{empId}
+	    WHEN NOT MATCHED THEN
+	        INSERT (
+	        	auth_id,
+	            vend_id,
+	            role_id,
+	            menu_id,
+	            sel_yn,
+	            ins_yn,
+	            updt_yn,
+	            del_yn,
+	            crea_dt,
+	            crea_by,
+	            updt_dt,
+	            updt_by
+	        )
+	        VALUES (
+	            #{authId},
+	            #{vendId},
+	            #{roleId},
+	            #{item.menuId},
+	            #{item.selYn},
+	            #{item.insYn},
+	            #{item.updtYn},
+	            #{item.delYn},
+	            SYSDATE,
+	            #{empId},
+	            SYSDATE,
+	            #{empId}
+	        )
+	</update>
+	
+	<insert id="insertRole">
+		<selectKey keyProperty="roleId" resultType="string" order="BEFORE">
+	        <![CDATA[
+	        SELECT 'role'
+	               || TO_CHAR(SYSDATE, 'YYYYMM')
+	               || LPAD(
+	                    NVL(MAX(TO_NUMBER(SUBSTR(role_id, -3))), 0) + 1,
+	                    3,
+	                    '0'
+	                  )
+	          FROM tb_role
+	         WHERE role_id LIKE 'role' || TO_CHAR(SYSDATE, 'YYYYMM') || '%'
+	        ]]>
+	    </selectKey>
+	
+	    INSERT INTO tb_role (
+	        role_id,
+	        vend_id,
+	        role_nm,
+	        role_ty,
+	        role_dc,
+	        yn,
+	        crea_dt,
+	        crea_by,
+	        updt_dt,
+	        updt_by
+	    ) VALUES (
+	        #{roleId},
+	        #{vendId},
+	        #{roleNm},
+	        #{roleTy},
+	        #{roleDc},
+	        #{yn},
+	        SYSDATE,
+	        #{creaBy},   
+	        SYSDATE,
+	        #{updtBy}  
+	    )
+	</insert>
+	
+	<update id="updateRole">
+	    UPDATE tb_role
+	       SET role_nm = #{roleNm},
+	           role_ty = #{roleTy},
+	           role_dc = #{roleDc},
+	           yn      = #{yn},
+	           updt_dt = SYSDATE,
+	           updt_by = #{updtBy}   
+	     WHERE role_id = #{roleId}
+	       AND vend_id = #{vendId}  
+	</update>
+	
+	<select id="countAuthByRole" resultType="int">
+	    SELECT COUNT(*)
+	    FROM tb_auth
+	    WHERE vend_id = #{vendId}
+	      AND role_id = #{roleId}
+	</select>
+	
+		
+</mapper>

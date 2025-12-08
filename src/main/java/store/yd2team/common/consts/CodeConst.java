@@ -31,6 +31,14 @@ public final class CodeConst {
         private TimeoutAction() {}
     }
     
+    // === 모듈 유형 구분 (grp_id = 'd' ) ===
+    public static final class ModuleType {
+    	public static final String GRP_ID        = "d";  // 모듈 유형
+    	public static final String INSA          = "d1"; // 인사
+    	public static final String COMMON        = "d2"; // 공통
+    	public static final String BUSI          = "d3"; // 영업
+    }
+    
     // 인스턴스 생성 방지
     private CodeConst() {} 
 	
