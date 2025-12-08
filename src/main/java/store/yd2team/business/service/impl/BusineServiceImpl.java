@@ -15,6 +15,7 @@ import store.yd2team.business.mapper.BusinessMapper;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ContactVO;
+import store.yd2team.business.service.LeadVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.PublicDataResponse;
@@ -27,8 +28,10 @@ public class BusineServiceImpl implements BusinessService {
 	
    private final BusinessMapper businessMapper;
    private final AiService aiService;
+   
    @Value("${publicdata.service-key}")
-   private String encodedServiceKey;  // 지금은 안 쓰고 하드코딩 중
+   private String encodedServiceKey;
+   
    @Override
    public List<BusinessVO> getList() {
        return businessMapper.getList();
@@ -121,17 +124,19 @@ public class BusineServiceImpl implements BusinessService {
        return list;
    }
   
-// 임시 구현: 나중에는 로그인한 회사 정보(세션/DB)에서 업종을 가져오도록 수정
+   // 임시 구현: 나중에는 로그인한 회사 정보(세션/DB)에서 업종을 가져오도록 수정
    private String getLoginCompanyIndustry() {
    	String biz = LoginSession.getBizcnd();
        return biz;
    }
-	//잠재고객기준상세목록조회
+   //
+   //
+   //잠재고객기준상세목록조회
 	@Override
 	 public List<PotentialStdrVO> getStdrDetailAll() {
        return businessMapper.getStdrDetailAll();
    }
-	//잠재고객기준상세목록수정
+   //잠재고객기준상세목록수정
    public void saveAll(List<BusinessVO> list) {
        if (list == null) return;
        for (BusinessVO vo : list) {
@@ -199,32 +204,69 @@ public class BusineServiceImpl implements BusinessService {
     public List<ContactVO> getContactListByVend(String vendId) {
         return businessMapper.selectContactListByVend(vendId);
     }
+	//
+	//
+	// 접촉내역 저장
+    @Override
+    @Transactional
+    public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> list) {
 
-	 @Override
-	    @Transactional
-	    public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> list) {
+        // 1) 해당 거래처 기존 접촉내역 전체 삭제
+    	//businessMapper.deleteContactsByVend(vendId);
 
-	        // 1) 해당 거래처 기존 접촉내역 전체 삭제
-		 businessMapper.deleteContactsByVend(vendId);
+        // 2) 새로 전부 INSERT
+        if (list == null) return;
 
-	        // 2) 새로 전부 INSERT
-	        if (list == null) return;
+        for (ContactVO row : list) {
+            row.setVendId(vendId);
+            row.setPotentialInfoNo(potentialInfoNo);
 
-	        for (ContactVO row : list) {
-	            // 완전 빈 행은 스킵
-	            if ((row.getContactDt() == null || row.getContactDt().isBlank())
-	             && (row.getContactManager() == null || row.getContactManager().isBlank())
-	             && (row.getContactWay() == null || row.getContactWay().isBlank())
-	             && (row.getContactCntn() == null || row.getContactCntn().isBlank())) {
-	                continue;
-	            }
+			if( row.getContactNo() == null  || row.getContactNo().equals("") ) {
+				businessMapper.insertContact(row);
+			}
+			else {   
+				businessMapper.updateContact(row);
+			}
+            
+        }
+    }
+	//리드내역 조회 및 저장
+	@Override
+	public List<LeadVO> selectLeadListByVend(String vendId) {
+		return selectLeadListByVend(vendId);
+	}
 
-	            row.setVendId(vendId);
-	            row.setPotentialInfoNo(potentialInfoNo);
+	@Override
+	public void saveAllLead(String vendId, Integer potentialInfoNo, List<LeadVO> list) {
+		
+	    // 1) 해당 거래처 기존 접촉내역 전체 삭제
+		// businessMapper.deleteContactsByVend(vendId);
 
-	            businessMapper.insertContact(row);
-	        }
-	    }
+        // 2) 새로 전부 INSERT
+        if (list == null) return;
+
+        for (LeadVO row : list) {
+//            // 완전 빈 행은 스킵
+//            if ((row.getLeadDt() == null || row.getLeadDt().isBlank())
+//             && (row.getLeadManager() == null || row.getLeadManager().isBlank())
+//             && (row.getRequiredDt() == null || row.getRequiredDt().isBlank())
+//             && (row.getCompetitorYn() == null || row.getContactCntn().isBlank())) {
+//            	&& (row.getContactCntn() == null || row.getContactCntn().isBlank())) {
+//                continue;
+//            }
+            row.setVendId(vendId);
+            row.setPotentialInfoNo(potentialInfoNo);
+			if( row.getLeadNo()  == null  || row.getLeadNo().equals("") ) {
+				businessMapper.insertLead(row);
+			}
+			else {   
+				businessMapper.updateLead(row);
+				
+			}
+        }
+    }
+	
 }
+
 
 

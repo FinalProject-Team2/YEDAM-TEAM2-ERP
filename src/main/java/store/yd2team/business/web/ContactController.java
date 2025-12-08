@@ -42,4 +42,29 @@ public class ContactController {
 
         return "OK";
     }
+    
+//    // 거래처ID(vend_id) 기준 리드내역 조회 (AJAX)
+//    @GetMapping("/salesActivity/contactByVend")
+//    public List<ContactVO> getLeadListByVend(@RequestParam("vendId") String vendId) {
+//        System.out.println("=== contactByVend 호출, vendId = " + vendId + " ===");
+//        return businessService.getContactListByVend(vendId);
+//    }
+//    
+//    // 접촉내역 전체 저장 (삭제 후 다시 INSERT 방식)
+//    @PostMapping("/salesActivity/contact/saveAll")
+//    public String saveAllLead(@RequestBody ContactSaveRequest req) {
+//
+//        System.out.println("=== saveAllContacts 호출 ===");
+//        System.out.println("vendId = " + req.getVendId()
+//                         + ", potentialInfoNo = " + req.getPotentialInfoNo());
+//
+//        businessService.saveAll(
+//            req.getVendId(),
+//            req.getPotentialInfoNo(),
+//            req.getContactList()
+//        );
+//
+//        return "OK";
+//    }
+    
 }

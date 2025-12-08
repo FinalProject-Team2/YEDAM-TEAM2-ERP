@@ -10,7 +10,7 @@ public class ContactVO {
     private Integer contactNo;           // 접촉ID (PK)
     private Integer potentialInfoNo;     // 잠재정보번호 (FK)
     private String vendId;               // 거래처 ID
-    private String contactDt;              // 접촉날짜
+    private String contactDt;            // 접촉날짜
     private String contactManager;       // 담당자
     private String contactWay;           // 접촉방법
     private String contactCntn;          // 접촉내용

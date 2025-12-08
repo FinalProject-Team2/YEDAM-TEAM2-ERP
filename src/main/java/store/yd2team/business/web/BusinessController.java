@@ -102,7 +102,9 @@ public class BusinessController {
 	@GetMapping("/potentialCustList")
 	public String list(Model model) {
 		System.out.println("=== BusinessController.list() 호출됨 ===");
-		model.addAttribute("list", businessService.getList());
+//		model.addAttribute("list", businessService.getList());
+		model.addAttribute("test", "testone");
+		
 		return "business/potentialCustList";
 	}
 	// 잠재고객검색조회
