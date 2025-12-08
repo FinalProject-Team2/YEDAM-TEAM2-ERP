@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import store.yd2team.business.service.AtmptService;
-import store.yd2team.business.service.AtmptVO;          // 미수채권(그리드) VO
+import store.yd2team.business.service.AtmptVO;
 
 @Controller
 @RequestMapping("/atmpt")
@@ -22,9 +22,7 @@ public class AtmptController {
 
     private final AtmptService atmptService;
 
-    /**
-     * 미수채권관리 메인 화면
-     */
+    // 상세미수관리 메인 화면
     @GetMapping("/atmptMain")
     public String atmptMain(Model model) {
         // 필요 시 공통코드/콤보 데이터 모델에 담아서 내려주기
@@ -44,59 +42,10 @@ public class AtmptController {
         return atmptService.searchCustcomName(keyword);
     }
 
-    /* 미수채권 목록 조회 (/atmpt/list)
-     * - 검색조건: 고객코드, 고객사, 담당자, 기간(fromDt, toDt) 등을 AtmptVO에 포함
-     * - 결과: 그리드에 뿌릴 미수/입출금 내역 리스트
-     */
+    // 미수상세조회
     @PostMapping("/list")
     @ResponseBody
     public List<AtmptVO> getAtmptList(@RequestBody AtmptVO searchVO) {
         return atmptService.searchAtmpt(searchVO);
     }
-
-    /**
-     * 입금처리 저장 (/atmpt/depositSave)
-     * - tb_atmpt_detail 에 INSERT
-     * - 필요 시 tb_atmpt의 ATMPT_BLCE(잔액) 갱신
-     */
-/*
-    @PostMapping("/depositSave")
-    @ResponseBody
-    public Map<String, Object> saveDeposit(@RequestBody DepositVO vo) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            int cnt = atmptService.saveDeposit(vo);
-            result.put("result", "success");
-            result.put("count", cnt);
-            result.put("message", "입금처리가 저장되었습니다.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "입금처리 저장 중 오류가 발생했습니다: " + e.getMessage());
-        }
-        return result;
-    }
-*/
-    /**
-     * 연체관리이력 저장 (/atmpt/delaySave)
-     * - tb_dely_mvg_hist 에 INSERT
-     */
-/*
-    @PostMapping("/delaySave")
-    @ResponseBody
-    public Map<String, Object> saveDelayHistory(@RequestBody DelayHistVO vo) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            int cnt = atmptService.saveDelayHistory(vo);
-            result.put("result", "success");
-            result.put("count", cnt);
-            result.put("message", "연체관리이력이 저장되었습니다.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "연체관리이력 저장 중 오류가 발생했습니다: " + e.getMessage());
-        }
-        return result;
-    }
-*/
-}
+}    

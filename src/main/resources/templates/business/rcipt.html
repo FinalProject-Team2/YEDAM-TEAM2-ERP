@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+<title>채권관리</title>
+<style>
+.form-select {
+	color: #000 !important;
+}
+</style>
+</head>
+<body layout:fragment="content">
+	<div class="row">
+		<!-- 검색조건 -->
+		<div class="col-md-12">
+			<div class="card mb-3">
+				<div class="card-header">
+					<h5 class="card-title">검색조건</h5>
+					<div class="card-header-right">
+						<button type="button" class="btn btn-dark" id="searchInitBtn">초기화</button>
+						<button class="btn btn-outline-dark" id="searchBtn">조회</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-3">
+							<label for="custcomId" class="form-label">고객사코드</label>
+							<input id="custcomId" type="text" class="form-control">
+						</div>
+						<div class="col-md-3">
+							<label for="custcomName" class="form-label">고객사명</label>
+							<select id="custcomName" class="form-control">
+								<option>전체</option>
+								<option>무신사</option>
+								<option>29cm</option>
+							</select>
+						</div>
+						<div class="col-md-2">
+							<label class="form-label">담당자</label>
+							<select id="psch" class="form-control">
+								<option>전체</option>
+								<option>논개</option>
+								<option>구론산</option>
+							</select>
+						</div>
+						<div class="col-md-4">
+							<label class="form-label">기간</label>
+								<div class="d-flex align-items-center js-date-range">
+
+									<!-- 시작일 -->
+									<div class="input-group date">
+										<input type="text"
+											class="form-control datepicker js-date-range-start"
+											placeholder="시작일"> <span
+											class="input-group-text js-date-range-icon-start"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+
+									<span class="mx-1 fw-bold fs-5">~</span>
+
+									<!-- 종료일 -->
+									<div class="input-group date ms-2">
+										<input type="text"
+											class="form-control datepicker js-date-range-end"
+											placeholder="종료일"> <span
+											class="input-group-text js-date-range-icon-end"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- 사원목록 -->
+			<div class="card">
+				<div class="card-header">
+					<h5 class="card-title">입출금관리</h5>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark" id="openRciptTretModal">입금처리</button>
+						<button id="addRowBtn" class="btn btn-outline-dark">행추가</button>
+						<button type="button" class="btn btn-dark">초기화</button>
+						<button class="btn btn-outline-dark" id="openRciptTretModal">저장</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div id="grid"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:replace="business/modal/rciptTretModal :: rciptTretModal"></div>
+	<div th:replace="business/modal/delayModal :: delayModal"></div>
+	
+<script>
+	let searchForm = {
+			custcomId: "",
+		    custcomName: "",
+		    psch: "",
+		    startDt: "",
+		    endDt: ""
+	};
+
+    const gridData = [];
+    
+    
+        // Grid 생성
+        const grid = new tui.Grid({
+            el: document.getElementById('grid'),
+            bodyHeight: 360,
+            data: gridData,
+            scrollX: true,
+            scrollY: true,
+            minBodyHeight: 0,
+            autoWidth: true,
+            columns: [
+            	  { header: '고객코드', name: 'custcomId', align: 'center' },
+            	  { header: '고객사', name: 'custcomName', align: 'center' },
+            	  { header: '거래일자', name: 'trnsDate' },
+            	  { header: '매출내역', name: 'saleCtnt', align: 'right' },
+            	  { header: '매출금액', name: 'salAmt', editor: 'text' },
+            	  { header: '대출금액', name: 'borwAmt', editor: 'text' },
+            	  { header: '원금잔액', name: 'prinsumBaln', align: 'right', editor: 'text' },
+            	  { header: '입금약속액', name: 'rciptAppoAmt', editor: 'text' },
+            	  { header: '입금약속일', name: 'rciptAppoDt' },
+            	  { header: '최근납입일', name: 'ltstRciptDt' },
+            	]
+        });
+        
+// =============== 버튼 이벤트
+	// 2-1. 초기화 버튼 이벤트
+	document.getElementById("searchInitBtn").addEventListener("click", function () {
+	
+	    // 1) searchForm 객체 초기화
+	    searchForm = {
+			custcomId: "",
+		    custcomName: "",
+		    psch: "",
+		    startDt: "",
+		    endDt: ""
+	    };
+	
+	    // 2) 화면 Input 값 초기화
+	    document.querySelector("#custcomId").value = "";
+	    document.querySelector("#custcomName").value = "";
+	    document.querySelector("#psch").value = "";
+	    document.querySelector(".js-date-range-start").value = "";
+	    document.querySelector(".js-date-range-end").value = "";
+	
+	    // datepicker 를 쓰는 경우 UI 리프레시
+	    $('.js-date-range-start').datepicker('update', '');
+	    $('.js-date-range-end').datepicker('update', '');
+	
+	    console.log("검색조건 초기화:", searchForm);
+	});
+
+	// 2-2. 조회 버튼 이벤트
+	document.getElementById("searchBtn").addEventListener("click", function () {
+	
+	    // 1) 화면 입력값 → searchForm 에 세팅
+	    searchForm.custcomId = document.querySelector("#custcomId").value.trim();
+	    searchForm.custcomName = document.querySelector("#custcomName").value.trim();
+	    searchForm.psch = document.querySelector("#psch").value.trim();
+	    searchForm.startDt = document.querySelector(".js-date-range-start").value;
+	    searchForm.endDt = document.querySelector(".js-date-range-end").value;
+	
+	    console.log("보낼 searchForm >>> ", searchForm);
+	
+	    // 2) 백엔드 조회 요청 (POST /esti/list)
+	    axios.post("/rcipt/list", searchForm)
+	        .then(res => {
+	            console.log("조회결과 >>> ", res.data);
+	
+	            // 3) 그리드 데이터 반영
+	            grid.resetData(res.data);
+	        })
+	        .catch(err => console.error("조회 중 오류:", err));
+	});
+        
+        
+        
+        
+
+        //행추가버튼
+        const addRowBtn = document.getElementById('addRowBtn');
+
+        addRowBtn.addEventListener('click', () => {
+            // 1) 최상단에 빈 행 추가
+            const { rowKey } = grid.prependRow(
+                {
+                	custcomId: '',
+            		custcomName: '',
+            		trnsDate: '',
+            		saleCtnt: '',
+            		salAmt: '',
+            		borwAmt: '',
+            		prinsumBaln: '',
+            		rciptAppoAmt: '',
+            		rciptAppoDt: '',
+            		ltstRciptDt: ''
+                },
+                { focus: true }      // 새로 추가된 행에 포커스 옵션
+            );
+
+            // 2) 특정 컬럼부터 바로 편집하고 싶으면
+            grid.focus(rowKey, 'custcomId');    
+            grid.startEditing(rowKey, 'custcomName');
+        });
+
+        
+        
+        
+        
+        
+        
+    	// 입금처리 모달창
+        const openRciptTretBtn = document.getElementById("openRciptTretModal");
+        const rciptTretModal = document.getElementById("rciptTretModal");
+        const rciptTretModalClose = document.getElementById("rciptTretModalClose");
+        const rciptTretBackdrop = document.getElementById("rciptTretBackdrop");
+
+        // 입금처리 열기
+        openRciptTretBtn.addEventListener("click", () => {
+        rciptTretModal.classList.add("show");
+        rciptTretModal.style.display = "block";
+        rciptTretBackdrop.style.display = "block";
+        document.body.classList.add("modal-open");
+        });
+        
+       	// 연체이력관리 모달창
+        const openDelayBtn = document.getElementById("openDelayModal");
+        const DelayModal = document.getElementById("delayModal");
+        const DelayModalClose = document.getElementById("delayModalClose");
+        const DelayModalBackdrop = document.getElementById("delayModalBackdrop");
+
+        // 연체이력관리 열기
+        openDelayBtn.addEventListener("click", () => {
+        delayModal.classList.add("show");
+        delayModal.style.display = "block";
+        delayModalBackdrop.style.display = "block";
+        document.body.classList.add("modal-open");
+        });
+        
+        
+    </script>
+</body>
+</html>
