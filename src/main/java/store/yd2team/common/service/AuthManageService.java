@@ -28,4 +28,6 @@ public interface AuthManageService {
 		              RoleSaveRequest req);
 	
 	List<MenuAuthDto> getMenuAuthList(String vendId, String roleId, String moduleId);
+	
+	List<RoleVO> getRoleNameSuggestList(String vendId, String keyword);
 }

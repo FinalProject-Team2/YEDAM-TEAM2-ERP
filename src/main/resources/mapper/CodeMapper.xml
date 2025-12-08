@@ -43,6 +43,7 @@
         FROM   tb_code
         WHERE  grp_id  = #{grpId}
         AND    code_nm = #{codeNm}
+        AND    (vend_id = #{vendId} OR vend_id IS NULL)
         <if test="codeId != null and codeId != ''">
           AND code_id != #{codeId}
         </if>
@@ -105,7 +106,8 @@
             updt_dt = SYSDATE,
             updt_by = #{updtBy}
      WHERE  grp_id  = #{grpId}
-     AND    code_id = #{codeId}   
+     AND    code_id = #{codeId} 
+     AND    vend_id = #{vendId}  
     </update>
 	
 </mapper>

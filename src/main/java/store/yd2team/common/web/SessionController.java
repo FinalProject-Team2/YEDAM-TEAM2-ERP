@@ -55,32 +55,46 @@ public class SessionController {
 
         // 4) 실제 서버 세션 타임아웃 연장 (초 단위)
         session.setMaxInactiveInterval(timeoutMin * 60);
-
+        
+        long lastAccessed = session.getLastAccessedTime();     // ms
+        int maxInactiveSec = session.getMaxInactiveInterval(); // sec
+        long expireAtMs = lastAccessed + (maxInactiveSec * 1000L);
+        long serverNowMs = System.currentTimeMillis();
+        
         log.info("세션 연장: sessionId={}, vendId={}, loginId={}, timeout={}분",
                 session.getId(), loginEmp.getVendId(), loginEmp.getLoginId(), timeoutMin);
 
         // 프론트 쪽에서 timeoutMin 다시 받아서 타이머 재설정 가능하게 응답
-        return ExtendSessionResponse.ok(timeoutMin);
+        return ExtendSessionResponse.ok(timeoutMin, expireAtMs, serverNowMs);
     }
 
     /**
      * 세션 연장 응답 DTO (record)
      */
     public record ExtendSessionResponse(
-            boolean success,
-            String code,      // ★ 응답 코드 (OK, SESSION_EXPIRED 등)
-            String message,   // ★ 사용자에게 보여줄 메시지
-            Integer timeoutMin
+    		boolean success,
+            String code,
+            String message,
+            Integer timeoutMin,
+            Long expireAtMs,
+            Long serverNowMs
     ) {
 
-        // ★ 정상 연장
-        public static ExtendSessionResponse ok(Integer timeoutMin) {
-            return new ExtendSessionResponse(true, "OK", "세션이 연장되었습니다.", timeoutMin);
+    	// 정상 연장
+        public static ExtendSessionResponse ok(Integer timeoutMin,
+                                               long expireAtMs,
+                                               long serverNowMs) {
+            return new ExtendSessionResponse(true, "OK",
+                    "세션이 연장되었습니다.",
+                    timeoutMin,
+                    expireAtMs,
+                    serverNowMs);
         }
 
-        // ★ 실패(코드 + 메시지)
+        // 실패
         public static ExtendSessionResponse fail(String code, String message) {
-            return new ExtendSessionResponse(false, code, message, null);
+            return new ExtendSessionResponse(false, code, message,
+                    null, null, null);
         }
     }
 }

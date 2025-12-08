@@ -29,8 +29,12 @@ public class CodeController {
 
 	// 공통 코드 목록 조회
 	@PostMapping("/code/codeId")
-	public List<CodeVO> commonCode(@RequestBody CodeVO grpId) {
-		return codeService.findCode(grpId);
+	public List<CodeVO> commonCode(@RequestBody CodeVO vo) {
+		
+		String vendId = LoginSession.getVendId();
+		vo.setVendId(vendId);
+		
+		return codeService.findCode(vo);
 	}
 
 	// 자동 완성
@@ -52,6 +56,13 @@ public class CodeController {
 	    vo.setVendId(vendId);  
 	    vo.setCreaBy(empId);    
 		
+	    if (vendId == null || vendId.isBlank()) {
+	        return CodeRegResponseDto.fail(
+	            "현재 계정에는 업체 정보가 없어 코드 등록이 불가능합니다.\n" +
+	            "관리자에게 문의해 주세요."
+	        );
+	    }
+	    
 		String chkId = vo.getGrpId();
 
 		int chk = codeService.regYn(chkId);
@@ -69,41 +80,57 @@ public class CodeController {
 		
 		// 중복 or 실패(데이터 무결성 catch)
 		if (result == 0) {
-			return CodeRegResponseDto.fail("코드 등록 중 오류가 발생했습니다.");
+			return CodeRegResponseDto.fail(
+				"시스템 오류로 코드 등록에 실패했습니다.\n" +
+			    "잠시 후 다시 시도하거나 관리자에게 문의해 주세요."
+			);
 		}
 
 		// 성공 (vo.getCodeId() 에 값 세팅해두었다고 가정)
 		return CodeRegResponseDto.ok(vo.getCodeId());
 	}
 	
-	// 공통 코드 수정
 	@PostMapping("/code/modCode")
 	public CodeRegResponseDto modifyCode(@RequestBody CodeVO vo) {
 
-	    // grpId / codeId 둘 다 들어왔는지 최소 체크
+	    // 0. 필수 값 체크 (grpId / codeId)
 	    if (vo.getGrpId() == null || vo.getCodeId() == null) {
 	        return CodeRegResponseDto.fail("그룹 ID 또는 코드 ID가 없습니다.");
 	    }
-	    
+
+	    // 1. 세션의 vendId / empId 조회
 	    String vendId = LoginSession.getVendId();
 	    String empId  = LoginSession.getEmpId();
+
+	    // 1-1. 업체 정보가 없는 계정은 수정 자체를 막기
+	    if (vendId == null || vendId.isBlank()) {
+	        return CodeRegResponseDto.fail(
+	            "현재 계정에는 업체 정보가 없어 코드 수정이 불가능합니다.\n" +
+	            "관리자에게 문의해 주세요."
+	        );
+	    }
 
 	    vo.setVendId(vendId);
 	    vo.setUpdtBy(empId);
 
+	    // 2. 실제 수정 처리
 	    int result = codeService.modifyCode(vo);
-	    
+
 	    if (result == -1) {
 	        // 코드명 중복
 	        return CodeRegResponseDto.fail("이미 존재하는 코드 명입니다.");
 	    }
-	    
+
 	    if (result == 0) {
-	        // WHERE 조건에 해당하는 행이 없을 때 (이미 삭제됐거나 잘못된 ID)
-	        return CodeRegResponseDto.fail("수정할 코드가 없습니다.");
+	        // 0: WHERE 조건에 맞는 행이 없거나(삭제/다른 업체 코드 등)
+	        //    또는 DB 제약 오류 등으로 실패한 경우
+	        return CodeRegResponseDto.fail(
+	            "수정할 코드가 없거나 수정 권한이 없습니다.\n" +
+	            "문제가 계속되면 관리자에게 문의해 주세요."
+	        );
 	    }
 
-	    // 성공
+	    // 3. 성공
 	    return CodeRegResponseDto.ok(vo.getCodeId());
 	}
 

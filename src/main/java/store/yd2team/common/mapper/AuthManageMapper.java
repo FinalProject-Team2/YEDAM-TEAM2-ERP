@@ -33,4 +33,9 @@ public interface AuthManageMapper {
     
     int countAuthByRole(@Param("vendId") String vendId,
             			@Param("roleId") String roleId);
+    
+    List<RoleVO> selectRoleNameSuggestList(
+            @Param("vendId") String vendId,
+            @Param("keyword") String keyword
+    );
 }

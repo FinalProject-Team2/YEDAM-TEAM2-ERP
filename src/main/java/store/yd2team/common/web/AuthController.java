@@ -111,4 +111,17 @@ public class AuthController {
         res.put("updatedCount", result.getUpdatedCount());
         return res;
     }
+    
+    @GetMapping("/roles/nameSuggest")
+    public List<RoleVO> suggestRoleNames(
+            @RequestParam("keyword") String keyword,
+            HttpSession session
+    ) {
+        SessionDto login = getLoginEmp(session);
+        String vendId = login.getVendId();
+
+        log.debug("GET /api/auth/roles/name-suggest vendId={}, keyword={}", vendId, keyword);
+
+        return authManageService.getRoleNameSuggestList(vendId, keyword);
+    }
 }

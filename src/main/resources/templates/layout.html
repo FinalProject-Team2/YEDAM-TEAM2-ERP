@@ -49,7 +49,8 @@
 	<!-- teamUtil.js -->
 	<script src="/assets/js/teamUtil.js"></script>
 	<!-- 정재민 비밀번호 변경 모달 js -->
-	<script src="/assets/js/pwChangeModal.js"></script>
+	<script th:if="${session.LOGIN_EMP != null}"
+        src="/assets/js/pwChangeModal.js"></script>
 
     <!-- ✅ 로고 사이즈만 조정하는 CSS 추가 -->
     <style>
@@ -91,7 +92,7 @@
             </li>
           </ul>
           <ul class="navbar-nav ms-auto">
-            <li class="nav-item d-flex align-items-center gap-2">
+            <li class="nav-item d-flex align-items-center gap-2" th:if="${session.LOGIN_EMP != null}">
 			  <span id="session-remaining-badge"
 			        class="btn btn-outline-primary btn-sm disabled"
 			        style="cursor: default; pointer-events: none;">
@@ -200,8 +201,8 @@
                 </div>
                 <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile <span class="badge badge-pill badge-danger">1</span></a>
                 <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"></i> Messages</a>
-                <a class="dropdown-item" id="pwChangeMenuItem"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> 비밀번호 변경</a>
-                <a class="dropdown-item" id="logoutMenuItem"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i> 로그 아웃</a>
+                <a class="dropdown-item" id="pwChangeMenuItem" th:if="${session.LOGIN_EMP != null}"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> 비밀번호 변경</a>
+                <a class="dropdown-item" id="logoutMenuItem" th:if="${session.LOGIN_EMP != null}"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i> 로그 아웃</a>
               </div>
             </li>
           </ul>
@@ -362,8 +363,10 @@
       <!-- page-body-wrapper ends -->
 
     
-    <div th:replace="~{common/modal/pwChangeModal :: pwChangeModal}"></div>
-    <div th:replace="~{common/modal/sessionTimeoutModal :: sessionTimeoutModal}"></div>
+    <div th:if="${session.LOGIN_EMP != null}"
+     th:replace="~{common/modal/pwChangeModal :: pwChangeModal}"></div>
+	<div th:if="${session.LOGIN_EMP != null}"
+	     th:replace="~{common/modal/sessionTimeoutModal :: sessionTimeoutModal}"></div>
     <!-- container-scroller -->
     <!-- plugins:js -->
 
@@ -389,11 +392,21 @@
 	<!-- 세션 정책 값을 JS 전역 변수로 노출 -->
 	<script th:inline="javascript">
 	/*<![CDATA[*/
+	  // 로그인된 화면에서만 true 로 내려옴
+	  window.SESSION_TIMER_ENABLED =
+	      /*[[${SESSION_TIMER_ENABLED} ?: false]]*/ false;
+	
 	  window.SESSION_TIMEOUT_MIN =
-	      /*[[${session.SESSION_TIMEOUT_MIN} ?: 0]]*/ 0;
+	      /*[[${SESSION_TIMEOUT_MIN} ?: 0]]*/ 0;
 	
 	  window.SESSION_TIMEOUT_ACTION =
-	      /*[[${session.SESSION_TIMEOUT_ACTION} ?: 't1']]*/ 't1';
+	      /*[[${SESSION_TIMEOUT_ACTION} ?: 't1']]*/ 't1';
+	
+	  window.SESSION_EXPIRE_AT =
+	      /*[[${SESSION_EXPIRE_AT} ?: 0]]*/ 0;
+	
+	  window.SERVER_NOW_MS =
+	      /*[[${SERVER_NOW_MS} ?: 0]]*/ 0;
 	/*]]>*/
 	</script>
 	
