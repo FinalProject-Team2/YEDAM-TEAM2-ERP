@@ -6,6 +6,11 @@
 <head>
     <meta charset="UTF-8">
     <title>allowDuc</title>
+
+    <!-- Toast UI Grid -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css"/>
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
     <style>
         /* ===========================
          * 탭 스타일 (입체감 / 그림자 버전)
@@ -14,6 +19,7 @@
             display: flex;
             gap: 0;
             margin-bottom: 0;
+            border-bottom: none !important;
         }
 
         .nav-tabs .nav-item {
@@ -28,7 +34,7 @@
             font-weight: 500;
             border: 1px solid #d1d5db;
             border-bottom-color: #d1d5db;
-            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.03);
+            box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.03);
             transition: background-color 0.15s ease,
                         color 0.15s ease,
                         box-shadow 0.15s ease;
@@ -49,7 +55,7 @@
             font-weight: 600;
             border-color: #d1d5db;
             border-bottom-color: #ffffff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
             z-index: 2;
         }
 
@@ -65,10 +71,6 @@
 
         .card-body > .mt-3 {
             margin-top: 0 !important;
-        }
-
-        .nav-tabs {
-            border-bottom: none !important;
         }
     </style>
 </head>
@@ -119,16 +121,17 @@
     </div>
 </div>
 
-<div th:replace="insa/modal/guideModal :: guideModal"></div>
+<!-- 계산식 / 토큰 설명용 가이드 모달 -->
+<div th:replace="~{insa/modal/guideModal :: guideModal}"></div>
 
 <script>
     /* =====================================================
-     * 1. Grid 옵션
+     * 1. Grid 공통 옵션
      * ===================================================== */
     const GridOptions = {
         bodyHeight: 580,
         scrollX: false,
-        scrollY: false,
+        scrollY: true,   // 세로 스크롤바 표시
         rowHeaders: ['checkbox'],
         columnOptions: {
             minWidth: 80,
@@ -137,93 +140,87 @@
     };
 
     /* =====================================================
-     * 2. 더미 데이터
-     * ===================================================== */
-    const allowGridData = [
-        { allowId: 'ALW001', allowNm: '기본급',     dispNo: 1,  calFmlt: 'FIXED',          calMthd: '정액',     yn: 'Y' },
-        { allowId: 'ALW002', allowNm: '직책수당',   dispNo: 2,  calFmlt: 'FIXED',          calMthd: '정액',     yn: 'Y' },
-        { allowId: 'ALW003', allowNm: '연장수당',   dispNo: 3,  calFmlt: 'WORK_HOUR*1.5',  calMthd: '근태연동', yn: 'Y' },
-        { allowId: 'ALW004', allowNm: '야간수당',   dispNo: 4,  calFmlt: 'WORK_HOUR*2',    calMthd: '근태연동', yn: 'Y' },
-        { allowId: 'ALW005', allowNm: '휴일수당',   dispNo: 5,  calFmlt: 'WORK_HOUR*1.5',  calMthd: '근태연동', yn: 'Y' },
-        { allowId: 'ALW006', allowNm: '성과급',     dispNo: 6,  calFmlt: 'BASIC_PAY*0.1',  calMthd: '비율',     yn: 'Y' },
-        { allowId: 'ALW007', allowNm: '식대',       dispNo: 7,  calFmlt: 'FIXED',          calMthd: '정액',     yn: 'Y' },
-        { allowId: 'ALW008', allowNm: '교통비',     dispNo: 8,  calFmlt: 'FIXED',          calMthd: '정액',     yn: 'N' },
-        { allowId: 'ALW009', allowNm: '자격수당',   dispNo: 9,  calFmlt: 'FIXED',          calMthd: '정액',     yn: 'Y' },
-        { allowId: 'ALW010', allowNm: '특별보너스', dispNo: 10, calFmlt: 'MANUAL',         calMthd: '수기입력', yn: 'Y' }
-    ];
-
-    const ducGridData = [
-        { ducId: 'DUC006', ducNm: '노조비',     dispNo: 6,  calFmlt: 'FIXED',       calMthd: '정액',     yn: 'N' },
-        { ducId: 'DUC007', ducNm: '상조회비',   dispNo: 7,  calFmlt: 'FIXED',       calMthd: '정액',     yn: 'Y' },
-        { ducId: 'DUC008', ducNm: '대출상환금', dispNo: 8,  calFmlt: 'FIXED',       calMthd: '정액',     yn: 'Y' },
-        { ducId: 'DUC009', ducNm: '식대공제',   dispNo: 9,  calFmlt: 'FIXED',       calMthd: '정액',     yn: 'N' },
-        { ducId: 'DUC010', ducNm: '기타공제',   dispNo: 10, calFmlt: 'MANUAL',      calMthd: '수기입력', yn: 'Y' }
-    ];
-
-    /* =====================================================
-     * 3. Grid 생성
+     * 2. 그리드 생성
      * ===================================================== */
     const allowGrid = new tui.Grid({
         el: document.getElementById('gridAllow'),
-        data: allowGridData,
+        data: [],
         ...GridOptions,
         editingType: 'cell',
         columns: [
-            { header: '수당ID',   name: 'allowId' },
-            { header: '수당명',   name: 'allowNm', editor: 'text' },
-            { header: '표시번호', name: 'dispNo',  editor: 'text' },
-            { header: '계산식',   name: 'calFmlt', editor: 'text' },
-            { header: '산출방법', name: 'calMthd', editor: 'text' },
+            {header: '수당ID', name: 'allowId', width: 110, align: 'center'},
+            {header: '수당명', name: 'allowNm', editor: 'text'},
+            {
+                header: '표시번호',
+                name: 'dispNo',
+                width: 80,
+                align: 'center',
+                editor: 'text'
+            },
+            {header: '계산식', name: 'calFmlt', editor: 'text'},
+            {header: '산출방법', name: 'calMthd', width: 400, editor: 'text'},
             {
                 header: '사용여부',
-                name: 'yn',
+                name: 'ynCode',
+                width: 90,
+                align: 'center',
                 editor: {
                     type: 'select',
                     options: {
                         listItems: [
-                            { text: '사용', value: 'Y' },
-                            { text: '미사용', value: 'N' }
+                            {text: '사용', value: 'e1'},
+                            {text: '미사용', value: 'e2'}
                         ]
                     }
-                }
+                },
+                formatter: ({value}) => value === 'e1' ? '사용' : '미사용'
             }
         ]
     });
 
     const ducGrid = new tui.Grid({
         el: document.getElementById('gridDuc'),
-        data: ducGridData,
+        data: [],
         ...GridOptions,
         editingType: 'cell',
         columns: [
-            { header: '공제ID',   name: 'ducId' },
-            { header: '공제명',   name: 'ducNm',  editor: 'text' },
-            { header: '표시번호', name: 'dispNo', editor: 'text' },
-            { header: '계산식',   name: 'calFmlt', editor: 'text' },
-            { header: '산출방법', name: 'calMthd', editor: 'text' },
+            {header: '공제ID', name: 'ducId', width: 110, align: 'center'},
+            {header: '공제명', name: 'ducNm', editor: 'text'},
+            {
+                header: '표시번호',
+                name: 'dispNo',
+                width: 80,
+                align: 'center',
+                editor: 'text'
+            },
+            {header: '계산식', name: 'calFmlt', editor: 'text'},
+            {header: '산출방법', name: 'calMthd', width: 400, editor: 'text'},
             {
                 header: '사용여부',
-                name: 'yn',
+                name: 'ynCode',
+                width: 90,
+                align: 'center',
                 editor: {
                     type: 'select',
                     options: {
                         listItems: [
-                            { text: '사용', value: 'Y' },
-                            { text: '미사용', value: 'N' }
+                            {text: '사용', value: 'e1'},
+                            {text: '미사용', value: 'e2'}
                         ]
                     }
-                }
+                },
+                formatter: ({value}) => value === 'e1' ? '사용' : '미사용'
             }
         ]
     });
 
     /* =====================================================
-     * 4. 탭 전환
+     * 3. 탭 전환
      * ===================================================== */
     const tabButtons = document.querySelectorAll('#allowDucTab .nav-link');
     const tabPanes = {
         '#tab-allow': document.getElementById('tab-allow'),
-        '#tab-duc':   document.getElementById('tab-duc')
+        '#tab-duc': document.getElementById('tab-duc')
     };
 
     tabButtons.forEach(btn => {
@@ -250,67 +247,26 @@
     });
 
     /* =====================================================
-     * 5. 모달
+     * 4. 현재 활성 탭의 Grid 반환
      * ===================================================== */
-    const openBtn = document.getElementById('openGuideModal');
-    const modal   = document.getElementById('guideModal');
-    const back    = document.getElementById('guideBackdrop');
+    function getActiveGrid() {
+        const activeTabBtn = document.querySelector('#allowDucTab .nav-link.active');
+        if (!activeTabBtn) return null;
 
-    function openModal() {
-        if (!modal || !back) return;
-        modal.classList.add('show');
-        modal.style.display = 'block';
-        back.style.display = 'block';
-
-        if (typeof grid2 !== 'undefined' && grid2 && grid2.refreshLayout) {
-            grid2.refreshLayout();
-        }
+        const target = activeTabBtn.getAttribute('data-target');
+        if (target === '#tab-allow') return {grid: allowGrid, type: 'ALLOW'};
+        if (target === '#tab-duc') return {grid: ducGrid, type: 'DUC'};
+        return null;
     }
-
-    if (openBtn) {
-        openBtn.addEventListener('click', openModal);
-    }
-
-    /* ✅ 모달 닫기 공통 함수 + 이벤트 */
-    function closeGuideModal() {
-        if (modal) {
-            modal.classList.remove('show');
-            modal.style.display = 'none';
-        }
-        if (back) {
-            back.style.display = 'none';
-        }
-    }
-
-    // 배경 클릭 시 닫기
-    if (back) {
-        back.addEventListener('click', closeGuideModal);
-    }
-
-    // 모달 바깥 영역 클릭 시 닫기
-    if (modal) {
-        modal.addEventListener('click', function (e) {
-            if (!e.target.closest('.modal-content')) {
-                closeGuideModal();
-            }
-        });
-    }
-
-    // ESC 키로 닫기
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-            closeGuideModal();
-        }
-    });
 
     /* =====================================================
-     * 6. 공통 유틸: 전체 행(rowKey/dispNo + 전체 row 데이터) 가져오기
+     * 5. 표시번호 관련 유틸
      * ===================================================== */
     function getAllRowInfos(grid) {
         const count = grid.getRowCount();
         const infos = [];
         for (let i = 0; i < count; i++) {
-            const row = grid.getRowAt(i);   // { rowKey, dispNo, ... }
+            const row = grid.getRowAt(i);
             infos.push({
                 rowKey: row.rowKey,
                 dispNo: parseInt(row.dispNo, 10),
@@ -320,22 +276,6 @@
         return infos;
     }
 
-    /* =====================================================
-     * 7. 활성 탭의 Grid
-     * ===================================================== */
-    function getActiveGrid() {
-        const activeTabBtn = document.querySelector('#allowDucTab .nav-link.active');
-        if (!activeTabBtn) return null;
-
-        const target = activeTabBtn.getAttribute('data-target');
-        if (target === '#tab-allow') return { grid: allowGrid, type: 'ALLOW' };
-        if (target === '#tab-duc')   return { grid: ducGrid,   type: 'DUC' };
-        return null;
-    }
-
-    /* =====================================================
-     * 8. 다음 표시번호 (마지막 + 1)
-     * ===================================================== */
     function getNextDispNo(grid) {
         const rows = getAllRowInfos(grid);
         if (rows.length === 0) return 1;
@@ -349,13 +289,9 @@
         return maxNo + 1;
     }
 
-    /* =====================================================
-     * 9. 표시번호 기준으로 전체 재정렬 + 1..N으로 재번호
-     * ===================================================== */
     function rebuildByDispNo(grid) {
         const infos = getAllRowInfos(grid);
 
-        // dispNo 기준 정렬
         infos.sort((a, b) => {
             const av = isNaN(a.dispNo) ? 9999 : a.dispNo;
             const bv = isNaN(b.dispNo) ? 9999 : b.dispNo;
@@ -363,102 +299,16 @@
             return av - bv;
         });
 
-        // 정렬 순서대로 1..N 재부여
         const newData = infos.map((info, idx) => ({
             ...info.rowData,
             dispNo: idx + 1
         }));
 
+        // resetData 때문에 getModifiedRows는 안 쓰고,
+        // 전체 데이터를 기준으로 payload 를 구성한다.
         grid.resetData(newData);
     }
 
-    /* =====================================================
-     * 10. 행추가 (표시번호 자동 세팅 → 이후 전체 재정렬)
-     * ===================================================== */
-    const btnRowAdd = document.getElementById('btnRowAdd');
-
-    if (btnRowAdd) {
-        btnRowAdd.addEventListener('click', () => {
-            const active = getActiveGrid();
-            if (!active) return;
-
-            const { grid, type } = active;
-            const nextDispNo = getNextDispNo(grid);
-
-            if (type === 'ALLOW') {
-                grid.prependRow(
-                    {
-                        allowId: '',
-                        allowNm: '',
-                        dispNo: nextDispNo,
-                        calFmlt: '',
-                        calMthd: '',
-                        yn: 'Y'
-                    },
-                    { focus: true }
-                );
-            } else if (type === 'DUC') {
-                grid.prependRow(
-                    {
-                        ducId: '',
-                        ducNm: '',
-                        dispNo: nextDispNo,
-                        calFmlt: '',
-                        calMthd: '',
-                        yn: 'Y'
-                    },
-                    { focus: true }
-                );
-            }
-
-            rebuildByDispNo(grid);
-        });
-    }
-
-    /* =====================================================
-     * 11. 선택 삭제
-     * ===================================================== */
-    const btnRowDel = document.getElementById('btnRowDel');
-
-    if (btnRowDel) {
-        btnRowDel.addEventListener('click', () => {
-            const active = getActiveGrid();
-            if (!active) return;
-
-            const { grid } = active;
-            const count = grid.getRowCount();
-            const toRemove = [];
-
-            for (let i = 0; i < count; i++) {
-                const row = grid.getRowAt(i);
-                if (row._attributes && row._attributes.checked) {
-                    toRemove.push(row.rowKey);
-                }
-            }
-            grid.removeRows(toRemove);
-
-            rebuildByDispNo(grid);
-        });
-    }
-
-    /* =====================================================
-     * 12. 저장 (콘솔)
-     * ===================================================== */
-    const btnSave = document.getElementById('btnSave');
-
-    if (btnSave) {
-        btnSave.addEventListener('click', () => {
-            const allowModified = allowGrid.getModifiedRows();
-            const ducModified   = ducGrid.getModifiedRows();
-
-            console.log('수당 변경 데이터', allowModified);
-            console.log('공제 변경 데이터', ducModified);
-        });
-    }
-
-    /* =====================================================
-     * 13. 표시번호 변경 시: 새 번호 위치에 끼워 넣고 전체 재정렬
-     * ===================================================== */
     let isDispNoUpdating = false;
 
     function reorderDispNo(grid, changedRowKey, newDispNoRaw) {
@@ -516,10 +366,435 @@
     attachDispNoHandler(ducGrid);
 
     /* =====================================================
-     * 14. 초기에도 한 번 정렬
+     * 6. 삭제된 ID 추적 + 원본 스냅샷
      * ===================================================== */
-    rebuildByDispNo(allowGrid);
-    rebuildByDispNo(ducGrid);
+    let deletedAllowIds = [];
+    let deletedDucIds = [];
+
+    let originalAllowSnapshot = [];
+    let originalDucSnapshot = [];
+
+    /* =====================================================
+     * 7. 행추가 / 삭제
+     * ===================================================== */
+    const btnRowAdd = document.getElementById('btnRowAdd');
+    const btnRowDel = document.getElementById('btnRowDel');
+
+    if (btnRowAdd) {
+        btnRowAdd.addEventListener('click', () => {
+            const active = getActiveGrid();
+            if (!active) return;
+
+            const {grid, type} = active;
+            const nextDispNo = getNextDispNo(grid);
+
+            if (type === 'ALLOW') {
+                grid.prependRow(
+                    {
+                        allowId: '',
+                        allowNm: '',
+                        dispNo: nextDispNo,
+                        calFmlt: '',
+                        calMthd: '',
+                        ynCode: 'e1'
+                    },
+                    {focus: true}
+                );
+            } else if (type === 'DUC') {
+                grid.prependRow(
+                    {
+                        ducId: '',
+                        ducNm: '',
+                        dispNo: nextDispNo,
+                        calFmlt: '',
+                        calMthd: '',
+                        ynCode: 'e1'
+                    },
+                    {focus: true}
+                );
+            }
+
+            rebuildByDispNo(grid);
+        });
+    }
+
+    if (btnRowDel) {
+        btnRowDel.addEventListener('click', () => {
+            const active = getActiveGrid();
+            if (!active) return;
+
+            const {grid, type} = active;
+            const checkedRows = grid.getCheckedRows();
+            const checkedKeys = grid.getCheckedRowKeys();
+
+            checkedRows.forEach(r => {
+                if (type === 'ALLOW' && r.allowId) {
+                    deletedAllowIds.push(r.allowId);
+                } else if (type === 'DUC') {
+                    if (r.ducId) {
+                        deletedDucIds.push(r.ducId);
+                    }
+                }
+            });
+
+            grid.removeRows(checkedKeys);
+            rebuildByDispNo(grid);
+        });
+    }
+
+    /* =====================================================
+     * 8. 서버 데이터 로딩
+     * ===================================================== */
+    function loadAllowList() {
+        fetch('/api/allow/list')
+            .then(res => res.json())
+            .then(list => {
+                const data = (list || []).map(r => ({
+                    allowId: r.allowId,
+                    allowNm: r.allowNm,
+                    dispNo: r.dispNo,
+                    calFmlt: r.calFmlt,
+                    calMthd: r.calMthd,
+                    ynCode: r.ynCode
+                }));
+                allowGrid.resetData(data);
+                rebuildByDispNo(allowGrid);
+                deletedAllowIds = [];
+
+                // ★ 원본 스냅샷 저장 (정규화해서 복사)
+                originalAllowSnapshot = allowGrid.getData().map(row => normAllowRow(row));
+            })
+            .catch(() => {
+                alert('수당 목록 조회 중 오류가 발생했습니다.');
+            });
+    }
+
+    function loadDucList() {
+        fetch('/api/duc/list')
+            .then(res => res.json())
+            .then(list => {
+                const data = (list || []).map(r => ({
+                    ducId: r.ducId,
+                    ducNm: r.ducNm,
+                    dispNo: r.dispNo,
+                    calFmlt: r.calFmlt,
+                    calMthd: r.calMthd,
+                    ynCode: r.ynCode
+                }));
+                ducGrid.resetData(data);
+                rebuildByDispNo(ducGrid);
+                deletedDucIds = [];
+
+                // ★ 원본 스냅샷 저장 (정규화해서 복사)
+                originalDucSnapshot = ducGrid.getData().map(row => normDucRow(row));
+            })
+            .catch(() => {
+                alert('공제 목록 조회 중 오류가 발생했습니다.');
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAllowList();
+        loadDucList();
+    });
+
+    /* =====================================================
+     * 9. 계산식 유효성 체크 (토큰+함수 화이트리스트 방식)
+     *  - 허용 토큰:
+     *      BASEPAY, HOURRATE, WORKTIME, OT, HOLLYDAY, UNPAIDTIME
+     *  - 허용 함수:
+     *      ROUND, TRUNC, FLOOR, CEIL, ABS (필요하면 여기서만 추가)
+     * ===================================================== */
+    function isValidFormula(raw) {
+        if (!raw) return false;
+
+        // 원본 문자열
+        const s = raw.toString().trim();
+        // 대문자로 통일
+        const upper = s.toUpperCase();
+
+        // 특수 키워드
+        if (upper === 'MANUAL' || upper === 'FIXED') {
+            return true;
+        }
+
+        // 1) 허용 문자만 있는지 체크
+        //    영문대문자, 숫자, 언더스코어, + - * / . , ( ) 와 공백만 허용
+        if (!/^[A-Z0-9_\+\-\*\/\.\,\(\)\s]+$/.test(upper)) {
+            return false;
+        }
+
+        // 2) 괄호 짝이 맞는지 체크
+        let bal = 0;
+        for (const ch of upper) {
+            if (ch === '(') bal++;
+            else if (ch === ')') {
+                bal--;
+                if (bal < 0) return false;
+            }
+        }
+        if (bal !== 0) return false;
+
+        // 3) 식 안에 등장하는 "식별자"들만 뽑아서 화이트리스트 체크
+        //    - 식별자 패턴: 알파벳/언더스코어로 시작, 뒤에 알파벳/숫자/언더스코어
+        const identifiers = upper.match(/[A-Z_][A-Z0-9_]*/g) || [];
+
+        // 실제로 허용할 토큰/함수 목록
+        const allowedTokens = [
+            // 토큰 (프로시저에서 치환되는 애들)
+            'BASEPAY',
+            'HOURRATE',
+            'WORKTIME',
+            'OT',
+            'HOLLYDAY',
+            'UNPAIDTIME',
+
+            // 숫자 함수들 (필요한 것만 추가)
+            'ROUND',
+            'TRUNC',
+            'FLOOR',
+            'CEIL',
+            'ABS'
+        ];
+
+        for (const id of identifiers) {
+            // 화이트리스트에 없으면 바로 거절
+            if (!allowedTokens.includes(id)) {
+                return false;
+            }
+        }
+
+        // 여기까지 통과하면 형식적으로는 OK
+        return true;
+    }
+
+
+    /* =====================================================
+     * 10. payload 생성 (스냅샷과 비교해서 변경된 것만 UPDATE)
+     * ===================================================== */
+    function normAllowRow(r) {
+        return {
+            allowId: r.allowId || null,
+            allowNm: (r.allowNm || '').toString().trim(),
+            dispNo: r.dispNo != null ? Number(r.dispNo) : null,
+            calFmlt: (r.calFmlt || '').toString().trim(),
+            calMthd: (r.calMthd || '').toString().trim(),
+            ynCode: r.ynCode || 'e1'
+        };
+    }
+
+    function normDucRow(r) {
+        return {
+            ducId: r.ducId || null,
+            ducNm: (r.ducNm || '').toString().trim(),
+            dispNo: r.dispNo != null ? Number(r.dispNo) : null,
+            calFmlt: (r.calFmlt || '').toString().trim(),
+            calMthd: (r.calMthd || '').toString().trim(),
+            ynCode: r.ynCode || 'e1'
+        };
+    }
+
+    function findOriginalAllow(allowId) {
+        if (!allowId) return null;
+        return originalAllowSnapshot.find(r => r.allowId === allowId) || null;
+    }
+
+    function findOriginalDuc(ducId) {
+        if (!ducId) return null;
+        return originalDucSnapshot.find(r => r.ducId === ducId) || null;
+    }
+
+    function buildPayload(grid, type) {
+        grid.finishEditing();
+        const data = grid.getData();
+
+        let createdRows = [];
+        let updatedRows = [];
+        let deletedRows = [];
+
+        if (type === 'ALLOW') {
+            data.forEach(row => {
+                const n = normAllowRow(row);
+
+                // 새 행 (allowId 없음) → 무조건 created
+                if (!n.allowId) {
+                    createdRows.push(n);
+                    return;
+                }
+
+                const orig = findOriginalAllow(n.allowId);
+
+                // 원본이 없으면 일단 수정된 것으로 간주
+                if (!orig) {
+                    updatedRows.push(n);
+                    return;
+                }
+
+                if (
+                    orig.allowNm !== n.allowNm ||
+                    orig.dispNo   !== n.dispNo   ||
+                    orig.calFmlt  !== n.calFmlt  ||
+                    orig.calMthd  !== n.calMthd  ||
+                    orig.ynCode   !== n.ynCode
+                ) {
+                    updatedRows.push(n);
+                }
+            });
+
+            deletedRows = deletedAllowIds.map(id => ({allowId: id}));
+        } else {
+            data.forEach(row => {
+                const n = normDucRow(row);
+
+                if (!n.ducId) {
+                    createdRows.push(n);
+                    return;
+                }
+
+                const orig = findOriginalDuc(n.ducId);
+
+                if (!orig) {
+                    updatedRows.push(n);
+                    return;
+                }
+
+                if (
+                    orig.ducNm  !== n.ducNm  ||
+                    orig.dispNo !== n.dispNo ||
+                    orig.calFmlt!== n.calFmlt||
+                    orig.calMthd!== n.calMthd||
+                    orig.ynCode !== n.ynCode
+                ) {
+                    updatedRows.push(n);
+                }
+            });
+
+            deletedRows = deletedDucIds.map(id => ({ducId: id}));
+        }
+
+        return {createdRows, updatedRows, deletedRows};
+    }
+
+    /* =====================================================
+     * 11. 저장 버튼 클릭 (★ 전체 행 대상으로 계산식 검증)
+     * ===================================================== */
+    const btnSave = document.getElementById('btnSave');
+
+    if (btnSave) {
+        btnSave.addEventListener('click', () => {
+            const active = getActiveGrid();
+            if (!active) return;
+
+            const {type, grid} = active;
+
+            // ★★★ 편집 중인 셀 값까지 모두 반영 ★★★
+            grid.finishEditing();
+
+            // 1) 그리드 전체 데이터 기준으로 검증
+            const allRowsForCheck = grid.getData().map(row =>
+                type === 'ALLOW' ? normAllowRow(row) : normDucRow(row)
+            );
+
+            const nameLabel = (type === 'ALLOW') ? '수당명' : '공제명';
+
+            for (let i = 0; i < allRowsForCheck.length; i++) {
+                const r = allRowsForCheck[i];
+                const nm = (type === 'ALLOW' ? r.allowNm : r.ducNm) || '';
+                const disp = r.dispNo;
+                const formula = r.calFmlt || '';
+
+                // 완전히 빈 행(이름/계산식 둘 다 없음)은 그냥 스킵하고 싶으면 여기서 continue 걸 수도 있음
+                // if (!nm.trim() && !formula.trim()) continue;
+
+                if (!nm.trim()) {
+                    alert(nameLabel + '을(를) 입력하세요.');
+                    return;
+                }
+                if (disp == null || isNaN(disp)) {
+                    alert('표시번호를 올바르게 입력하세요.');
+                    return;
+                }
+                if (!formula.trim()) {
+                    alert('계산식을 입력하세요.');
+                    return;
+                }
+                if (!isValidFormula(formula)) {
+                    alert('계산식이 올바르지 않습니다.\n예: BASIC_PAY*0.1, WORK_HOUR*1.5, FIXED, MANUAL 등');
+                    return;
+                }
+            }
+
+            // 2) 검증 통과 후에 payload 생성해서 서버로 전송
+            const payload = buildPayload(grid, type);
+            const url = (type === 'ALLOW') ? '/api/allow/save' : '/api/duc/save';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error();
+                    return res.json();
+                })
+                .then(resBody => {
+                    if (resBody.result !== 'SUCCESS') throw new Error();
+                    alert('저장되었습니다.');
+
+                    if (type === 'ALLOW') {
+                        deletedAllowIds = [];
+                        loadAllowList();
+                    } else {
+                        deletedDucIds = [];
+                        loadDucList();
+                    }
+                })
+                .catch(() => {
+                    alert('저장 중 오류가 발생했습니다.');
+                });
+        });
+    }
+
+    /* =====================================================
+     * 12. 가이드 모달 (계산식 설명용)
+     * ===================================================== */
+    const openBtn = document.getElementById('openGuideModal');
+    const modal = document.getElementById('guideModal');
+    const back = document.getElementById('guideBackdrop');
+
+    function openModal() {
+        if (!modal || !back) return;
+        modal.classList.add('show');
+        modal.style.display = 'block';
+        back.style.display = 'block';
+    }
+
+    function closeGuideModal() {
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
+        if (back) {
+            back.style.display = 'none';
+        }
+    }
+
+    openBtn?.addEventListener('click', openModal);
+    back?.addEventListener('click', closeGuideModal);
+
+    if (modal) {
+        modal.addEventListener('click', function (e) {
+            if (!e.target.closest('.modal-content')) {
+                closeGuideModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeGuideModal();
+        }
+    });
 </script>
 </body>
 </html>

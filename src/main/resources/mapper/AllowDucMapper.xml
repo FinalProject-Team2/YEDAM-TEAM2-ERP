@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="store.yd2team.insa.mapper.AllowDucMapper">
+
+    <!-- ===================== 수당 ===================== -->
+    <select id="selectAllowList"
+            parameterType="string"
+            resultType="store.yd2team.insa.service.AllowDucVO">
+        SELECT
+            a.vend_id    AS vendId,
+            a.allow_id   AS allowId,
+            a.allow_nm   AS allowNm,
+            a.grp_no     AS grpNo,
+            a.disp_no    AS dispNo,
+            a.cal_fmlt   AS calFmlt,
+            a.cal_mthd   AS calMthd,
+            a.yn         AS ynCode,
+            a.crea_dt    AS creaDt,
+            a.crea_by    AS creaBy,
+            a.updt_dt    AS updtDt,
+            a.updt_by    AS updtBy
+        FROM tb_allow a
+        WHERE a.vend_id = #{vendId}
+        ORDER BY a.disp_no, a.allow_id
+    </select>
+
+    <!-- 수당 ID 생성 (ALWYYMM001 패턴) -->
+    <select id="selectNewAllowId"
+            parameterType="string"
+            resultType="string">
+        SELECT 'ALW'
+               || TO_CHAR(SYSDATE, 'YYMM')
+               || LPAD(
+                      NVL(
+                          MAX(
+                              TO_NUMBER(SUBSTR(allow_id, LENGTH(allow_id) - 2, 3))
+                          ),
+                          0
+                      ) + 1,
+                      3,
+                      '0'
+                  ) AS allow_id
+        FROM tb_allow
+        WHERE vend_id = #{vendId}
+          AND SUBSTR(allow_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
+    </select>
+
+    <insert id="insertAllow"
+            parameterType="store.yd2team.insa.service.AllowDucVO">
+        INSERT INTO tb_allow (
+            allow_id,
+            grp_no,
+            allow_nm,
+            cal_fmlt,
+            cal_mthd,
+            disp_no,
+            yn,
+            crea_dt,
+            crea_by,
+            vend_id
+        ) VALUES (
+            #{allowId},
+            #{grpNo},
+            #{allowNm},
+            #{calFmlt},
+            #{calMthd},
+            #{dispNo},
+            #{ynCode},
+            SYSDATE,
+            #{creaBy,jdbcType=VARCHAR},
+            #{vendId}
+        )
+    </insert>
+
+    <update id="updateAllow"
+            parameterType="store.yd2team.insa.service.AllowDucVO">
+        UPDATE tb_allow
+           SET allow_nm = #{allowNm},
+               grp_no   = #{grpNo},
+               cal_fmlt = #{calFmlt},
+               cal_mthd = #{calMthd},
+               disp_no  = #{dispNo},
+               yn       = #{ynCode},
+               updt_dt  = SYSDATE,
+               updt_by  = #{updtBy,jdbcType=VARCHAR}
+         WHERE allow_id = #{allowId}
+           AND vend_id  = #{vendId}
+    </update>
+
+    <delete id="deleteAllow">
+        DELETE FROM tb_allow
+         WHERE allow_id = #{allowId}
+           AND vend_id  = #{vendId}
+    </delete>
+
+    <!-- ===================== 공제 ===================== -->
+    <select id="selectDucList"
+            parameterType="string"
+            resultType="store.yd2team.insa.service.AllowDucVO">
+        SELECT
+            d.vend_id    AS vendId,
+            d.duc_id     AS ducId,
+            d.duc_nm     AS ducNm,
+            d.grp_no     AS grpNo,
+            d.disp_no    AS dispNo,
+            d.cal_fmlt   AS calFmlt,
+            d.cal_mthd   AS calMthd,
+            d.yn         AS ynCode,
+            d.crea_dt    AS creaDt,
+            d.crea_by    AS creaBy,
+            d.updt_dt    AS updtDt,
+            d.updt_by    AS updtBy
+        FROM tb_duc d
+        WHERE d.vend_id = #{vendId}
+        ORDER BY d.disp_no, d.duc_id
+    </select>
+
+    <!-- 공제 ID 생성 (DUCYYMM001 패턴) -->
+    <select id="selectNewDucId"
+            parameterType="string"
+            resultType="string">
+        SELECT 'DUC'
+               || TO_CHAR(SYSDATE, 'YYMM')
+               || LPAD(
+                      NVL(
+                          MAX(
+                              TO_NUMBER(SUBSTR(duc_id, LENGTH(duc_id) - 2, 3))
+                          ),
+                          0
+                      ) + 1,
+                      3,
+                      '0'
+                  ) AS duc_id
+        FROM tb_duc
+        WHERE vend_id = #{vendId}
+          AND SUBSTR(duc_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
+    </select>
+
+    <insert id="insertDuc"
+            parameterType="store.yd2team.insa.service.AllowDucVO">
+        INSERT INTO tb_duc (
+            duc_id,
+            grp_no,
+            duc_nm,
+            cal_fmlt,
+            cal_mthd,
+            disp_no,
+            yn,
+            crea_dt,
+            crea_by,
+            vend_id
+        ) VALUES (
+            #{ducId},
+            #{grpNo},
+            #{ducNm},
+            #{calFmlt},
+            #{calMthd},
+            #{dispNo},
+            #{ynCode},
+            SYSDATE,
+            #{creaBy,jdbcType=VARCHAR},
+            #{vendId}
+        )
+    </insert>
+
+    <update id="updateDuc"
+            parameterType="store.yd2team.insa.service.AllowDucVO">
+        UPDATE tb_duc
+           SET duc_nm  = #{ducNm},
+               grp_no  = #{grpNo},
+               cal_fmlt = #{calFmlt},
+               cal_mthd = #{calMthd},
+               disp_no  = #{dispNo},
+               yn       = #{ynCode},
+               updt_dt  = SYSDATE,
+               updt_by  = #{updtBy,jdbcType=VARCHAR}
+         WHERE duc_id  = #{ducId}
+           AND vend_id = #{vendId}
+    </update>
+
+    <delete id="deleteDuc">
+        DELETE FROM tb_duc
+         WHERE duc_id  = #{ducId}
+           AND vend_id = #{vendId}
+    </delete>
+
+</mapper>
