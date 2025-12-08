@@ -8,28 +8,40 @@ FROM    tb_emp
 WHERE   vend_id = #{vendId}
 </select>
 
-<select id="mlssCreateId">
-SELECT 'mlss' || TO_CHAR(SYSDATE, 'YYMM') ||
-       LPAD(NVL(MAX(SUBSTR(mlss_id, LENGTH(mlss_id)-2, 3)), 0) + 1, 3, '0') AS mlss_id
+<insert id="insertMlssHead">
+<selectKey keyProperty="mlssId" order="BEFORE" resultType="String">
+SELECT 'mlss' ||  LPAD(NVL(MAX(SUBSTR(mlss_id, LENGTH(mlss_id)-2, 3)), 0) + 1, 3, '0') AS mlss_id
 FROM tb_mlss
-WHERE SUBSTR(mlss_id, 5, 4) = TO_CHAR(SYSDATE, 'YYMM')
+</selectKey>
+insert into tb_mlss(
+      mlss_id, evl_begin_dt, evl_end_dt, mlss_nm, suprr, crk, self, crea_by 
+    ) VALUES (
+      #{mlssId}, #{evlBeginDt}, #{evlEndDt}, #{mlssNm}, 0, 0, 0, 'myk' )
+</insert>
+
+<select id="mlssCreateId">
+SELECT 'mlss_emp' || TO_CHAR(SYSDATE, 'YYMM') ||
+       LPAD(NVL(MAX(SUBSTR(mlss_emp_id, LENGTH(mlss_emp_id)-2, 3)), 0) + 1, 3, '0') AS mlss_emp_id
+FROM tb_mlss_emp
+WHERE SUBSTR(mlss_emp_id, 9, 4) = TO_CHAR(SYSDATE, 'YYMM')
 </select>
 
 <insert id="insertMlssList">
   INSERT ALL
   <foreach collection="list" item="item">
-    INTO tb_mlss (
-      mlss_id, emp_id, mlss_nm, evl_begin_dt, evl_end_dt, suprr, crk, self, crea_dt, crea_by
+    INTO tb_mlss_emp (
+      mlss_emp_id, emp_id, suprr, crk, self, crea_dt, crea_by, mlss_id
     ) VALUES (
-      #{item.mlssId}, #{item.empId}, #{item.mlssNm}, #{item.evlBeginDt},#{item.evlEndDt}, 0, 0, 0, #{item.creaDt}, 'myk'
+      #{item.mlssEmpId}, #{item.empId}, 0, 0, 0, #{item.creaDt}, 'myk' ,#{item.mlssId}
     )
   </foreach>
   SELECT 1 FROM DUAL
 </insert>
 
 <select id="mlssSearchList">
-SELECT DISTINCT 
- mlss_nm
+SELECT 
+mlss_id
+ ,mlss_nm
  ,evl_begin_dt
  ,evl_end_dt
  ,crea_dt
@@ -46,14 +58,16 @@ FROM    tb_mlss
 
 <select id="mlssDtChk">
 <![CDATA[
-        SELECT mlss_id
+        SELECT mlss_id, mlss_emp_id
 		FROM (
-		    SELECT mlss_id
-		    FROM tb_mlss
+		    SELECT a.mlss_id, a.mlss_emp_id
+		    FROM tb_mlss_emp a 
+		    join tb_mlss b
+		    on a.mlss_id = b.mlss_id
 		    WHERE emp_id = #{empId}
 		      AND evl_begin_dt <= TRUNC(SYSDATE)
 		      AND evl_end_dt >= TRUNC(SYSDATE)
-		    ORDER BY crea_dt DESC
+		    ORDER BY a.crea_dt DESC
 		)
 		WHERE ROWNUM = 1          
     ]]>
@@ -67,34 +81,51 @@ from tb_mlss_iem
 <insert id="mlssWrterRegist">
 INSERT ALL
   <foreach collection="list" item="item">
-    INTO tb_mlss_wrter (mlss_id, mlss_iem_id, emp_id, score, evale_relate, crea_by)
-    VALUES (#{item.mlssId}, #{item.mlssIemId}, #{item.empId}, #{item.score}, #{item.evaleRelate}, 'myk')
+    INTO tb_mlss_wrter (mlss_emp_id, mlss_iem_id, emp_id, score, evale_relate, crea_by)
+    VALUES (#{item.mlssEmpId}, #{item.mlssIemId}, #{item.empId}, #{item.score}, #{item.evaleRelate}, 'myk')
   </foreach>
 SELECT 1 FROM DUAL
 </insert>
 
 <update id="mlssMasterUpdate">
-UPDATE tb_mlss
+UPDATE tb_mlss_emp
 SET
  <if test="self != null">self = #{self}</if>
  <if test="suprr != null">suprr = #{suprr}</if>
  <if test="crk != null">crk = #{crk}</if>
-where mlss_id = #{mlssId}
+where mlss_emp_id = #{mlssEmpId}
 </update>
 
 <select id="mlssEmpList">
+<![CDATA[
 select
- emp_id
- ,nm
- ,clsf
-from tb_emp
-where dept_id = #{deptId}
+ /*피평가자 ID, 피평가자 직급 */ 
+ a.mlss_emp_id
+ ,case when a.emp_id = c.emp_id then  '본인'
+       
+       when c.clsf < b.clsf then '상사'
+       when c.clsf >= b.clsf then '동료'
+       end "evale_relate" 
+ /*평가자 ID, 평가자 직급 */ 
+ ,b.emp_id
+ ,b.nm
+ ,b.clsf
+ from tb_mlss_emp a, tb_emp b, tb_emp c
+where c.emp_id = #{empId}
+and a.emp_id = b.emp_id
+and b.dept_id = #{deptId}
+and a.mlss_id = (select mlss_id
+                 from tb_mlss
+                 where evl_begin_dt <= TRUNC(SYSDATE)
+		      AND evl_end_dt >= TRUNC(SYSDATE)
+              and ROWNUM = 1)]]>
+              
 </select>
 
 <select id="mlssWrterLoadBefore">
 select *
 from tb_mlss_wrter
-where mlss_id = #{mlssId}
+where mlss_emp_id = #{mlssEmpId}
 and emp_id = #{empId}
 </select>
 

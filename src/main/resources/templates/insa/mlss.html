@@ -116,12 +116,12 @@
 						<h5 class="card-title mb-0 me-2" id="collapseToggle">본인 평가</h5>
 						<select id="evaleRelate1" class="form-select form-select-sm w-auto">
 								<th:block th:each="val : ${evaleRelateUpr}">
-									<option class="clsf" th:value="${val.empId}" th:text="${val.nm}"></option>									
+									<option class="clsf" th:value="${val.mlssEmpId}" th:text="${val.nm}"></option>									
 								</th:block>																															
 							</select>													
 						<select id="evaleRelate2" class="form-select form-select-sm w-auto">								
 								<th:block th:each="val : ${evaleRelateLwr}">
-									<option class="clsf" th:value="${val.empId}" th:text="${val.nm}"></option>																	
+									<option class="clsf" th:value="${val.mlssEmpId}" th:text="${val.nm}"></option>																	
 								</th:block>																								
 							</select>													
 					</div>
@@ -189,10 +189,10 @@
 	<script th:inline="javascript">	
 	$("#evaleRelate1").hide();
 	$("#evaleRelate2").hide();
+	let mlssEmpId ="";
 function chTitle(el) {
 	 // div 안의 텍스트 가져오기 (아이콘 제외)
 	const text = $(el).text().trim();
-
     if (text === "결과지 확인") {
         $("#mlssUser").addClass("stIsShow");
         $("#mlssResult").removeClass("stIsShow");
@@ -205,18 +205,39 @@ function chTitle(el) {
     $("#collapseToggle").text(text);    
     if ($("#collapseToggle").text() == "상사 평가") {
         $("#evaleRelate1").show();        
-        $("#evaleRelate2").hide();        
+        $("#evaleRelate2").hide();   
+        mlssEmpId = $("#evaleRelate1").val();
     } else if($("#collapseToggle").text() == "동료 평가"){
     	$("#evaleRelate1").hide();    	
-    	$("#evaleRelate2").show();    	
+    	$("#evaleRelate2").show();   
+    	empId = $("#evaleRelate2").val();
     } else {
     	$("#evaleRelate1").hide();
     	$("#evaleRelate2").hide();
+    	mlssEmpId = [[${empId}]];    	
     }
     
-    $(".clsf").each(function(el) {
-    	//console.log( $(".clsf")[el] );
-    });
+console.log(mlssEmpId);
+//라디오 버튼 중 checked 되어 있는 것만 선택
+$("input[type=radio]:checked").prop("checked", false);
+
+$.ajax({
+    url: "/selectMlssChkJohoe",                // 요청 URL
+    type: "get",                     // GET 방식 (fetch 코드와 동일)
+    data: {mlssEmpId : mlssEmpId,
+    	empId: [[${empId}]]}
+})
+.done((result) => {	
+	console.log(result);   
+	getdbData(result);
+})
+.fail((error) => {
+    console.error(error);
+    alert("데이터 요청 중 오류 발생");
+}); 
+
+
+    
 	// 📌 div가 화면에 보이는 순간 차트를 생성
        if (!radarChart) {
            showRadarChart();
@@ -309,33 +330,32 @@ let gridColums = [
 				for(let data of datas) {
 					$(`input[name="${data.mlssIemId}"]`).each(function() {
 						  if ($(this).prop("checked")) {
-						    data["score"] = Number($(this).val());
-						    data["mlssId"] = [[${mlssId}]];
-						    data["empId"] = [[${empId}]];
+						    data["score"] = Number($(this).val());						    
+						    data["empId"] = [[${empId}]];			    
 						    if($("#collapseToggle").text() == "본인 평가") {
 						    	data["evaleRelate"] = "본인";
+						    	data["mlssEmpId"] = [[${mlssEmpId}]];
+						    }else if($("#collapseToggle").text() == "상사 평가"){
+						    	data["evaleRelate"] = "상사";
+						    	data["mlssEmpId"] = $("option.clsf:selected").val();
 						    }else{
-						    	data["evaleRelate"] = "타인";
+						    	data["evaleRelate"] = "동료";
+						    	data["mlssEmpId"] = $("option.clsf:selected").val();
 						    }
 						  }
 						});					
 				}
 				datas = datas.filter(data => data.score != null);
-				let total = 0;
-				for(let selNum of datas) {
-					total += selNum.score;
-				}
-				if($("#collapseToggle").text() == "본인 평가") {
-					master["self"] = total/datas.length;
-				}else{
-					master["crk"] = total/datas.length;
-				}
+				
+				master["mlssEmpId"] = [[${mlssEmpId}]];
 				master["mlssId"] = [[${mlssId}]];
+				master["empId"] = [[${empId}]];
+				
 				payLoad["master"] = master;
 				payLoad["datas"] = datas;
 				console.log(payLoad);
 				
-				$.ajax({
+				/* $.ajax({
 				    url: "/mlssUserRegist",                // 요청 URL
 				    type: "post",                     // GET 방식 (fetch 코드와 동일)
 				    contentType: "application/json",
@@ -347,7 +367,7 @@ let gridColums = [
 				.fail((error) => {
 				    console.error(error);
 				    alert("데이터 요청 중 오류 발생");
-				});
+				}); */
 				
 			});
 			
@@ -419,13 +439,17 @@ let gridColums = [
 			//기존에 평가했다면 내꺼는 페이지 로드시 출력되게 하는 코드
 			let myWrterList = [[${userWrterList}]]
 			console.log(myWrterList);
-			for(let myWrter of myWrterList) {
-				$(`input[name="${myWrter.mlssIemId}"]`).each(function(el) {
-					if($(this).val() == myWrter.score) {
-						$(this).prop("checked", true);
-					}
-				});				
-			};
+			getdbData(myWrterList);
+			function getdbData(val) {
+				for(let myWrter of val) {
+					$(`input[name="${myWrter.mlssIemId}"]`).each(function(el) {
+						if($(this).val() == myWrter.score) {
+							$(this).prop("checked", true);
+						}
+					});				
+				};
+			}
+			
 			
 			
 			

@@ -17,6 +17,7 @@ public class MlssVO {
 
 	
     private String mlssId; // 주식별자    
+    private String mlssEmpId; // 주식별자    
     private String empId; // 평가당하는 사원 FK
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date evlBeginDt; // 다면평가 시작날짜
@@ -45,6 +46,8 @@ public class MlssVO {
     
     //비즈니스 로직에 필요한 컬럼
     private String vendId;       // 구독시 생성된ID FK
+    private String nm;       // 사원이름
+    private String clsf;       // 사원직급
     
     
 
