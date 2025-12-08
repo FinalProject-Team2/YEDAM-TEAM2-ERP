@@ -366,8 +366,59 @@ ORDER BY finalScore DESC
             #{contactCntn}
         )
     </insert>
-
-  
+   
+   
+   
+   
+   
+   
+   	<!-- 1. List-->
+	  <select id="selectLeadListByVend"
+            parameterType="string"
+            resultType="store.yd2team.business.service.ContactVO">
+        SELECT
+           	LEAD_NO			AS	leadNo
+			VEND_ID			AS	vendId
+			LEAD_DT			AS	leadDt
+			LEAD_MANAGER	AS	leadManager
+			REQUIRED_DT		AS	requiredDt
+			COMPETITOR_YN	AS	competitorYn
+			BUDGET_AVAIL_YN	AS	budgetAvailYn
+        FROM TB_LEAD
+        WHERE VEND_ID = #{vendId}
+        ORDER BY LEAD_DT DESC
+    </select>
+    
+     <!-- 전체 삭제 -->
+    <delete id="deleteLeadByVend" parameterType="string">
+        DELETE FROM TB_LEAD
+        WHERE VEND_ID = #{vendId}
+    </delete>
+    
+       <!-- INSERT -->
+    <insert id="insertLead"
+            parameterType="store.yd2team.business.service.ContactVO">
+        INSERT INTO TB_CONTACT
+        (
+           	LEAD_NO,
+			VEND_ID,		
+			LEAD_DT,
+			LEAD_MANAGER,
+			REQUIRED_DT,
+			COMPETITOR_YN,
+			BUDGET_AVAIL_YN
+        )
+        VALUES
+        (
+            CONTACT_SEQ.NEXTVAL,
+        	#{vendId}
+			#{leadDt}
+			#{leadManager}
+			#{requiredDt}
+			#{competitorYn}
+			#{budgetAvailYn}
+        )
+    </insert>  
 	
 </mapper>
 

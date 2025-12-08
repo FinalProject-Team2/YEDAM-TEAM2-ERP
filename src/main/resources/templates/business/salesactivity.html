@@ -113,45 +113,57 @@
 	<form th:action="@{/salesActivity/contact}" method="post">
 		<div class="card mb-3">
 			<div class="card-header">
+				<!-- 탭 -->
 				<div class="card-header-left">
-					<h5 class="card-title">접촉사항</h5>
+					<ul class="nav nav-tabs mt-1">
+						<li class="nav-item">
+							<button class="nav-link active" type="button"
+								data-target="#tabContact" onclick="changeLeadTab(this)">
+								접촉사항</button>
+						</li>
+						<li class="nav-item">
+							<button class="nav-link" type="button" data-target="#tabLead"
+								onclick="changeLeadTab(this)">리드분석</button>
+						</li>
+						<li class="nav-item">
+							<button class="nav-link" type="button" data-target="#tabActivity"
+								onclick="changeLeadTab(this)">견적 및 데모활동</button>
+						</li>
+					</ul>
 				</div>
+
+				<!-- 버튼 -->
 				<div class="card-header-right">
-					<button type="button" class="btn btn-outline-dark" id="btnContactAdd">추가</button>
+					<button type="button" class="btn btn-outline-dark"
+						id="btnContactAdd">추가</button>
 					<button type="button" class="btn btn-primary" id="btnContactSave">저장</button>
-					<form th:action="@{/salesActivity/contact}" method="post">
-						<button class="btn btn-out	line-dark">조회</button>
-					</form>
+					<button type="button" class="btn btn-outline-dark"
+						id="btnContactSearch">조회</button>
 				</div>
 			</div>
-			<div class="card-body">
-				<div id="contactgrid"
-					style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+
+			<!-- 탭 내용 -->
+			<div class="card-body" style="height: 520px;">
+				<!-- 접촉사항 탭 -->
+				<div id="tabContact" class="tab-pane-custom">
+					<div id="contactgrid"
+						style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+				</div>
+
+				<!-- 리드분석 탭 -->
+				<div id="tabLead" class="tab-pane-custom" style="display: none;">
+					<div id="leadgrid"
+						style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+				</div>
+
+				<!-- 견적 및 데모활동 탭 -->
+				<div id="tabActivity" class="tab-pane-custom" style="display: none;">
+					<div id="activitygrid"
+						style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+				</div>
 			</div>
 		</div>
 	</form>
-
-	<!-- 리드분석
-	<form th:action="@{/salesActivity/contact}" method="post">
-		<div class="card mb-3">
-			<div class="card-header">
-				<div class="card-header-left">
-					<h5 class="card-title">접촉사항</h5>
-				</div>
-				<div class="card-header-right">
-				<button class="btn btn-dark">초기화</button>
-				<form th:action="@{/salesActivity/contact}" method="post">
-				<button class="btn btn-out	line-dark">조회</button>
-				</form>
-			</div> 
-			</div>
-			<div class="card-body">
-				<div id="contactgrid" style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
-			</div>
-		</div>
-	</form> -->
-
-
 
 	<script th:inline="javascript">
 		// 잠재고객그리드 디자인
@@ -264,54 +276,30 @@
 			//
 			//
 			//
-			// 접촉 그리드 디자인
-			tui.Grid.applyTheme('default', {
-				cell : {
-					normal : { // 일반 셀(본문)
-						border : '#ccc',
-						background : "#fff",
-						showVerticalBorder : true, // 세로 라인 표시
-					},
-					header : { // 헤더 셀
-						border : '#ccc',
-						background : '#E3E6ED',
-						showVerticalBorder : true,
-					},
-					editable : { // ★ 편집 가능한 셀 공통 스타일
-						background : '#FFFDF0', // 연노랑 같은 색으로 표시
-						text : '#000'
-					},
-					selectedHeader : { // 헤더 클릭했을 때 색
-						background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-					},
-					selected : { // 선택된 셀 색
-						background : '#ffffff' // 필요하면 여기도 조정
-					}
-				}
-			});
 			// 접촉데이터
 			const contactData = /*[[${contactrList}]]*/ [];
-		    console.log(potentialData);
+		    console.log(contactData);
 			// 접촉Grid 생성
 			const contactGrid = new tui.Grid({
-	    el: document.getElementById('contactgrid'),
-	    scrollX: false,
-	    scrollY: true,
-	    columns: [
-	        {   header : '날짜',
-	            name : 'contactDt',
-	            editor: 'text',
-	            formatter: ({ value }) => {
-	                if (!value) return '';
-	                const d = new Date(value);
-	                if (isNaN(d.getTime())) return '';
-	                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
-	            }, align : 'center', editor: 'text', width: 150 },
-	        { header: '담당자', name: 'contactManager', width: 150,  align : 'center', editor: 'text' },
-	        { header: '방법',   name: 'contactWay', width: 150,  align : 'center', editor: 'text' },
-	        { header: '내용',   name: 'contactCntn', editor: 'text' }
-	    ]
-	});
+			    el: document.getElementById('contactgrid'),
+			    data: contactData,   // ← 이거 넣어
+			    scrollX: false,
+			    scrollY: true,
+			    columns: [
+			        {   header : '날짜',
+			            name : 'contactDt',
+			            editor: 'text',
+			            formatter: ({ value }) => {
+			                if (!value) return '';
+			                const d = new Date(value);
+			                if (isNaN(d.getTime())) return '';
+			                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
+			            }, align : 'center', editor: 'text', width: 150 },
+			        { header: '담당자', name: 'contactManager', width: 150,  align : 'center', editor: 'text' },
+			        { header: '방법',   name: 'contactWay', width: 150,  align : 'center', editor: 'text' },
+			        { header: '내용',   name: 'contactCntn', editor: 'text' }
+			    ]
+			});
 		// "추가" 버튼 클릭 시, 맨 아래에 새 행 추가
 		document.getElementById('btnContactAdd').addEventListener('click', function() {
 		    const today = new Date();
@@ -329,120 +317,143 @@
 		
 		    contactGrid.focus(0, 'contactDt');
 		});
-		
-		// 저장 버튼 클릭
-		document.getElementById('btnContactSave').addEventListener('click', function () {
-
-			    contactGrid.finishEditing();
-			
-			    const contactList = contactGrid.getData();
-			
-			    // 날짜 포맷 정리
-			    contactList.forEach(row => {
-			        if (row.contactDt) {
-			            row.contactDt = row.contactDt.substring(0, 10); // "YYYY-MM-DD"
-			        }
-			    });
-			
-			    const focusedCell = potentialgrid.getFocusedCell();
-			    if (!focusedCell) {
-			        alert("잠재고객을 먼저 선택해.");
-			        return;
-			    }
-			
-			    const selected = potentialgrid.getRow(focusedCell.rowKey);
-			    const vendId = selected.vendId;
-			    const potentialInfoNo = selected.potentialInfoNo;
-			
-			    fetch('/salesActivity/contact/saveAll', {
-			        method: 'POST',
-			        headers: { 'Content-Type': 'application/json' },
-			        body: JSON.stringify({
-			            vendId: vendId,
-			            potentialInfoNo: potentialInfoNo,
-			            contactList: contactList
-			        })
-			    })
-			        .then(res => res.text())
-			        .then(msg => {
-			            alert("저장되었습니다.");
-			        })
-			        .catch(err => console.error(err));
-			});
-
-
-
 		//
 		//
-		// 리드그리드 디자인
-		tui.Grid.applyTheme('default', {
-			cell : {
-				normal : { // 일반 셀(본문)
-					border : '#ccc',
-					background : "#fff",
-					showVerticalBorder : true, // 세로 라인 표시
-				},
-				header : { // 헤더 셀
-					border : '#ccc',
-					background : '#E3E6ED',
-					showVerticalBorder : true,
-				},
-				editable : { // ★ 편집 가능한 셀 공통 스타일
-					background : '#FFFDF0', // 연노랑 같은 색으로 표시
-					text : '#000'
-				},
-				selectedHeader : { // 헤더 클릭했을 때 색
-					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-				},
-				selected : { // 선택된 셀 색
-					background : '#ffffff' // 필요하면 여기도 조정
-				}
-			}
-		});
+		// 
 		// 리드데이터
-		const leadData = /*[[${contactrList}]]*/ [];
-	    console.log(potentialData);
+		const leadData = /*[[${leadList}]]*/ [];
+	    console.log(leadData);
 		// 리드Grid 생성
-			const leadgrid = new tui.Grid({
-			el : document.getElementById('leadgrid'),
-			data : leadData,
-			scrollX : true,
-			scrollY : true,
-			minBodyHeight : 0,
-			autoWidth : true,
-			columns : [ {
-				header : 'lead_dt',
-				name : 'lead_dt',
-				sortable : 'true',
-				align : 'center'
-			}, {
-				header : 'lead_manager',
-				name : 'lead_manager',
-				editor : 'text'
-			}, {
-				header : 'required_dt',
-				name : 'required_dt',
-				sortable : 'true',
-				align : 'center'
-			}, {
-				header : 'competitor_yn',
-				name : 'competitor_yn',
-				align : 'center'
-			}, {
-	            header: 'budget_avail_yn',
-	            name: 'budget_avail_yn',
-	            align : 'center'
-	        }, {
-				header : 'leadscore',
-				name : 'leadScore',
-				align : 'center'
-			},{
-			    header : 'outcontact',
-			    name   : 'outcontact',   // leadscore → leadScore 로 수정
-			    align  : 'center',
-			    sortable : 'true'
-			} ]
-		});
+		const leadgrid = new tui.Grid({
+            el : document.getElementById('leadgrid'),
+            data : leadData,
+            scrollX : true,
+            scrollY : true,
+            minBodyHeight : 0,
+            autoWidth : true,
+            columns : [
+                { header : '리드일자',        name : 'lead_dt',        align : 'center', sortable : true },
+                { header : '담당자',          name : 'lead_manager',   editor : 'text' },
+                { header : '요청기한',        name : 'required_dt',    align : 'center' },
+                { header : '경쟁사 존재여부',  name : 'competitor_yn',  align : 'center' },
+                { header : '예산확보 여부',    name : 'budget_avail_yn',align : 'center' },
+                { header : '리드점수',        name : 'leadScore',      align : 'center' },
+                { header : '외부접촉여부',    name : 'outcontact',     align : 'center', sortable : true }
+            ]
+        });
+		
+		 // 견적 및 데모활동 데이터
+	        const activityData = /*[[${activityList}]]*/ [];
+	        console.log(activityData);
+
+	        const activityGrid = new tui.Grid({
+	            el : document.getElementById('activitygrid'),
+	            data : activityData,
+	            scrollX : true,
+	            scrollY : true,
+	            minBodyHeight : 0,
+	            autoWidth : true,
+	            columns : [
+	                { header : '날짜',     name : 'activity_dt',  align : 'center', editor : 'text' },
+	                { header : '유형',     name : 'activity_ty',  align : 'center', editor : 'text' }, // 견적/데모 등
+	                { header : '설명',     name : 'activity_cntn', editor : 'text' },
+	                { header : '결과',     name : 'activity_result', editor : 'text' }
+	            ]
+	        });
+	        
+	        
+	        // 탭 전환 함수
+	        function changeLeadTab(btn) {
+	        	 const header = btn.closest('.card-header');
+	        	
+	            // 탭 active 처리
+	            header.querySelectorAll('.nav-link').forEach(el => {
+			        el.classList.remove('active');
+			    });
+			    btn.classList.add('active');
+
+	            // 탭 내용 숨기기
+	            document.querySelectorAll('.tab-pane-custom').forEach(function(pane) {
+	                pane.style.display = 'none';
+	            });
+
+	            // 선택된 탭만 보이기
+	            const targetSelector = btn.getAttribute('data-target');
+	            const target = document.querySelector(targetSelector);
+	            if (target) {
+	                target.style.display = 'block';
+	            }
+
+	            // 그리드 리사이즈(탭 전환 시 깨지는 것 방지용, 필요하면 사용)
+	            setTimeout(() => {
+	                contactGrid.refreshLayout();
+	                leadgrid.refreshLayout();
+	                activityGrid.refreshLayout();
+	            }, 0);
+	        }
+	        //
+	        //
+	    	// 저장 버튼 클릭
+			document.getElementById('btnContactSave').addEventListener('click', function () {
+
+				    contactGrid.finishEditing();
+				
+				    console.log('contactGrid.getModifiedRows()' + contactGrid.getModifiedRows());
+				
+				    let ulist = contactGrid.getModifiedRows().updatedRows;
+				    let clist = contactGrid.getModifiedRows().createdRows;
+				    const contactList = ulist.concat(clist); //contactGrid.getData();
+				    
+				    
+				    //입력값 유효성 체크
+				    for(contact of contactList){
+				    	if( contact.contactDt == ''
+				    		|| contact.contactManager == ''
+				    		|| contact.contactWay == '' 
+				    		|| contact.contactCntn == '' )
+				    	{
+				    		alert("내용을 입력하십시오")
+				    		return
+				    	}
+				    }
+				    
+				    
+				    // 날짜 포맷 정리
+				    contactList.forEach(row => {
+				        if (row.contactDt) {
+				            row.contactDt = row.contactDt.substring(0, 10); // "YYYY-MM-DD"
+				        }
+				    });
+				
+				    
+				    
+				    //잠재고객정보 조회
+				    const focusedCell = potentialgrid.getFocusedCell();
+				    if (!focusedCell) {
+				        alert("잠재고객을 먼저 선택해.");
+				        return;
+				    }				
+				    const selected = potentialgrid.getRow(focusedCell.rowKey);
+				    const vendId = selected.vendId;
+				    const potentialInfoNo = selected.potentialInfoNo;
+				
+				    fetch('/salesActivity/contact/saveAll', {
+				        method: 'POST',
+				        headers: { 'Content-Type': 'application/json' },
+				        body: JSON.stringify({
+				            vendId: vendId,
+				            potentialInfoNo: potentialInfoNo,
+				            contactList: contactList
+				        })
+				    })
+				        .then(res => res.text())
+				        .then(msg => {
+				            alert("저장되었습니다.");
+				        })
+				        .catch(err => console.error(err));
+				});
+
+
 	</script>
 </body>
 </html>

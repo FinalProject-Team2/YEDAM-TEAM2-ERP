@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ContactVO;
+import store.yd2team.business.service.LeadVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.churnRiskVO;
@@ -57,6 +58,12 @@ public interface BusinessMapper {
     List<ContactVO> selectContactListByVend(String vendId);
     int deleteContactsByVend(String vendId);
     int insertContact(ContactVO vo);
+    int updateContact(ContactVO vo);
+    //잠재고객항목 선택시 해당리드사항 조회
+    List<LeadVO> selectLeadListByVend(String vendId);
+    int deleteLeadByVend(String vendId);
+    int insertLead(LeadVO vo);
+    int updateLead(LeadVO vo);
 }
 
 
