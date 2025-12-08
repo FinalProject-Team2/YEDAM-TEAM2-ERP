@@ -112,6 +112,54 @@
 	    </foreach>
 	</delete>
 	
+	
+	<!-- 고객사모달 저장버튼 이벤트 -->
+	<!-- ===================================================== -->
+    <!-- detail 삭제 -->
+    <!-- ===================================================== -->
+    <delete id="deletePriceDetail">
+        DELETE FROM tb_price_detail
+        WHERE price_policy_id = #{priceId}
+    </delete>
+
+    <!-- ===================================================== -->
+    <!-- detail insert (고객사만 저장) -->
+    <!-- ===================================================== -->
+    <insert id="insertPriceDetail">
+        INSERT INTO tb_price_detail (
+            price_detail_no,
+            price_policy_id,
+            custcom_id,
+            product_id,
+            applc_start_dt,
+            applc_end_dt,
+            dc_rate,
+            prior_rank,
+            rm
+        )
+        VALUES (
+            #{detailNo},
+            #{priceId},
+            #{custcomId},
+            NULL,
+            #{applcStartDt},
+            #{applcEndDt},
+            #{dcRate},
+            #{detailNo},
+            NULL
+        )
+    </insert>
+
+    <!-- ===================================================== -->
+    <!-- detail 조회 (checkbox 자동 체크용) -->
+    <!-- ===================================================== -->
+    <select id="selectPriceDetail" resultType="map">
+        SELECT 
+            custcom_id as custcomId
+        FROM tb_price_detail
+        WHERE price_policy_id = #{priceId}
+    </select>
+	
 
 
 

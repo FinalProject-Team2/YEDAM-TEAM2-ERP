@@ -64,5 +64,13 @@ public interface EstiSoMapper {
     int insertOust(EstiSoDetailVO detail);
 
     int updateApproveStatus(String soId);
+    
+    // 보류버튼 이벤트
+    void updateRejectStatus(@Param("soId") String soId,
+            @Param("reason") String reason);
+    
+    // 주문취소버튼 이벤트
+    void updateCancelStatus(@Param("soId") String soId,
+            @Param("reason") String reason);
 
 }

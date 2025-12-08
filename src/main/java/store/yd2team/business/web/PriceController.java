@@ -10,12 +10,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
 import store.yd2team.business.service.CommonCodeVO;
 import store.yd2team.business.service.PriceService;
 import store.yd2team.business.service.PriceVO;
+import store.yd2team.business.service.ProductVO;
 
 
 @Controller
@@ -94,4 +96,34 @@ public class PriceController {
 
 	    return result;
 	}
+	
+	// 고객사모달 저장버튼이벤트
+	// 1) 고객사 detail 저장
+	@PostMapping("/policy/save")
+	@ResponseBody
+	public Map<String, Object> savePricePolicyDetail(@RequestBody PriceVO vo) {
+
+	    Map<String, Object> result = new HashMap<>();
+
+	    try {
+	        priceService.savePricePolicyDetail(vo);
+	        result.put("result", "success");
+	        result.put("message", "고객사 단가정책 저장 완료");
+
+	    } catch (Exception e) {
+	        result.put("result", "fail");
+	        result.put("message", e.getMessage());
+	    }
+
+	    return result;
+	}
+
+
+	// 2) 고객사 detail 조회 (모달 오픈 시 체크박스 자동 체크용)
+	@GetMapping("/policy/detail")
+	@ResponseBody
+	public List<Map<String, Object>> selectPricePolicyDetail(@RequestParam String priceId) {
+	    return priceService.selectPricePolicyDetail(priceId);
+	}
+	
 }

@@ -61,19 +61,6 @@ public class SoController {
         return result;
     }
     
-    
-	// 주문서 조회(그리드)
-	/*
-	 * @PostMapping("/list")
-	 * 
-	 * @ResponseBody public List<EstiSoVO> soList(@RequestBody EstiSoVO so) {
-	 * 
-	 * System.out.println("검색조건 >>> " + so);
-	 * 
-	 * // 서비스 호출 List<EstiSoVO> soList = estiSoService.selectSoList(so);
-	 * 
-	 * // JSON 으로 반환 (뷰 이름 X) return soList; }
-	 */
 	
 	// 주문서 조회 (AJAX)
     @PostMapping("/list")
@@ -86,10 +73,34 @@ public class SoController {
     /** 주문 승인 */
     @PostMapping("/approve")
     @ResponseBody
-    public Map<String, Object> approveOrders(@RequestBody Map<String, Object> param) {
+    public Map<String, Object> approveOrders(@RequestBody List<EstiSoVO> param) {
 
-        List<String> soIds = (List<String>) param.get("soIds");
+ 
 
-        return estiSoService.approveOrders(soIds);
+        return estiSoService.approveOrders(param);
     }
+    
+    // 보류버튼 이벤트
+    @PostMapping("/reject")
+    @ResponseBody
+    public Map<String, Object> rejectOrder(@RequestBody Map<String, Object> param) {
+
+        String soId = (String) param.get("soId");
+        String reason = (String) param.get("reason");
+
+        return estiSoService.rejectOrder(soId, reason);
+    }
+    
+    // 주문취소버튼 이벤트
+    @PostMapping("/cancel")
+    @ResponseBody
+    public Map<String, Object> cancelOrder(@RequestBody Map<String, Object> param) {
+
+        String soId = (String) param.get("soId");
+        String reason = (String) param.get("reason");
+
+        return estiSoService.cancelOrder(soId, reason);
+    }
+    
+    
 }

@@ -228,53 +228,62 @@ public class EstiSoServiceImpl implements EstiSoService {
     /** 승인 처리 */
     @Transactional
     @Override
-    public Map<String, Object> approveOrders(List<String> soIds) {
+    public Map<String, Object> approveOrders(List<EstiSoVO> soIds) {
 
         StringBuilder msg = new StringBuilder();
 
-        for (String soId : soIds) {
-
-            EstiSoVO header = estiSoMapper.getOrderHeader(soId);
-
-            // 존재 X
-            if (header == null) {
-                msg.append(soId).append(" : 존재하지 않는 주문서입니다.\n");
-                continue;
-            }
-
-            String status = header.getProgrsSt();
-
-            // 이미 승인된 상태
-            if ("es2".equals(status)) {
-                msg.append(soId).append(" : 이미 승인된 주문서입니다.\n");
-                continue;
-            }
-
-            // 승인 가능한 상태(es1, es5) 외는 거부
-            if (!("es1".equals(status) || "es5".equals(status))) {
-                msg.append(soId).append(" : 승인할 수 없는 상태입니다.\n");
-                continue;
-            }
-
-            // 상세 조회
-            List<EstiSoDetailVO> details = estiSoMapper.selectSoDetailList(soId);
-
-            // 재고 부족 체크
-            for (EstiSoDetailVO d : details) {
-                if (d.getCurrStockQy() < d.getTtSoQy()) {
-                    msg.append(soId).append(" : ")
-                       .append(d.getProductName())
-                       .append(" 재고가 부족합니다.\n");
-                    continue;
-                }
-            }
-
-            // 재고 업데이트 + 출고 생성
-            for (EstiSoDetailVO d : details) {
-                estiSoMapper.updateReserveStock(d);  // 출고예약 += 주문수량
-                estiSoMapper.insertOust(d);          // 출고 insert
-            }
-
+        for (EstiSoVO vo : soIds) {
+        	String soId = vo.getSoId();
+        	if("h".equals(vo.getHeader())){
+		        EstiSoVO header = estiSoMapper.getOrderHeader(soId);
+		
+		        if (header == null) {
+		            msg.append(soId).append(" : 존재하지 않는 주문서입니다.\n");
+		            continue;
+		        }
+		
+		        String status = header.getProgrsSt();
+		
+		        // 승인 불가 상태
+		        if ("es2".equals(status)) {
+		            msg.append(soId).append(" : 이미 승인된 주문서입니다.\n");
+		            continue;
+		        }
+		        if (!("es1".equals(status) || "es5".equals(status))) {
+		            msg.append(soId).append(" : 승인할 수 없는 상태입니다.\n");
+		            continue;
+		        }
+        	}else {
+        	
+	            // 상세 조회
+	            List<EstiSoDetailVO> details = estiSoMapper.selectSoDetailList(soId);
+	
+	            boolean stockFail = false;
+	
+	            // 재고 부족 체크
+	            for (EstiSoDetailVO d : details) {
+	
+	                Long stock = d.getCurrStockQy();
+	                Long need = d.getTtSoQy();
+	
+	                if (stock == null) stock = 0L;   // null 방지
+	
+	                if (stock < need) {
+	                    msg.append(soId).append(" : ")
+	                       .append(d.getProductName())
+	                       .append(" 재고가 부족합니다.\n");
+	                    stockFail = true;
+	                }
+	            }
+	
+	            if (stockFail) continue;  // 🔥 중요한 부분: 재고 부족이면 승인 전체 skip
+	
+	            // 재고 예약 update + 출고 insert
+	            for (EstiSoDetailVO d : details) {
+	                estiSoMapper.updateReserveStock(d);
+	                estiSoMapper.insertOust(d);
+	            }
+        	}
             // 승인처리
             estiSoMapper.updateApproveStatus(soId);
         }
@@ -284,4 +293,89 @@ public class EstiSoServiceImpl implements EstiSoService {
         result.put("message", msg.length() == 0 ? "승인 완료되었습니다." : msg.toString());
         return result;
     }
+    
+    // 보류버튼 이벤트
+    @Transactional
+    @Override
+    public Map<String, Object> rejectOrder(String soId, String reason) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        EstiSoVO header = estiSoMapper.getOrderHeader(soId);
+
+        if (header == null) {
+            result.put("success", false);
+            result.put("message", "존재하지 않는 주문서입니다.");
+            return result;
+        }
+
+        String status = header.getProgrsSt();
+
+        // 이미 보류 상태
+        if ("es5".equals(status)) {
+            result.put("success", false);
+            result.put("message", "이미 보류 상태입니다.");
+            return result;
+        }
+
+        // 승인대기(es1), 승인(es2), 반려(es3) 등 → 보류 가능
+        // 필요 시 조건 조정 가능
+        if (!("es1".equals(status) || "es2".equals(status))) {
+            result.put("success", false);
+            result.put("message", "이 상태에서는 보류할 수 없습니다.");
+            return result;
+        }
+
+        estiSoMapper.updateRejectStatus(soId, reason);
+
+        result.put("success", true);
+        result.put("message", "보류 처리 완료되었습니다.");
+        return result;
+    }
+    
+    // 주문취소버튼 이벤트
+    @Transactional
+    @Override
+    public Map<String, Object> cancelOrder(String soId, String reason) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        EstiSoVO header = estiSoMapper.getOrderHeader(soId);
+
+        if (header == null) {
+            result.put("success", false);
+            result.put("message", "존재하지 않는 주문서입니다.");
+            return result;
+        }
+
+        String status = header.getProgrsSt();
+
+	     // 이미 취소 상태
+	        if ("es9".equals(status)) {
+	            result.put("success", false);
+	            result.put("message", "이미 취소된 주문서입니다.");
+	            return result;
+	        }
+	
+	        // 승인 상태는 취소 불가
+	        if ("es2".equals(status)) {
+	            result.put("success", false);
+	            result.put("message", "승인 상태에서는 취소할 수 없습니다.");
+	            return result;
+	        }
+	
+	        // 승인대기(es1), 보류(es5)만 취소 가능
+	        if (!("es1".equals(status) || "es5".equals(status))) {
+	            result.put("success", false);
+	            result.put("message", "취소할 수 없는 상태입니다.");
+	            return result;
+	        }
+
+        estiSoMapper.updateCancelStatus(soId, reason);
+
+        result.put("success", true);
+        result.put("message", "취소 처리 완료되었습니다.");
+        return result;
+    }
+    
 }

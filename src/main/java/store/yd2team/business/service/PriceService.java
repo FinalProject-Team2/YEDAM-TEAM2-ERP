@@ -1,6 +1,7 @@
 package store.yd2team.business.service;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PriceService {
 
@@ -15,4 +16,9 @@ public interface PriceService {
     
     // 삭제
     void deletePricePolicy(List<String> priceIdList) throws Exception;
+    
+    // 고객사모달 저장버튼 이벤트
+    int savePricePolicyDetail(PriceVO vo);
+
+    List<Map<String, Object>> selectPricePolicyDetail(String priceId);
 }
