@@ -8,6 +8,8 @@ import static store.yd2team.common.consts.CodeConst.Yn.Y;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import lombok.Data;
 
@@ -43,6 +45,9 @@ public class EmpAcctVO {
 	private String addr;    // 거래처 주소
 	private String cttpc;   // 연락처
 	private String hp;      // 거래처 핸드폰 번호
+	
+	private List<String> roleIds;
+    private Set<String> authCodes;
 
 	// ==========================
 	// 상태(r그룹) 헬퍼 메서드

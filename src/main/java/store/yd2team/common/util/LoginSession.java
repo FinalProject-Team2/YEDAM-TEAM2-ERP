@@ -107,4 +107,61 @@ public class LoginSession {
         return (s != null) ? s.getHp() : null;
     }
     
+    
+    // ==========================
+    // 1) 역할 / 권한 Getter
+    // ==========================
+    public static java.util.List<String> getRoleIds() {
+        SessionDto s = getLoginSession();
+        return (s != null) ? s.getRoleIds() : null;
+    }
+
+    public static java.util.Set<String> getAuthCodes() {
+        SessionDto s = getLoginSession();
+        return (s != null) ? s.getAuthCodes() : null;
+    }
+
+    // ==========================
+    // 2) 역할 체크 헬퍼
+    // ==========================
+    public static boolean hasRole(String roleId) {
+        SessionDto s = getLoginSession();
+        if (s == null || s.getRoleIds() == null) return false;
+        return s.getRoleIds().contains(roleId);
+    }
+
+    public static boolean hasAnyRole(String... roleIds) {
+        SessionDto s = getLoginSession();
+        if (s == null || s.getRoleIds() == null) return false;
+
+        java.util.Set<String> myRoles = new java.util.HashSet<>(s.getRoleIds());
+        for (String r : roleIds) {
+            if (myRoles.contains(r)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ==========================
+    // 3) 권한 코드 체크 헬퍼 (나중에 활용)
+    // ==========================
+    public static boolean hasAuth(String authCode) {
+        SessionDto s = getLoginSession();
+        if (s == null || s.getAuthCodes() == null) return false;
+        return s.getAuthCodes().contains(authCode);
+    }
+
+    public static boolean hasAnyAuth(String... authCodes) {
+        SessionDto s = getLoginSession();
+        if (s == null || s.getAuthCodes() == null) return false;
+
+        java.util.Set<String> myAuths = s.getAuthCodes();
+        for (String code : authCodes) {
+            if (myAuths.contains(code)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

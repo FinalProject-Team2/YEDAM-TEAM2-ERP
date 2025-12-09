@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.consts.SessionConst;
 import store.yd2team.common.dto.EmpAcctEmployeeDto;
+import store.yd2team.common.dto.EmpAcctRoleDto;
 import store.yd2team.common.dto.EmpAcctSaveRequestDto;
 import store.yd2team.common.dto.EmpAcctSaveResultDto;
 import store.yd2team.common.dto.SessionDto;
@@ -114,7 +115,20 @@ public class EmpAcctController {
 
         SessionDto loginEmp = (SessionDto) session.getAttribute(SessionConst.LOGIN_EMP);
         String loginEmpId = (loginEmp != null ? loginEmp.getEmpId() : null);
+        
+        log.info(">>> [EmpAcctController] SAVE called. empAcctId={}, loginId={}, acctStatus={}, roleIdsSize={}",
+                req.getEmpAcctId(),
+                req.getLoginId(),
+                req.getAcctStatus(),
+                (req.getRoleIds() == null ? "null" : req.getRoleIds().size()));
 
         return empAcctService.saveEmpAccount(req, loginEmpId);
+    }
+    
+    @GetMapping("/roles")
+    public List<EmpAcctRoleDto> getEmpAcctRoles(
+            @RequestParam("empAcctId") String empAcctId) {
+
+        return empAcctService.getEmpAcctRoles(empAcctId);
     }
 }

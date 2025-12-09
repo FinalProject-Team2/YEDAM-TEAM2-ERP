@@ -1,5 +1,7 @@
 package store.yd2team.common.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -24,5 +26,8 @@ public interface EmpLoginMapper {
 	// 로그인 자동 잠금 해제
 	int unlock(@Param("empAcctId") String empAcctId,
 			   @Param("updtBy") String updtBy);
-
+	
+	List<String> selectRoleIdsByEmpAcctId(@Param("empAcctId") String empAcctId);
+	
+	List<String> selectAuthCodesByEmpAcctId(@Param("empAcctId") String empAcctId);
 }

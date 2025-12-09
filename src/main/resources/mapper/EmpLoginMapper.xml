@@ -75,5 +75,19 @@
                updt_by   = #{updtBy}
          WHERE emp_acct_id = #{empAcctId}
     </update>
+    
+    <select id="selectRoleIdsByEmpAcctId" resultType="string">
+        SELECT ur.role_id
+          FROM tb_user_role ur
+         WHERE ur.emp_acct_id = #{empAcctId}
+    </select>
+    
+    <select id="selectAuthCodesByEmpAcctId" resultType="string">
+        SELECT DISTINCT a.auth_code
+          FROM tb_auth a
+          JOIN tb_user_role ur
+            ON a.role_id = ur.role_id
+         WHERE ur.emp_acct_id = #{empAcctId}
+    </select>
     	
 </mapper>

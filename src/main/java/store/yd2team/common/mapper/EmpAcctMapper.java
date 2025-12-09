@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import store.yd2team.common.dto.EmpAcctEmployeeDto;
+import store.yd2team.common.dto.EmpAcctRoleDto;
 import store.yd2team.common.dto.EmpDeptDto;
 import store.yd2team.common.service.EmpAcctVO;
 
@@ -54,4 +55,13 @@ public interface EmpAcctMapper {
     
     String selectEmpPhone(@Param("vendId") String vendId,
             			  @Param("empId")  String empId);
+    
+    int deleteEmpRoles(@Param("empAcctId") String empAcctId);
+
+    int insertEmpRole(@Param("empAcctId") String empAcctId,
+                      @Param("roleId")    String roleId,
+                      @Param("vendId")    String vendId,
+                      @Param("creaBy")    String creaBy);
+    
+    List<EmpAcctRoleDto> selectEmpAcctRoles(@Param("empAcctId") String empAcctId);
 }

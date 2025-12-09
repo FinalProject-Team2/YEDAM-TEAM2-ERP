@@ -84,14 +84,17 @@ public class EmpLogInController {
             
             applySessionPolicy(session, loginEmp.getVendId());
             
-            log.info(">>> 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={}, empId={}, loginId={}, vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={}",
+            log.info(">>> 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={},"
+            		+ " empId={}, loginId={}, vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={},"
+            		+ " AuthCodes={}, RoleIds = {}",
                     session.getId(),
                     loginEmp.getEmpAcctId(), loginEmp.getEmpNm(),
                     loginEmp.getDeptNm(), loginEmp.getDeptId(),
                     loginEmp.getEmpId(), loginEmp.getLoginId(),
                     loginEmp.getVendId(), loginEmp.getMasYn(),
                     loginEmp.getBizcnd(), loginEmp.getAddr(),
-                    loginEmp.getCttpc(), loginEmp.getHp());
+                    loginEmp.getCttpc(), loginEmp.getHp(),
+                    loginEmp.getAuthCodes(), loginEmp.getRoleIds());
 
             return result; // success=true, otpRequired=false
         }
@@ -271,6 +274,8 @@ public class EmpLogInController {
         loginEmp.setCttpc(empAcct.getCttpc());
         loginEmp.setHp(empAcct.getHp());
         loginEmp.setTempYn(empAcct.getTempYn());
+        loginEmp.setRoleIds(empAcct.getRoleIds());
+        loginEmp.setAuthCodes(empAcct.getAuthCodes());
 
         return loginEmp;
     }

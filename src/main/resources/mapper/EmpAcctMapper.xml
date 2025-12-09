@@ -134,7 +134,7 @@
 		        crea_dt,
 		        crea_by,
 		        updt_dt,
-		        updt_by,
+		        updt_by
 	    FROM    tb_emp_acct
 	   WHERE    emp_acct_id = #{empAcctId}
 	</select>
@@ -187,7 +187,6 @@
 						         last_login,
 						         yn,
 						         temp_yn,
-						         mas_yn,
 						         crea_dt,
 						         crea_by,
 						         updt_dt,
@@ -203,7 +202,6 @@
 			      NULL,
 			      #{yn},
 			      #{tempYn},
-			      #{masYn},
 			      SYSDATE,
 			      #{creaBy},
 			      SYSDATE,
@@ -232,5 +230,47 @@
          WHERE e.vend_id = #{vendId}
            AND e.emp_id  = #{empId}
     </select>
+	
+	<delete id="deleteEmpRoles">
+	  DELETE FROM tb_user_role
+	   WHERE emp_acct_id = #{empAcctId}
+	</delete>
+	
+	<!-- 역할 매핑 insert -->
+	<insert id="insertEmpRole">
+	  INSERT INTO tb_user_role (
+	      emp_acct_id,
+	      role_id,
+	      vend_id,
+	      crea_dt,
+	      crea_by,
+	      updt_dt,
+	      updt_by
+	  ) VALUES (
+	      #{empAcctId},
+	      #{roleId},
+	      #{vendId},
+	      SYSDATE,
+	      #{creaBy},
+	      SYSDATE,
+	      #{creaBy}
+	  )
+	</insert>
+	
+	<select id="selectEmpAcctRoles">
+	    SELECT  r.role_id      AS roleId,    
+	            r.role_nm      AS roleNm,    
+	            r.role_ty      AS roleTy,     
+	            c.code_nm      AS roleTyNm,   
+	            r.yn           AS useYn       
+	    FROM    tb_user_role ur                
+	    JOIN    tb_role r
+	           ON ur.role_id = r.role_id
+	    LEFT JOIN tb_code c
+	           ON r.role_ty = c.code_id
+	    WHERE   ur.emp_acct_id = #{empAcctId}
+	    ORDER BY r.role_nm
+	</select>
+	
 	
 </mapper>

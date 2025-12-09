@@ -1,6 +1,8 @@
 package store.yd2team.common.dto;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,4 +29,7 @@ public class SessionDto implements Serializable{
     private String cttpc;	  // 사원 연락처
     private String hp;        // 거래처 핸드폰 번호
     private String tempYn;    // 임시 비밀번호 여부
+    
+    private List<String> roleIds;
+    private Set<String> authCodes;
 }
