@@ -16,9 +16,9 @@ public interface BusinessService {
    public List<PotentialStdrVO> getStdrDetailAll();
   
    //잠재고객기준상세목록수정
-   List<BusinessVO> getListByCond(String condGb);
+   List<PotentialStdrVO> getListByCond(String condGb);
   
-   public void saveAll(List<BusinessVO> list);
+   public void saveAllPotential(List<PotentialStdrVO> list);
   
    //로그인한 거래처의 주소, 업체명 조회
    public List<BusinessVO> getcustaddrtype(String info);
@@ -38,10 +38,10 @@ public interface BusinessService {
    public List<ContactVO> getContactListByVend(String vendId);
    //접촉사항 내용 저장
    public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> contactList);
-   //잠재고객항목 선택시 해당 리드내역 조회
+   //잠재고객항목 선택시 해당 리드내역 조회 및 저장
    List<LeadVO> getLeadListByVend(String vendId);
    public void saveAllLead(String vendId, Integer potentialInfoNo, List<LeadVO> leadList);
-   //잠재고객항목 선택시 해당 데모내역 조회
+   //잠재고객항목 선택시 해당 데모내역 조회 및 저장
    List<DemoVO> getDemoListByVend(String vendId);
    public void saveAllDemo(String vendId, Integer potentialInfoNo, List<DemoVO> demoList);
 

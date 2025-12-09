@@ -103,6 +103,16 @@
 			</div>
 		</div>
 	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	<script th:inline="javascript">
 	
     const industryData  = /*[[${industryList}]]*/ [];
@@ -253,8 +263,13 @@
 	});
 		
 	 // ========== 전체 저장 버튼 ==========
-
 	  document.getElementById('btnSaveAll').addEventListener('click', () => {
+		  // 0) 편집 중인 셀 강제로 종료
+		  custTypeGrid.finishEditing();
+		  sizeGrid.finishEditing();
+		  createGrid.finishEditing();
+		  regionGrid.finishEditing();
+		  
 	    // 1) 각 그리드 데이터 가져오기
 	    const indList  = custTypeGrid.getData().map(r => ({ ...r, condGb:'IND' }));
 	    const sizeList = sizeGrid.getData().map(r => ({ ...r, condGb:'SIZE' }));
@@ -270,6 +285,8 @@
 	      const score = r.infoScore;
 	      return info !== '' || (score !== null && score !== '' && score !== undefined);
 	    });
+	    
+	    console.log('전송할 전체 데이터:', all); // 확인용
 
 	    // 4) 서버로 전송
 	    fetch('/potentialCustRegister', {
@@ -289,7 +306,7 @@
 	    })
 	    .catch(err => {
 	      console.error(err);
-	      alert('저장 중 오류가 발생했다.');
+	      alert('저장 중 오류가 발생했습니다.');
 	    });
 	  });
 		

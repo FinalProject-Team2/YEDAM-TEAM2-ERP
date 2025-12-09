@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
-import store.yd2team.business.service.ContactVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.churnRiskVO;
@@ -60,7 +59,7 @@ public class BusinessController {
 	//
 	//
 	//
-	// 잠재고객기준상세목록 가져오기
+	// 잠재고객 기준상세목록 가져오기
 	@GetMapping("/potentialCustRegister")
 	public String churnRiskStdrRegister(Model model) {
 		   List<PotentialStdrVO> allList = businessService.getStdrDetailAll();
@@ -93,13 +92,13 @@ public class BusinessController {
 	    	return "business/potentialCustRegister";
 	}
 	//
-	//잠재고객조건상세목록수정
+	//잠재고객 조건상세목록 수정
 	@PostMapping("/potentialCustRegister")
 	@ResponseBody
-	public Map<String, List<BusinessVO>> saveAll(
-			@RequestBody List<BusinessVO> list) {
-		businessService.saveAll(list);
-		Map<String, List<BusinessVO>> result = new HashMap<>();
+	public Map<String, List<PotentialStdrVO>> saveAll(@RequestBody List<PotentialStdrVO> list) {
+		businessService.saveAllPotential(list);
+		
+		Map<String, List<PotentialStdrVO>> result = new HashMap<>();
 		result.put("industryList",  businessService.getListByCond("IND"));
 		result.put("sizeList",      businessService.getListByCond("SIZE"));
 		result.put("establishList", businessService.getListByCond("EST"));
@@ -107,7 +106,7 @@ public class BusinessController {
 		return result;
 	}
 	//
-	// 잠재고객조회 페이지열람
+	// 잠재고객 검색조회 페이지열람
 	@GetMapping("/potentialCustList")
 	public String list(Model model) {
 		System.out.println("=== BusinessController.list() 호출됨 ===");
@@ -116,7 +115,7 @@ public class BusinessController {
 		
 		return "business/potentialCustList";
 	}
-	// 잠재고객검색조회
+	// 잠재고객 검색조회
 	@PostMapping("/potentialCustList")
 	public String stdrlist(BusinessVO vo, Model model) {
 		

@@ -194,7 +194,7 @@
 	</select>
 	
 	<!-- 잠재고객 조건상세목록 수정 -->
-	<select id="selectByCondGb" parameterType="store.yd2team.business.service.PotentialStdrVO">
+	<!-- <select id="selectByCondGb" parameterType="store.yd2team.business.service.PotentialStdrVO">
 	   SELECT
              STDR_DETAIL_ID   AS stdrDetailId
            , STDR_ID          AS stdrId
@@ -204,29 +204,25 @@
        FROM TB_POTENTIAL_STDR_DETAIL
        WHERE STDR_ID = #{condGb}
        ORDER BY STDR_ID, STDR_DETAIL_ID
-	</select>
-	<!-- 잠재고객조건 상세목록 등록 -->
-	<insert id="insertDetail"
-		        parameterType="store.yd2team.business.service.PotentialStdrVO">
+	</select> -->
+	<!-- 잠재고객 조건상세목록 등록 -->
+	<insert id="insertDetail" parameterType="store.yd2team.business.service.PotentialStdrVO">
 				  INSERT INTO TB_POTENTIAL_STDR_DETAIL (
 		              STDR_DETAIL_ID
 		            , STDR_ID
 		            , VEND_ID
 		            , STDR_IT	EAM_INFO
 		            , INFO_SCORE
-		            , CREA_DT
 		        ) VALUES (
-		              SEQ_POTENTIAL_STDR_DETAIL_ID.NEXTVAL    <!-- 실제 시퀀스명에 맞게 수정 -->
+		              #{stdrDetailId}    <!-- 실제 시퀀스명에 맞게 수정 -->
 		            , #{stdrId}
 		            , #{vendId}
 		            , #{stdrIteamInfo}
 		            , #{infoScore}
-		            , SYSDATE
 		        )
 	</insert>
 	<!-- 잠재고객조건 상세목록 수정 -->
-	<update id="updateDetail"
-	        parameterType="store.yd2team.business.service.PotentialStdrVO">
+	<update id="updateDetail"  parameterType="store.yd2team.business.service.PotentialStdrVO">
 	  UPDATE TB_POTENTIAL_STDR_DETAIL
          SET STDR_ITEAM_INFO = #{stdrIteamInfo}
            , INFO_SCORE      = #{infoScore}
@@ -449,16 +445,16 @@
             parameterType="string"
             resultType="store.yd2team.business.service.DemoVO">
         SELECT
-            DEMO_QUOTATIO_NO	as	demoQuotatioNo
-			POTENTIAL_INFO_NO	as	potentialInfoNo
-			VEND_ID				as	vendId
-			DEMO_QUOTATIO_DT	as	demoQuotatioDt
-			DEMO_MANAGER		as	demoManager
-			DEMO_DC				as	demoDc
-			CUST_REACTION		as	custReaction
-			SAMPLE_PRIVIDE		as	samplePrivide
-			CUST_QY				as	custQy
-			CUST_DISCOUNT		as	custDiscount
+            DEMO_QUOTATIO_NO	as	demoQuotatioNo,
+			POTENTIAL_INFO_NO	as	potentialInfoNo,
+			VEND_ID				as	vendId,
+			DEMO_QUOTATIO_DT	as	demoQuotatioDt,
+			DEMO_MANAGER		as	demoManager,
+			DEMO_DC				as	demoDc,
+			CUST_REACTION		as	custReaction,
+			SAMPLE_PRIVIDE		as	samplePrivide,
+			CUST_QY				as	custQy,
+			CUST_DISCOUNT		as	custDiscount,
 			CUST_DELIVERY		as	custDelivery
         FROM TB_DEMO_QUOTATIO
         WHERE VEND_ID = #{vendId}
