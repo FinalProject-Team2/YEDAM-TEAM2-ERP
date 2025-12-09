@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.ContactSaveRequest;
 import store.yd2team.business.service.ContactVO;
+import store.yd2team.business.service.DemoVO;
 import store.yd2team.business.service.LeadVO;
 
 @RestController
@@ -61,25 +62,14 @@ public class ContactController {
     // 거래처ID(vend_id) 기준 리드내역 조회 (AJAX)
     @GetMapping("/salesActivity/LeadByVend")
     public List<LeadVO> getLeadListByVend(@RequestParam("vendId") String vendId) {
-        System.out.println("=== contactByVend 호출, vendId = " + vendId + " ===");
+        System.out.println("=== leadByVend 호출, vendId = " + vendId + " ===");
         return businessService.getLeadListByVend(vendId);
     }
     
-//    // 리드내역 전체 저장 (삭제 후 다시 INSERT 방식)
-//    @PostMapping("/salesActivity/contact/saveAllLeae")
-//    public String saveAllLead(@RequestBody ContactSaveRequest req) {
-//
-//        System.out.println("=== saveAllContacts 호출 ===");
-//        System.out.println("vendId = " + req.getVendId()
-//                         + ", potentialInfoNo = " + req.getPotentialInfoNo());
-//
-//        businessService.saveAllLead(
-//            req.getVendId(),
-//            req.getPotentialInfoNo(),
-//            req.getLeadList()
-//        );
-//
-//        return "OK";
-//    }
-    
+    // 거래처ID(vend_id) 기준 데모내역 조회 (AJAX)
+    @GetMapping("/salesActivity/DemoByVend")
+    public List<DemoVO> getDemoListByVend(@RequestParam("vendId") String vendId) {
+        System.out.println("=== demoByVend 호출, vendId = " + vendId + " ===");
+        return businessService.getDemoListByVend(vendId);
+    }
 }
