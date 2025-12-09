@@ -1,0 +1,231 @@
+<!-- /templates/common/modal/authModal.html -->
+<div th:fragment="authModal">
+
+  <!-- 모달 배경 -->
+  <div class="modal-backdrop fade" id="roleSelectBackdrop" style="display:none;"></div>
+
+  <!-- 모달 본체 -->
+  <div class="modal" id="authModal" tabindex="-1" role="dialog"
+       aria-modal="true" aria-labelledby="authModalLabel"
+       style="display:none;">
+
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content role-select-wrapper">
+
+        <!-- =============== HEADER =============== -->
+        <div class="modal-header">
+          <h5 class="modal-title mb-0" id="authModalLabel">역할 선택</h5>
+          <button type="button" class="btn-close" id="roleSelectCloseBtn" aria-label="Close"></button>
+        </div>
+
+        <!-- =============== BODY =============== -->
+        <div class="modal-body">
+
+          <!-- === 1. 역할 조회 영역 === -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <div class="card-header-left">
+                <h5 class="card-title mb-0">역할 조회</h5>
+              </div>
+              <div class="card-header-right">
+                <button id="roleSelectResetBtn" class="btn btn-dark" type="button">초기화</button>
+                <button id="roleSelectSearchBtn" class="btn btn-outline-dark" type="button">조회</button>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="row mb-2">
+                <!-- 역할 명 + 자동완성 -->
+                <div class="col-md-4">
+                  <label for="roleSelectName" class="form-label">역할 명</label>
+                  <div class="position-relative">
+                    <input id="roleSelectName"
+                           type="text"
+                           class="form-control"
+                           placeholder="인사 담당"
+                           autocomplete="off">
+                    <ul id="roleSelectNameSuggest"
+                        class="list-group position-absolute w-100"
+                        style="z-index: 2000;">
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- 역할 유형 -->
+                <div class="col-md-4">
+                  <label for="roleSelectType" class="form-label">역할 유형</label>
+                  <select id="roleSelectType" class="form-select">
+                    <option value="">전체</option>
+                    <option value="d1">인사</option>
+                    <option value="d3">영업</option>
+                    <option value="d2">공통</option>
+                  </select>
+                </div>
+
+                <!-- 사용 여부 -->
+                <div class="col-md-4">
+                  <label for="roleSelectUseYn" class="form-label">사용 여부</label>
+                  <select id="roleSelectUseYn" class="form-select">
+                    <option value="">전체</option>
+                    <option value="e1">사용</option>
+                    <option value="e2">미사용</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- === 2. 역할 목록 / 권한 설정 영역 === -->
+          <div class="row">
+            <!-- 역할 목록 -->
+            <div class="col-md-6 mb-3">
+              <div class="card h-100">
+                <div class="card-header">
+                  <div class="card-header-left">
+                    <h5 class="card-title mb-0">역할 목록</h5>
+                  </div>
+                  <div class="card-header-right">
+                    <!-- ✅ 선택 버튼: 모달 안에서 최종 선택 -->
+                    <button type="button" class="btn btn-dark" id="roleSelectOkBtn">선택</button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div id="roleSelectRoleGrid"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 권한 설정 (아코디언) -->
+            <div class="col-md-6 mb-3">
+              <div class="card h-100">
+                <div class="card-header">
+                  <div class="card-header-left">
+                    <h5 class="card-title mb-0">권한 설정</h5>
+                  </div>
+                  <div class="card-header-right">
+                    <span class="small text-muted">
+                      좌측에서 역할을 클릭하면, 모듈별 조회/저장/삭제 권한이 표시됩니다.
+                    </span>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="accordion" id="roleSelectAuthAccordion">
+
+                    <!-- 인사/급여 (d1) -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="roleSelectHeadingHr">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#roleSelectCollapseHr"
+                                aria-expanded="false"
+                                aria-controls="roleSelectCollapseHr">
+                          인사 / 급여
+                        </button>
+                      </h2>
+                      <div id="roleSelectCollapseHr"
+                           class="accordion-collapse collapse"
+                           aria-labelledby="roleSelectHeadingHr"
+                           data-bs-parent="#roleSelectAuthAccordion">
+                        <div class="accordion-body">
+                          <div id="roleSelectAuthGridHr"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 영업 (d3) -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="roleSelectHeadingSales">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#roleSelectCollapseSales"
+                                aria-expanded="false"
+                                aria-controls="roleSelectCollapseSales">
+                          영업
+                        </button>
+                      </h2>
+                      <div id="roleSelectCollapseSales"
+                           class="accordion-collapse collapse"
+                           aria-labelledby="roleSelectHeadingSales"
+                           data-bs-parent="#roleSelectAuthAccordion">
+                        <div class="accordion-body">
+                          <div id="roleSelectAuthGridSales"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 공통 (d2) -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="roleSelectHeadingCommon">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#roleSelectCollapseCommon"
+                                aria-expanded="false"
+                                aria-controls="roleSelectCollapseCommon">
+                          공통
+                        </button>
+                      </h2>
+                      <div id="roleSelectCollapseCommon"
+                           class="accordion-collapse collapse"
+                           aria-labelledby="roleSelectHeadingCommon"
+                           data-bs-parent="#roleSelectAuthAccordion">
+                        <div class="accordion-body">
+                          <div id="roleSelectAuthGridCommon"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div> <!-- /accordion -->
+                </div> <!-- /card-body -->
+              </div>
+            </div>
+          </div>
+
+        </div> <!-- /modal-body -->
+      </div>
+    </div>
+  </div>
+
+ <!-- 모달 전용 간단 스타일 -->
+<style>
+  .role-select-wrapper .card-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  /* 실제 3개 권한 그리드에 width 100% 적용 */
+  .role-select-wrapper #roleSelectRoleGrid,
+  .role-select-wrapper #roleSelectAuthGridHr,
+  .role-select-wrapper #roleSelectAuthGridSales,
+  .role-select-wrapper #roleSelectAuthGridCommon {
+    width: 100%;
+  }
+  
+    /* ✅ 이 모달만 폭 넓게 쓰기 */
+  #authModal .modal-dialog {
+    max-width: 80vw;      /* 화면의 80%까지 사용 */
+  }
+
+  @media (min-width: 1140px) {
+    #authModal .modal-dialog {
+      max-width: 1300px;  
+    }
+  }
+  
+  .role-select-wrapper .auth-chk {
+    width: 16px;
+    height: 16px;
+    accent-color: #ff6b6b;   /* 원하는 색 (#ff6b6b 같은 걸로 바꿔도 됨) */
+  }
+  
+  /* 비활성화된 경우 색 다르게 */
+  .role-select-wrapper .auth-chk:disabled {
+    accent-color: #fff;
+    cursor: not-allowed;
+  }
+</style>
+
+</div>
