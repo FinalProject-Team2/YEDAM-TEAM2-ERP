@@ -70,14 +70,20 @@ public class SoController {
     }
     
     // 주문서관리 승인버튼
-    /** 주문 승인 */
     @PostMapping("/approve")
     @ResponseBody
-    public Map<String, Object> approveOrders(@RequestBody List<EstiSoVO> param) {
+    public Map<String, Object> approveSo(@RequestBody List<EstiSoVO> list) {
 
- 
+        try {
+            estiSoService.approveSo(list);
+            return Map.of("success", true);
 
-        return estiSoService.approveOrders(param);
+        } catch (Exception e) {
+            return Map.of(
+                "success", false,
+                "message", e.getMessage()
+            );
+        }
     }
     
     // 보류버튼 이벤트

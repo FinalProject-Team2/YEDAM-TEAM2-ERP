@@ -75,5 +75,7 @@ public class EstiSoVO {
     private String codeNm;
     
     private String header;
+    
+    private List<EstiSoDetailVO> details;
 }
 
