@@ -15,23 +15,28 @@ import store.yd2team.business.service.churnRiskVO;
 @Mapper
 public interface BusinessMapper {
 		
-	//전체조회
+	//휴면,이탈고객 검색조회
+	List<churnRiskVO> getchurnRiskList(churnRiskVO vo);
+	//휴면, 이탈고객 평균
+	int getAVG();
+	//휴면, 이탈 조건별 점수화
+	List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo);
+	//
+	//
+	//잠재고객 전체조회
 	List<BusinessVO> getList();
-	
-	//잠재고객조건상세목록조회
+	//잠재고객 조건상세목록 조회
 	 List<PotentialStdrVO> getStdrDetailAll();
-	 
-	//잠재고객조건상세목록수정
+	//잠재고객 조건상세목록 수정
     List<BusinessVO> selectByCondGb(String condGb);
+    //잠재고객조건 상세목록 등록
+    	int insertDetail(BusinessVO vo);
+    //잠재고객조건 상세목록 수정
+    	int updateDetail(BusinessVO vo);
 
-    int insertDetail(BusinessVO vo);
-
-    int updateDetail(BusinessVO vo);
-
-	// 공공데이터 한 건 insert
+	//공공데이터 한 건 insert
     int insertPotential(BusinessVO vo);
-    
-    //번호조회
+    //공공데이터 고객 건수 카운트
     int existsPotentialInfoNo(@Param("potentialInfoNo") Long potentialInfoNo);
     
     //잠재고객검색조회
@@ -41,27 +46,16 @@ public interface BusinessMapper {
     public List<BusinessVO> getcustaddrtype(String info);
     //
     //
-    //휴면,이탈고객 검색조회
-    List<churnRiskVO> getchurnRiskList(churnRiskVO vo);
-    //
-	//휴면, 이탈고객 평균
-    int getAVG();
-    //휴면, 이탈 조건별 점수화
-    List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo);
-    //
-    //
 	//접촉사항조회
     List<ContactVO> getAction();
     //리드분석조회
     List<ContactVO> getLeadGenerar();
     //잠재고객항목 선택시 해당접촉사항 조회
     List<ContactVO> selectContactListByVend(String vendId);
-    int deleteContactsByVend(String vendId);
     int insertContact(ContactVO vo);
     int updateContact(ContactVO vo);
     //잠재고객항목 선택시 해당리드사항 조회
-    List<LeadVO> selectLeadListByVend(String vendId);
-    int deleteLeadByVend(String vendId);
+    List<LeadVO> getLeadListByVend(String vendId);
     int insertLead(LeadVO vo);
     int updateLead(LeadVO vo);
 }

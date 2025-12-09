@@ -166,7 +166,7 @@
 	</form>
 
 	<script th:inline="javascript">
-		// 잠재고객그리드 디자인
+		// 그리드 디자인
 		tui.Grid.applyTheme('default', {
 			cell : {
 				normal : { // 일반 셀(본문)
@@ -249,7 +249,7 @@
 			    sortable : 'true'
 			} ]
 		});
-		// ★ 잠재고객 한 줄 클릭 시 – vendId 기준으로 접촉내역 조회
+		// ★ 잠재고객 한 줄 클릭 시 vendId 기준으로 접촉내역 조회
 		potentialgrid.on('click', function(ev) {
 		    const row = potentialgrid.getRow(ev.rowKey);
 		    if (!row) return;
@@ -282,7 +282,7 @@
 			// 접촉Grid 생성
 			const contactGrid = new tui.Grid({
 			    el: document.getElementById('contactgrid'),
-			    data: contactData,   // ← 이거 넣어
+			    data: contactData,   //
 			    scrollX: false,
 			    scrollY: true,
 			    columns: [
@@ -332,15 +332,42 @@
             minBodyHeight : 0,
             autoWidth : true,
             columns : [
-                { header : '리드일자',        name : 'lead_dt',        align : 'center', sortable : true },
-                { header : '담당자',          name : 'lead_manager',   editor : 'text' },
-                { header : '요청기한',        name : 'required_dt',    align : 'center' },
-                { header : '경쟁사 존재여부',  name : 'competitor_yn',  align : 'center' },
-                { header : '예산확보 여부',    name : 'budget_avail_yn',align : 'center' },
+                { header : '리드일자',        name : 'leadDt',  formatter: ({ value }) => {
+	                if (!value) return '';
+	                const d = new Date(value);
+	                if (isNaN(d.getTime())) return '';
+	                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
+	            },       align : 'center', sortable : true },
+                { header : '담당자',          name : 'leadManager',   editor : 'text' },
+                { header : '요청기한',        name : 'requiredDt',    align : 'center' },
+                { header : '경쟁사 존재여부',  name : 'competitorYn',  align : 'center' },
+                { header : '예산확보 여부',    name : 'budgetAvailYn',align : 'center' },
                 { header : '리드점수',        name : 'leadScore',      align : 'center' },
-                { header : '외부접촉여부',    name : 'outcontact',     align : 'center', sortable : true }
             ]
         });
+		// ★ 잠재고객 한 줄 클릭 시 vendId 기준으로 리드내역 조회
+		potentialgrid.on('click', function(ev) {
+		    const row = potentialgrid.getRow(ev.rowKey);
+		    if (!row) return;
+
+		    const vendId = row.vendId;
+		    if (!vendId) {
+		        console.warn('vendId 없음', row);
+		        return;
+		    }
+
+		    console.log('리드내역 조회 요청, vendId =', vendId);
+
+		    fetch('/salesActivity/LeadByVend?vendId=' + encodeURIComponent(vendId))
+		        .then(res => res.json())
+		        .then(data => {
+		            console.log('받은 접촉내역', data);
+		            leadgrid.resetData(data);
+		        })
+		        .catch(err => {
+		            console.error('접촉내역 조회 오류', err);
+		        });
+		});
 		
 		 // 견적 및 데모활동 데이터
 	        const activityData = /*[[${activityList}]]*/ [];
@@ -427,7 +454,7 @@
 				
 				    
 				    
-				    //잠재고객정보 조회
+				    //접촉내역 저장
 				    const focusedCell = potentialgrid.getFocusedCell();
 				    if (!focusedCell) {
 				        alert("잠재고객을 먼저 선택해.");

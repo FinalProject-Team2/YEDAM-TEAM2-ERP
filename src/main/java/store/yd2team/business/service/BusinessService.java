@@ -39,7 +39,7 @@ public interface BusinessService {
    //접촉사항 내용 저장
    public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> list);
    //잠재고객항목 선택시 해당리드사항 조회
-   List<LeadVO> selectLeadListByVend(String vendId);
+   List<LeadVO> getLeadListByVend(String vendId);
    public void saveAllLead(String vendId, Integer potentialInfoNo, List<LeadVO> list);
 }
 
