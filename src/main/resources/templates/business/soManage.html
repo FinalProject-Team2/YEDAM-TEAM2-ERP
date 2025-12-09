@@ -7,10 +7,6 @@
 <meta charset="UTF-8">
 <title>주문서 관리</title>
 <style>
-.tui-grid-row.row-canceled > td {
-    background-color: #eee !important;
-    color: #888 !important;
-}
 </style>
 </head>
 <body layout:fragment="content">
@@ -90,6 +86,7 @@
 							<h5 class="card-title">주문서 목록</h5>
 						</div>
 						<div class="card-header-right">
+							<button type="button" class="btn btn-outline-dark" id="addOustBtn">출하지시서</button>
 							<button type="button" class="btn btn-outline-dark" id="approveSoBtn">승인</button>
 							<button type="button" class="btn btn-outline-dark" id="rejectSoBtn">보류</button>
 							<button type="button" class="btn btn-danger" id="deleteSoBtn">주문취소</button>
@@ -108,7 +105,7 @@
 	</div>
 	<!-- end so-manage-wrapper -->
 
-	<script>
+<script>
 	// 0. 데이터
 	const soData = [];
 	const loadedSoSet = new Set();  // 어떤 so_id 의 상세를 이미 불러왔는지 체크용
@@ -135,13 +132,6 @@
 		el: document.getElementById('soGrid'),
 		data: soData,
 		...soGridOptions,
-		rowClassName: function(row) {
-		    // 트리 구조 → 헤더만 색칠하도록 depth 체크
-		    if (row._treeInfo?.depth === 0 && row.progrsSt === 'es9') {
-		        return 'row-canceled';
-		    }
-		    return '';
-		},
 		treeColumnOptions: {
 		  name: 'productName',        // 이 컬럼에 펼침/접기 아이콘 표시
 		  useIcon: true,
@@ -160,7 +150,7 @@
 			{ 
 			  header: '진행상태',
 			  name: 'codeNm',
-			  ailgn: 'center',
+			  align: 'center',
 			  formatter: ({ row }) => {
 			      if (!row.codeNm) return '';
 			      if (row.stResn) {
@@ -172,10 +162,10 @@
 			{ name: 'header', hidden: true },
 			{ name: 'stResn', hidden: true },
 			{ name: 'progrsSt', hidden: true },
+			{ name: 'soDetailNo', hidden: true }
 		]	
 	}); // 1-2. 주문서목록 그리드 생성 끝
 	
-
 	
 	
 	// ======================================================================== 2. 버튼 이벤트
@@ -225,70 +215,68 @@
 	    });
 	});
 	
+	
+	
 	// 2-3. 승인버튼 이벤트
-	document.getElementById('approveSoBtn').addEventListener('click', async () => {
-	  try {
-	    const checkedKeys = soGrid.getCheckedRowKeys();
-	    if (!checkedKeys || checkedKeys.length === 0) {
-	      alert('승인할 주문서를 선택하세요.');
-	      return;
+	document.getElementById("approveSoBtn").addEventListener("click", () => {
+	
+	    // 1) 사용자 체크한 전체 row
+	    const checkedRows = soGrid.getCheckedRows();
+	
+	    if (checkedRows.length === 0) {
+	        alert("승인할 주문서를 선택해주세요.");
+	        return;
 	    }
 	
-	    const soIds = [];
-	    let invalidStatusItems = [];
+	    // 2) 부모(row.header == 'h')만 필터링
+	    const parentRows = checkedRows.filter(r => r.header === 'h');
 	
-	    checkedKeys.forEach(key => {
-	      const row = soGrid.getRow(key);
+	    if (parentRows.length === 0) {
+	        alert("승인은 주문서 기준으로만 가능합니다. 주문서를 선택한 후 다시 시도해주세요.");
+	        return;
+	    }
 	
-	      if(row.header)
-		      if (row.progrsSt === 'es2') {
-		        invalidStatusItems.push(`${row.soId} : 이미 승인된 주문서입니다.`);
-		      }
-		      if (row.progrsSt !== 'es1' && row.progrsSt !== 'es5') {
-		        invalidStatusItems.push(`${row.soId} : 승인할 수 없는 상태입니다.`);
-		      }
-		
-	      soIds.push({soId: row.soId,
-	    	          header: row.header ?? "d" });
+	    // 3) 각 부모별 자식 재고 검사 수행
+	    for (const parent of parentRows) {
+	
+	        // 해당 부모의 모든 자식 가져오기
+	        const childRows = soGrid.getChildRows(parent.rowKey);
+	
+	        for (const child of childRows) {
+	
+	            // 재고 < 주문수량 → 승인 불가
+	            if (child.currStockQy < child.ttSoQy) {
+	                alert(
+	                    `주문서 ${parent.soId} 승인 불가\n` +
+	                    `상품명: ${child.productName}\n` +
+	                    `재고(${child.currStockQy}) < 주문수량(${child.ttSoQy})`
+	                );
+	                return; // 승인 중단
+	            }
+	        }
+	    }
+	
+	    // 4) 서버에 승인 요청 (부모만 보냄)
+	    const payload = parentRows.map(p => ({
+	        soId: p.soId
+	    }));
+	
+	    fetch("/so/approve", {
+	        method: "POST",
+	        headers: {"Content-Type": "application/json"},
+	        body: JSON.stringify(payload)
+	    })
+	    .then(r => r.json())
+	    .then(res => {
+	        if (res.success) {
+	            alert("승인 완료되었습니다.");
+	            document.getElementById("SearchBtn").click();
+	        } else {
+	            alert(res.message || "승인 실패");
+	        }
 	    });
+	}); // 승인버튼 end
 	
-	    if (invalidStatusItems.length > 0) {
-	      alert(invalidStatusItems.join('\n'));
-	      return;
-	    }
-	
-	    if (!confirm(`선택한 ${soIds.length}건의 주문을 승인하시겠습니까?`)) {
-	      return;
-	    }
-	
-	    const btn = document.getElementById('approveSoBtn');
-	    btn.disabled = true;
-	    btn.innerText = '처리중...';
-	
-	    const res = await axios.post('/so/approve', { soIds });
-	
-	    if (res?.data?.success === false) {
-	      alert(res.data.message || '승인 처리 중 오류가 발생했습니다.');
-	    } else {
-	      alert(res.data.message || '승인 처리가 완료되었습니다.');
-	      document.getElementById('SearchBtn')?.click(); // 새로고침
-	    }
-	
-	  } catch (err) {
-	    console.error(err);
-	
-	    if (err.response?.data?.message) {
-	      alert(err.response.data.message);
-	    } else {
-	      alert('승인 처리 중 오류가 발생했습니다.');
-	    }
-	
-	  } finally {
-	    const btn = document.getElementById('approveSoBtn');
-	    btn.disabled = false;
-	    btn.innerText = '승인';
-	  }
-	});
 	
 	// 2-4. 보류버튼 이벤트
 	// 보류 버튼 클릭 (단건만 가능)
@@ -311,9 +299,15 @@
 	    alert("보류는 한 건씩만 처리할 수 있습니다.\n하나만 선택해주세요.");
 	    return;
 	  }
+	  
 	
 	  const row = soGrid.getRow(parentKeys[0]);
 	  const soId = row.soId;
+	  
+	  if (row.progrsSt === 'es2') {
+	    alert("이미 승인된 주문서입니다.");
+	    return;
+	  }
 	  
 	  const reason = prompt(`[${soId}] 보류 사유를 입력하세요:`);
 	  if (reason === null) return;
@@ -361,6 +355,11 @@
 	
 	  const row = soGrid.getRow(parentKeys[0]);
 	  const soId = row.soId;
+	  
+	  if (row.progrsSt === 'es2') {
+	    alert("이미 승인된 주문서입니다.");
+	    return;
+	  }
 	  
 	  const reason = prompt(`[${soId}] 취소 사유를 입력하세요:`);
 	  if (reason === null) return;

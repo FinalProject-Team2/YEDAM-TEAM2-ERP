@@ -282,8 +282,8 @@
 	        , version
 	        , due_dt
 	        , tt_supply_price
-	        , tt_surtax_price      -- ★ 추가
-	        , tt_price             -- ★ 추가
+	        , tt_surtax_price
+	        , tt_price
 	        , tt_so_qy
 	        , rm
 	        , ship_addr
@@ -295,8 +295,8 @@
 	        , #{version}
 	        , #{dueDt}
 	        , #{ttSupplyPrice}
-	        , #{ttSurtaxPrice}     -- ★
-	        , #{ttPrice}           -- ★
+	        , #{ttSurtaxPrice}
+	        , #{ttPrice}
 	        , #{ttSoQy}
 	        , #{rm}
 	        , #{shipAddr}
@@ -401,34 +401,17 @@
         WHERE so_id = #{soId}
     </select>
 
-
-    <!-- 출고예약수량 += 주문수량 -->
-    <update id="updateReserveStock" parameterType="store.yd2team.business.service.EstiSoDetailVO">
-        UPDATE tb_stock
-        SET oust_reserv_qy = oust_reserv_qy + #{ttSoQy}
-        WHERE product_id = #{productId}
-    </update>
-
-
-    <!-- 출고 INSERT -->
-    <insert id="insertOust" parameterType="store.yd2team.business.service.EstiSoDetailVO">
-        INSERT INTO tb_oust (
-            oust_id, so_id, product_id, oust_qy, oust_request_dt, oust_progrs_st
-        ) VALUES (
-            'OUST_' || TO_CHAR(SYSTIMESTAMP, 'YYYYMMDDHH24MISSFF3'),
-            #{soId},
-            #{productId},
-            #{ttSoQy},
-            SYSDATE,
-            'os1'
-        )
-    </insert>
-
+	<select id="selectSoStatus" resultType="String">
+        SELECT progrs_st
+        FROM tb_so
+        WHERE so_id = #{soId}
+    </select>
 
     <!-- 승인 상태 변경 -->
-    <update id="updateApproveStatus" parameterType="string">
+    <update id="updateSoStatusToApproved">
         UPDATE tb_so
-        SET progras_st = 'es2'
+        SET progrs_st = 'es2',
+            updt_dt = SYSDATE
         WHERE so_id = #{soId}
     </update>
     

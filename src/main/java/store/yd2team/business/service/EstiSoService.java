@@ -38,7 +38,7 @@ public interface EstiSoService {
     List<EstiSoVO> selectSoList(EstiSoVO so);
     
     // 주문서관리화면 승인버튼
-    Map<String, Object> approveOrders(List<EstiSoVO> soIds);
+    void approveSo(List<EstiSoVO> list) throws Exception;
     
     // 보류버튼 이벤트
     Map<String, Object> rejectOrder(String soId, String reason);

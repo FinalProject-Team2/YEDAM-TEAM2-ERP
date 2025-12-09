@@ -59,11 +59,9 @@ public interface EstiSoMapper {
     // 주문서관리화면 승인버튼
     EstiSoVO getOrderHeader(String soId);
 
-    int updateReserveStock(EstiSoDetailVO detail);
+    String selectSoStatus(String soId);
 
-    int insertOust(EstiSoDetailVO detail);
-
-    int updateApproveStatus(String soId);
+    int updateSoStatusToApproved(String soId);
     
     // 보류버튼 이벤트
     void updateRejectStatus(@Param("soId") String soId,

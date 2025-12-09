@@ -225,74 +225,23 @@ public class EstiSoServiceImpl implements EstiSoService {
     }
     
     // 주문서관리화면 승인버튼
-    /** 승인 처리 */
-    @Transactional
     @Override
-    public Map<String, Object> approveOrders(List<EstiSoVO> soIds) {
+    public void approveSo(List<EstiSoVO> list) throws Exception {
 
-        StringBuilder msg = new StringBuilder();
+        for (EstiSoVO vo : list) {
 
-        for (EstiSoVO vo : soIds) {
-        	String soId = vo.getSoId();
-        	if("h".equals(vo.getHeader())){
-		        EstiSoVO header = estiSoMapper.getOrderHeader(soId);
-		
-		        if (header == null) {
-		            msg.append(soId).append(" : 존재하지 않는 주문서입니다.\n");
-		            continue;
-		        }
-		
-		        String status = header.getProgrsSt();
-		
-		        // 승인 불가 상태
-		        if ("es2".equals(status)) {
-		            msg.append(soId).append(" : 이미 승인된 주문서입니다.\n");
-		            continue;
-		        }
-		        if (!("es1".equals(status) || "es5".equals(status))) {
-		            msg.append(soId).append(" : 승인할 수 없는 상태입니다.\n");
-		            continue;
-		        }
-        	}else {
-        	
-	            // 상세 조회
-	            List<EstiSoDetailVO> details = estiSoMapper.selectSoDetailList(soId);
-	
-	            boolean stockFail = false;
-	
-	            // 재고 부족 체크
-	            for (EstiSoDetailVO d : details) {
-	
-	                Long stock = d.getCurrStockQy();
-	                Long need = d.getTtSoQy();
-	
-	                if (stock == null) stock = 0L;   // null 방지
-	
-	                if (stock < need) {
-	                    msg.append(soId).append(" : ")
-	                       .append(d.getProductName())
-	                       .append(" 재고가 부족합니다.\n");
-	                    stockFail = true;
-	                }
-	            }
-	
-	            if (stockFail) continue;  // 🔥 중요한 부분: 재고 부족이면 승인 전체 skip
-	
-	            // 재고 예약 update + 출고 insert
-	            for (EstiSoDetailVO d : details) {
-	                estiSoMapper.updateReserveStock(d);
-	                estiSoMapper.insertOust(d);
-	            }
-        	}
-            // 승인처리
-            estiSoMapper.updateApproveStatus(soId);
+            // 1. 현재 상태 조회
+            String currStatus = estiSoMapper.selectSoStatus(vo.getSoId());
+
+            // 승인 가능한 상태인지 확인 (es1: 대기, es5: 보류)
+            if (!("es1".equals(currStatus) || "es5".equals(currStatus))) {
+                throw new RuntimeException("주문서 " + vo.getSoId() + "는 승인할 수 없는 상태입니다.");
+            }
+
+            // 2. 승인 처리 (상태 = es2)
+            estiSoMapper.updateSoStatusToApproved(vo.getSoId());
         }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", msg.length() == 0);
-        result.put("message", msg.length() == 0 ? "승인 완료되었습니다." : msg.toString());
-        return result;
-    }
+    } // 주문서 승인버튼 end
     
     // 보류버튼 이벤트
     @Transactional

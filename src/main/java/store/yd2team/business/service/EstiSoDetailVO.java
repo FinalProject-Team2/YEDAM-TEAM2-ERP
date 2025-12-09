@@ -33,5 +33,6 @@ public class EstiSoDetailVO {
     // 공통
     private String creaBy;
     private String updtBy;
+    
 }
 
