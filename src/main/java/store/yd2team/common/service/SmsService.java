@@ -9,5 +9,7 @@ public interface SmsService {
      * @param validMin 유효 시간(분) - 안내 메시지에 사용
      */
     void sendOtpSms(String to, String otpCode, int validMin);
+    
+    void sendTempPasswordSms(String to, String vendId, String loginId, String tempPassword);
 	
 }

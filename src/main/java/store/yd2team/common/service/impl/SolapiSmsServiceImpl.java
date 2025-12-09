@@ -39,14 +39,40 @@ public class SolapiSmsServiceImpl implements SmsService {
         message.setTo(cleanTo);
         message.setText("[ERP] OTP 인증번호 [" + otpCode + "] 를 입력해 주세요.\n(유효시간 "
                         + validMin + "분)");
+        
+        log.info("[SMS-DRY-RUN][OTP] to={}, text={}", cleanTo, message);
+		/* 정재민 나중에 주석해제 할 거임
+		 * try { messageService.send(message); // 실제 문자 발송
+		 * log.info("SOLAPI OTP 전송 성공: to={}", cleanTo); } catch (Exception e) { // 여기서
+		 * 예외를 바로 던지면 로그인 전체가 깨질 수 있으니, 일단 로그만 찍는 패턴 추천
+		 * log.error("SOLAPI OTP 전송 실패: to={}, err={}", cleanTo, e.getMessage(), e); }
+		 */
+    }
 
-        try {
-            messageService.send(message);   // 실제 문자 발송
-            log.info("SOLAPI OTP 전송 성공: to={}", cleanTo);
-        } catch (Exception e) {
-            // 여기서 예외를 바로 던지면 로그인 전체가 깨질 수 있으니, 일단 로그만 찍는 패턴 추천
-            log.error("SOLAPI OTP 전송 실패: to={}, err={}", cleanTo, e.getMessage(), e);
-        }
+    @Override
+    public void sendTempPasswordSms(String to,String vendId, String loginId, String tempPassword) {
+
+        String cleanTo   = to.replaceAll("[^0-9]", "");
+        String cleanFrom = fromNumber.replaceAll("[^0-9]", "");
+
+        Message message = new Message();
+        message.setFrom(cleanFrom);
+        message.setTo(cleanTo);
+        message.setText(
+                "[ERP] 임시 비밀번호 안내\n" +
+                "회사코드 : " + vendId + "\n" + 
+                "ID : " + loginId + "\n" +
+                "임시 비밀번호 : " + tempPassword + "\n" +
+                "로그인 후 반드시 비밀번호를 변경해 주세요."
+        );
+
+        log.info("[SMS-DRY-RUN][OTP] to={}, text={}", cleanTo, message);
+		/*
+		 * try { // 정재민 나중에 주석 해제할 거임 messageService.send(message);
+		 * log.info("SOLAPI 임시 비밀번호 전송 성공: to={}", cleanTo); } catch (Exception e) {
+		 * log.error("SOLAPI 임시 비밀번호 전송 실패: to={}, err={}", cleanTo, e.getMessage(), e);
+		 * }
+		 */
     }
 	
 }
