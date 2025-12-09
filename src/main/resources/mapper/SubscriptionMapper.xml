@@ -109,6 +109,7 @@
 		SELECT
 			p.plan_nm        AS planNm,
 			s.crea_dt        AS creaDt,
+			s.start_dt       AS startDt,
 			p.sttl_perd      AS sttlPerd,
 			p.acct_issu_cnt  AS acctIssuCnt,
 			p.api_issu_cnt   AS apiIssuCnt,
@@ -127,7 +128,7 @@
 		WHERE subsp_id LIKE CONCAT(#{prefix}, '%')
 	</select>
 	
-	<!-- 신규 추가: tb_subsp 등록 -->
+	<!-- 구독(tb_subsp) 등록 -->
 	<insert id="insertSubscription" parameterType="store.yd2team.common.service.SubscriptionVO">
 		INSERT INTO tb_subsp
 		(
@@ -136,6 +137,8 @@
 			subsp_plan_id,
 			acct_use_cnt,
 			api_use_cnt,
+			start_dt,
+			end_dt,
 			crea_dt,
 			crea_by
 		)
@@ -146,15 +149,76 @@
 			#{subspPlanId},
 			NVL(#{acctUseCnt}, 0),
 			NVL(#{apiUseCnt}, 0),
+			#{startDt},
+			#{endDt},
 			SYSDATE,
 			#{creaBy}
 		)
 	</insert>
 	
-	<!-- 신규 추가: vendId 기준 tb_subsp 구독 삭제 (구독 해지) -->
-	<delete id="deleteSubscriptionByVendId" parameterType="string">
-		DELETE FROM tb_subsp
+	<!-- 구독 존재 여부 체크 (vendId 기준) -->
+	<select id="existsSubscriptionByVendId" parameterType="string" resultType="int">
+		SELECT COUNT(*)
+		FROM tb_subsp
 		WHERE vend_id = #{vendId}
-	</delete>
+	</select>
 	
+	<!-- vendId 기준 구독 정보 수정 -->
+	<update id="updateSubscriptionByVendId" parameterType="store.yd2team.common.service.SubscriptionVO">
+		UPDATE tb_subsp
+		SET
+			subsp_plan_id = #{subspPlanId},
+			start_dt      = #{startDt},
+			end_dt        = #{endDt},
+			updt_dt       = SYSDATE,
+			updt_by       = #{updtBy}
+		WHERE vend_id = #{vendId}
+	</update>
+	
+	<!-- === 정산/결제(tb_sttl) 관련 쿼리 추가 === -->
+	<select id="getMaxSttlSeqOfMonth" parameterType="string" resultType="string">
+		SELECT MAX(SUBSTR(sttl_id, LENGTH(#{prefix}) + 1))
+		FROM tb_sttl
+		WHERE sttl_id LIKE CONCAT(#{prefix}, '%')
+	</select>
+	
+	<insert id="insertSttl" parameterType="store.yd2team.common.service.SttlVO">
+		INSERT INTO tb_sttl
+		(
+			sttl_id,
+			vend_id,
+			subsp_plan_id,
+			payment_key,
+			crea_by
+		)
+		VALUES
+		(
+			#{sttlId},
+			#{vendId},
+			#{subspPlanId},
+			#{paymentKey},
+			#{creaBy}
+		)
+	</insert>
+	
+	<!-- === 신규 추가: 결제 내역 조회 === -->
+	<select id="selectSttlHistoryByVendId" parameterType="string" resultType="store.yd2team.common.dto.SttlHistoryDto">
+		SELECT
+			v.vend_nm             AS vendNm,
+			p.plan_nm             AS planNm,
+			p.sttl_perd           AS sttlPerd,
+			s.crea_dt             AS startDt,
+			CASE
+				WHEN p.sttl_perd = 'b1' THEN ADD_MONTHS(s.crea_dt, 1)
+				WHEN p.sttl_perd = 'b2' THEN ADD_MONTHS(s.crea_dt, 12)
+				ELSE s.crea_dt
+			END                  AS endDt
+		FROM tb_sttl s
+		JOIN tb_vend v
+		  ON s.vend_id = v.vend_id
+		JOIN tb_subsp_plan p
+		  ON s.subsp_plan_id = p.subsp_plan_id
+		WHERE s.vend_id = #{vendId}
+		ORDER BY s.crea_dt DESC
+	</select>
 </mapper>

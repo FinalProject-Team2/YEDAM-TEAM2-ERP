@@ -2,6 +2,7 @@ package store.yd2team.common.service;
 
 import java.util.List;
 
+import store.yd2team.common.dto.SttlHistoryDto;
 import store.yd2team.common.dto.SubscriptionUsageDto;
 
 public interface SubscriptionService {
@@ -23,5 +24,8 @@ public interface SubscriptionService {
 	
 	// 신규 추가: vendId 기준 구독 해지(tb_subsp 삭제)
 	int cancelSubscriptionByVendId(String vendId) throws Exception;
+	
+	// 신규 추가: 결제 내역 조회
+	List<SttlHistoryDto> getSttlHistoryByVendId(String vendId) throws Exception;
 	
 }// end interface

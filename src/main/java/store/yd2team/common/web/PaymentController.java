@@ -86,8 +86,8 @@ public class PaymentController {
 		// amount 파라미터와 세션 값이 다를 경우를 대비해 우선순위는 파라미터 > 세션
 		Long finalAmount = (amount != null ? amount : sessionAmount);
 
-		// 결제 성공 시 tb_subsp 저장
-		paymentService.saveSubscriptionOnPaymentSuccess(planName, billingCycle, finalAmount);
+		// 결제 성공 시 tb_subsp / tb_sttl 저장 (paymentKey 포함)
+		paymentService.saveSubscriptionOnPaymentSuccess(planName, billingCycle, finalAmount, paymentKey);
 
 		// 세션에 저장해둔 정보는 더 이상 필요 없으므로 제거
 		session.removeAttribute("PAYMENT_PLAN_NAME");
@@ -100,7 +100,7 @@ public class PaymentController {
 		// 최종적으로 /subscription/check로 리다이렉트
 		return "redirect:/subscription/check";
 	}
-
+	
 	// Toss 결제 실패 콜백
 	@GetMapping("/subscription/payment/fail")
 	public String paymentFail(

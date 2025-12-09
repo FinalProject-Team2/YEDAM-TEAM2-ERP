@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import store.yd2team.common.dto.SttlHistoryDto;
 import store.yd2team.common.dto.SubscriptionUsageDto;
 import store.yd2team.common.mapper.SubscriptionMapper;
 import store.yd2team.common.service.SubscriptionService;
@@ -83,6 +84,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 			return 0;
 		}
 		return subscriptionMapper.deleteSubscriptionByVendId(vendId);
+	}
+	
+	@Override
+	public List<SttlHistoryDto> getSttlHistoryByVendId(String vendId) throws Exception {
+		if (vendId == null || vendId.isEmpty()) {
+			return java.util.Collections.emptyList();
+		}
+		return subscriptionMapper.selectSttlHistoryByVendId(vendId);
 	}
 	
 }// end class
