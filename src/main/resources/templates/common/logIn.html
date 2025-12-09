@@ -461,6 +461,10 @@
         })
         .then(function (data) {
           if (data.success) {
+            try {
+        	  sessionStorage.removeItem('erp_session_expire_at');
+        	} catch (e) {}
+        	  
             window.location.href = '/';
             return;
           }
@@ -585,6 +589,7 @@
       });
     }
   });
+  
 </script>
 
 </body>

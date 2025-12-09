@@ -1,5 +1,6 @@
 package store.yd2team.common.service.impl;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -114,5 +115,13 @@ public class AuthManageServiceImpl implements AuthManageService {
 
         return result;
 
+    }
+    
+    @Override
+    public List<RoleVO> getRoleNameSuggestList(String vendId, String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return Collections.emptyList();
+        }
+        return authManageMapper.selectRoleNameSuggestList(vendId, keyword);
     }
 }

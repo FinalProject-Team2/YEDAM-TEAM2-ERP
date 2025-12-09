@@ -187,5 +187,22 @@
 	      AND role_id = #{roleId}
 	</select>
 	
-		
+	<select id="selectRoleNameSuggestList">
+	  SELECT *
+	  FROM (
+	      SELECT  ROLE_ID,
+	              VEND_ID,
+    	          ROLE_NM,
+	              ROLE_TY,
+	              ROLE_DC,
+	              YN   
+	      FROM    TB_ROLE
+	      WHERE   (VEND_ID = #{vendId} OR VEND_ID IS NULL)
+	        AND   YN = 'e1'
+	        <if test="keyword != null and keyword != ''">
+	          AND ROLE_NM LIKE '%' || #{keyword} || '%'
+	        </if>
+	      ORDER BY ROLE_NM
+	  )
+	</select>
 </mapper>

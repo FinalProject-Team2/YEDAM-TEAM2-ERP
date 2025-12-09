@@ -1,6 +1,15 @@
 // 비밀번호 변경 모달
 document.addEventListener('DOMContentLoaded', function () {
+  
+  const usernameHidden = document.getElementById('pwChangeUsername');
+  const isLoggedIn = !!(usernameHidden && usernameHidden.value);
 
+  // 로그인 안 된 상태면 비밀번호 변경 모달 기능 전체 비활성화
+  if (!isLoggedIn) {
+    console.log('[PW MODAL] 비로그인 상태이므로 모달 스크립트를 실행하지 않습니다.');
+    return;
+  }
+  
   const pwMenuItem   = document.getElementById('pwChangeMenuItem');
   const pwModal      = document.getElementById('pwChangeModal');
   const pwBackdrop   = document.getElementById('pwChangeBackdrop');
