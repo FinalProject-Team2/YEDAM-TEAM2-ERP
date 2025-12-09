@@ -86,6 +86,7 @@
 							<h5 class="card-title">주문서 목록</h5>
 						</div>
 						<div class="card-header-right">
+							<button type="button" class="btn btn-outline-dark" id="addOustBtn">출하지시서</button>
 							<button type="button" class="btn btn-outline-dark" id="approveSoBtn">승인</button>
 							<button type="button" class="btn btn-outline-dark" id="rejectSoBtn">보류</button>
 							<button type="button" class="btn btn-danger" id="deleteSoBtn">주문취소</button>
@@ -149,7 +150,7 @@
 			{ 
 			  header: '진행상태',
 			  name: 'codeNm',
-			  ailgn: 'center',
+			  align: 'center',
 			  formatter: ({ row }) => {
 			      if (!row.codeNm) return '';
 			      if (row.stResn) {
@@ -231,7 +232,7 @@
 	    const parentRows = checkedRows.filter(r => r.header === 'h');
 	
 	    if (parentRows.length === 0) {
-	        alert("부모(주문서 헤더)만 승인할 수 있습니다.");
+	        alert("승인은 주문서 기준으로만 가능합니다. 주문서를 선택한 후 다시 시도해주세요.");
 	        return;
 	    }
 	
@@ -298,9 +299,15 @@
 	    alert("보류는 한 건씩만 처리할 수 있습니다.\n하나만 선택해주세요.");
 	    return;
 	  }
+	  
 	
 	  const row = soGrid.getRow(parentKeys[0]);
 	  const soId = row.soId;
+	  
+	  if (row.progrsSt === 'es2') {
+	    alert("이미 승인된 주문서입니다.");
+	    return;
+	  }
 	  
 	  const reason = prompt(`[${soId}] 보류 사유를 입력하세요:`);
 	  if (reason === null) return;
@@ -348,6 +355,11 @@
 	
 	  const row = soGrid.getRow(parentKeys[0]);
 	  const soId = row.soId;
+	  
+	  if (row.progrsSt === 'es2') {
+	    alert("이미 승인된 주문서입니다.");
+	    return;
+	  }
 	  
 	  const reason = prompt(`[${soId}] 취소 사유를 입력하세요:`);
 	  if (reason === null) return;

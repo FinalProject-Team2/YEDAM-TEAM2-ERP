@@ -1,0 +1,14 @@
+package store.yd2team.business.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import store.yd2team.business.service.OustVO;
+
+@Mapper
+public interface OustMapper {
+
+	// 견적서 목록 조회
+    List<OustVO> selectOust(OustVO cond);
+}
