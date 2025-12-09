@@ -345,13 +345,13 @@
 		} */
 	}
 	
+	// 바깥 클릭 시 닫기
 	function closeNewCustModal() {
 		modal.classList.remove("show");
 		modal.style.display = "none";
 		back.style.display = "none";
 	}
 	
-	// 바깥 클릭 시 닫기
 	modal.addEventListener("click", (event) => {
 		if (!event.target.closest(".modal-content")) {
 		  closeNewCustModal();

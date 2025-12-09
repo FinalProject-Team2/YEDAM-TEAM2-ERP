@@ -3,6 +3,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import store.yd2team.business.mapper.CreditMapper;
+import store.yd2team.business.service.AtmptVO;
 import store.yd2team.business.service.CreditService;
 import store.yd2team.business.service.CreditVO;
 import store.yd2team.business.service.CustcomVO;
@@ -15,14 +16,7 @@ public class CreditServiceImpl implements CreditService {
    public List<CreditVO> searchCredit(CreditVO vo) {
        return creditMapper.searchCredit(vo);
    }
-   // 검색조건(저장)
-   @Override
-   public int saveCredit(CreditVO vo) throws Exception {
-       System.out.println("### Service saveCredit 호출 ###");
-       int result = creditMapper.insertCredit(vo);
-       System.out.println("### result = " + result);
-       return 1;
-   }
+   
    // 조회 고객사 auto complete(고객코드, 고객사명)
    @Override
    public List<CreditVO> searchCustcomId(String keyword) {
@@ -83,6 +77,24 @@ public class CreditServiceImpl implements CreditService {
        }
        return updatedCount;
    }
+@Override
+public int insertCdtlnLmt(CreditVO vo) {
+	// TODO Auto-generated method stub
+    creditMapper.insertCdtlnLmt(vo);
+    
+    AtmptVO  avo = new AtmptVO();
+    avo.setCdtlnNo(vo.getCdtlnNo());
+    avo.setCustcomId(vo.getCustcomId());
+    avo.setVendId(vo.getVendId());
+	avo.setAtmptBlce(0l);
+    return creditMapper.insertAtmpt(avo);
+	
+}
+@Override
+public int insertAtmpt(AtmptVO vo) {
+	// TODO Auto-generated method stub
+	return 0;
+}
 }
 
 
