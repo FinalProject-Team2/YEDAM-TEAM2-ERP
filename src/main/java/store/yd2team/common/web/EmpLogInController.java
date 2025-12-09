@@ -34,10 +34,10 @@ public class EmpLogInController {
     // ==========================
     @PostMapping("/logIn/login")
     public EmpLoginResultDto login(@RequestParam("vendId") String vendId,
-                                @RequestParam("loginId") String loginId,
-                                @RequestParam("password") String password,
-                                @RequestParam(value = "captchaValue", required = false) String captchaValue,
-                                HttpSession session) {
+                                   @RequestParam("loginId") String loginId,
+                                   @RequestParam("password") String password,
+                                   @RequestParam(value = "captchaValue", required = false) String captchaValue,
+                                   HttpSession session) {
 
         // 이번 로그인 시도에서 캡챠가 필요한지 정책 + 실패횟수 기반으로 체크
         boolean captchaRequired = empAcctService.isCaptchaRequired(vendId, loginId);
@@ -137,7 +137,7 @@ public class EmpLogInController {
             // OTP 문자 발송 (hp → cttpc 순으로 사용)
             String targetMobile = selectOtpTargetNumber(empAcct); // hp 우선, 없으면 cttpc
             if (targetMobile != null && !targetMobile.isBlank()) {
-            	// 정재민 아래 기능은 문자 발송 기능
+                // 정재민 아래 기능은 문자 발송 기능
                 // smsService.sendOtpSms(targetMobile, otpCode, otpValidMin);
                 
                 log.info(">>> [DEV ONLY] OTP 문자 발송: to={}, otpCode={}, validMin={}, failLimit={}",
@@ -163,8 +163,8 @@ public class EmpLogInController {
     // ==========================
     @PostMapping("/logIn/otp")
     public EmpLoginResultDto verifyOtp(@RequestParam("otpCode") String otpCode,
-                                    HttpSession session) {
-    	
+                                       HttpSession session) {
+        
         String savedOtp      = (String) session.getAttribute(SessionConst.LOGIN_OTP_CODE);
         Long expireMillis    = (Long) session.getAttribute(SessionConst.LOGIN_OTP_EXPIRE);
         EmpAcctVO pendingEmp = (EmpAcctVO) session.getAttribute(SessionConst.PENDING_LOGIN_EMP);
@@ -194,7 +194,7 @@ public class EmpLogInController {
             session.setAttribute(SessionConst.LOGIN_OTP_FAIL_CNT, failCnt);
 
             if (failCnt >= failLimit) {
-            	// 이 OTP 세션 전체를 "로그인 실패 1회"로 처리
+                // 이 OTP 세션 전체를 "로그인 실패 1회"로 처리
                 empAcctService.increaseLoginFailByOtp(pendingEmp);
 
                 //  OTP 관련 세션 정리
@@ -220,14 +220,15 @@ public class EmpLogInController {
         
         applySessionPolicy(session, loginEmp.getVendId());
 
-        log.info(">>> OTP 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={}, empId={}, loginId={}, vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={}",
+        log.info(">>> OTP 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={}, empId={}, loginId={}, vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={}, roleId={}",
                 session.getId(),
                 loginEmp.getEmpAcctId(), loginEmp.getEmpNm(),
                 loginEmp.getDeptNm(), loginEmp.getDeptId(),
                 loginEmp.getEmpId(), loginEmp.getLoginId(),
                 loginEmp.getVendId(), loginEmp.getMasYn(),
                 loginEmp.getBizcnd(), loginEmp.getAddr(),
-                loginEmp.getCttpc(), loginEmp.getHp());
+                loginEmp.getCttpc(), loginEmp.getHp(),
+                loginEmp.getRoleId());
 
         // OTP 관련 임시 세션은 제거
         clearOtpSession(session);
@@ -277,6 +278,15 @@ public class EmpLogInController {
         loginEmp.setRoleIds(empAcct.getRoleIds());
         loginEmp.setAuthCodes(empAcct.getAuthCodes());
 
+        // 🔽 추가된 부분: masYn 기준으로 roleId 세팅
+        //  - 예시: masYn == 'e1' 이면 HR 관리자 권한
+        String roleId = "ROLE_USER";
+        if ("e1".equals(empAcct.getMasYn())) {
+            roleId = "ROLE_HR_ADMIN";
+        }
+        loginEmp.setRoleId(roleId);
+        // 🔼 여기까지만 새로 추가됨
+
         return loginEmp;
     }
 
@@ -296,65 +306,63 @@ public class EmpLogInController {
         return null;
     }
     
-	 // ==========================
-	 // OTP 재발급 API
-	 // ==========================
-	 @PostMapping("/logIn/otp/resend")
-	 public EmpLoginResultDto resendOtp(HttpSession session) {
-	
-	     EmpAcctVO pendingEmp = (EmpAcctVO) session.getAttribute(SessionConst.PENDING_LOGIN_EMP);
-	     if (pendingEmp == null) {
-	         return EmpLoginResultDto.fail("OTP 세션 정보가 없습니다. 다시 로그인해 주세요.");
-	     }
-	
-	     Integer failCntObj   = (Integer) session.getAttribute(SessionConst.LOGIN_OTP_FAIL_CNT);
-	     Integer failLimitObj = (Integer) session.getAttribute(SessionConst.LOGIN_OTP_FAIL_LIMIT);
-	
-	     int failCnt   = (failCntObj == null ? 0 : failCntObj);
-	     int failLimit = (failLimitObj == null || failLimitObj <= 0 ? DEFAULT_OTP_FAIL_LIMIT : failLimitObj);
-	
-	     // 이미 OTP 실패 한도를 넘은 경우 → 재로그인 유도
-	     if (failCnt >= failLimit) {
-	         // 한도만 넘었고 아직 verifyOtp 쪽에서 증가를 안 했다고 가정하면
-	         // 여기서도 로그인 실패 1회 반영해도 되고, 아니면 세션만 정리해도 됨.
-	         clearOtpSession(session);
-	         return EmpLoginResultDto.fail("OTP 재발급 가능 횟수를 초과했습니다. 다시 로그인해 주세요.");
-	     }
-	
-	     // OTP 정책 재조회 (유효 시간만 쓰면 됨)
-	     SecPolicyVO policy = empAcctService.getSecPolicy(pendingEmp.getVendId());
-	
-	     int otpValidMin = DEFAULT_OTP_VALID_MIN;
-	     if (policy != null && policy.getOtpValidMin() != null && policy.getOtpValidMin() > 0) {
-	         otpValidMin = policy.getOtpValidMin();
-	     }
-
-	     // 새 OTP 생성 + 만료시간 갱신
-	     String otpCode = generateOtpCode(6);
-	     long now = System.currentTimeMillis();
-	     long expireTimeMillis = now + (otpValidMin * 60L * 1000L);
-	
-	     session.setAttribute(SessionConst.LOGIN_OTP_CODE, otpCode);
-	     session.setAttribute(SessionConst.LOGIN_OTP_EXPIRE, expireTimeMillis);
-	
-	     String targetMobile = selectOtpTargetNumber(pendingEmp);
-	     if (targetMobile != null && !targetMobile.isBlank()) {
-	         // 나중에 주석으로 막을 예정
-	         // smsService.sendOtpSms(targetMobile, otpCode, otpValidMin);
-	
-	         log.info(">>> [DEV ONLY] OTP 재발급: to={}, otpCode={}, validMin={}",
-	                 targetMobile, otpCode, otpValidMin);
-	     } else {
-	         log.warn("OTP 재발급 문자 발송 불가 - hp/cttpc 모두 없음: empAcctId={}", pendingEmp.getEmpAcctId());
-	         log.info(">>> [DEV ONLY] OTP 재발급 (문자 미발송, 번호 없음): vendId={}, loginId={}, otpCode={}, validMin={}",
-	                 pendingEmp.getVendId(), pendingEmp.getLoginId(), otpCode, otpValidMin);
-	     }
-	
-	     // 프론트에서는 OTP 입력 박스 그대로 두고 메시지만 띄우면 되므로
-	     return EmpLoginResultDto.otpStep(pendingEmp, "새 OTP를 전송했습니다.");
-	 }
-	 
-	// ==========================
+    // ==========================
+    // OTP 재발급 API
+    // ==========================
+    @PostMapping("/logIn/otp/resend")
+    public EmpLoginResultDto resendOtp(HttpSession session) {
+    
+        EmpAcctVO pendingEmp = (EmpAcctVO) session.getAttribute(SessionConst.PENDING_LOGIN_EMP);
+        if (pendingEmp == null) {
+            return EmpLoginResultDto.fail("OTP 세션 정보가 없습니다. 다시 로그인해 주세요.");
+        }
+    
+        Integer failCntObj   = (Integer) session.getAttribute(SessionConst.LOGIN_OTP_FAIL_CNT);
+        Integer failLimitObj = (Integer) session.getAttribute(SessionConst.LOGIN_OTP_FAIL_LIMIT);
+    
+        int failCnt   = (failCntObj == null ? 0 : failCntObj);
+        int failLimit = (failLimitObj == null || failLimitObj <= 0 ? DEFAULT_OTP_FAIL_LIMIT : failLimitObj);
+    
+        // 이미 OTP 실패 한도를 넘은 경우 → 재로그인 유도
+        if (failCnt >= failLimit) {
+            clearOtpSession(session);
+            return EmpLoginResultDto.fail("OTP 재발급 가능 횟수를 초과했습니다. 다시 로그인해 주세요.");
+        }
+    
+        // OTP 정책 재조회 (유효 시간만 쓰면 됨)
+        SecPolicyVO policy = empAcctService.getSecPolicy(pendingEmp.getVendId());
+    
+        int otpValidMin = DEFAULT_OTP_VALID_MIN;
+        if (policy != null && policy.getOtpValidMin() != null && policy.getOtpValidMin() > 0) {
+            otpValidMin = policy.getOtpValidMin();
+        }
+    
+        // 새 OTP 생성 + 만료시간 갱신
+        String otpCode = generateOtpCode(6);
+        long now = System.currentTimeMillis();
+        long expireTimeMillis = now + (otpValidMin * 60L * 1000L);
+    
+        session.setAttribute(SessionConst.LOGIN_OTP_CODE, otpCode);
+        session.setAttribute(SessionConst.LOGIN_OTP_EXPIRE, expireTimeMillis);
+    
+        String targetMobile = selectOtpTargetNumber(pendingEmp);
+        if (targetMobile != null && !targetMobile.isBlank()) {
+            // 나중에 주석으로 막을 예정
+            // smsService.sendOtpSms(targetMobile, otpCode, otpValidMin);
+    
+            log.info(">>> [DEV ONLY] OTP 재발급: to={}, otpCode={}, validMin={}",
+                    targetMobile, otpCode, otpValidMin);
+        } else {
+            log.warn("OTP 재발급 문자 발송 불가 - hp/cttpc 모두 없음: empAcctId={}", pendingEmp.getEmpAcctId());
+            log.info(">>> [DEV ONLY] OTP 재발급 (문자 미발송, 번호 없음): vendId={}, loginId={}, otpCode={}, validMin={}",
+                    pendingEmp.getVendId(), pendingEmp.getLoginId(), otpCode, otpValidMin);
+        }
+    
+        // 프론트에서는 OTP 입력 박스 그대로 두고 메시지만 띄우면 되므로
+        return EmpLoginResultDto.otpStep(pendingEmp, "새 OTP를 전송했습니다.");
+    }
+     
+    // ==========================
     // 세션 타임아웃 정책 적용 유틸
     // ==========================
     private void applySessionPolicy(HttpSession session, String vendId) {

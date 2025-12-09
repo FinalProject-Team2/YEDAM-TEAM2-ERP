@@ -126,7 +126,7 @@
 								onclick="changeLeadTab(this)">리드분석</button>
 						</li>
 						<li class="nav-item">
-							<button class="nav-link" type="button" data-target="#tabActivity"
+							<button class="nav-link" type="button" data-target="#tabDemo"
 								onclick="changeLeadTab(this)">견적 및 데모활동</button>
 						</li>
 					</ul>
@@ -137,8 +137,6 @@
 					<button type="button" class="btn btn-outline-dark"
 						id="btnContactAdd">추가</button>
 					<button type="button" class="btn btn-primary" id="btnContactSave">저장</button>
-					<button type="button" class="btn btn-outline-dark"
-						id="btnContactSearch">조회</button>
 				</div>
 			</div>
 
@@ -157,13 +155,21 @@
 				</div>
 
 				<!-- 견적 및 데모활동 탭 -->
-				<div id="tabActivity" class="tab-pane-custom" style="display: none;">
-					<div id="activitygrid"
+				<div id="tabDemo" class="tab-pane-custom" style="display: none;">
+					<div id="demoGrid"
 						style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 				</div>
 			</div>
 		</div>
 	</form>
+
+
+
+
+
+
+
+
 
 	<script th:inline="javascript">
     // 공통 테마
@@ -225,7 +231,8 @@
             { header: '리드점수', name: 'leadScore', align: 'center', sortable: true }
         ]
     });
-
+    //
+    //
     // 접촉 Grid
     const contactData = /*[[${contactrList}]]*/ [];
     console.log("contactData", contactData);
@@ -254,7 +261,7 @@
             { header: '내용', name: 'contactCntn', editor: 'text' }
         ]
     });
-
+    //
     // 리드 Grid
     const leadData = /*[[${leadList}]]*/ [];
     console.log("leadData", leadData);
@@ -286,27 +293,41 @@
             { header: '리드점수', name: 'leadScore', align: 'center' }
         ]
     });
-
+    //
     // 견적/데모 Grid
-    const activityData = /*[[${activityList}]]*/ [];
-    console.log("activityData", activityData);
+    const demoData = /*[[${demoList}]]*/ [];
+    console.log("demoData", demoData);
 
-    const activityGrid = new tui.Grid({
-        el: document.getElementById('activitygrid'),
-        data: activityData,
+    const demoGrid = new tui.Grid({
+        el: document.getElementById('demoGrid'),
+        data: demoData,
         scrollX: true,
         scrollY: true,
         minBodyHeight: 0,
         autoWidth: true,
         columns: [
-            { header: '날짜', name: 'activity_dt', align: 'center', editor: 'text' },
-            { header: '유형', name: 'activity_ty', align: 'center', editor: 'text' },
-            { header: '설명', name: 'activity_cntn', editor: 'text' },
-            { header: '결과', name: 'activity_result', editor: 'text' }
+            { header: '날짜', name: 'demoQuotatioDt', formatter: ({ value }) => {
+                if (!value) return '';
+                const d = new Date(value);
+                if (isNaN(d.getTime())) return '';
+                return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
+            }, align: 'center', editor: 'text' },
+            { header: '담당자', name: 'demoManager', align: 'center', editor: 'text' },
+            { header: '설명', name: 'demoDc', editor: 'text' },
+            { header: '고개반응', name: 'custReaction', editor: 'text' },
+            { header: '샘플여부', name: 'samplePrivide', editor: 'text' },
+            { header: '수량', name: 'custQy', editor: 'text' },
+            { header: '할인', name: 'custDiscount', editor: 'text' },
+            { header: '납기', name: 'custDelivery', formatter: ({ value }) => {
+                if (!value) return '';
+                const d = new Date(value);
+                if (isNaN(d.getTime())) return '';
+                return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
+            }, editor: 'text' }
         ]
     });
 
-    // 잠재고객 클릭 시 접촉/리드 조회
+    // 잠재고객 클릭 시 접촉/리드/데모 조회
     potentialgrid.on('click', function (ev) {
         const row = potentialgrid.getRow(ev.rowKey);
         if (!row) return;
@@ -332,24 +353,34 @@
         fetch('/salesActivity/LeadByVend?vendId=' + encodeURIComponent(vendId))
             .then(res => res.json())
             .then(data => {
-                console.log('받은 리드내역', data);
-                // 컨트롤러에서 List<LeadVO> 그대로 리턴하면 이대로
+                console.log('받은 데모내역', data);
                 leadgrid.resetData(data);
-                // 만약 { leadList: [...] } 형태면 → leadgrid.resetData(data.leadList);
             })
             .catch(err => console.error('리드내역 조회 오류', err));
+        
+       // 데모내역
+        fetch('/salesActivity/DemoByVend?vendId=' + encodeURIComponent(vendId))
+            .then(res => res.json())
+            .then(data => {
+                console.log('받은 데모내역', data);
+                demoGrid.resetData(data);
+            })
+            .catch(err => console.error('데모내역 조회 오류', err));
     });
 
     // 저장 버튼
     document.getElementById('btnContactSave').addEventListener('click', function () {
         contactGrid.finishEditing();
         leadgrid.finishEditing();
+        demoGrid.finishEditing();
 
         const contactModified = contactGrid.getModifiedRows();
-        const leadModified = 	leadgrid.getModifiedRows();
+        const leadModified    = leadgrid.getModifiedRows();
+        const demoModified    = demoGrid.getModifiedRows();
 
         const contactList = contactModified.updatedRows.concat(contactModified.createdRows);
-        const leadList = 	leadModified.updatedRows.concat(leadModified.createdRows);
+        const leadList    = leadModified.updatedRows.concat(leadModified.createdRows);
+        const demoList    = demoModified.updatedRows.concat(demoModified.createdRows);
 
         // 접촉 유효성 체크
         for (const contact of contactList) {
@@ -363,6 +394,21 @@
         for (const lead of leadList) {
             if (!lead.leadDt || !lead.leadManager || !lead.requiredDt || !lead.competitorYn || !lead.budgetAvailYn) {
                 alert("리드 내용을 모두 입력하십시오.");
+                return;
+            }
+        }
+        
+        // 데모 유효성 체크
+        for (const demo of demoList) {
+            if (!demo.demoQuotatioDt 
+            	|| !demo.demoManager 
+            	|| !demo.demoDc 
+            	|| !demo.custReaction 
+            	|| !demo.samplePrivide
+            	|| !demo.custQy
+            	|| !demo.custDiscount
+            	|| !demo.custDelivery) {
+                alert("데모 내용을 모두 입력하십시오.");
                 return;
             }
         }
@@ -396,7 +442,8 @@
                 vendId: vendId,
                 potentialInfoNo: potentialInfoNo,
                 contactList: contactList,
-                leadList: leadList
+                leadList: leadList,
+                demoList: demoList
             })
         })
             .then(res => res.text())
@@ -409,7 +456,8 @@
     // 행 추가 버튼
     document.getElementById('btnContactAdd').addEventListener('click', function () {
     	console.log('typeof contactGrid = ', typeof contactGrid);
-    	console.log('typeof leadgrid = ', typeof leadgrid);
+    	console.log('typeof leadGrid = ', typeof leadgrid);
+    	console.log('typeof demoGrid = ', typeof demoGrid);
     	console.log('>>> 추가 버튼 클릭됨');
     	
         const today = new Date();
@@ -447,14 +495,18 @@
                 leadScore: null
             });
             leadgrid.focus(0, 'leadDt');
-        } else if (target === '#tabActivity') {
-            activityGrid.prependRow({
-                activity_dt: todayStr,
-                activity_ty: '',
-                activity_cntn: '',
-                activity_result: ''
+        } else if (target === '#tabDemo') {
+            demoGrid.prependRow({
+	            demoQuotatioDt: todayStr,
+	            demoManager: '',
+	            demoDc: '',
+	            custReaction: '',
+	            samplePrivide: '',
+	            custQy: '',
+	            custDiscount: '',
+	            custDelivery: ''
             });
-            activityGrid.focus(0, 'activity_dt');
+            demoGrid.focus(0, 'demoQuotatioDt');
         }
     });
 
@@ -478,7 +530,7 @@
         setTimeout(() => {
             contactGrid.refreshLayout();
             leadgrid.refreshLayout();
-            activityGrid.refreshLayout();
+            demoGrid.refreshLayout();
         }, 0);
     }
 </script>

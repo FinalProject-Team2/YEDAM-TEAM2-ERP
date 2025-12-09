@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
     <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
-    <title>attStatus</title>
+    <title>attd</title>
 
     <style>
         #attGrid { width: 100%; }
@@ -23,35 +23,36 @@
     <div class="col-md-12">
         <div class="card mb-3">
             <div class="card-header">
-                <h5 class="card-title">근태현황 조회(관리자)</h5>
+                <h5 class="card-title mb-0">근태현황 조회</h5>
                 <div class="card-header-right">
-                    <button class="btn btn-outline-dark">조회</button>
+                    <button type="button" id="btnSearchAttd" class="btn btn-outline-dark">
+                        조회
+                    </button>
                 </div>
             </div>
 
             <div class="card-body">
                 <div class="row">
 
-                    <!-- 부서명 -->
-                    <div class="col-md-3">
+                    <!-- 부서명 : HR 관리자만 노출 -->
+                    <div class="col-md-3"
+                         th:if="${session.LOGIN_EMP != null and session.LOGIN_EMP.roleId == 'ROLE_HR_ADMIN'}">
                         <label class="form-label">부서명</label>
-                        <select class="form-select">
-                            <option>전체</option>
-                            <option>인사</option>
-                            <option>생산</option>
-                            <option>총무</option>
+                        <select class="form-select" id="deptSelect">
+                            <option value="">전체</option>
                         </select>
                     </div>
 
-                    <!-- 사원명 -->
-                    <div class="col-md-3">
+                    <!-- 사원명 : HR 관리자만 검색용 인풋 노출 -->
+                    <div class="col-md-3"
+                         th:if="${session.LOGIN_EMP != null and session.LOGIN_EMP.roleId == 'ROLE_HR_ADMIN'}">
                         <label class="form-label">사원명</label>
-                        <input type="text" class="form-control" placeholder="사원명 입력">
+                        <input type="text" id="empNmCond" class="form-control" placeholder="사원명 입력">
                     </div>
 
-                    <!-- 근무기간 -->
+                    <!-- 근무일자 -->
                     <div class="col-md-6">
-                        <label class="form-label">근무기간</label>
+                        <label class="form-label">근무일자</label>
                         <div class="d-flex align-items-center js-date-range">
 
                             <!-- 시작일 -->
@@ -87,11 +88,8 @@
 
         <!-- ================= 목록 ================= -->
         <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">근태 목록</h5>
-                <div class="card-header-right">
-                    <button class="btn btn-outline-dark">PDF</button>
-                </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">근태 목록</h5>
             </div>
             <div class="card-body">
                 <div id="attGrid" class="mt-3"></div>
@@ -101,40 +99,129 @@
 
 </div>
 
-<script>
+<script type="text/javascript">
     /***********************
-     * 더미 데이터
-     ***********************/
-    const attGridData = [
-        { workDt: "2025.04.03", deptNm: "인사", positionNm: "부장", empNo: "001", empNm: "민윤기", attType: "연차", inTime: "09:00", outTime: "18:00" },
-        { workDt: "2025.05.12", deptNm: "인사", positionNm: "부장", empNo: "001", empNm: "민윤기", attType: "조퇴", inTime: "09:00", outTime: "16:00" },
-        { workDt: "2025.04.03", deptNm: "인사", positionNm: "과장", empNo: "002", empNm: "정재민", attType: "지각", inTime: "10:00", outTime: "19:00" },
-        { workDt: "2025.04.03", deptNm: "인사", positionNm: "과장", empNo: "002", empNm: "정재민", attType: "휴무", inTime: "-", outTime: "-" }
-    ];
-
-    /***********************
-     * Grid 생성
+     * Grid 생성 (초기 빈 데이터)
      ***********************/
     const attGrid = new tui.Grid({
         el: document.getElementById("attGrid"),
-        data: attGridData,
+        data: [],
         bodyHeight: 431,
         scrollX: false,
         scrollY: true,
         rowHeaders: [],
         columns: [
-            { header: "근무일자", name: "workDt", align: "center" },
-            { header: "부서명",   name: "deptNm", align: "center" },
-            { header: "직급",     name: "positionNm", align: "center" },
-            { header: "사원번호", name: "empNo", align: "center" },
-            { header: "사원명",   name: "empNm", align: "center" },
-            { header: "근태종류", name: "attType", align: "center" },
-            { header: "출근시간", name: "inTime", align: "center" },
-            { header: "퇴근시간", name: "outTime", align: "center" }
+            { header: "근무일자", name: "wkDt",    align: "center" },
+            { header: "부서명",   name: "deptNm",  align: "center" },
+            { header: "직급",     name: "roleNm",  align: "center" },
+            { header: "사원ID",   name: "empId",   align: "center" },
+            { header: "사원명",   name: "empNm",   align: "center" },
+            { header: "근태종류", name: "attdTy",  align: "center" },
+            { header: "출근시간", name: "attdIn",  align: "center" },
+            { header: "퇴근시간", name: "attdOut", align: "center" }
         ]
     });
 
-    // ⚠️ 기능 구현은 하지 않음 (화면 전용)
+    /***********************
+     * 부서 셀렉트 박스 로딩
+     *  - HR 관리자 화면에서만 존재함
+     ***********************/
+    function loadDeptOptionsForAttd() {
+        const deptSelect = document.getElementById("deptSelect");
+        if (!deptSelect) return;   // 일반 사용자면 그냥 패스
+
+        deptSelect.innerHTML = '<option value="">전체</option>';
+
+        fetch('/insa/edc/inputOption')
+            .then(res => res.json())
+            .then(data => {
+                const deptList = data.dept || [];
+                deptList.forEach(dept => {
+                    const opt = document.createElement('option');
+                    opt.value = dept.deptId;
+                    opt.textContent = dept.deptNm;
+                    deptSelect.appendChild(opt);
+                });
+            })
+            .catch(() => {
+                alert('부서 목록을 불러오는 중 오류가 발생했습니다.');
+            });
+    }
+
+    /***********************
+     * 공통 조회 함수
+     *  - 여기서 근무일자 최신순 정렬
+     ***********************/
+    function loadAttdList() {
+        const deptSelect = document.getElementById("deptSelect");   // HR 관리자만 존재
+        const empNmInput = document.getElementById("empNmCond");    // HR 관리자만 존재
+
+        const param = {
+            deptId   : deptSelect ? deptSelect.value : "",
+            empNmCond: empNmInput ? empNmInput.value : "",
+            startDt  : document.getElementById("workDtStart").value,
+            endDt    : document.getElementById("workDtEnd").value
+        };
+
+        fetch("/attd/list", {
+            method : "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body   : JSON.stringify(param)
+        })
+        .then(res => res.json())
+        .then(data => {
+            // 🔥 근무일자(wkDt, 'YYYY.MM.DD' 형식)를 기준으로 최신순 정렬
+            const sorted = (data || []).slice().sort((a, b) => {
+                const da = a.wkDt || '';
+                const db = b.wkDt || '';
+                // 문자열이 'YYYY.MM.DD' 형태라서 역순 비교만 해도 최신순 됨
+                return db.localeCompare(da);
+            });
+            attGrid.resetData(sorted);
+        })
+        .catch(err => {
+            console.error("근태 조회 오류", err);
+            alert("근태 조회 중 오류가 발생했습니다.");
+        });
+    }
+
+    /***********************
+     * 조회 버튼 클릭
+     ***********************/
+    document.getElementById("btnSearchAttd").addEventListener("click", function () {
+        loadAttdList();
+    });
+
+    /***********************
+     * 엔터키 검색 (사원명 인풋)
+     ***********************/
+    document.addEventListener("DOMContentLoaded", function () {
+        const empNmInput = document.getElementById("empNmCond");
+        if (empNmInput) {
+            empNmInput.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    loadAttdList();
+                }
+            });
+        }
+
+        const deptSelect = document.getElementById("deptSelect");
+        if (deptSelect) {
+            deptSelect.addEventListener("change", function () {
+                loadAttdList();
+            });
+        }
+    });
+
+    /***********************
+     * 페이지 로드 시 1회 전체 조회 + 부서 목록 로딩
+     ***********************/
+    document.addEventListener("DOMContentLoaded", function () {
+        loadDeptOptionsForAttd();  // HR 관리자면 부서 셀렉트 채움
+        loadAttdList();            // 그리드 첫 화면 로딩
+    });
 </script>
 </body>
 </html>

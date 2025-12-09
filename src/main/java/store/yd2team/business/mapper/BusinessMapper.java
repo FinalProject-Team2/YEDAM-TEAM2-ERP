@@ -27,13 +27,11 @@ public interface BusinessMapper {
 	//잠재고객 전체조회
 	List<BusinessVO> getList();
 	//잠재고객 조건상세목록 조회
-	 List<PotentialStdrVO> getStdrDetailAll();
-	//잠재고객 조건상세목록 수정
-    List<BusinessVO> selectByCondGb(String condGb);
+	List<PotentialStdrVO> getStdrDetailAll();
     //잠재고객조건 상세목록 등록
-    	int insertDetail(BusinessVO vo);
+    	int insertDetail(PotentialStdrVO vo);
     //잠재고객조건 상세목록 수정
-    	int updateDetail(BusinessVO vo);
+    	int updateDetail(PotentialStdrVO vo);
 
 	//공공데이터 한 건 insert
     int insertPotential(BusinessVO vo);

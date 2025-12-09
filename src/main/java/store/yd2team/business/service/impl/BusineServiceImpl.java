@@ -136,29 +136,48 @@ public class BusineServiceImpl implements BusinessService {
 	 public List<PotentialStdrVO> getStdrDetailAll() {
        return businessMapper.getStdrDetailAll();
    }
+	
+	@Override
+	public void saveAllPotential(List<PotentialStdrVO> list) {
+//		if (list == null) return;
+//
+//        for (PotentialStdrVO row : list) {
+//            row.setVendId(vendId);
+//            row.setPotentialInfoNo(potentialInfoNo);
+//            
+//			if( row.getLeadNo()  == null  || row.getLeadNo().equals("") ) {
+//				businessMapper.insertLead(row);
+//			}
+//			else {   
+//				businessMapper.updateLead(row);
+//				
+//			}
+//        }
+//		
+	}
    //잠재고객기준상세목록수정
-   public void saveAll(List<BusinessVO> list) {
-       if (list == null) return;
-       for (BusinessVO vo : list) {
-           // 1) 아예 내용이 없으면 건너뛰기
-           String info = vo.getStdrIteamInfo();
-           Integer score = vo.getInfoScore();
-           boolean noInfo  = (info == null || info.trim().isEmpty());
-           boolean noScore = (score == null);
-           if (noInfo && noScore) {
-               continue; // 아무 값도 없으면 skip
-           }
-           // 2) PK 없으면 INSERT, 있으면 UPDATE
-           if (vo.getStdrId() == null || vo.getStdrId().trim().isEmpty()) {
-           	businessMapper.insertDetail(vo);
-           } else {
-           	businessMapper.updateDetail(vo);
-           }
-       }
-   }
-   public List<BusinessVO> getListByCond(String condGb) {
-       return businessMapper.selectByCondGb(condGb);
-   }
+//   public void saveAll(List<BusinessVO> list) {
+//       if (list == null) return;
+//       for (BusinessVO vo : list) {
+//           // 1) 아예 내용이 없으면 건너뛰기
+//           String info = vo.getStdrIteamInfo();
+//           Integer score = vo.getInfoScore();
+//           boolean noInfo  = (info == null || info.trim().isEmpty());
+//           boolean noScore = (score == null);
+//           if (noInfo && noScore) {
+//               continue; // 아무 값도 없으면 skip
+//           }
+//           // 2) PK 없으면 INSERT, 있으면 UPDATE
+//           if (vo.getStdrId() == null || vo.getStdrId().trim().isEmpty()) {
+//           	businessMapper.insertDetail(vo);
+//           } else {
+//           	businessMapper.updateDetail(vo);
+//           }
+//       }
+//   }
+//   public List<BusinessVO> getListByCond(String condGb) {
+//       return businessMapper.selectByCondGb(condGb);
+//   }
 	@Override
 	public List<BusinessVO> getcustaddrtype(String cond) {
 		 List<BusinessVO> list = businessMapper.getcustaddrtype(cond);
@@ -280,6 +299,15 @@ public class BusineServiceImpl implements BusinessService {
 			}
         }
     }
+
+	@Override
+	public List<PotentialStdrVO> getListByCond(String condGb) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	
 }
 
 
