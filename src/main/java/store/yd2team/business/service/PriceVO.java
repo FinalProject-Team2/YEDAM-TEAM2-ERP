@@ -14,7 +14,7 @@ public class PriceVO {
 	// 조회 결과
 	private String priceId;
     private String priceName;
-    private String type;
+    private String priceType;
     private Double percent;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate beginDt;

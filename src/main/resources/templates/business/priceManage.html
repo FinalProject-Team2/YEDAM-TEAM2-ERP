@@ -333,7 +333,7 @@
         columns: [
         	{ header: 'ID', name: 'priceId', hidden: true },
             { header: '단가정책명', name: 'priceName', width: 180 },
-            { header: '유형', name: 'type', width: 80, align: 'center',
+            { header: '유형', name: 'priceType', width: 80, align: 'center',
             	formatter: ({ value }) => {
                     return priceTypeMap[value] || value || '';
                     // priceTypeMap에 있으면 한글명, 없으면 원래 값(p1/p2) 표시
@@ -346,7 +346,7 @@
            	  align: 'center',
            	  formatter: ({ row }) => {
            	    // row.type 이 p1일 때만 활성 버튼
-           	    const disabled = row.type === 'p1' ? '' : 'disabled style="opacity:0.5;cursor:not-allowed;"';
+           	    const disabled = row.priceType === 'p1' ? '' : 'disabled style="opacity:0.5;cursor:not-allowed;"';
            	    return `<button class="grid-btn open-client-modal-btn" ${disabled}>고객사선택</button>`;
            	  }
            	},
@@ -357,7 +357,7 @@
            	  align: 'center',
            	  formatter: ({ row }) => {
            	    // row.type 이 p2일 때만 활성 버튼
-           	    const disabled = row.type === 'p2' ? '' : 'disabled style="opacity:0.5;cursor:not-allowed;"';
+           	    const disabled = row.priceType === 'p2' ? '' : 'disabled style="opacity:0.5;cursor:not-allowed;"';
            	    return `<button class="grid-btn open-product-modal-btn" ${disabled}>품목선택</button>`;
            	  }
            	},
@@ -418,96 +418,165 @@
     // 7. 모달 호출 버튼
     
     // 7-1 고객사 선택 모달
-	const openBtn = document.getElementById("custcomBtn");
-	const modal   = document.getElementById("custcomModal");
-	const back    = document.getElementById("custcomBackdrop");
+    const modal = document.getElementById("custcomModal");
+	const back  = document.getElementById("custcomBackdrop");
 	
-	function openCustcomModal() {
-		modal.classList.add("show");
-		modal.style.display = "block";
-		back.style.display = "block";
-		
-		if (!window.custcomGrid) {
-		  loadCustcomGrid();
-		} else {
-		  window.custcomGrid.refreshLayout();
-		}
+	/**
+	 * 🔹 priceId 를 받아서
+	 *   1) 모달 열고
+	 *   2) 고객사 리스트 조회 후 그리드에 뿌리고
+	 *   3) 해당 priceId 로 저장된 거래처 목록을 조회해서 체크
+	 */
+	async function openCustcomModal(priceId) {
+	  // 모달 표시
+	  modal.classList.add("show");
+	  modal.style.display = "block";
+	  back.style.display = "block";
+	
+	  // 그리드 없으면 생성, 있으면 레이아웃만 리프레시
+	  if (!window.custcomGrid) {
+	    loadCustcomGrid();
+	  } else {
+	    window.custcomGrid.refreshLayout();
+	  }
+	
+	  try {
+	    // 1) 모달 열 때 기본 고객사 목록 조회 (검색어 유지하고 싶으면 input 값 사용)
+	    const keyword = document.getElementById('custcomName').value || '';
+	    const custData = await fetchCustcomList(keyword);
+	    loadCustcomGrid(custData);
+	
+	    // 2) priceId 가 있으면 저장된 거래처 detail 조회 후 자동 체크
+	    if (priceId) {
+	      const res = await axios.get('/price/policy/detail', {
+	        params: { priceId }
+	      });
+	
+	      // 컨트롤러에서 { result, detailList } 구조로 보낸다고 가정
+	      if (res.data.result === 'success') {
+	        const detailList = res.data.detailList || [];
+	        const savedIds = detailList.map(d => d.custcomId);
+	        setCheckedCustomers(savedIds);
+	      } else {
+	        console.warn(res.data.message || '단가정책 거래처 조회 실패');
+	      }
+	    }
+	
+	  } catch (err) {
+	    console.error('고객사/단가정책 조회 오류:', err);
+	  }
 	}
 	
 	function closeCustcomModal() {
-		modal.classList.remove("show");
-		modal.style.display = "none";
-		back.style.display = "none";
+	  modal.classList.remove("show");
+	  modal.style.display = "none";
+	  back.style.display = "none";
 	}
 	
 	// 바깥 클릭 시 닫기
 	modal.addEventListener("click", (event) => {
-		if (!event.target.closest(".modal-content")) {
-		  closeCustcomModal();
-		}
+	  if (!event.target.closest(".modal-content")) {
+	    closeCustcomModal();
+	  }
 	});
 	
 	document.addEventListener('click', (e) => {
+		  if (e.target.classList.contains('open-client-modal-btn')) {
 
-	  if (e.target.classList.contains('open-client-modal-btn')) {
+		    const cell = priceGrid.getFocusedCell();
+		    const row = cell ? priceGrid.getRow(cell.rowKey) : null;
+		    if (!row) return;
 
-	    const cell = priceGrid.getFocusedCell();
-	    const row = cell ? priceGrid.getRow(cell.rowKey) : null;
-	    if (!row) return;
+		    // 유형이 p1일 때만 오픈 (거래처별)
+		    if (row.priceType !== 'p1') return;
 
-	    // 유형이 p1일 때만 오픈
-	    if (row.type !== 'p1') return;
-
-	    // 바깥 버튼과 동일하게 모달 열기
-	    openCustcomModal();
-	  }
-	}); // end 고객사모달
+		    // 🔹 이 단가정책의 priceId 를 모달에 넘겨줌
+		    const priceId = row.priceId;   // 헤더 그리드에 priceId 컬럼이 있어야 함
+		    openCustcomModal(priceId);
+		  }
+		});
 	
-
-	// 7-2 상품 선택 모달
-	const openProductBtn = document.getElementById("productBtn");
-	const productModal   = document.getElementById("productModal");
-	const productBack    = document.getElementById("productBackdrop");
 	
-	function openProductModal() {
-		productModal.classList.add("show");
-		productModal.style.display = "block";
-		productBack.style.display = "block";
-		
-		if (!window.productGrid) {
-		  loadProductGrid();
-		} else {
-		  window.productGrid.refreshLayout();
-		}
+	
+	// ================ 상품모달
+	// 체크 처리
+	function setCheckedProducts(savedList = []) {
+	  if (!window.productGrid) return;
+
+	  const savedIds = savedList.map(d =>
+	    d.productId || d.PRODUCTID || d.productid
+	  );
+
+	  const rows = window.productGrid.getData();
+
+	  rows.forEach(row => {
+	    if (savedIds.includes(row.productId)) {
+	      window.productGrid.check(row.rowKey);
+	    }
+	  });
 	}
-	
+
+	// 상품모달
+	const productModal = document.getElementById("productModal");
+	const productBack  = document.getElementById("productBackdrop");
+
+	async function openProductModal(priceId) {
+
+	  productModal.classList.add("show");
+	  productModal.style.display = "block";
+	  productBack.style.display = "block";
+
+	  if (!window.productGrid) {
+	    loadProductGrid();
+	  } else {
+	    window.productGrid.refreshLayout();
+	  }
+
+	  try {
+	    const keyword = document.getElementById('productName').value || '';
+
+	    const productData = await fetch('/price/product/list', {
+	      method: 'POST',
+	      headers: { 'Content-Type': 'application/json' },
+	      body: JSON.stringify({ productName: keyword })
+	    }).then(res => res.json());
+
+	    loadProductGrid(productData);
+
+	    if (priceId) {
+	      const savedList = await fetchSavedProducts(priceId);
+	      setCheckedProducts(savedList);
+	    }
+
+	  } catch (err) {
+	    console.error("상품 모달 로딩 오류:", err);
+	  }
+	}
+
 	function closeProductModal() {
-		productModal.classList.remove("show");
-		productModal.style.display = "none";
-		productBack.style.display = "none";
+	  productModal.classList.remove("show");
+	  productModal.style.display = "none";
+	  productBack.style.display = "none";
 	}
-	
+
 	productModal.addEventListener("click", (event) => {
-		if (!event.target.closest(".modal-content")) {
-		  closeProductModal();
-		}
+	  if (!event.target.closest(".modal-content")) {
+	    closeProductModal();
+	  }
 	});
-	
-	
+
+	// 버튼 클릭 이벤트 (정상 동작 버전)
 	document.addEventListener('click', (e) => {
 
-	  if (e.target.classList.contains('open-product-modal-btn')) {
+	  if (!e.target.classList.contains('open-product-modal-btn')) return;
 
-	    const cell = priceGrid.getFocusedCell();
-	    const row = cell ? priceGrid.getRow(cell.rowKey) : null;
-	    if (!row) return;
+	  const cell = priceGrid.getFocusedCell();
+	  const row = cell ? priceGrid.getRow(cell.rowKey) : null;
+	  if (!row) return;
 
-	    // 유형이 p2일 때만 오픈
-	    if (row.type !== 'p2') return;
+	  if (row.priceType !== 'p2') return;
 
-	    // 바깥 버튼과 동일하게 모달 열기
-	    openProductModal();
-	  }
+	  openProductModal(row.priceId);
 	}); // end 상품모달
 
 	 
@@ -567,7 +636,7 @@
 		const payload = {
 		  priceId: priceForm.priceId.value,
 		  priceName: priceForm.priceName.value,
-		  type: priceForm.priceType.value,
+		  priceType: priceForm.priceType.value,
 		  percent: priceForm.percent.value,
 		  beginDt: priceForm.beginDt.value,
 		  endDt: priceForm.endDt.value,
@@ -680,9 +749,9 @@
 	}
 	
 // ---------------------------- 고객사 모달 스크립트
-	//1. 그리드 생성
+	// 1. 그리드 생성
 	window.custcomGrid = null;
-
+	
 	function loadCustcomGrid(data = []) {
 	  if (window.custcomGrid) {
 	    window.custcomGrid.resetData(data);
@@ -704,58 +773,78 @@
 	    ]
 	  });
 	}
-
+	
+	 //  고객사 목록 조회를 함수로 분리 모달 오픈 시에도 재사용
+	function fetchCustcomList(keyword = '') {
+	  return fetch('/custcom/list', {
+	    method: 'POST',
+	    headers: { 'Content-Type': 'application/json' },
+	    body: JSON.stringify({ custcomName: keyword })
+	  }).then(res => res.json());
+	}
+	
 	// 2. 조회버튼 고객사 조회
 	document.getElementById('searchCustcomBtn').addEventListener('click', () => {
 	  const keyword = document.getElementById('custcomName').value;
 	
-	  fetch('/custcom/list', {
-	    method: 'POST',
-	    headers: { 'Content-Type': 'application/json' },
-	    body: JSON.stringify({ custcomName: keyword })
-	  })
-	    .then(res => res.json())
+	  fetchCustcomList(keyword)
 	    .then(data => loadCustcomGrid(data))
 	    .catch(err => console.error('고객사 조회 오류:', err));
 	});
+	
+	 // 저장된 거래처 ID 들을 받아서 그리드에서 해당 행의 체크박스를 체크해주는 함수
+	function setCheckedCustomers(savedIds = []) {
+	  if (!window.custcomGrid) return;
 
+	  const rows = window.custcomGrid.getData();
+
+	  rows.forEach(row => {
+	    // tui.Grid 에서는 rowKey 를 써서 체크하는 게 안전
+	    if (savedIds.includes(row.custcomId)) {
+	      window.custcomGrid.check(row.rowKey);
+	    }
+	  });
+	}
 	
-	// 3. 고객사모달 저장버튼
-	
+	 
 	// 선택한 고객사 정보 가져오는 함수
 	function getSelectedCustcomList() {
 	  if (!window.custcomGrid) return [];
-	
 	  const checked = window.custcomGrid.getCheckedRows();
 	
 	  return checked.map(row => ({
-	    custcomId: row.custcomId,   // 실제 컬럼명
+	    custcomId: row.custcomId,
 	    custcomName: row.custcomName
 	  }));
 	}
 	
-	// 고객사모달 저장버튼 이벤트
+	
+	// 고객사 모달 저장버튼 이벤트
 	document.getElementById('insertCustcomBtn').addEventListener('click', () => {
-
-	  // 1) 기본 헤더 값
+	
+	  const selected = getSelectedCustcomList();
+	
+	  if (selected.length === 0) {
+	    alert('고객사를 1개 이상 선택하세요.');
+	    return;
+	  }
+	
 	  const payload = {
 	    priceId: priceForm.priceId.value,
 	    priceName: priceForm.priceName.value,
-	    type: priceForm.priceType.value,
+	    priceType: priceForm.priceType.value,
 	    percent: priceForm.percent.value,
 	    beginDt: priceForm.beginDt.value,
 	    endDt: priceForm.endDt.value,
 	    rm: priceForm.rm.value,
 	
-	    // 2) 고객사 선택 목록 추가
-	    detailList: getSelectedCustcomList()
+	    detailList: selected
 	  };
 	
 	  axios.post('/price/policy/save', payload)
 	    .then(res => {
 	      if (res.data.result === 'success') {
 	        alert('저장 완료');
-	
 	        document.getElementById('btnInsertInit').click();
 	        reloadPriceGrid();
 	      } else {
@@ -773,7 +862,7 @@
 // ---------------------------- 상품 모달 스크립트
 	//1. 그리드 생성
 	window.productGrid = null;
-
+	
 	function loadProductGrid(data = []) {
 	  if (window.productGrid) {
 	    window.productGrid.resetData(data);
@@ -787,6 +876,7 @@
 	    bodyHeight: 350,
 	    rowHeaders: ['checkbox'],
 	    columns: [
+	      { header: '상품ID', name: 'productId', hidden: true },
 	      { header: '상품명', name: 'productName', width: 300 },
 	      { header: '단위', name: 'unit', width: 152 },
 	      { header: '판매단가', name: 'basisSaleAmt', width: 240, align: 'right' },
@@ -794,32 +884,76 @@
 	  });
 	}
 
-	// 2. 조회버튼 고객사 조회
+	// 2. 조회버튼 상품 조회
+	async function fetchSavedProducts(priceId) {
+	  const res = await axios.get('/price/policy/product', {
+	    params: { priceId }
+	  });
+	
+	  if (res.data.result === 'success') {
+	    return res.data.detailList; 
+	  } else {
+	    console.warn("저장된 상품 조회 실패:", res.data.message);
+	    return [];
+	  }
+	}
+	
 	document.getElementById('searchProductBtn').addEventListener('click', () => {
 	  const keyword = document.getElementById('productName').value;
-	
-	  fetch('/product/list', {
+
+	  fetch('/price/product/list', {     // URL 반드시 이렇게!
 	    method: 'POST',
 	    headers: { 'Content-Type': 'application/json' },
 	    body: JSON.stringify({ productName: keyword })
 	  })
-	    .then(res => res.json())
-	    .then(data => loadProductGrid(data))
-	    .catch(err => console.error('상품 조회 오류:', err));
+	  .then(res => res.json())
+	  .then(data => {
+
+	    if (!Array.isArray(data)) {
+	      console.error("서버 응답이 배열이 아님:", data);
+	      return;
+	    }
+
+	    loadProductGrid(data);
+	  })
+	  .catch(err => console.error('상품 조회 오류:', err));
 	});
 
 	// 3. 상품모달 저장버튼
 	document.getElementById('insertProductBtn').addEventListener('click', () => {
-	  const checkedRows = window.productGrid.getCheckedRows();  // window 사용
-
-	  if (!checkedRows.length) {
-	    alert("선택된 상품이 없습니다.");
+	
+	  const selected = window.productGrid.getCheckedRows();
+	
+	  if (selected.length === 0) {
+	    alert("상품을 1개 이상 선택하세요.");
 	    return;
 	  }
-
-	  console.log("선택된 상품 목록:", checkedRows);
-
-	  bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+	
+	  const payload = {
+	    priceId: priceForm.priceId.value,
+	    priceType: priceForm.priceType.value,
+	    percent: priceForm.percent.value,
+	    beginDt: priceForm.beginDt.value,
+	    endDt: priceForm.endDt.value,
+	    rm: priceForm.rm.value,
+	
+	    detailList: selected   // 🔥 중요
+	  };
+	
+	  axios.post('/price/policy/saveProduct', payload)
+	    .then(res => {
+	      if (res.data.result === 'success') {
+	        alert('상품 저장 완료');
+	        closeProductModal();
+	        reloadPriceGrid();
+	      } else {
+	        alert(res.data.message || '상품 저장 실패');
+	      }
+	    })
+	    .catch(err => {
+	      console.error('상품 저장 오류:', err);
+	      alert('저장 중 오류 발생');
+	    });
 	});
 	
 	
