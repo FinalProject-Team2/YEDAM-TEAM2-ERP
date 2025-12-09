@@ -1,5 +1,7 @@
 package store.yd2team.common.web;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import store.yd2team.common.dto.SttlHistoryDto;
 import store.yd2team.common.dto.SubscriptionUsageDto;
 import store.yd2team.common.service.SubscriptionService;
 import store.yd2team.common.util.LoginSession;
@@ -25,11 +28,14 @@ public class SubscriptionCheckController {
 		// 로그인 세션에서 vendId 조회
 		String vendId = LoginSession.getVendId();
 		SubscriptionUsageDto usage = null;
+		List<SttlHistoryDto> sttlHistoryList = java.util.Collections.emptyList();
 		if (vendId != null && !vendId.isEmpty()) {
 			usage = subscriptionService.getSubscriptionUsageByVendId(vendId);
+			sttlHistoryList = subscriptionService.getSttlHistoryByVendId(vendId);
 		}
-		// 구독 정보가 없을 수도 있으므로 그대로 모델에 담기 (null 허용)
+		// 구독 정보 및 결제 내역이 없을 수도 있으므로 그대로 모델에 담기 (null/empty 허용)
 		model.addAttribute("usage", usage);
+		model.addAttribute("sttlHistoryList", sttlHistoryList);
 		return "subscription/subscriptionCheck";
 	}
 	
