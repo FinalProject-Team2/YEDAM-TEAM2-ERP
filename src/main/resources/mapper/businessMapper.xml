@@ -407,39 +407,109 @@
     
     <!-- 리드내역 등록 -->
     <insert id="insertLead"
-            parameterType="store.yd2team.business.service.ContactVO">
-        INSERT INTO TB_CONTACT
+            parameterType="store.yd2team.business.service.LeadVO">
+        INSERT INTO TB_LEAD
         (
-            CONTACT_NO,
-            POTENTIAL_INFO_NO,
-            VEND_ID,
-            CONTACT_DT,
-            CONTACT_MANAGER,
-            CONTACT_WAY,
-            CONTACT_CNTN
+           LEAD_NO,
+           POTENTIAL_INFO_NO,
+           VEND_ID,
+           LEAD_DT,
+           LEAD_MANAGER,
+           REQUIRED_DT,
+           COMPETITOR_YN,
+           BUDGET_AVAIL_YN
         )
         VALUES
         (
-            CONTACT_SEQ.NEXTVAL,
+            SEQ_TB_LEAD_NO.NEXTVAL,
             #{potentialInfoNo},
             #{vendId},
-            TO_DATE(#{contactDt}, 'YYYY-MM-DD'),
-            #{contactManager},
-            #{contactWay},
-            #{contactCntn}
+            TO_DATE(#{leadDt}, 'YYYY-MM-DD'),
+            #{leadManager},
+            #{requiredDt},
+            SUBSTR(#{competitorYn}, 1, 1),   <!-- ★ 여기서 1글자로 강제 -->
+        	SUBSTR(#{budgetAvailYn}, 1, 1)   <!-- ★ 여기서 1글자로 강제 -->
         )
     </insert>
     
 	<!-- 리드내역 수정 -->
 	<update id="updateLead"
-		        parameterType="store.yd2team.business.service.ContactVO">
-		 UPDATE TB_CONTACT
-		       SET  CONTACT_DT 		= #{contactDt},
-					CONTACT_MANAGER = #{contactManager},
-					CONTACT_WAY 	= #{contactWay},
-					CONTACT_CNTN 	= #{contactCntn},
-			        UPDT_DT      	= SYSDATE
-		     WHERE CONTACT_NO  = #{contactNo}
+		        parameterType="store.yd2team.business.service.LeadVO">
+		 UPDATE TB_LEAD
+		       SET LEAD_MANAGER		= #{leadManager},
+		           REQUIRED_DT		= #{requiredDt},
+		           COMPETITOR_YN	= #{competitorYn},
+		           BUDGET_AVAIL_YN	= #{budgetAvailYn},
+			       UPDT_DT          = SYSDATE
+		     WHERE LEAD_NO  = #{leadNo}
+	</update>
+	
+	<!-- 데모내역조회 -->
+	<select id="getDemoListByVend"
+            parameterType="string"
+            resultType="store.yd2team.business.service.DemoVO">
+        SELECT
+            DEMO_QUOTATIO_NO	as	demoQuotatioNo
+			POTENTIAL_INFO_NO	as	potentialInfoNo
+			VEND_ID				as	vendId
+			DEMO_QUOTATIO_DT	as	demoQuotatioDt
+			DEMO_MANAGER		as	demoManager
+			DEMO_DC				as	demoDc
+			CUST_REACTION		as	custReaction
+			SAMPLE_PRIVIDE		as	samplePrivide
+			CUST_QY				as	custQy
+			CUST_DISCOUNT		as	custDiscount
+			CUST_DELIVERY		as	custDelivery
+        FROM TB_DEMO_QUOTATIO
+        WHERE VEND_ID = #{vendId}
+        ORDER BY DEMO_QUOTATIO_DT DESC
+    </select>
+    
+    <!-- 데모내역 등록 -->
+    <insert id="insertDemo"
+            parameterType="store.yd2team.business.service.DemoVO">
+        INSERT INTO TB_DEMO_QUOTATIO
+        (
+            DEMO_QUOTATIO_NO,
+			POTENTIAL_INFO_NO,
+			VEND_ID,
+			DEMO_QUOTATIO_DT,
+			DEMO_MANAGER,
+			DEMO_DC,
+			CUST_REACTION,
+			SAMPLE_PRIVIDE,
+			CUST_QY,
+			CUST_DISCOUNT,
+			CUST_DELIVERY
+        )
+        VALUES
+        (
+            SEQ_TB_DEMO_QUOTATIO_NO.NEXTVAL,
+            #{potentialInfoNo},
+            #{vendId},
+            TO_DATE(#{demoQuotatioDt}, 'YYYY-MM-DD'),
+            #{demoManager},
+            #{demoDc},
+            #{custReaction},
+            #{samplePrivide},
+            #{custQy},
+            #{custDiscount},
+            #{custDelivery}
+        )
+    </insert>
+    
+	<!-- 데모내역 수정 -->
+	<update id="updateDemo"
+		        parameterType="store.yd2team.business.service.DemoVO">
+		 UPDATE TB_DEMO_QUOTATIO
+		       SET  DEMO_MANAGER	= #{demoManager},
+					DEMO_DC			= #{demoDc},
+					CUST_REACTION	= #{custReaction},
+					SAMPLE_PRIVIDE	= #{samplePrivide},
+					CUST_QY			= #{custQy},
+					CUST_DISCOUNT	= #{custDiscount},
+					CUST_DELIVERY	= #{custDelivery}
+		     WHERE DEMO_QUOTATIO_NO  = #{demoQuotatioNo}
 		</update>
 	
 </mapper>

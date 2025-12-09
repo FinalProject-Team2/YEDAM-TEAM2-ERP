@@ -15,6 +15,7 @@ import store.yd2team.business.mapper.BusinessMapper;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ContactVO;
+import store.yd2team.business.service.DemoVO;
 import store.yd2team.business.service.LeadVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
@@ -116,9 +117,8 @@ public class BusineServiceImpl implements BusinessService {
            String region         = row.getRegion();
            String establishDate  = row.getEstablishDate();
           
-           int score = aiService.calculateLeadScoreByIndustry(loginIndustry, leadIndustry,  companySize,
-                   region,
-                   establishDate);
+           //todo upd
+           int score =0;  //aiService.calculateLeadScoreByIndustry(loginIndustry, leadIndustry,  companySize,  region,   establishDate);
            row.setLeadScore(score);
        }
        return list;
@@ -164,13 +164,14 @@ public class BusineServiceImpl implements BusinessService {
 		 List<BusinessVO> list = businessMapper.getcustaddrtype(cond);
 		    String loginIndustry = LoginSession.getBizcnd(); // 로그인 회사 업종
 		    for (BusinessVO row : list) {
-		    	 int score = aiService.calculateLeadScoreByIndustry(
-		                 loginIndustry,
-		                 row.getIndustryType(),
-		                 row.getCompanySize(),
-		                 row.getRegion(),
-		                 row.getEstablishDate()
-		         );
+//		    	 int score = aiService.calculateLeadScoreByIndustry(
+//		                 loginIndustry,
+//		                 row.getIndustryType(),
+//		                 row.getCompanySize(),
+//		                 row.getRegion(),
+//		                 row.getEstablishDate()
+//		         );
+		    	int score = 0;
 		         row.setLeadScore(score);
 		    }
 		    return list;
@@ -210,15 +211,11 @@ public class BusineServiceImpl implements BusinessService {
 	// 접촉내역 저장
     @Override
     @Transactional
-    public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> list) {
+    public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> contactList) {
 
-        // 1) 해당 거래처 기존 접촉내역 전체 삭제
-    	//businessMapper.deleteContactsByVend(vendId);
+        if (contactList == null) return;
 
-        // 2) 새로 전부 INSERT
-        if (list == null) return;
-
-        for (ContactVO row : list) {
+        for (ContactVO row : contactList) {
             row.setVendId(vendId);
             row.setPotentialInfoNo(potentialInfoNo);
 
@@ -237,19 +234,17 @@ public class BusineServiceImpl implements BusinessService {
 	public List<LeadVO> getLeadListByVend(String vendId) {
 		return businessMapper.getLeadListByVend(vendId);
 	}
-
+	//리드내역 저장
 	@Override
+	@Transactional
 	public void saveAllLead(String vendId, Integer potentialInfoNo, List<LeadVO> list) {
 		
-	    // 1) 해당 거래처 기존 접촉내역 전체 삭제
-		// businessMapper.deleteContactsByVend(vendId);
-
-        // 2) 새로 전부 INSERT
         if (list == null) return;
 
         for (LeadVO row : list) {
             row.setVendId(vendId);
             row.setPotentialInfoNo(potentialInfoNo);
+            
 			if( row.getLeadNo()  == null  || row.getLeadNo().equals("") ) {
 				businessMapper.insertLead(row);
 			}
@@ -259,7 +254,32 @@ public class BusineServiceImpl implements BusinessService {
 			}
         }
     }
-	
+	//
+	//데모내역 조회
+	@Override
+	public List<DemoVO> getDemoListByVend(String vendId) {
+		return businessMapper.getDemoListByVend(vendId);
+	}
+	//데모내역 저장
+	@Override
+	@Transactional
+	public void saveAllDemo(String vendId, Integer potentialInfoNo, List<DemoVO> demolist) {
+		
+        if (demolist == null) return;
+
+        for (DemoVO row : demolist) {
+            row.setVendId(vendId);
+            row.setPotentialInfoNo(potentialInfoNo);
+            
+			if( row.getDemoQuotatioNo()  == null  || row.getDemoQuotatioNo().equals("") ) {
+				businessMapper.insertDemo(row);
+			}
+			else {   
+				businessMapper.updateDemo(row);
+				
+			}
+        }
+    }
 }
 
 
