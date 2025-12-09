@@ -134,8 +134,10 @@ public class MlssController {
 			@GetMapping("/selectMlssChkJohoe")
 			@ResponseBody
 			public List<MlssVO> selectMlssChkJohoe(MlssVO keyword) {			
-				System.out.println("모나오니 다중입력조회"+keyword);				
-				return null;			
+				System.out.println("모나오니 다중입력조회"+keyword);	
+				
+				
+				return mlssService.mlssWrterLoadBefore(keyword.getMlssEmpId(), keyword.getEmpId());		
 			}
 	
 

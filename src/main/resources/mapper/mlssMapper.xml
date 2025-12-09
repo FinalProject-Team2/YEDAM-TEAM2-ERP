@@ -88,6 +88,11 @@ SELECT 1 FROM DUAL
 </insert>
 
 <update id="mlssMasterUpdate">
+<selectKey keyProperty="mlssId" order="BEFORE" resultType="String">
+SELECT 'mlss' ||  LPAD(NVL(MAX(SUBSTR(mlss_id, LENGTH(mlss_id)-2, 3)), 0) + 1, 3, '0') AS mlss_id
+FROM tb_mlss
+where mlss_emp_id = #{mlssEmpId}
+</selectKey>
 UPDATE tb_mlss_emp
 SET
  <if test="self != null">self = #{self}</if>
