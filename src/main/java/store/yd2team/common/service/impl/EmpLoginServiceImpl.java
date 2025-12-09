@@ -11,6 +11,11 @@ import java.time.LocalDateTime;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.dto.EmpLoginResultDto;
@@ -175,6 +180,13 @@ public class EmpLoginServiceImpl implements EmpLoginService {
 
         // 비밀번호 일치 → 실패 카운트/잠금 관련 필드 초기화
         empLoginMapper.updateLoginSuccess(empAcct.getEmpAcctId(), empAcct.getEmpId());
+        
+        List<String> roleIds = empLoginMapper.selectRoleIdsByEmpAcctId(empAcct.getEmpAcctId());
+        empAcct.setRoleIds(roleIds);
+
+        Set<String> authCodes = new HashSet<>();
+        // authCodes.addAll(empLoginMapper.selectAuthCodesByEmpAcctId(empAcct.getEmpAcctId()));
+        empAcct.setAuthCodes(authCodes);
 
         boolean otpEnabled = false;
         if (policy != null && Y.equals(policy.getOtpYn())) {

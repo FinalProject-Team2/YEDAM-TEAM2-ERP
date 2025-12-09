@@ -1,266 +1,318 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout}">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
-<meta charset="UTF-8">
-<title>사원 계정 관리</title>
+  <meta charset="UTF-8">
+  <title>사원 계정 관리</title>
 
-<!-- Toast UI Grid -->
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+  <!-- Toast UI Grid -->
+  <link rel="stylesheet"
+        href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+  <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
-<style>
-.emp-account-wrapper .card-title {
-	font-weight: 600;
-	font-size: 1.1rem;
-}
+  <style>
+    .emp-account-wrapper .card-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
 
-.emp-account-wrapper #empGrid, .emp-account-wrapper #roleGrid {
-	width: 100%;
-	margin-top: 4px;
-}
+    .emp-account-wrapper #empGrid,
+    .emp-account-wrapper #roleGrid {
+      width: 100%;
+      margin-top: 4px;
+    }
 
-.emp-account-wrapper .help-text {
-	font-size: 12px;
-	color: #6c757d;
-}
+    .emp-account-wrapper .help-text {
+      font-size: 12px;
+      color: #6c757d;
+    }
 
-.emp-account-wrapper .card-header-left {
-	display: flex;
-	align-items: center;
-}
+    .emp-account-wrapper .card-header-left {
+      display: flex;
+      align-items: center;
+    }
 
-.emp-account-wrapper .card-header-left .card-title {
-	margin-bottom: 0;
-}
+    .emp-account-wrapper .card-header-left .card-title {
+      margin-bottom: 0;
+    }
 
-.emp-account-wrapper .tui-grid-header-area .tui-grid-cell-row-header {
-	background-color: #f5f5f5;
-}
+    .emp-account-wrapper .tui-grid-header-area .tui-grid-cell-row-header {
+      background-color: #f5f5f5;
+    }
 
-.emp-account-wrapper .tui-grid-body-area .tui-grid-cell-row-header {
-	background-color: #ffffff;
-}
+    .emp-account-wrapper .tui-grid-body-area .tui-grid-cell-row-header {
+      background-color: #ffffff;
+    }
 
-.emp-account-wrapper .form-control[readonly],
-.emp-account-wrapper .form-select[disabled] {
-	cursor: not-allowed;
-	background-color: #f8f9fa;
-}
-</style>
+    .emp-account-wrapper .form-control[readonly],
+    .emp-account-wrapper .form-select[disabled] {
+      cursor: not-allowed;
+      background-color: #f8f9fa;
+    }
+    
+    /* 역할 카드 비활성화 상태 */
+	.emp-account-wrapper .disabled-card {
+	  opacity: 0.6;
+	  pointer-events: none;
+	}
+	
+	/* 역할 없음 안내 문구 */
+	.emp-account-wrapper .role-empty-message {
+	  font-size: 12px;
+	  color: #999;
+	}
+    
+  </style>
 </head>
 
 <body layout:fragment="content">
-	<div class="emp-account-wrapper"
-		th:data-vend-id="${session.LOGIN_EMP != null ? session.LOGIN_EMP.vendId : ''}">
+<div class="emp-account-wrapper"
+     th:data-vend-id="${session.LOGIN_EMP != null ? session.LOGIN_EMP.vendId : ''}">
 
-		<!-- ================= 사원 조회 ================= -->
-		<div class="row">
-			<div class="col-md-12 mb-3">
-				<div class="card">
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">사원 조회</h5>
-						</div>
-						<div class="card-header-right">
-							<button class="btn btn-dark" type="button" id="btnEmpSearchReset">초기화</button>
-							<button class="btn btn-outline-dark" type="button"
-								id="btnEmpSearch">조회</button>
-						</div>
-					</div>
+  <!-- ================= 사원 조회 ================= -->
+  <div class="row">
+    <div class="col-md-12 mb-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <h5 class="card-title">사원 조회</h5>
+          </div>
+          <div class="card-header-right">
+            <button class="btn btn-dark" type="button" id="btnEmpSearchReset">초기화</button>
+            <button class="btn btn-outline-dark" type="button" id="btnEmpSearch">조회</button>
+          </div>
+        </div>
 
-					<div class="card-body">
-						<div class="row mb-2">
-							<div class="col-md-3">
-								<label for="deptName">부서 명</label>
-								<select id="deptName" class="form-select">
-								  <option value="">전체</option>
-								  <option th:each="dept : ${deptList}"
-								          th:value="${dept.deptNm}"  
-								          th:text="${dept.deptNm}">   
-								  </option>
-								</select>
-							</div>
-							<div class="col-md-3">
-								<label for="jobName">직급 명</label>
-								<select id="jobName" class="form-select">
-								  <option value="">전체</option>
-								  <option th:each="code : ${jobCodeList}"
-								          th:value="${code.codeId}"  
-								          th:text="${code.codeNm}">  
-								  </option>
-								</select>
-							</div>
-							
-							<div class="col-md-3 position-relative">
-							  <label for="empName">사원 이름</label>
-							  <input id="empName"
-							         type="text"
-							         class="form-control"
-							         placeholder="홍길동"
-							         autocomplete="off">
+        <div class="card-body">
+          <div class="row mb-2">
+            <div class="col-md-3">
+              <label for="deptName">부서 명</label>
+              <select id="deptName" class="form-select">
+                <option value="">전체</option>
+                <option th:each="dept : ${deptList}"
+                        th:value="${dept.deptNm}"
+                        th:text="${dept.deptNm}">
+                </option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="jobName">직급 명</label>
+              <select id="jobName" class="form-select">
+                <option value="">전체</option>
+                <option th:each="code : ${jobCodeList}"
+                        th:value="${code.codeId}"
+                        th:text="${code.codeNm}">
+                </option>
+              </select>
+            </div>
 
-							  <ul id="empNameList"
-							      class="list-group position-absolute w-100"
-							      style="z-index: 2000; max-height: 200px; overflow-y: auto; display:none;"></ul>
-							</div>
-							
-							<div class="col-md-3 position-relative">
-							  <label for="accountId">계정 ID</label>
-							  <input id="accountId"
-							         type="text"
-							         class="form-control"
-							         placeholder="HONG@HONG.AC"
-							         autocomplete="off">
-							  <ul id="accountIdList"
-							      class="list-group position-absolute w-100"
-							      style="z-index: 2000; max-height: 200px; overflow-y: auto; display:none;"></ul>
-							</div>
-						</div>
-					</div>
+            <div class="col-md-3 position-relative">
+              <label for="empName">사원 이름</label>
+              <input id="empName"
+                     type="text"
+                     class="form-control"
+                     placeholder="홍길동"
+                     autocomplete="off">
 
-				</div>
-			</div>
-		</div>
+              <ul id="empNameList"
+                  class="list-group position-absolute w-100"
+                  style="z-index: 2000; max-height: 200px; overflow-y: auto; display:none;"></ul>
+            </div>
 
-		<!-- ================= 사원 목록 (3줄 고정 + 스크롤) ================= -->
-		<div class="row">
-			<div class="col-md-12 mb-3">
-				<div class="card">
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title me-2">사원 목록</h5>
-							<span class="help-text"> * 사원 목록에서 대상을 선택하면 아래에서 계정을
-								생성·변경할 수 있습니다. 계정 상태에 따라 임시 비밀번호 발급 및 문자 전송 방식이 달라집니다. </span>
-						</div>
-						<div class="card-header-right"></div>
-					</div>
+            <div class="col-md-3 position-relative">
+              <label for="accountId">계정 ID</label>
+              <input id="accountId"
+                     type="text"
+                     class="form-control"
+                     placeholder="yedam"
+                     autocomplete="off">
+              <ul id="accountIdList"
+                  class="list-group position-absolute w-100"
+                  style="z-index: 2000; max-height: 200px; overflow-y: auto; display:none;"></ul>
+            </div>
+          </div>
+        </div>
 
-					<div class="card-body">
-						<div id="empGrid"></div>
-					</div>
-				</div>
-			</div>
-		</div>
+      </div>
+    </div>
+  </div>
 
-		<!-- ========== 아래 한 행: 계정 정보 + 역할 설정 ========== -->
-		<div class="row">
-			<!-- 사원 계정 정보 (왼쪽) -->
-			<div class="col-md-7 mb-3">
-				<div class="card h-100">
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title">사원 계정 정보</h5>
-						</div>
-						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark"
-								id="btnEmpAcctSave">저장</button>
-						</div>
-					</div>
+  <!-- ================= 사원 목록 (3줄 고정 + 스크롤) ================= -->
+  <div class="row">
+    <div class="col-md-12 mb-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <h5 class="card-title me-2">사원 목록</h5>
+            <span class="help-text">
+              * 사원 목록에서 대상을 선택하면 아래에서 계정을 생성·변경할 수 있습니다.
+              계정 상태에 따라 임시 비밀번호 발급 및 문자 전송 방식이 달라집니다.
+            </span>
+          </div>
+          <div class="card-header-right"></div>
+        </div>
 
-					<div class="card-body">
-						<!-- 필요하면 계정 PK 저장용 hidden -->
-						<input type="hidden" id="empAcctId">
+        <div class="card-body">
+          <div id="empGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-						<!-- 1행: 부서 / 직급 / 사번 -->
-						<div class="row mb-2">
-							<div class="col-md-4">
-								<label>부서 명</label> <input id="empDeptName" type="text"
-									class="form-control form-control-sm" placeholder="YEDAM"
-									readonly>
-							</div>
-							<div class="col-md-4">
-								<label>직급 명</label> <input id="empJobName" type="text"
-									class="form-control form-control-sm" placeholder="사원" readonly>
-							</div>
-							<div class="col-md-4">
-								<label>사번</label> <input id="empNo" type="text"
-									class="form-control form-control-sm" placeholder="2511001"
-									readonly>
-							</div>
-						</div>
+  <!-- ========== 아래 한 행: 계정 정보 + 역할 설정 ========== -->
+  <div class="row">
+    <!-- 사원 계정 정보 (왼쪽) -->
+    <div class="col-md-7 mb-3">
+      <div class="card h-100">
+        <div class="card-header">
+          <div class="card-header-left">
+            <h5 class="card-title">사원 계정 정보</h5>
+          </div>
+          <div class="card-header-right">
+            <button type="button" class="btn btn-outline-dark" id="btnEmpAcctSave">저장</button>
+          </div>
+        </div>
 
-						<!-- 2행: 사원명 / 연락처 / 이메일 -->
-						<div class="row mb-2">
-							<div class="col-md-4">
-								<label>사원 명</label> <input id="empNameDetail" type="text"
-									class="form-control form-control-sm" placeholder="홍길동" readonly>
-							</div>
-							<div class="col-md-4">
-								<label>연락처</label> <input id="empPhone" type="text"
-									class="form-control form-control-sm"
-									placeholder="010-1111-1234" readonly>
-							</div>
-							<div class="col-md-4">
-								<label>이메일</label> <input id="empEmail" type="email"
-									class="form-control form-control-sm"
-									placeholder="YEDAM@YEDAM.AC" readonly>
-							</div>
-						</div>
+        <div class="card-body">
+          <!-- 필요하면 계정 PK 저장용 hidden -->
+          <input type="hidden" id="empAcctId">
 
-						<!-- 3행: 회사코드 / 아이디 / 계정상태 -->
-						<div class="row mb-2">
-							<div class="col-md-4">
-								<label>회사 코드</label> <input id="empCompanyCode" type="text"
-									class="form-control form-control-sm" placeholder="CO_YEDAM001"
-									readonly>
-							</div>
-							<div class="col-md-4">
-							  <label id="empLoginIdLabel">계정ID</label>
-							  <input id="empLoginId" type="text"
-							         class="form-control form-control-sm"
-							         placeholder="HONG@HONG.AC"
-							         readonly>
-							</div>
-							<div class="col-md-4">
-								<label class="astar">계정 상태</label>
-								<select id="empAcctStatus" class="form-select form-select-sm">
-								  <option value="">-</option>
-								  <option th:each="code : ${acctStatusList}"
-								          th:value="${code.codeId}"  
-								          th:text="${code.codeNm}"> 
-								  </option>
-								</select>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+          <!-- 1행: 부서 / 직급 / 사번 -->
+          <div class="row mb-2">
+            <div class="col-md-4">
+              <label>부서 명</label>
+              <input id="empDeptName"
+                     type="text"
+                     class="form-control form-control-sm"
+                     placeholder="YEDAM"
+                     readonly>
+            </div>
+            <div class="col-md-4">
+              <label>직급 명</label>
+              <input id="empJobName"
+                     type="text"
+                     class="form-control form-control-sm"
+                     placeholder="사원"
+                     readonly>
+            </div>
+            <div class="col-md-4">
+              <label>사번</label>
+              <input id="empNo"
+                     type="text"
+                     class="form-control form-control-sm"
+                     placeholder="2511001"
+                     readonly>
+            </div>
+          </div>
 
-			<!-- 계정 역할 설정 (오른쪽, 폭 줄임) -->
-			<div class="col-md-5 mb-3">
-				<div class="card h-100">
-					<div class="card-header">
-						<div class="card-header-left">
-							<h5 class="card-title me-2 mb-0">계정 역할 설정</h5>
-							<span class="help-text">※ 계정이 존재할 경우, 설정 가능합니다.</span>
-						</div>
-						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark"
-								id="btnRoleSelectModal">역할 조회</button>
-							<button type="button" class="btn btn-outline-dark">저장</button>
-							<button type="button" class="btn btn-danger">삭제</button>
-						</div>
-					</div>
+          <!-- 2행: 사원명 / 연락처 / 이메일 -->
+          <div class="row mb-2">
+            <div class="col-md-4">
+              <label>사원 명</label>
+              <input id="empNameDetail"
+                     type="text"
+                     class="form-control form-control-sm"
+                     placeholder="홍길동"
+                     readonly>
+            </div>
+            <div class="col-md-4">
+              <label>연락처</label>
+              <input id="empPhone"
+                     type="text"
+                     class="form-control form-control-sm"
+                     placeholder="010-1111-1234"
+                     readonly>
+            </div>
+            <div class="col-md-4">
+              <label>이메일</label>
+              <input id="empEmail"
+                     type="email"
+                     class="form-control form-control-sm"
+                     placeholder="YEDAM@YEDAM.AC"
+                     readonly>
+            </div>
+          </div>
 
-					<div class="card-body">
-						<div id="roleGrid"></div>
-					</div>
-				</div>
-			</div>
-		</div>
+          <!-- 3행: 회사코드 / 아이디 / 계정상태 -->
+          <div class="row mb-2">
+            <div class="col-md-4">
+              <label>회사 코드</label>
+              <input id="empCompanyCode"
+                     type="text"
+                     class="form-control form-control-sm"
+                     placeholder="CO_YEDAM001"
+                     readonly>
+            </div>
+            <div class="col-md-4">
+              <label id="empLoginIdLabel">계정ID</label>
+              <input id="empLoginId"
+                     type="text"
+                     class="form-control form-control-sm"
+                     placeholder="HONG@HONG.AC"
+                     readonly>
+            </div>
+            <div class="col-md-4">
+              <label class="astar">계정 상태</label>
+              <select id="empAcctStatus" class="form-select form-select-sm">
+                <option value="">-</option>
+                <option th:each="code : ${acctStatusList}"
+                        th:value="${code.codeId}"
+                        th:text="${code.codeNm}">
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-	</div>
+    <!-- 계정 역할 설정 (오른쪽) -->
+    <div class="col-md-5 mb-3">
+      <div class="card h-100 disabled-card" id="roleCard">
+        <div class="card-header">
+          <div class="card-header-left">
+            <h5 class="card-title me-2 mb-0">계정 역할 설정</h5>
+            <span class="help-text">※ 계정이 존재할 경우, 설정 가능합니다.</span>
+          </div>
+          <div class="card-header-right">
+            <button type="button"
+                    class="btn btn-outline-dark"
+                    id="btnRoleSelectModal">역할 조회</button>
+            <button type="button" class="btn btn-outline-dark" id="btnRoleSave">저장</button>
+            <button type="button" class="btn btn-danger" id="btnRoleDelete">삭제</button>
+          </div>
+        </div>
 
-	<div th:replace="common/modal/authModal :: authModal"></div>
+        <div class="card-body">
+          <div id="roleGrid"></div>
+          <div id="roleEmptyMessage"
+		       class="role-empty-message mt-2"
+		       style="display:none;">
+		    현재 계정에 설정된 역할이 없습니다.<br>
+		    [역할 조회] 버튼으로 역할을 추가할 수 있습니다.
+		  </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-	<script>
-  document.addEventListener('DOMContentLoaded', function () {
+</div>
 
-    let selectedEmpRow = null;
+<div th:replace="common/modal/authModal :: authModal"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {  
+
+    let selectedEmpRow = null;      // 현재 선택된 사원 행 데이터
+    let selectedEmpRowKey = null;   // 현재 선택된 그리드 rowKey
+
+    // 🔹 선택된 사원의 "기준 스냅샷" (마지막 로딩/저장 시점)
+    let selectedEmpSnapshot = {
+      status: null,   // acctStatus (r1/r2/r3/...)
+      roleIds: []     // 마지막 저장/로딩 시 역할 ID 목록
+    };
 
     // ==========================
     // 0. Toast Grid 존재 여부 체크
@@ -271,18 +323,26 @@
     }
 
     // ==========================
-    // 1. 세션 vendId (회사 코드) 읽기
+    // 1. 공통 상수 정의
+    // ==========================
+    const STATUS_ACTIVE   = 'r1'; // 사용
+    const STATUS_LOCKED   = 'r2'; // 잠금
+    const STATUS_INACTIVE = 'r3'; // 비활성
+    const STATUS_END      = 'r4'; // 해지(이 화면에서는 숨김 처리)
+
+    const EMP_SEARCH_URL     = '/api/empAcct/employees';
+    const EMP_SAVE_URL       = '/api/empAcct/save';
+    const EMP_ROLE_LIST_URL  = '/api/empAcct/roles';
+
+    // ==========================
+    // 2. 세션 vendId (회사 코드) 읽기
     // ==========================
     const wrapper = document.querySelector('.emp-account-wrapper');
     const SESSION_VEND_ID = wrapper ? (wrapper.dataset.vendId || '') : '';
 
-    const EMP_SEARCH_URL = '/api/empAcct/employees';   // 사원 목록 조회
-    const EMP_SAVE_URL   = '/api/empAcct/save';        // 계정 저장
-
     // ==========================
-    // 2. jQuery 엘리먼트 캐싱
+    // 3. jQuery 엘리먼트 캐싱
     // ==========================
-    // 검색 영역
     const $deptName   = $('#deptName');
     const $jobName    = $('#jobName');
     const $empName    = $('#empName');
@@ -290,7 +350,6 @@
     const $btnSearch  = $('#btnEmpSearch');
     const $btnReset   = $('#btnEmpSearchReset');
 
-    // 상세 영역
     const $empAcctId       = $('#empAcctId');
     const $empDeptName     = $('#empDeptName');
     const $empJobName      = $('#empJobName');
@@ -303,21 +362,24 @@
     const $empAcctStatus   = $('#empAcctStatus');
     const $empLoginIdLabel = $('#empLoginIdLabel');
 
-    // 버튼
-    const $btnEmpAcctSave  = $('#btnEmpAcctSave');
+    const $btnSaveAcct   = $('#btnEmpAcctSave');
+    const $btnRoleSave   = $('#btnRoleSave');
+    const $btnRoleDelete = $('#btnRoleDelete');
+    
+    const $roleCard     = $('#roleCard');
+    const $roleEmptyMsg = $('#roleEmptyMessage');
 
-    // 페이지 처음 들어왔을 때 회사코드는 세션 값으로 세팅
     if (SESSION_VEND_ID) {
       $empCompanyCode.val(SESSION_VEND_ID);
     }
 
     // ==========================
-    // 3. Grid 옵션
+    // 4. Grid 옵션
     // ==========================
     const rowHeight = 40;
 
     const empGridOptions = {
-      bodyHeight: rowHeight * 3,   // 3행 고정
+      bodyHeight: rowHeight * 3,   // 3줄 고정 + 스크롤
       rowHeight: rowHeight,
       scrollX: false,
       scrollY: true,
@@ -329,11 +391,24 @@
 
     const roleGridOptions = {
       ...empGridOptions,
-      bodyHeight: rowHeight * 4   // 4행
+      bodyHeight: rowHeight * 4
     };
 
     // ==========================
-    // 4. 사원 목록 Grid
+    // 5. 상태 코드 → 한글 라벨
+    // ==========================
+    function toStatusLabel(code) {
+      switch (code) {
+        case STATUS_ACTIVE:   return '사용';
+        case STATUS_LOCKED:   return '잠금';
+        case STATUS_INACTIVE: return '비활성';
+        case STATUS_END:      return '-';   // TERMINATED 숨김
+        default:              return '-';
+      }
+    }
+
+    // ==========================
+    // 6. 사원 목록 Grid
     // ==========================
     const empGrid = new tui.Grid({
       el: document.getElementById('empGrid'),
@@ -351,7 +426,7 @@
     });
 
     // ==========================
-    // 5. 계정 역할 Grid
+    // 7. 계정 역할 Grid
     // ==========================
     const roleGrid = new tui.Grid({
       el: document.getElementById('roleGrid'),
@@ -362,11 +437,11 @@
         { header: '역할 ID',   name: 'roleId',   hidden: true },
         { header: '역할 명',   name: 'roleName', minWidth: 100 },
         { header: '역할 유형', name: 'roleType', minWidth: 90 },
-        { header: '사용 여부', name: 'roleType', minWidth: 30 } // TODO: 실제 컬럼명에 맞게 변경 가능
+        { header: '사용 여부', name: 'roleYn',   minWidth: 60 }
       ]
     });
 
-    // 체크 상태 → 데이터에도 반영(필요 시 사용)
+    // 체크 상태를 별도 컬럼에 유지 (필요 시 사용할 수 있음)
     roleGrid.on('check', function (ev) {
       roleGrid.setValue(ev.rowKey, 'checked', true, false);
     });
@@ -383,12 +458,33 @@
         roleGrid.setValue(row.rowKey, 'checked', false, false);
       });
     });
+	
+	// ==========================
+	// 역할 카드 활성/비활성 토글
+	// ==========================
+	function setRoleCardEnabled(enabled) {
+	  if (enabled) {
+	    $roleCard.removeClass('disabled-card');
+	    $btnRoleSave.prop('disabled', false);
+	    $btnRoleDelete.prop('disabled', false);
+	  } else {
+	    $roleCard.addClass('disabled-card');
+	    $btnRoleSave.prop('disabled', true);
+	    $btnRoleDelete.prop('disabled', true);
+	  }
+	}
 
     // ==========================
-    // 6. 상세 영역 초기화
+    // 8. 상세 영역 초기화
     // ==========================
     function clearEmpDetail() {
       selectedEmpRow = null;
+      selectedEmpRowKey = null;
+
+      selectedEmpSnapshot = {
+        status: null,
+        roleIds: []
+      };
 
       $empAcctId.val('');
       $empDeptName.val('');
@@ -397,105 +493,77 @@
       $empNameDetail.val('');
       $empPhone.val('');
       $empEmail.val('');
-      // 회사 코드는 기본적으로 세션 값 유지
       $empCompanyCode.val(SESSION_VEND_ID || '');
       $empLoginId.val('');
       $empLoginId.prop('readonly', true);
       $empLoginIdLabel.removeClass('astar');
       $empAcctStatus.val('');
+      roleGrid.resetData([]);
+      
+      setRoleCardEnabled(false);
+      $roleEmptyMsg.hide();
     }
 
     // ==========================
-    // 7. 사원 목록 조회 함수
+    // 9. 사원 계정 역할 목록 조회
     // ==========================
+    function loadEmpRoles(empAcctId) {
+	  if (!empAcctId) {
+	    roleGrid.resetData([]);
+	    selectedEmpSnapshot.roleIds = [];
+	    // 계정 자체가 없으면 안내 문구도 숨겨둔다
+	    $roleEmptyMsg.hide();
+	    return;
+	  }
+	
+	  $.getJSON(EMP_ROLE_LIST_URL, { empAcctId: empAcctId }, function (list) {
+	
+	    // 🔹 역할이 하나도 없을 때
+	    if (!list || list.length === 0) {
+	      roleGrid.resetData([]);
+	      selectedEmpSnapshot.roleIds = [];
+	      $roleEmptyMsg.show();
+	      return;
+	    }
+	
+	    $roleEmptyMsg.hide();
+	
+	    const rows = (list || []).map(function (r) {
+	      return {
+	        roleId  : r.roleId,
+	        roleName: r.roleNm,
+	        roleType: r.roleTyNm,
+	        roleYn  : (r.useYn === 'e1') ? '사용' : '미사용',
+	        checked : true
+	      };
+	    });
+	
+	    roleGrid.resetData(rows);
+	
+	    roleGrid.getData().forEach(function (row) {
+	      roleGrid.check(row.rowKey);
+	    });
+	
+	    const roleIds = rows
+	      .map(r => r.roleId)
+	      .filter(id => !!id);
+	
+	    selectedEmpSnapshot.roleIds = roleIds;
+	
+	  }).fail(function (xhr) {
+	    console.error('사원 계정 역할 조회 실패', xhr);
+	    roleGrid.resetData([]);
+	    selectedEmpSnapshot.roleIds = [];
+	    $roleEmptyMsg.hide();
+	  });
+	}
 
-    function toStatusLabel(code) {
-      switch (code) {
-        case 'r1': return '사용';
-        case 'r2': return '잠금';
-        case 'r3': return '비활성';
-        case 'r4': return '해지';
-        default:   return '-';
-      }
-    }
-
-    // confirm용 상태 한글/영문
-    function toStatusName(code) {
-      switch (code) {
-        case 'r1': return 'ACTIVE(사용)';
-        case 'r2': return 'LOCKED(잠금)';
-        case 'r3': return 'INACTIVE(비활성)';
-        case 'r4': return 'TERMINATED(해지)';
-        default:   return code || '-';
-      }
-    }
-
-    // 저장 전 안내 메시지 생성
-    function buildSaveConfirmMessage(opts) {
-      const { isNew, status, phone, loginId, vendId } = opts;
-
-      const statusNm  = toStatusName(status);
-      const phoneDisp = phone  || '(연락처 미등록)';
-      const idDisp    = loginId || '(ID 미입력)';
-      const vendDisp  = vendId || '(회사코드 없음)';
-
-      // ① 신규 계정 생성
-      if (isNew) {
-        return [
-          '[계정 신규 생성]',
-          '',
-          '전송 방식 : 문자(SMS)',
-          `전송 대상 : ${phoneDisp}`,
-          '',
-          '[전송 내용 예시]',
-          `회사코드 : ${vendDisp}`,
-          `계정 ID : ${idDisp}`,
-          '임시 비밀번호가 발급됩니다.',
-          '',
-          '저장과 동시에 메시지를 전송하시겠습니까?'
-        ].join('\n');
-      }
-
-      // ② 기존 계정 + ACTIVE 로 변경
-      if (status === 'r1') {
-        return [
-          '[계정 상태 변경 → ACTIVE]',
-          '',
-          '전송 방식 : 문자(SMS)',
-          `전송 대상 : ${phoneDisp}`,
-          '',
-          '[전송 내용 예시]',
-          `계정 ID : ${idDisp}`,
-          '임시 비밀번호가 재발급됩니다.',
-          '',
-          '저장과 동시에 메시지를 전송하시겠습니까?'
-        ].join('\n');
-      }
-
-      // ③ LOCKED 또는 INACTIVE
-      if (status === 'r2' || status === 'r3') {
-        return [
-          `[계정 상태 변경 → ${statusNm}]`,
-          '',
-          '전송 방식 : 없음',
-          '',
-          '※ 문자 전송 없이 계정 상태만 변경됩니다.',
-          '',
-          '저장하시겠습니까?'
-        ].join('\n');
-      }
-
-      // 그 외
-      return [
-        `[계정 상태 변경 → ${statusNm}]`,
-        '',
-        '저장하시겠습니까?'
-      ].join('\n');
-    }
-
+    // ==========================
+    // 10. 사원 목록 조회
+    // ==========================
     function fetchEmpList() {
       const params = {
-        vendId:   SESSION_VEND_ID,          // ★ 세션 회사코드 같이 전송
+        vendId:   SESSION_VEND_ID,
         deptName: $deptName.val()  || '',
         jobName:  $jobName.val()   || '',
         empName:  $empName.val()   || '',
@@ -507,20 +575,18 @@
           const hasLogin = !!emp.loginId;
 
           return {
-            // 그리드 표시용
-            empAcctId: emp.empAcctId,                // 계정 PK(있다면)
-            deptName:  emp.deptNm,                   // 부서 명
-            jobName:   emp.jobNm,                    // 직급 명
-            empNo:     emp.empId,                    // 사번
-            empName:   emp.nm,                       // 사원 명
+            deptName:   emp.deptNm,
+            jobName:    emp.jobNm,
+            empNo:      emp.empId,
+            empName:    emp.nm,
             hasAccount: hasLogin ? 'Y' : 'N',
-            status:    hasLogin ? toStatusLabel(emp.acctStatus) : '-',
+            status:     hasLogin ? toStatusLabel(emp.acctStatus) : '-',
 
-            // 상세용
+            empAcctId:  emp.empAcctId || null,
             phone:      emp.cttpc,
             email:      emp.email,
             loginId:    emp.loginId,
-            acctStatus: emp.acctStatus,              // r1/r2/r3/r4
+            acctStatus: emp.acctStatus,  // r1/r2/r3/r4
             vendId:     emp.vendId
           };
         });
@@ -534,7 +600,6 @@
       });
     }
 
-    // 버튼 이벤트
     $btnSearch.on('click', fetchEmpList);
 
     $btnReset.on('click', function () {
@@ -547,15 +612,17 @@
     });
 
     // ==========================
-    // 8. 사원 Grid 행 클릭 → 상세 채우기
+    // 11. 사원 Grid 행 클릭 → 상세 채우기 + 역할 그리드 채우기
     // ==========================
     empGrid.on('click', function (ev) {
       const row = empGrid.getRow(ev.rowKey);
       if (!row) return;
 
       selectedEmpRow = row;
+      selectedEmpRowKey = ev.rowKey;
 
-      $empAcctId.val(row.empAcctId || '');
+      roleGrid.resetData([]);
+
       $empDeptName.val(row.deptName || '');
       $empJobName.val(row.jobName || '');
       $empNo.val(row.empNo || '');
@@ -563,104 +630,373 @@
       $empPhone.val(row.phone || '');
       $empEmail.val(row.email || '');
 
-      // 회사코드: row에 vendId 있으면 그 값, 없으면 세션 값
       const companyCode = row.vendId || SESSION_VEND_ID || '';
       $empCompanyCode.val(companyCode);
 
-      // 아이디 / 계정 상태
-      $empLoginId.val(row.loginId || '');
+      $empAcctId.val(row.empAcctId || '');
 
       if (!row.loginId) {
-        // 계정이 아직 없음 → 아이디 신규 입력 가능 + 필수(*)
-        $empLoginId.val('');
-        $empLoginId.prop('readonly', false);      // 입력 가능
-        $empLoginIdLabel.addClass('astar');       // 필수 표시
+    	  // ==========================
+    	  // 계정이 아직 없음 → 신규 생성 모드
+    	  // ==========================
+    	  $empLoginId.val('');
+    	  $empLoginId.prop('readonly', false);
+    	  $empLoginIdLabel.addClass('astar');
 
-        $empAcctStatus.val('');                   // 아직 상태 없음
-      } else {
-        // 계정이 이미 존재 → 아이디 수정 불가
-        $empLoginId.val(row.loginId || '');
-        $empLoginId.prop('readonly', true);       // 수정 불가
-        $empLoginIdLabel.removeClass('astar');    // 별 제거
+    	  $empAcctStatus.val('r1');      // 기본값 사용(r1)
 
-        $empAcctStatus.val(row.acctStatus || '');
-      }
+    	  roleGrid.resetData([]);
+
+    	  // 🔹 계정이 없으므로 역할 카드 비활성 + 안내 숨김
+    	  setRoleCardEnabled(false);
+    	  $roleEmptyMsg.hide();
+
+    	  selectedEmpSnapshot = {
+    	    status: null,
+    	    roleIds: []
+    	  };
+
+    	} else {
+    	  // ==========================
+    	  // 기존 계정 있음 → 수정 모드
+    	  // ==========================
+    	  $empLoginId.val(row.loginId || '');
+    	  $empLoginId.prop('readonly', true);
+    	  $empLoginIdLabel.removeClass('astar');
+
+    	  $empAcctStatus.val(row.acctStatus || '');
+
+    	  selectedEmpSnapshot = {
+    	    status: row.acctStatus || '',
+    	    roleIds: []
+    	  };
+
+    	  // 🔹 계정이 있으므로 역할 카드 활성화
+    	  setRoleCardEnabled(true);
+    	  $roleEmptyMsg.hide();
+
+    	  // 🔹 이 계정(empAcctId)의 역할 목록 조회해서 그리드에 세팅
+    	  loadEmpRoles(row.empAcctId);
+    	}
     });
 
     // ==========================
-    // 9. 계정 저장 버튼 (상태 + 문자 발송 흐름)
+    // 12. 저장 전 안내 메시지 구성 (일반 저장용)
     // ==========================
-    $btnEmpAcctSave.on('click', function () {
+    function buildSaveConfirmMessage(
+      isNew,
+      prevStatus,
+      newStatus,
+      empName,
+      phone,
+      vendId,
+      loginId,
+      roleCount
+    ) {
+      const prevLabel = prevStatus ? toStatusLabel(prevStatus) : '-';
+      const newLabel  = toStatusLabel(newStatus);
+      const phoneDisp = phone || '연락처 미등록';
+
+      let msg = '';
+
+      if (isNew) {
+        msg += '[신규 계정 생성]\n';
+        msg += '사원: ' + empName + '\n';
+        msg += '회사코드: ' + vendId + '\n';
+        msg += 'ID: ' + loginId + '\n';
+        msg += '계정 상태: ' + newLabel + '\n';
+        msg += '역할 수: ' + roleCount + '개\n\n';
+
+        if (newStatus === STATUS_ACTIVE) {
+          msg += '→ 임시 비밀번호가 생성되며,\n';
+          msg += '  사원의 연락처(' + phoneDisp + ')로 문자(현재는 로그만) 발송됩니다.\n\n';
+        } else {
+          msg += '→ 문자 발송 없이 계정만 생성됩니다.\n\n';
+        }
+      } else {
+        msg += '[계정 상태 / 역할 변경]\n';
+        msg += '사원: ' + empName + '\n';
+        msg += '현재 상태: ' + prevLabel + '\n';
+        msg += '변경 후 상태: ' + newLabel + '\n';
+        msg += '역할 수: ' + roleCount + '개\n\n';
+
+        if (prevStatus !== STATUS_ACTIVE && newStatus === STATUS_ACTIVE) {
+          msg += '→ 임시 비밀번호가 새로 생성되고,\n';
+          msg += '  사원의 연락처(' + phoneDisp + ')로 문자(현재는 로그만) 발송됩니다.\n\n';
+        } else if (prevStatus === STATUS_ACTIVE && newStatus === STATUS_ACTIVE) {
+          msg += '→ 상태는 이미 "사용"입니다. 비밀번호는 변경되지 않고,\n';
+          msg += '  역할 정보만 변경됩니다.\n\n';
+        } else {
+          msg += '→ 문자 발송 없이 상태/역할만 변경됩니다.\n\n';
+        }
+      }
+
+      msg += '저장하시겠습니까?';
+      return msg;
+    }
+
+    // ==========================
+    // 13. 역할 ID 수집
+    // ==========================
+    function collectRoleIds() {
+      const rows = roleGrid.getData();
+      if (!rows || rows.length === 0) {
+        return [];
+      }
+
+      return rows
+        .map(r => r.roleId)
+        .filter(id => !!id);
+    }
+
+    // ==========================
+    // 14. 변경 여부 비교 함수
+    // ==========================
+    function isNoChange(prevStatus, newStatus, prevRoleIds, newRoleIds) {
+      const s1 = prevStatus || '';
+      const s2 = newStatus  || '';
+
+      if (s1 !== s2) {
+        return false;
+      }
+
+      const a1 = (prevRoleIds || []).slice().sort();
+      const a2 = (newRoleIds  || []).slice().sort();
+
+      if (a1.length !== a2.length) {
+        return false;
+      }
+
+      for (let i = 0; i < a1.length; i++) {
+        if (a1[i] !== a2[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // ==========================
+    // 15. 공통 저장 함수
+    //    skipConfirm = true 이면 confirm/알림 최소화 (삭제 이후 자동 저장용)
+    // ==========================
+    function doSave(skipConfirm) {
 
       if (!selectedEmpRow) {
-        alert('사원을 먼저 선택해 주세요.');
+        alert('먼저 사원을 선택해 주세요.');
         return;
       }
 
-      const status  = $empAcctStatus.val();
-      const loginId = ($empLoginId.val() || '').trim();
-      const phone   = ($empPhone.val() || '').trim();
-      const vendId  = ($empCompanyCode.val() || '').trim();
-      const empId   = ($empNo.val() || '').trim();
-      const empAcctId = ($empAcctId.val() || '').trim();
+      const vendId   = ($empCompanyCode.val() || '').trim();
+      const empId    = ($empNo.val() || '').trim();
+      const loginId  = ($empLoginId.val() || '').trim();
+      const acctSt   = $empAcctStatus.val();
 
-      if (!status) {
+      const empName  = $empNameDetail.val() || selectedEmpRow.empName || '';
+      const phone    = $empPhone.val() || selectedEmpRow.phone || '';
+
+      if (!vendId || !empId) {
+        alert('회사 코드 또는 사번 정보가 없습니다.');
+        return;
+      }
+
+      const isNew      = !selectedEmpRow.loginId;
+      const prevStatus = selectedEmpSnapshot.status;
+      const prevRoles  = selectedEmpSnapshot.roleIds || [];
+
+      if (isNew && !loginId) {
+        alert('신규 계정 생성 시 계정 ID를 입력해 주세요.');
+        return;
+      }
+
+      if (!acctSt) {
         alert('계정 상태를 선택해 주세요.');
         return;
       }
 
-      // 신규 계정 여부: 그리드 row에 loginId 가 없는 경우
-      const isNew = !selectedEmpRow.loginId;
+      const roleIds = collectRoleIds();
 
-      if (isNew && !loginId) {
-        alert('신규 계정 생성 시 계정 ID는 필수입니다.');
-        $empLoginId.focus();
+      if (!isNew && isNoChange(prevStatus, acctSt, prevRoles, roleIds)) {
+        if (!skipConfirm) {
+          alert('변경된 내용이 없습니다.');
+        }
         return;
       }
 
-      const confirmMsg = buildSaveConfirmMessage({
-        isNew,
-        status,
-        phone,
-        loginId,
-        vendId
-      });
+      if (!skipConfirm) {
+        const confirmMsg = buildSaveConfirmMessage(
+          isNew,
+          prevStatus,
+          acctSt,
+          empName,
+          phone,
+          vendId,
+          loginId,
+          roleIds.length
+        );
 
-      if (!confirm(confirmMsg)) {
-        // 사용자가 취소한 경우 아무것도 하지 않음
-        return;
+        if (!confirm(confirmMsg)) {
+          return;
+        }
       }
 
-      // ==========================
-      // AJAX로 저장 요청
-      // ==========================
       const payload = {
-        empAcctId: empAcctId || null,  // null이면 서비스에서 신규로 처리
+        empAcctId: $empAcctId.val() || null,
         vendId:    vendId,
         empId:     empId,
         loginId:   loginId,
-        acctStatus: status
+        acctStatus: acctSt,
+        roleIds:   roleIds
       };
+
+      console.log('>>> /api/empAcct/save 요청 payload', payload);
 
       $.ajax({
         url: EMP_SAVE_URL,
         method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify(payload),
-        success: function (res) {
-          alert('저장 및 전송 처리가 완료되었습니다.');
-          // 저장 후 목록 다시 조회
-          fetchEmpList();
-        },
-        error: function (xhr) {
-          console.error('계정 저장 실패', xhr);
-          alert('계정 저장 중 오류가 발생했습니다.');
+        data: JSON.stringify(payload)
+      }).done(function (res) {
+
+        if (!res || res.success !== true) {
+          alert('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+          return;
         }
+
+        const newStatus = res.acctStatus || acctSt;
+        
+        if (res.empAcctId) {
+          $empAcctId.val(res.empAcctId);        // hidden 업데이트
+          selectedEmpRow.empAcctId = res.empAcctId;  // 그리드 row에도 반영
+        }
+
+        // 그리드 갱신
+        if (selectedEmpRowKey != null) {
+          empGrid.setValue(selectedEmpRowKey, 'hasAccount', 'Y');
+          empGrid.setValue(selectedEmpRowKey, 'status', toStatusLabel(newStatus));
+        }
+
+        // 선택된 행 데이터 갱신
+        selectedEmpRow.loginId    = loginId;
+        selectedEmpRow.acctStatus = newStatus;
+
+        // 기준 스냅샷 갱신
+        selectedEmpSnapshot = {
+          status: newStatus,
+          roleIds: roleIds.slice()
+        };
+
+        // 상세 영역 반영
+        $empAcctStatus.val(newStatus);
+        $empLoginId.prop('readonly', true);
+        $empLoginIdLabel.removeClass('astar');
+
+        if (!skipConfirm) {
+          let msg = '계정 정보가 저장되었습니다.\n\n';
+
+          if (res.smsSent) {
+            msg += '- 임시 비밀번호 안내 문자(현재는 로그 출력만)가 처리되었습니다.';
+          } else {
+            msg += '- 문자 발송 없이 상태/역할만 변경되었습니다.';
+          }
+
+          alert(msg);
+        } else {
+          // 삭제 등 자동 저장 시에는 조용히 로그만
+          console.log('역할/계정 변경 자동 저장 완료');
+        }
+
+      }).fail(function (xhr) {
+        console.error('계정 저장 중 오류', xhr);
+        alert('계정 저장 중 오류가 발생했습니다.');
       });
+      
+      if (isNew) {
+    	setRoleCardEnabled(true);
+      }
+    }
+
+    // ==========================
+    // 16. 계정 + 역할 저장 버튼
+    // ==========================
+    if ($btnSaveAcct.length) {
+      $btnSaveAcct.on('click', function () {
+        doSave(false);   // 일반 저장: 안내/confirm 표시
+      });
+    }
+
+    // ==========================
+    // 17. 계정 역할 저장 버튼 (오른쪽 "저장")
+    // ==========================
+    $btnRoleSave.on('click', function () {
+
+      if (!selectedEmpRow) {
+        alert('먼저 사원을 선택해 주세요.');
+        return;
+      }
+
+      if (!$empAcctId.val()) {
+        alert('계정이 아직 생성되지 않았습니다.\n좌측 [사원 계정 정보]에서 먼저 계정을 저장해 주세요.');
+        return;
+      }
+
+      // doSave 내부에서 변경 유무 체크 후 알아서 저장
+      doSave(false);
     });
 
     // ==========================
-    // 10. 역할 선택 모달 연동
+    // 18. 계정 역할 삭제 버튼
+    //     → 그리드에서 삭제 후, 곧바로 DB까지 저장(doSave(true))
+    // ==========================
+    $btnRoleDelete.on('click', function () {
+
+      if (!selectedEmpRow) {
+        alert('먼저 사원을 선택해 주세요.');
+        return;
+      }
+
+      if (!$empAcctId.val()) {
+        alert('계정이 아직 생성되지 않았습니다.\n좌측 [사원 계정 정보]에서 먼저 계정을 저장해 주세요.');
+        return;
+      }
+
+      const checkedRows = roleGrid.getCheckedRows();
+      if (!checkedRows || checkedRows.length === 0) {
+        alert('삭제할 역할을 선택해 주세요.');
+        return;
+      }
+
+      if (!confirm('선택한 역할을 삭제하시겠습니까?\n(삭제 후 바로 DB에 반영됩니다.)')) {
+        return;
+      }
+
+      // rowKey 큰 순서대로 삭제 (인덱스 꼬임 방지)
+      const rowKeys = checkedRows
+        .map(r => r.rowKey)
+        .sort(function (a, b) { return b - a; });
+
+      rowKeys.forEach(function (rowKey) {
+        roleGrid.removeRow(rowKey);
+      });
+
+      roleGrid.uncheckAll();
+      
+      const remain = roleGrid.getData();
+      $roleEmptyMsg.toggle(!remain || remain.length === 0);
+
+      // 삭제 직후 자동 저장 (추가 confirm 없음)
+      doSave(true);
+    });
+
+    // ==========================
+    // 19. 리사이즈 시 레이아웃 보정
+    // ==========================
+    window.addEventListener('resize', function () {
+      empGrid.refreshLayout();
+      roleGrid.refreshLayout();
+    });
+
+    // ==========================
+    // 20. 역할 선택 모달(authModal) 연동
     // ==========================
     const btnRoleSelect = document.getElementById('btnRoleSelectModal');
     if (btnRoleSelect) {
@@ -683,6 +1019,7 @@
                 roleId:   r.roleId,
                 roleName: r.roleNm,
                 roleType: r.roleTyNm,
+                roleYn:   '사용',
                 checked:  true
               };
             });
@@ -692,25 +1029,17 @@
             roleGrid.getData().forEach(function (row) {
               roleGrid.check(row.rowKey);
             });
+          $roleEmptyMsg.toggle(newRows.length === 0);
           }
         });
       });
     }
 
     // ==========================
-    // 11. 리사이즈 시 레이아웃 보정
-    // ==========================
-    window.addEventListener('resize', function () {
-      empGrid.refreshLayout();
-      roleGrid.refreshLayout();
-    });
-
-    // ==========================
-    // 12. 자동완성(사원 이름 / 계정 ID)
+    // 21. 자동완성(사원 이름 / 계정 ID)
     // ==========================
     if (window.TeamCommon && TeamCommon.autocomplete) {
 
-      // 12-1. 사원 이름 자동완성
       TeamCommon.autocomplete.init({
         inputSelector: '#empName',
         listSelector:  '#empNameList',
@@ -720,9 +1049,9 @@
         delay:         300,
         mapResponse: function (item) {
           return {
-            id:    item.empId,
-            label: '[' + item.empId + '] ' + item.nm + ' / ' + (item.deptNm || ''),
-            value: item.nm,
+            id:      item.empId,
+            label:   '[' + item.empId + '] ' + item.nm + ' / ' + (item.deptNm || ''),
+            value:   item.nm,
             loginId: item.loginId
           };
         },
@@ -734,7 +1063,6 @@
         }
       });
 
-      // 12-2. 계정 ID 자동완성
       TeamCommon.autocomplete.init({
         inputSelector: '#accountId',
         listSelector:  '#accountIdList',
@@ -744,9 +1072,9 @@
         delay:         300,
         mapResponse: function (item) {
           return {
-            id:    item.empId,
-            label: item.loginId + ' / ' + item.nm + ' / ' + (item.deptNm || ''),
-            value: item.loginId,
+            id:      item.empId,
+            label:   item.loginId + ' / ' + item.nm + ' / ' + (item.deptNm || ''),
+            value:   item.loginId,
             empName: item.nm
           };
         },
@@ -765,9 +1093,7 @@
   });
 </script>
 
-
-
-	<script src="/assets/js/authModal.js"></script>
+<script src="/assets/js/authModal.js"></script>
 
 </body>
 </html>

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.dto.EmpAcctEmployeeDto;
+import store.yd2team.common.dto.EmpAcctRoleDto;
 import store.yd2team.common.dto.EmpAcctSaveRequestDto;
 import store.yd2team.common.dto.EmpAcctSaveResultDto;
 import store.yd2team.common.dto.EmpDeptDto;
@@ -177,19 +178,21 @@ public class EmpAcctServiceImpl implements EmpAcctService{
         }
         // 3) 기존 계정 수정
         else {
-            acct.setLoginId(req.getLoginId());
+            // loginId를 안 보냈으면 기존 값 유지
+            if (req.getLoginId() != null && !req.getLoginId().isBlank()) {
+                acct.setLoginId(req.getLoginId());
+            }
+
             acct.setSt(newStatus);
             acct.setUpdtBy(loginEmpId);
 
-            // 기존 상태 != ACTIVE → ACTIVE 로 변경되는 경우
             if (!ACTIVE.equals(oldStatus) && ACTIVE.equals(newStatus)) {
                 tempPwPlain = generateTempPassword();
                 acct.setLoginPwd(passwordEncoder.encode(tempPwPlain));
-                acct.setTempYn(Y);   // 임시 비밀번호 상태
+                acct.setTempYn(Y);
                 smsSend = true;
             }
 
-            // INACTIVE / LOCKED / 기타 → 비밀번호 변경 없이 상태만 저장
             empAcctMapper.updateEmpAcct(acct);
         }
 
@@ -212,11 +215,33 @@ public class EmpAcctServiceImpl implements EmpAcctService{
                         req.getVendId(), req.getEmpId());
             }
         }
+        
+	    // 5) 역할(권한) 매핑 저장
+	    String empAcctId = acct.getEmpAcctId();
+	    String vendId    = acct.getVendId();   // or req.getVendId()
+	
+	    if (empAcctId != null) {
+	        List<String> roleIds = req.getRoleIds();
+
+	        // 🔹 roleIds == null 이면 권한은 손대지 않음
+	        if (roleIds != null) {
+	            // 기존 매핑 삭제
+	            empAcctMapper.deleteEmpRoles(empAcctId);
+
+	            // 새 매핑 insert (빈 배열이면 여기 안 들어감 → 결과적으로 "권한 싹 다 삭제")
+	            if (!roleIds.isEmpty()) {
+	                for (String roleId : roleIds) {
+	                    empAcctMapper.insertEmpRole(empAcctId, roleId, vendId, loginEmpId);
+	                }
+	            }
+	        }
+	    }
 
         EmpAcctSaveResultDto result = new EmpAcctSaveResultDto();
         result.setSuccess(true);
         result.setSmsSent(smsSend);
         result.setAcctStatus(newStatus);
+        result.setEmpAcctId(acct.getEmpAcctId());
         return result;
     }
 
@@ -233,6 +258,11 @@ public class EmpAcctServiceImpl implements EmpAcctService{
             sb.append(chars.charAt(idx));
         }
         return sb.toString();
+    }
+    
+    @Override
+    public List<EmpAcctRoleDto> getEmpAcctRoles(String empAcctId) {
+        return empAcctMapper.selectEmpAcctRoles(empAcctId);
     }
 
 }

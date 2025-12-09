@@ -84,7 +84,9 @@ public class EmpLogInController {
             
             applySessionPolicy(session, loginEmp.getVendId());
             
-            log.info(">>> 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={}, empId={}, loginId={}, vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={}, roleId={}",
+            log.info(">>> 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={},"
+            		+ " empId={}, loginId={}, vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={},"
+            		+ " AuthCodes={}, RoleIds = {}",
                     session.getId(),
                     loginEmp.getEmpAcctId(), loginEmp.getEmpNm(),
                     loginEmp.getDeptNm(), loginEmp.getDeptId(),
@@ -92,7 +94,7 @@ public class EmpLogInController {
                     loginEmp.getVendId(), loginEmp.getMasYn(),
                     loginEmp.getBizcnd(), loginEmp.getAddr(),
                     loginEmp.getCttpc(), loginEmp.getHp(),
-                    loginEmp.getRoleId());
+                    loginEmp.getAuthCodes(), loginEmp.getRoleIds());
 
             return result; // success=true, otpRequired=false
         }
@@ -273,6 +275,8 @@ public class EmpLogInController {
         loginEmp.setCttpc(empAcct.getCttpc());
         loginEmp.setHp(empAcct.getHp());
         loginEmp.setTempYn(empAcct.getTempYn());
+        loginEmp.setRoleIds(empAcct.getRoleIds());
+        loginEmp.setAuthCodes(empAcct.getAuthCodes());
 
         // 🔽 추가된 부분: masYn 기준으로 roleId 세팅
         //  - 예시: masYn == 'e1' 이면 HR 관리자 권한
