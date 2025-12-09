@@ -27,19 +27,33 @@ public class ContactController {
         return businessService.getContactListByVend(vendId);
     }
     
-    // 접촉내역 전체 저장
+    // 모든내역 전체 저장
     @PostMapping("/salesActivity/contact/saveAll")
     public String saveAllContacts(@RequestBody ContactSaveRequest req) {
 
         System.out.println("=== saveAllContacts 호출 ===");
         System.out.println("vendId = " + req.getVendId()
                          + ", potentialInfoNo = " + req.getPotentialInfoNo());
-
+        //접촉내역 저장
         businessService.saveAll(
             req.getVendId(),
             req.getPotentialInfoNo(),
             req.getContactList()
         );
+        
+        //리드내역 저장
+        businessService.saveAllLead(
+                req.getVendId(),
+                req.getPotentialInfoNo(),
+                req.getLeadList()
+            );
+        
+        //데모내역 저장
+        businessService.saveAllDemo(
+                req.getVendId(),
+                req.getPotentialInfoNo(),
+                req.getDemoList()
+            );
 
         return "OK";
     }
@@ -50,19 +64,19 @@ public class ContactController {
         System.out.println("=== contactByVend 호출, vendId = " + vendId + " ===");
         return businessService.getLeadListByVend(vendId);
     }
-//    
-//    // 접촉내역 전체 저장 (삭제 후 다시 INSERT 방식)
-//    @PostMapping("/salesActivity/contact/saveAll")
+    
+//    // 리드내역 전체 저장 (삭제 후 다시 INSERT 방식)
+//    @PostMapping("/salesActivity/contact/saveAllLeae")
 //    public String saveAllLead(@RequestBody ContactSaveRequest req) {
 //
 //        System.out.println("=== saveAllContacts 호출 ===");
 //        System.out.println("vendId = " + req.getVendId()
 //                         + ", potentialInfoNo = " + req.getPotentialInfoNo());
 //
-//        businessService.saveAll(
+//        businessService.saveAllLead(
 //            req.getVendId(),
 //            req.getPotentialInfoNo(),
-//            req.getContactList()
+//            req.getLeadList()
 //        );
 //
 //        return "OK";
