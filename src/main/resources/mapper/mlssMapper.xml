@@ -58,9 +58,9 @@ FROM    tb_mlss
 
 <select id="mlssDtChk">
 <![CDATA[
-        SELECT mlss_id, mlss_emp_id
+        SELECT mlss_id, mlss_emp_id, evl_begin_dt, evl_end_dt
 		FROM (
-		    SELECT a.mlss_id, a.mlss_emp_id
+		    SELECT a.mlss_id, a.mlss_emp_id, evl_begin_dt, evl_end_dt
 		    FROM tb_mlss_emp a 
 		    join tb_mlss b
 		    on a.mlss_id = b.mlss_id
@@ -88,17 +88,35 @@ SELECT 1 FROM DUAL
 </insert>
 
 <update id="mlssMasterUpdate">
-<selectKey keyProperty="mlssId" order="BEFORE" resultType="String">
-SELECT 'mlss' ||  LPAD(NVL(MAX(SUBSTR(mlss_id, LENGTH(mlss_id)-2, 3)), 0) + 1, 3, '0') AS mlss_id
-FROM tb_mlss
-where mlss_emp_id = #{mlssEmpId}
-</selectKey>
 UPDATE tb_mlss_emp
 SET
- <if test="self != null">self = #{self}</if>
- <if test="suprr != null">suprr = #{suprr}</if>
- <if test="crk != null">crk = #{crk}</if>
-where mlss_emp_id = #{mlssEmpId}
+    self = (
+        SELECT NVL(AVG(CASE WHEN evale_relate='본인' THEN score END), 0)
+        FROM tb_mlss_wrter
+        WHERE mlss_emp_id IN (
+            SELECT mlss_emp_id FROM tb_mlss_emp WHERE mlss_id = #{mlssId}
+        )
+        AND emp_id = #{empId}
+    ),
+    suprr = (
+        SELECT NVL(AVG(CASE WHEN evale_relate='상사' THEN score END), 0)
+        FROM tb_mlss_wrter
+        WHERE mlss_emp_id IN (
+            SELECT mlss_emp_id FROM tb_mlss_emp WHERE mlss_id = #{mlssId}
+        )
+        AND emp_id = #{empId}
+    ),
+    crk = (
+        SELECT NVL(AVG(CASE WHEN evale_relate='동료' THEN score END), 0)
+        FROM tb_mlss_wrter
+        WHERE mlss_emp_id IN (
+            SELECT mlss_emp_id FROM tb_mlss_emp WHERE mlss_id = #{mlssId}
+        )
+        AND emp_id = #{empId}
+    ),
+    updt_dt = SYSDATE,
+    updt_by = 'myk'
+WHERE mlss_emp_id = #{mlssEmpId}
 </update>
 
 <select id="mlssEmpList">
@@ -132,6 +150,44 @@ select *
 from tb_mlss_wrter
 where mlss_emp_id = #{mlssEmpId}
 and emp_id = #{empId}
+</select>
+
+<select id="mlssStLoadBefore">
+select
+ evale_relate 
+ ,count(mlss_emp_id)/9 "mlss_emp_id_count"
+from tb_mlss_wrter
+where mlss_emp_id in (select
+                     mlss_emp_id
+                    from tb_mlss_emp
+                    where emp_id in (select
+                                    emp_id
+                                    from tb_emp
+                                    where vend_id = #{vendId}
+                                    and dept_id = #{deptId})
+                    and mlss_id = #{mlssId})
+group by evale_relate
+</select>
+
+<select id="FinalResultMlssList">
+select
+ a.evale_relate
+ ,b.ability
+ ,b.mlss_iem
+ ,avg(a.score) "score"
+from tb_mlss_wrter a
+join tb_mlss_iem b
+on a.mlss_iem_id = b.mlss_iem_id
+where a.mlss_emp_id in (select
+                     mlss_emp_id
+                    from tb_mlss_emp
+                    where emp_id in (select
+                                    emp_id
+                                    from tb_emp
+                                    where vend_id = #{vendId}
+                                    and dept_id = #{deptId})
+                    and mlss_id = #{mlssId})
+group by a.evale_relate, b.ability, b.mlss_iem
 </select>
 
 </mapper>

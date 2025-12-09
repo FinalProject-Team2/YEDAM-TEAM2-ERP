@@ -79,12 +79,16 @@ public class MlssController {
 		}
 		Map<String, List<MlssVO>> list = mlssService.mlssLoadBefore();
 		List<MlssVO> userWrterList = mlssService.mlssWrterLoadBefore(v.getMlssEmpId(), empId);
+		List<MlssVO> stList = mlssService.mlssStLoadBefore(session.getVendId(), session.getDeptId(), v.getMlssId());
 		model.addAttribute("userWrterList", userWrterList);
+		model.addAttribute("stList", stList);
 		model.addAttribute("evaleRelateUpr", uprList);
 		model.addAttribute("evaleRelateLwr", lwrList);
 		model.addAttribute("empId", empId);
 		model.addAttribute("mlssId", v.getMlssId());
 		model.addAttribute("mlssEmpId", v.getMlssEmpId());
+		model.addAttribute("evlBeginDt", v.getEvlBeginDt());
+		model.addAttribute("evlEndDt", v.getEvlEndDt());
 		model.addAttribute("iemList", list);
 		model.addAttribute("Session", "testone");
 		return "insa/mlss";
@@ -130,14 +134,21 @@ public class MlssController {
 			return mlssService.mlssWrterRegist(keyword);	
 		}
 		
-	//다중입력조회
-			@GetMapping("/selectMlssChkJohoe")
+	//평가 탭 누를때 불러오는 조회기능(결과지 확인 제외)
+		@GetMapping("/selectMlssChkJohoe")
+		@ResponseBody
+		public List<MlssVO> selectMlssChkJohoe(MlssVO keyword) {			
+			System.out.println("모나오니 다중입력조회"+keyword);			
+			return mlssService.mlssWrterLoadBefore(keyword.getMlssEmpId(), keyword.getEmpId());		
+		}
+		
+	//결과지 확인 눌럿을 때 불러오는 Data
+			@GetMapping("/mlssFinalResult")
 			@ResponseBody
-			public List<MlssVO> selectMlssChkJohoe(MlssVO keyword) {			
-				System.out.println("모나오니 다중입력조회"+keyword);	
-				
-				
-				return mlssService.mlssWrterLoadBefore(keyword.getMlssEmpId(), keyword.getEmpId());		
+			public List<MlssVO> mlssFinalData(Model model) {	
+				SessionDto session = LoginSession.getLoginSession();
+				MlssVO v = mlssService.mlssVisitChk( session.getEmpId() );							
+				return mlssService.FinalResultMlssList(session.getVendId(), session.getDeptId(), v.getMlssId() );
 			}
 	
 

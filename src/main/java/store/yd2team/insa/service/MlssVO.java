@@ -41,13 +41,14 @@ public class MlssVO {
     
     //mlss_wrter 에만 있는 컬럼
     private String mlssWrterId;
-    private int score;
+    private Double score;
     private String evaleRelate;
     
     //비즈니스 로직에 필요한 컬럼
     private String vendId;       // 구독시 생성된ID FK
     private String nm;       // 사원이름
     private String clsf;       // 사원직급
+    private int mlssEmpIdCount;       // 완료여부카운트
     
     
 

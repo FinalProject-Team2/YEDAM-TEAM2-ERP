@@ -25,6 +25,17 @@
 .menu-item {
 	cursor: pointer; /* 마우스 올리면 손가락 모양 */
 }
+
+.fw-bold {
+font-weight: bold;
+}
+
+.btn-group .btn:not(:last-child) {
+    border-right-width: 0 !important;
+}
+
+
+
 </style>
 </head>
 <body layout:fragment="content">
@@ -42,15 +53,15 @@
 					<div class="row mb-2">
 						<div class="col-md-2">
 							<label class="form-label">본인 평가 완료 여부</label> <input type="text"
-								value="0 / 3" class="form-control" />
+								id="selfSt" value="0 / 3" class="form-control" />
 						</div>
 						<div class="col-md-2">
 							<label class="form-label">상사 평가 완료 여부</label> <input type="text"
-								value="0 / 2" class="form-control" />
+								id="suprrSt" th:value="|${evaleRelateUpr.size()}|" class="form-control" />
 						</div>
 						<div class="col-md-2">
 							<label class="form-label">동료 평가 완료 여부</label> <input type="text"
-								value="0 / 5" class="form-control" />
+								id="crkSt" th:value="|${evaleRelateLwr.size()}|" class="form-control"/>
 						</div>
 						<div class="col-md-6">
 								<label for="userName" class="form-label">기간</label>
@@ -60,7 +71,7 @@
 										<div class="input-group date">
 											<input type="text"
 												class="form-control datepicker js-date-range-start"
-												placeholder="시작일"> <span
+												th:value="${#dates.format(evlBeginDt, 'yyyy-MM-dd')}" placeholder="시작일"> <span
 												class="input-group-text js-date-range-icon-start"> <i
 												class="bi bi-calendar"></i>
 											</span>
@@ -72,7 +83,7 @@
 										<div class="input-group date ms-2">
 											<input type="text"
 												class="form-control datepicker js-date-range-end"
-												placeholder="종료일"> <span
+												th:value="${#dates.format(evlEndDt, 'yyyy-MM-dd')}" placeholder="종료일"> <span
 												class="input-group-text js-date-range-icon-end"> <i
 												class="bi bi-calendar"></i>
 											</span>
@@ -89,7 +100,7 @@
 
 
 	<div class="row">
-		<div class="col-md-2">
+		<!-- <div class="col-md-2">
 			<div class="card">
 				<div class="menu-item" onclick="chTitle(this)">
 					<i class="fa fa-edit"></i>본인 평가
@@ -104,9 +115,24 @@
 					<i class="fa fa-edit"></i>결과지 확인
 				</div>
 			</div>
+		</div> -->
+		<div class="col-md-10">
+		<div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+  <input type="radio"  class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
+  <label class="btn btn-outline-primary fw-bold" onclick="chTitle(this)" for="btnradio1"><i class="fa fa-edit"></i>본인 평가</label>
+
+  <input type="radio"  class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+  <label class="btn btn-outline-primary fw-bold" onclick="chTitle(this)" for="btnradio2"><i class="fa fa-edit"></i>상사 평가</label>
+
+  <input type="radio"  class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
+  <label class="btn btn-outline-primary fw-bold" onclick="chTitle(this)" for="btnradio3"><i class="fa fa-edit"></i>동료 평가</label>
+
+  <input type="radio"  class="btn-check" name="btnradio" id="btnradio4" autocomplete="off">
+  <label class="btn btn-outline-primary fw-bold" onclick="chTitle(this)" for="btnradio4"><i class="fa fa-edit"></i>결과지 확인</label>
+</div>
 		</div>
 		<!-- 검색조건 -->
-		<div class="col-md-10">
+		<div class="col-md-12">
 			<!-- 사원목록 -->
 			<div id="mlssUser" class="card">
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
@@ -125,32 +151,13 @@
 								</th:block>																								
 							</select>													
 					</div>
-					<div class="card-header-right">
-						<button type="button" class="btn btn-outline-dark">임시저장</button>
-						<button id="mlssUserRegist" type="button" class="btn btn-outline-dark">제출</button>
+					<div class="card-header-right">						
+						<button id="mlssUserRegist" type="button" class="btn btn-outline-dark">제출</button>						
 					</div>
 				</div>
 				
-					<div class="card-body">
-						<div class="row mb-2">
-							<div class="col-md-4">
-								<label class="form-label">이름</label> <input type="text"
-									value="김철수" class="form-control" />
-							</div>
-							<div class="col-md-4">
-								<label class="form-label">부서</label> <input type="text"
-									value="영업" class="form-control" />
-							</div>
-							<div class="col-md-4">
-								<label class="form-label">직급</label> <input type="text"
-									value="사원" class="form-control" />
-							</div>
-						</div>
-						<div class="row mb-2">
-							
-							
-						</div>
-						<div style="height: 450px; overflow:auto;" >
+					<div class="card-body">						
+						<div style="height: 530px; overflow:auto;" >
 						<h5 id="yeocRyangGrp" class="card-title">역량 그룹별 평가 항목</h5>
 						<p>직무 역량</p>
 						<div id="toastGrid" style="margin: 20px;"></div>
@@ -190,12 +197,25 @@
 	$("#evaleRelate1").hide();
 	$("#evaleRelate2").hide();
 	let mlssEmpId ="";
+	let resultFinalData = null;
 function chTitle(el) {
 	 // div 안의 텍스트 가져오기 (아이콘 제외)
 	const text = $(el).text().trim();
     if (text === "결과지 확인") {
         $("#mlssUser").addClass("stIsShow");
         $("#mlssResult").removeClass("stIsShow");
+        $.ajax({
+      	  url: "/mlssFinalResult",                // 요청 URL
+      	  type: "get"                     // GET 방식 (fetch 코드와 동일)      	  
+      	})
+      	.done((result) => {	
+      		resultFinalData = result;
+      		console.log(resultFinalData);
+      	})
+      	.fail((error) => {
+      	  console.error(error);
+      	  alert("데이터 요청 중 오류 발생");
+      	}); 
     } else {
         $("#mlssUser").removeClass("stIsShow");
         $("#mlssResult").addClass("stIsShow");
@@ -210,7 +230,7 @@ function chTitle(el) {
     } else if($("#collapseToggle").text() == "동료 평가"){
     	$("#evaleRelate1").hide();    	
     	$("#evaleRelate2").show();   
-    	empId = $("#evaleRelate2").val();
+    	mlssEmpId = $("#evaleRelate2").val();
     } else {
     	$("#evaleRelate1").hide();
     	$("#evaleRelate2").hide();
@@ -243,6 +263,7 @@ function chTitle(el) {
 
 $("#evaleRelate1, #evaleRelate2").on("change", function() {
     mlssEmpId = $(this).val();
+    //console.log(mlssEmpId);
     callMlssChkJohoe(mlssEmpId);
 });
 
@@ -251,7 +272,7 @@ $("#evaleRelate1, #evaleRelate2").on("change", function() {
 
 
 function callMlssChkJohoe(mlssEmpId) {
-	//console.log("모나오니"+mlssEmpId);
+	console.log("모나오니"+mlssEmpId);
 	//라디오 버튼 중 checked 되어 있는 것만 선택
 	$("input[type=radio]:checked").prop("checked", false);
 	$.ajax({
@@ -325,7 +346,7 @@ class ScoreRadioRenderer {
 			
 let gridColums = [
     { header: 'ID', name: 'mlssIemId', hidden: true },
-    { header: '평가 항목', name: 'mlssIem', sortable: true },
+    { header: '평가 항목', name: 'mlssIem', sortable: true, align:'center'},
     {
     	  header: '점수',
     	  name: 'score',
@@ -339,7 +360,8 @@ let gridColums = [
 			$("#mlssUserRegist").on("click", () => {				
 				let payLoad = {};				
 				let master = {};				
-				let datas = [...grid.getData(), ...grid2.getData(), ...grid3.getData()];		
+				let datas = [...grid.getData(), ...grid2.getData(), ...grid3.getData()];	
+				
 				for(let data of datas) {
 					$(`input[name="${data.mlssIemId}"]`).each(function() {
 						  if ($(this).prop("checked")) {
@@ -350,10 +372,10 @@ let gridColums = [
 						    	data["mlssEmpId"] = [[${mlssEmpId}]];
 						    }else if($("#collapseToggle").text() == "상사 평가"){
 						    	data["evaleRelate"] = "상사";
-						    	data["mlssEmpId"] = $("option.clsf:selected").val();
+						    	data["mlssEmpId"] = mlssEmpId;
 						    }else{
 						    	data["evaleRelate"] = "동료";
-						    	data["mlssEmpId"] = $("option.clsf:selected").val();
+						    	data["mlssEmpId"] = mlssEmpId;
 						    }
 						  }
 						});					
@@ -387,7 +409,18 @@ let gridColums = [
 				
 			});
 			
-			
+			const stList = [[${stList}]];			
+			for(let v of stList) {			
+				if(v.evaleRelate == "본인"){
+					$("#selfSt").val(v.mlssEmpIdCount*3+"/ 3");				
+				}else if(v.evaleRelate == "상사"){
+					let old = $("#suprrSt").val();
+					$("#suprrSt").val(v.mlssEmpIdCount+" / "+old)
+				}else{
+					let old = $("#crkSt").val();
+					$("#crkSt").val(v.mlssEmpIdCount+" / "+old)
+				}
+			}
 			
 			
 			const iemList = [[${iemList}]];
@@ -525,6 +558,25 @@ let gridColums = [
 			        }
 			    });
 			    
+			 // 초기값
+			    const selfData = Array(categories.length).fill(0);
+			    const suprrData = Array(categories.length).fill(0);
+			    const crkData = Array(categories.length).fill(0);
+
+			    // 데이터 매핑
+			    resultFinalData.forEach(item => {
+			      const idx = categories.indexOf(item.mlssIem);
+			      if (idx === -1) return;
+
+			      if (item.evaleRelate === '본인') {
+			        selfData[idx] = item.score ?? 0;
+			      } else if (item.evaleRelate === '상사') {
+			        suprrData[idx] = item.score ?? 0;
+			      } else if (item.evaleRelate === '동료') {
+			        crkData[idx] = item.score ?? 0;
+			      }
+			    });
+			    
 			    columnChart = toastui.Chart.columnChart({
 			        el: columnEl,
 			        data: {
@@ -536,15 +588,15 @@ let gridColums = [
 			            series: [
 			              {
 			                name: '본인',
-			                data: [6, 8, 10, 10, 7, 5, 2, 9, 3]
+			                data: selfData
 			              },
 			              {
 			                name: '상사',
-			                data: [7, 9, 9, 8, 8, 6, 3, 8, 4]
+			                data: suprrData
 			              },
 			              {
 			                name: '동료',
-			                data: [5, 7, 8, 9, 6, 5, 4, 7, 5]
+			                data: crkData
 			              }
 			            ]
 			          },
