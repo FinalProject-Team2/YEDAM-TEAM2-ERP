@@ -211,6 +211,8 @@ function chTitle(el) {
       	.done((result) => {	
       		resultFinalData = result;
       		console.log(resultFinalData);
+      	// 📌 데이터 로딩이 끝난 후 차트 그리기
+            showRadarChart();  
       	})
       	.fail((error) => {
       	  console.error(error);
@@ -239,7 +241,7 @@ function chTitle(el) {
     
     callMlssChkJohoe(mlssEmpId);
     
-	// 📌 div가 화면에 보이는 순간 차트를 생성
+	/* // 📌 div가 화면에 보이는 순간 차트를 생성
        if (!radarChart) {
            showRadarChart();
        } else {		        	
@@ -252,7 +254,7 @@ function chTitle(el) {
            radarChart.resize();   
            pieChart.resize();   
            columnChart.resize();   
-       }
+       } */
 	
 	
        
@@ -509,6 +511,168 @@ let gridColums = [
 			let pieChart;   // 전역 변수로 선언하여 어디서든 접근 가능
 			let columnChart;   // 전역 변수로 선언하여 어디서든 접근 가능
 			let resultGrid;   // 전역 변수로 선언하여 어디서든 접근 가능
+			    // 3대 역량 그룹 정의
+			    const groupMap = {
+			        "직무 역량": ["업무 이해도", "전문성", "문제 해결 능력"],
+			        "협업 역량": ["의사소통 능력", "협력 태도", "문제해결 및 기여도"],
+			        "자기관리 역량": ["시간 및 업무관리", "자기개발 및 학습태도", "책임감 및 규율 준수"]
+			    };
+			//Rader차트에 쓰이는 함수
+			function makeRadarSeries(resultFinalData) {
+
+
+			    // 본인 / 상사 / 동료 별 그룹 값 저장용
+			    const result = {
+			        "본인":     { "직무 역량": [], "협업 역량": [], "자기관리 역량": [] },
+			        "상사":     { "직무 역량": [], "협업 역량": [], "자기관리 역량": [] },
+			        "동료":     { "직무 역량": [], "협업 역량": [], "자기관리 역량": [] }
+			    };
+
+			    // 항목을 그룹에 매핑
+			    for (const row of resultFinalData) {
+			        const { mlssIem, evaleRelate, score } = row;
+
+			        for (const groupName in groupMap) {
+			            if (groupMap[groupName].includes(mlssIem)) {
+			                result[evaleRelate][groupName].push(score ?? 0);
+			            }
+			        }
+			    }
+
+			    // 그룹 평균 계산 함수
+			    function avg(arr) {
+			        if (arr.length === 0) return 0;
+			        return arr.reduce((a, b) => a + b, 0) / arr.length;
+			    }
+
+			    // radarChart 데이터 구조 제작
+			    return [
+			        {
+			            name: "본인",
+			            data: [
+			                avg(result["본인"]["직무 역량"]),
+			                avg(result["본인"]["협업 역량"]),
+			                avg(result["본인"]["자기관리 역량"])
+			            ]
+			        },
+			        {
+			            name: "상사",
+			            data: [
+			                avg(result["상사"]["직무 역량"]),
+			                avg(result["상사"]["협업 역량"]),
+			                avg(result["상사"]["자기관리 역량"])
+			            ]
+			        },
+			        {
+			            name: "동료",
+			            data: [
+			                avg(result["동료"]["직무 역량"]),
+			                avg(result["동료"]["협업 역량"]),
+			                avg(result["동료"]["자기관리 역량"])
+			            ]
+			        }
+			    ];
+			}
+			
+			//Pie차트에 쓰이는 함수
+			function makePieSeries(resultFinalData) {    
+
+    // 결과 저장 객체
+    const result = {
+        "직무 역량": [],
+        "협업 역량": [],
+        "자기관리 역량": []
+    };
+
+    // 본인 평가만 추출
+    const myList = resultFinalData.filter(row => row.evaleRelate === "본인");
+
+    // 항목을 그룹에 매핑하여 점수 push
+    for (const row of myList) {
+        const { mlssIem, score } = row;
+
+        for (const groupName in groupMap) {
+            if (groupMap[groupName].includes(mlssIem)) {
+                result[groupName].push(score ?? 0);
+            }
+        }
+    }
+
+    // 평균 계산 함수
+    function avg(arr) {
+        if (arr.length === 0) return 0;
+        return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+
+    // pieChart series 형태로 변환
+    return [
+        { name: '직무 역량', data: avg(result["직무 역량"]) },
+        { name: '협업 역량', data: avg(result["협업 역량"]) },
+        { name: '자기관리 역량', data: avg(result["자기관리 역량"]) }
+    ];
+}
+
+			
+			//총합 그리드 출력함수
+			function makeGridData(resultFinalData) {
+    const relateTypes = ["본인", "상사", "동료"];
+
+    // 결과 저장용 객체
+    const result = {
+        "본인": { "직무 역량": [], "협업 역량": [], "자기관리 역량": [] },
+        "상사": { "직무 역량": [], "협업 역량": [], "자기관리 역량": [] },
+        "동료": { "직무 역량": [], "협업 역량": [], "자기관리 역량": [] }
+    };
+
+    // row들을 그룹/평가자별로 분배
+    for (const row of resultFinalData) {
+        const { evaleRelate, mlssIem, score } = row;
+
+        if (!relateTypes.includes(evaleRelate)) continue;
+
+        for (const groupName in groupMap) {
+            if (groupMap[groupName].includes(mlssIem)) {
+                result[evaleRelate][groupName].push(score ?? 0);
+            }
+        }
+    }
+
+    // 평균 계산 함수
+    function avg(arr) {
+        if (arr.length === 0) return 0;
+        return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+
+    // 각 평가자별 총 평균 (3개 역량 평균을 모두 합침)
+    const totalAvg = {};
+
+    relateTypes.forEach(type => {
+        const job = avg(result[type]["직무 역량"]);
+        const coop = avg(result[type]["협업 역량"]);
+        const self = avg(result[type]["자기관리 역량"]);
+
+        totalAvg[type] = Number(((job + coop + self)/3).toFixed(2));
+    });
+
+    // 조직 평균 (= 상사 + 동료 평균)
+    const groupAvgScore = Number(((totalAvg["상사"] + totalAvg["동료"]) / 2).toFixed(2));
+
+    // 본인의 조직 대비 점수 차이
+    const groupReadinessScore = Number((totalAvg["본인"] - groupAvgScore).toFixed(2));
+
+    // Grid에 넣을 최종 데이터
+    return [{
+        id: 1,
+        fin: "총 합계 평균점수",
+        self: totalAvg["본인"],
+        suprr: totalAvg["상사"],
+        crk: totalAvg["동료"],
+        groupAvgScore: groupAvgScore,
+        groupReadinessScore: groupReadinessScore
+    }];
+}
+
+
 
 			function showRadarChart() {
 				const radarEl = document.getElementById('radar');
@@ -523,16 +687,15 @@ let gridColums = [
 			    if (resultGrid) resultGrid.destroy(); 
 			    
 			    if (columnChart) columnChart.destroy();
+			    //makeRadarData(iemList, myWrterList, "본인")
+			    
+			    const radarSeries = makeRadarSeries(resultFinalData);
 			    
 			    radarChart = toastui.Chart.radarChart({
 			        el: radarEl,
 			        data: {
 			            categories: ['직무 역량', '협업 역량', '자기관리 역량'],
-			            series: [
-			            	makeRadarData(iemList, myWrterList, "본인"),
-			          	   { name: '상사', data: [4, 4, 4] },
-			                 { name: '부하', data: [3, 3.7, 3.5] }, 
-			            ]
+			            series: radarSeries
 			        },
 			        options: {
 			            series: { showArea: true },
@@ -541,15 +704,14 @@ let gridColums = [
 				            height: 600   // 원하는 높이
 				          }
 			        },		        
-			    });			    
+			    });	
+			    
+			    const pieSeries = makePieSeries(resultFinalData);
+			    
 			    pieChart = toastui.Chart.pieChart({
 			        el: pieEl,
 			        data: {
-			            series: [
-			                { name: '직무 역량', data: 6 },
-			                { name: '협업 역량', data: 5 },
-			                { name: '자기관리 역량', data: 9 }
-			            ]
+			            series: pieSeries
 			        },
 			        options: {
 			            chart: {
@@ -557,6 +719,13 @@ let gridColums = [
 			            }
 			        }
 			    });
+			    
+			 // 원하는 category 순서
+			    const categories = [
+			      '업무 이해도', '전문성', '문제 해결 능력',
+			      '의사소통 능력', '협력 태도', '문제해결 및 기여도',
+			      '시간 및 업무관리', '자기개발 및 학습태도', '책임감 및 규율 준수'
+			    ];
 			    
 			 // 초기값
 			    const selfData = Array(categories.length).fill(0);
@@ -609,10 +778,7 @@ let gridColums = [
 			        }			        
 			    });
 			    
-			    const gridData = [ {
-					id : 7,
-					ability : "시간 및  업무관리",
-				},  ];
+			    const gridData = makeGridData(resultFinalData);
 
 				// Grid 생성
 				resultGrid = new tui.Grid(
@@ -624,29 +790,29 @@ let gridColums = [
 							minBodyHeight : 0,
 							autoWidth : true,
 							columns : [{
-										header : '다면평가 역량그룹',
-										name : 'ability',
+										header : '다면평가 종합점수',
+										name : 'fin',
 										sortable : true
 										},
 										{
 											header : '본인',
-											name : 'score1',
+											name : 'self',
 											align : 'left',												
 										},{
 											header : '상사',
-											name : 'score1',
+											name : 'suprr',
 											align : 'left',												
 										},{
 											header : '동료',
-											name : 'score1',
+											name : 'crk',
 											align : 'left',												
 										},{
 											header : '조직평균',
-											name : 'score1',
+											name : 'groupAvgScore',
 											align : 'left',												
 										},{
 											header : '조직대비',
-											name : 'score1',
+											name : 'groupReadinessScore',
 											align : 'left',												
 										},]
 						});
