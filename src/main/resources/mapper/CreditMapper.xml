@@ -36,6 +36,9 @@
        cdt.mrtgg_lmt,
        cdt.credit_lmt,
        cdt.cdtln_lmt,
+       
+        round((cdt.cdtln_lmt - NVL(r.remain_amt, 0)) / cdt.cdtln_lmt * 100) as useRate,
+       
        cdt.lmtover_check,
        cdt.yn,
        cdt.applc_begin_dt,
@@ -96,4 +99,82 @@
        FROM tb_custcom
        WHERE custcom_id = #{custcomId}
    </select>
+   
+   
+   <!-- CreditMapper.xml 예시 -->
+<insert id="insertCdtlnLmt"
+        parameterType="store.yd2team.business.service.CreditVO">
+
+    <!-- PK 생성용 시퀀스 (필요 시 이름 변경) -->
+    <selectKey keyProperty="cdtlnNo" resultType="string" order="BEFORE">
+        SELECT seq_newcredit.NEXTVAL FROM DUAL
+    </selectKey>
+
+    INSERT INTO tb_cdtln_lmt (
+          CDTLN_NO
+        , VEND_ID
+        , CUSTCOM_ID
+        , CREDIT_GRAD
+        , CDTLN_CHECK
+        , MRTGG_LMT
+        , CREDIT_LMT
+        , CDTLN_LMT
+        , APPLC_BEGIN_DT
+        , APPLC_END_DT
+        , CREA_DT
+        , CREA_BY
+        , UPDT_DT
+        , CREDIT_MM
+        , BAD_CREDIT_YN
+        , SHIP_HOLD_YN
+        , TURNOVER_DAYS
+        , LAST_EVAL_DT
+    ) VALUES (
+          #{cdtlnNo}    
+        , #{vendId}
+        , #{custcomId}
+        , #{creditGrad}
+        , #{cdtlnCheck}
+        , #{mrtggLmt}
+        , #{creditLmt}
+        , #{cdtlnLmt}
+        , #{applcBeginDt}
+        , #{applcEndDt}
+        , SYSDATE
+        , #{creaBy}
+        , SYSDATE
+        , #{creditMm}
+        , #{badCreditYn}
+        , #{shipHoldYn}
+        , #{turnoverDays}
+        , #{lastEvalDt}
+    )
+</insert>
+
+
+<insert id="insertAtmpt" parameterType="store.yd2team.business.service.AtmptVO">
+
+    INSERT INTO tb_atmpt (
+          ATMPT_NO
+        , CDTLN_NO
+        , VEND_ID
+        , CUSTCOM_ID
+        , BASIS_ATMPT_BLCE
+        , ATMPT_BLCE
+        , CREA_DT
+        , CREA_BY
+        , UPDT_DT
+    ) VALUES (
+          seq_atmpt.nextval         
+        , #{cdtlnNo}            
+        , #{vendId}
+        , #{custcomId}
+        , #{basisAtmptBlce}
+        , #{atmptBlce}
+        , SYSDATE
+        , #{creaBy}
+        , SYSDATE
+    )
+</insert>
+   
 </mapper>

@@ -1,5 +1,7 @@
 package store.yd2team.business.service;
 
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
@@ -22,11 +24,11 @@ public class RciptVO {
 
     // 거래일자 시작일 (datepicker: startDt)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private String startDt;
+    private LocalDate startDt;
 
     // 거래일자 종료일 (datepicker: endDt)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private String endDt;
+    private LocalDate endDt;
 
 
     /* =========================
@@ -44,7 +46,7 @@ public class RciptVO {
     // 거래일자
     // SELECT r.trns_dt
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private String trnsDt;
+    private LocalDate trnsDt;
 
     // 거래내역(내용)
     // SELECT r.sale_ctnt
@@ -69,10 +71,10 @@ public class RciptVO {
     // 수금예정일
     // SELECT r.rcipt_appo_dt AS rciptAppoDt
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private String rciptAppoDt;
+    private LocalDate rciptAppoDt;
 
     // 최종수금일
     // SELECT r.ltst_rcipt_dt AS ltstRciptDt
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private String ltstRciptDt;
+    private LocalDate ltstRciptDt;
 }

@@ -245,42 +245,43 @@
 			</div>
 		</div>
 	</div>
-
+	<div th:replace="business/modal/delayModal :: delayModal"></div>
+	
 	<script>
 
 
 	
     // 1. Toast UI Grid 테마
-tui.Grid.applyTheme('default', {
-  cell: {
-    normal: {
-      border: '#dedede',
-      background: '#ffffff',
-      showVerticalBorder: true
-    },
-    header: {
-      border: '#dedede',
-      background: '#f5f5f5',
-      showVerticalBorder: true
-    },
-    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
-    rowHeader: {
-      border: '#dedede',
-      background: '#ffffff',
-      showVerticalBorder: true
-    },
-    editable: {
-      background: '#FFFDF0',
-      text: '#000'
-    },
-    selectedHeader: {
-      background: '#f5f5f5'
-    },
-    selected: {
-      background: '#ffffff'
-    }
-  }
-});
+	tui.Grid.applyTheme('default', {
+	  cell: {
+	    normal: {
+	      border: '#dedede',
+	      background: '#ffffff',
+	      showVerticalBorder: true
+	    },
+	    header: {
+	      border: '#dedede',
+	      background: '#f5f5f5',
+	      showVerticalBorder: true
+	    },
+	    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
+	    rowHeader: {
+	      border: '#dedede',
+	      background: '#ffffff',
+	      showVerticalBorder: true
+	    },
+	    editable: {
+	      background: '#FFFDF0',
+	      text: '#000'
+	    },
+	    selectedHeader: {
+	      background: '#f5f5f5'
+	    },
+	    selected: {
+	      background: '#ffffff'
+	    }
+	  }
+	});
 
 
 
@@ -338,6 +339,19 @@ tui.Grid.applyTheme('default', {
         ]
     });
 
+   	// 연체이력관리 모달창
+    const openDelayBtn = document.getElementById("openDelayModal");
+    const DelayModal = document.getElementById("delayModal");
+    const DelayModalClose = document.getElementById("delayModalClose");
+    const DelayModalBackdrop = document.getElementById("delayModalBackdrop");
+
+    // 연체이력관리 열기
+    openDelayBtn.addEventListener("click", () => {
+    delayModal.classList.add("show");
+    delayModal.style.display = "block";
+    delayModalBackdrop.style.display = "block";
+    document.body.classList.add("modal-open");
+    });
     
     
 

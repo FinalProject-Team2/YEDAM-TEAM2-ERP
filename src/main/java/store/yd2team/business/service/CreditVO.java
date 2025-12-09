@@ -1,9 +1,12 @@
 package store.yd2team.business.service;
+import java.util.Date;
+
 import lombok.Data;
 @Data
 public class CreditVO {
    // --- 여신한도 테이블(tb_cdtln_lmt)
    private String cdtlnNo;
+   private String vendId;
    private String custcomId;
    private String custcomName;
    private String creditGrad;
@@ -13,8 +16,11 @@ public class CreditVO {
    private Long cdtlnLmt;
    private String lmtoverCheck;
    private String yn;
-   private String applcBeginDt;
-   private String applcEndDt;
+   private Date applcBeginDt;
+   private Date applcEndDt;
+   private String creaBy;
+   private Date lastEvalDt;
+   private int useRate;
    // --- 신규 추가 (여신관리 기능 강화용)
    private Integer creditMm;      // 여신 개월 수
    private String badCreditYn;    // 악성여신 여부

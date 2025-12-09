@@ -18,6 +18,7 @@ public class AtmptVO {
     private String custcomId;        // CUSTCOM_ID    고객코드
     private Long basisAtmptBlce;     // BASIS_ATMPT_BLCE  기초미수잔액
     private Long atmptBlce;          // ATMPT_BLCE        현재미수잔액
+    private String creaBy;
 
     /* ==========================
      * tb_atmpt_detail (미수상세)

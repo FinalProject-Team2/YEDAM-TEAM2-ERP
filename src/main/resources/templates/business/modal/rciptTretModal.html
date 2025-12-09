@@ -1,73 +1,96 @@
 <!-- /templates/business/modal/rciptTretModal.html -->
 <div th:fragment="rciptTretModal">
-	<!-- ✅ 모달 본체 -->
-	<div class="modal-backdrop" id="rciptTretBackdrop"></div>
-	<div class="modal" id="rciptTretModal">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-
-				<!-- 모달 헤더 -->
-				<div class="modal-header">
-					<h5 class="modal-title">입금처리</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal"
-						aria-label="Close"></button>
-				</div>
-
-				<!-- 모달 바디 -->
-				<div class="modal-body">
-					<form id="depositForm">
-						<div class="row g-3">
-
-							<!-- 1행: 고객명 / 일자 -->
-							<div class="col-md-6">
-								<label for="custName" class="form-label">고객명</label> <select
-									id="custName" class="form-select">
-									<option value="">선택</option>
-									<option value="C001">무신사</option>
-									<option value="C002">29cm</option>
-									<!-- 실제 데이터 바인딩 -->
-								</select>
-							</div>
-
-							<div class="col-md-6">
-								<label for="depositDate" class="form-label">일자</label> <input
-									type="date" id="depositDate" class="form-control">
-							</div>
-
-							<!-- 2행: 입금금액 / 결제방법 -->
-							<div class="col-md-6">
-								<label for="depositAmt" class="form-label">입금금액</label> <input
-									type="number" id="depositAmt" class="form-control"
-									placeholder="0">
-							</div>
-
-							<div class="col-md-6">
-								<label for="payMethod" class="form-label">결제방법</label> <select
-									id="payMethod" class="form-select">
-									<option value="">선택</option>
-									<option value="CASH">현금</option>
-									<option value="CARD">카드</option>
-									<option value="TRANSFER">계좌이체</option>
-								</select>
-							</div>
-
-							<!-- 3행: 비고 -->
-							<div class="col-12">
-								<label for="remark" class="form-label">비고</label>
-								<textarea id="remark" class="form-control" rows="3"
-									placeholder="비고를 입력하세요."></textarea>
-							</div>
-
+  <!--  모달 본체 -->
+  <div class="modal-backdrop" id="rciptTretBackdrop"></div>
+  <div class="modal" id="rciptTretModal">
+    <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 600px;">
+      <div class="modal-content">
+        <div class="modal-body">
+	          <div class="row">
+		        <!-- 검색조건 -->
+		        <div class="col-md-12">
+		        	<div class="card-header with-actions">
+						<div class="card-header-left">
+				          	<h5 class="modal-title">입금처리</h5>
 						</div>
-					</form>
-				</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark" id="modalInit">초기화</button>
+			           		<button type="button" class="btn btn-outline-dark" id="modalSaveBtn">저장</button>
+						</div>
+					</div>
+					
+			<div class="col-md-12 d-flex">
+    			<div class="card w-100 h-100">
 
-				<!-- 모달 푸터 -->
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-					<button type="button" class="btn btn-primary" id="btnSaveDeposit">저장</button>
+					
+
+					<!-- 신규등록폼 -->
+					<div class="card-body d-flex flex-column justify-content-between">
+						  <div class="row g-3">
+						  
+						  <!-- custcomId 유지용 -->
+						  <input type="hidden" id="custcomIdHidden" value="">
+						  
+							    <!-- 위쪽 영역 -->
+							    <div class="col-6">
+							      <label for="custcomName" class="form-label">고객사명</label>
+							      <input id="custcomName" type="text" class="form-control" readonly>
+							    </div>
+							    
+							    <!-- <div class="col-1"></div> -->
+							    
+							    <div class="col-6">
+							      <label for="userName" class="form-label">입금일자</label>
+									<div class="input-group date" id="applyDatePicker">
+									    <input type="text" class="form-control" id="applyDate" placeholder="날짜 선택">
+									    <span class="input-group-text" id="icon-calendar">
+									        <i class="bi bi-calendar"></i>
+									    </span>
+									</div>
+							    </div>
+						  </div>
+							
+						  <div class="row g-3">
+							    <!-- 2번째줄 -->
+							    <div class="col-md-6">
+	                                <label for="mbizAddr" class="form-label">입금금액</label> 
+									<input id="mbizAddr" type="text" class="form-control" placeholder="YEDAM" align-items-center>
+								</div>
+								
+								
+								
+								<div class="col-md-6">
+	                                <label for="mbizTel" class="form-label">결제방법</label> 
+									<select id="payMethod" class="form-select">
+					                  <option value="">선택</option>
+					                  <option value="CASH">현금</option>
+					                  <option value="CARD">카드</option>
+					                  <option value="TRANSFER">계좌이체</option>
+					                </select>
+								</div>
+						</div>
+						<div class="row g-3">	
+							    <!-- 아래 : 비고 (아래쪽에 붙도록) -->
+								<div class="col-md-12">
+	                                <div class="col-md-12">
+		                                <label for="mbizTel" class="form-label">비고</label> 
+										<input id="mbizTel" type="text" class="form-control" placeholder="YEDAM" align-items-center>
+									</div>
+								</div>
+						</div>	
+					</div> <!-- 신규등록폼 end -->
+					
 				</div>
-			</div>
-		</div>
-	</div>
+			</div><!-- 신규등록 카드 end -->
+<!-- 	           </div> col-md-12 end
+		               
+	                <div class="card-body">
+	                </div>
+		            
+	        </div> -->
+		    
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,22 +1,28 @@
 package store.yd2team.business.mapper;
 import java.util.List;
+
+import store.yd2team.business.service.AtmptVO;
 import store.yd2team.business.service.CreditVO;
 import store.yd2team.business.service.CustcomVO;
 public interface CreditMapper {
 	//검색조건(조회)
 	List<CreditVO> searchCredit(CreditVO searchVO);
 	
-	//검색조건(저장)
-	int insertCredit(CreditVO vo);
-	
 	// 조회 고객사 auto complete(고객코드, 고객사명)
 	List<CreditVO> searchCustcomId(String keyword);    // 고객사코드(아이디) 검색
 	List<CreditVO> searchCustcomName(String keyword);  // 고객사명 검색
+	
 	//업체정보 모달창
 	CustcomVO selectCustcomDetail(String custcomId);
 	List<CreditVO> selectEvalTarget(CreditVO vo);
 	CreditVO selectCreditStatus(CreditVO target);
 	int updateCreditEval(CreditVO eval);
+	
+	//여신등록
+	int insertCdtlnLmt(CreditVO vo);
+	
+	//미수등록
+	int insertAtmpt(AtmptVO vo);
 }
 
 

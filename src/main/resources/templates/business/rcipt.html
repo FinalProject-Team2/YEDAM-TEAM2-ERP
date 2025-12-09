@@ -99,18 +99,26 @@
 		</div>
 	</div>
 	<div th:replace="business/modal/rciptTretModal :: rciptTretModal"></div>
-	<div th:replace="business/modal/delayModal :: delayModal"></div>
+	
 	
 <script>
-	let searchForm = {
-			custcomId: "",
-		    custcomName: "",
-		    psch: "",
-		    startDt: "",
-		    endDt: ""
-	};
+		function toNumber(val) {
+		    if (val === null || val === undefined) return 0;
+		    const str = String(val).replace(/,/g, '').trim();
+		    if (str === '') return 0;
+		    return Number(str) || 0;
+		}
 
-    const gridData = [];
+
+		let searchForm = {
+				custcomId: "",
+			    custcomName: "",
+			    psch: "",
+			    startDt: "",
+			    endDt: ""
+		};
+	
+	    const gridData = [];
     
     
         // Grid 생성
@@ -123,17 +131,63 @@
             minBodyHeight: 0,
             autoWidth: true,
             columns: [
-            	  { header: '고객코드', name: 'custcomId', align: 'center' },
-            	  { header: '고객사', name: 'custcomName', align: 'center' },
-            	  { header: '거래일자', name: 'trnsDate' },
-            	  { header: '매출내역', name: 'saleCtnt', align: 'right' },
-            	  { header: '매출금액', name: 'salAmt', editor: 'text' },
-            	  { header: '대출금액', name: 'borwAmt', editor: 'text' },
-            	  { header: '원금잔액', name: 'prinsumBaln', align: 'right', editor: 'text' },
-            	  { header: '입금약속액', name: 'rciptAppoAmt', editor: 'text' },
-            	  { header: '입금약속일', name: 'rciptAppoDt' },
-            	  { header: '최근납입일', name: 'ltstRciptDt' },
-            	]
+                {header: '고객코드', name: 'custcomId', align: 'center'},
+                {header: '고객사', name: 'custcomName', align: 'center'},
+                {header: '거래일자', name: 'trnsDate'},
+                {header: '매출내역', name: 'saleCtnt'},
+                {
+                    header: '매출금액',
+                    name: 'saleAmt',
+                    editor: 'text',
+                    align: 'right',
+                    formatter: ({value}) => {
+                        const num = toNumber(value);
+                        return num ? num.toLocaleString() : '';
+                    }
+                },
+                {
+                    header: '대출금액',
+                    name: 'borwAmt',
+                    editor: 'text',
+                    align: 'right',
+                    formatter: ({value}) => {
+                        const num = toNumber(value);
+                        return num ? num.toLocaleString() : '';
+                    }
+                },
+                {
+                    header: '입금금액',
+                    name: 'rciptAmt',
+                    editor: 'text',
+                    align: 'right',
+                    formatter: ({value}) => {
+                        const num = toNumber(value);
+                        return num ? num.toLocaleString() : '';
+                    }
+                },
+                {
+                    header: '원금잔액',
+                    name: 'prinsumBaln',
+                    editor: 'text',
+                    align: 'right',
+                    formatter: ({value}) => {
+                        const num = toNumber(value);
+                        return num ? num.toLocaleString() : '';
+                    }
+                },
+                {
+                    header: '입금약속액',
+                    name: 'rciptAppoAmt',
+                    editor: 'text',
+                    align: 'right',
+                    formatter: ({value}) => {
+                        const num = toNumber(value);
+                        return num ? num.toLocaleString() : '';
+                    }
+                },
+                {header: '입금약속일', name: 'rciptAppoDt', align: 'right'},
+                {header: '최근납입일', name: 'ltstRciptDt', align: 'right'}
+            ]
         });
         
 // =============== 버튼 이벤트
@@ -224,8 +278,7 @@
         
     	// 입금처리 모달창
         const openRciptTretBtn = document.getElementById("openRciptTretModal");
-        const rciptTretModal = document.getElementById("rciptTretModal");
-        const rciptTretModalClose = document.getElementById("rciptTretModalClose");
+        const modal = document.getElementById("rciptTretModal");
         const rciptTretBackdrop = document.getElementById("rciptTretBackdrop");
 
         // 입금처리 열기
@@ -236,20 +289,19 @@
         document.body.classList.add("modal-open");
         });
         
-       	// 연체이력관리 모달창
-        const openDelayBtn = document.getElementById("openDelayModal");
-        const DelayModal = document.getElementById("delayModal");
-        const DelayModalClose = document.getElementById("delayModalClose");
-        const DelayModalBackdrop = document.getElementById("delayModalBackdrop");
+    	// 바깥 클릭 시 닫기
+    	function closeRciptTretModal() {
+    		modal.classList.remove("show");
+    		modal.style.display = "none";
+    		rciptTretBackdrop.style.display = "none";
+    	}
+    	
+    	modal.addEventListener("click", (event) => {
+    		if (!event.target.closest(".modal-content")) {
+    			closeRciptTretModal();
+    		}
+    	});
 
-        // 연체이력관리 열기
-        openDelayBtn.addEventListener("click", () => {
-        delayModal.classList.add("show");
-        delayModal.style.display = "block";
-        delayModalBackdrop.style.display = "block";
-        document.body.classList.add("modal-open");
-        });
-        
         
     </script>
 </body>

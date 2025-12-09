@@ -98,8 +98,9 @@
                    <div class="card-header-right">
                        <!-- 여신 평가 버튼 추가 -->
                        <button type="button" class="btn btn-outline-danger me-2" id="creditEval">여신평가</button>
+                       <button type="button" class="btn btn-outline-dark" id="newBtn">행추가</button>
                        <button type="button" class="btn btn-dark" id="limitInit">초기화</button>
-                       <button type="button" class="btn btn-outline-dark" id="limitSave">저장</button>
+                       <button type="button" class="btn btn-outline-dark" id="saveBtn">저장</button>
                    </div>
                </div>
                <div class="card-body">
@@ -573,6 +574,42 @@
            }
        });
    });
+   
+   //8.행추가 버튼
+   document.getElementById("newBtn").addEventListener("click", function () {
+	   const custcomId = document.querySelector("#autoCustcomId").value  ;
+	   const custcomName = document.querySelector("#autoCustcomName").value ;
+	   creditGrid.appendRow({custcomId, custcomName});
+   })
+   
+   
+	//9. modalSaveBtn(저장버튼) 이벤트
+	document.getElementById("saveBtn").addEventListener("click", function () {
+	
+	    const payload = creditGrid.getModifiedRows().createdRows[0];
+	
+	    console.log("저장 payload >>> ", payload);
+	
+	    axios.post("/credit/save", payload)
+	        .then(res => {
+	            console.log("저장 결과 >>> ", res.data);
+	
+	            if (res.data.result === "success") {
+	                alert("저장 완료");
+
+	                closeNewCustModal();
+	                $("#searchBtn").click();
+
+	            } else {
+	                alert("저장 실패\n" + (res.data.message || ""));
+	            }
+	        })
+	        .catch(err => {
+	            console.error("저장 중 오류:", err);
+	            alert("저장 중 오류가 발생했습니다.");
+	        });
+	});
+
 </script>
 </body>
 </html>
