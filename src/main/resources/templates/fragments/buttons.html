@@ -1,0 +1,42 @@
+<!-- src/main/resources/templates/fragments/buttons.html -->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공통 버튼</title>
+</head>
+<body>
+
+<!-- 저장 버튼 (등록+수정 공용) -->
+<th:block th:fragment="saveButton(menuId)">
+    <th:block th:if="${@authView.canWrite(menuId)}">
+        <button type="button" class="btn btn-primary btn-sm"
+                id="btnSave">
+            저장
+        </button>
+    </th:block>
+</th:block>
+
+<!-- 삭제 버튼 -->
+<th:block th:fragment="deleteButton(menuId)">
+    <th:block th:if="${@authView.canDelete(menuId)}">
+        <button type="button" class="btn btn-danger btn-sm"
+                id="btnDelete">
+            삭제
+        </button>
+    </th:block>
+</th:block>
+
+<!-- 조회 버튼 (필요하면) -->
+<th:block th:fragment="searchButton(menuId)">
+    <th:block th:if="${@authView.canRead(menuId)}">
+        <button type="button" class="btn btn-secondary btn-sm"
+                id="btnSearch">
+            조회
+        </button>
+    </th:block>
+</th:block>
+
+</body>
+</html>

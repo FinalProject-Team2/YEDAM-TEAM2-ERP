@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.common.mapper.MenuAuthMapper">
+
+	<resultMap id="MenuAuthResultMap" type="store.yd2team.common.dto.MenuAuthDto">
+        <result property="menuId"     column="menu_id"/>
+        <result property="menuNm"     column="menu_nm"/>
+        <result property="menuUrl"    column="menu_url"/>
+        <result property="moduleId"   column="module_id"/>
+        <result property="prntMenuId" column="prnt_menu_id"/>
+        <result property="sortOrd"    column="sort_ord"/>
+
+        <result property="canRead"    column="can_read"/>
+        <result property="canWrite"   column="can_write"/>
+        <result property="canDelete"  column="can_delete"/>
+    </resultMap>
+
+    <select id="selectMenuAuthByEmpAcct" resultMap="MenuAuthResultMap">
+        SELECT m.menu_id,
+               m.menu_nm,
+               m.menu_url,
+               m.prnt_menu_id,
+               m.sort_ord,
+               m.module_id,
+               MAX(CASE WHEN a.sel_yn = 'e1' THEN 1 ELSE 0 END) AS can_read,
+               MAX(CASE
+                       WHEN a.ins_yn  = 'e1'
+                         OR a.updt_yn = 'e1'
+                       THEN 1 ELSE 0
+                   END) AS can_write,
+               MAX(CASE WHEN a.del_yn = 'e1' THEN 1 ELSE 0 END) AS can_delete
+          FROM tb_user_role ur           -- 계정 ↔ 역할 매핑
+          JOIN tb_role r
+            ON ur.role_id = r.role_id
+           AND NVL(r.vend_id, ur.vend_id) = ur.vend_id
+          JOIN tb_auth a
+            ON a.role_id = r.role_id
+           AND NVL(a.vend_id, ur.vend_id) = ur.vend_id
+          JOIN tb_menu m
+            ON a.menu_id = m.menu_id
+           AND NVL(m.vend_id, ur.vend_id) = ur.vend_id
+         WHERE ur.emp_acct_id = #{empAcctId}
+           AND ur.vend_id     = #{vendId}
+         GROUP BY
+               m.menu_id,
+               m.menu_nm,
+               m.menu_url,
+               m.prnt_menu_id,
+               m.sort_ord,
+               m.module_id
+         ORDER BY
+               m.sort_ord,
+               m.menu_id
+    </select>
+
+</mapper>

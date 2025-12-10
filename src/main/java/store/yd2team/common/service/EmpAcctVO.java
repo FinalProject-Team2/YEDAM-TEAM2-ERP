@@ -45,6 +45,9 @@ public class EmpAcctVO {
 	private String addr;    // 거래처 주소
 	private String cttpc;   // 연락처
 	private String hp;      // 거래처 핸드폰 번호
+	private String email;
+	private String proofPhoto;
+	
 	
 	private List<String> roleIds;
     private Set<String> authCodes;
