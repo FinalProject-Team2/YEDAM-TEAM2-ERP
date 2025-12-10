@@ -22,9 +22,9 @@
        JOIN tb_dept d
          ON d.dept_id = e.dept_id
        LEFT JOIN tb_code c
-         ON c.code_id = e.emplym_ty      <!-- emplym_ty ↔ code_id -->
+         ON c.code_id = e.emplym_ty
     WHERE e.vend_id = #{vendId}
-      AND e.hffc_st = 'n1'               <!-- 재직자만 -->
+      AND e.hffc_st = 'n1'
     <if test="deptId != null and deptId != ''">
       AND e.dept_id = #{deptId}
     </if>
@@ -34,13 +34,16 @@
     ORDER BY d.dept_nm, e.nm
   </select>
 
-  <!-- ================= 급여대장 단건 ================= -->
-  <select id="selectSalyLedgById" resultType="store.yd2team.insa.service.SalyLedgVO">
+  <!-- ================= 급여대장 목록 ================= -->
+  <!-- 파라미터: vendId, deptId, salyLedgNm, payDtStart, payDtEnd -->
+  <select id="selectSalyLedgList"
+          resultType="store.yd2team.insa.service.SalyLedgVO">
     SELECT
       s.saly_ledg_id                 AS salyLedgId,
       s.saly_ledg_nm                 AS salyLedgNm,
       TO_CHAR(s.revs_ym,'YYYY-MM')   AS revsYm,
       s.saly_ledg_st                 AS salyLedgSt,
+      c_st.code_nm                   AS salyLedgStNm,
       TO_CHAR(s.pay_dt,'YYYY-MM-DD') AS payDt,
       s.dept_id                      AS deptId,
       d.dept_nm                      AS deptNm,
@@ -54,6 +57,47 @@
     FROM tb_saly_ledg s
        LEFT JOIN tb_dept d
          ON d.dept_id = s.dept_id
+       LEFT JOIN tb_code c_st
+         ON c_st.code_id = s.saly_ledg_st   <!-- sal1/sal2/sal3 → 코드명 -->
+    WHERE s.vend_id = #{vendId}
+    <if test="deptId != null and deptId != ''">
+      AND s.dept_id = #{deptId}
+    </if>
+    <if test="salyLedgNm != null and salyLedgNm != ''">
+      AND s.saly_ledg_nm LIKE '%' || #{salyLedgNm} || '%'
+    </if>
+    <if test="payDtStart != null and payDtStart != ''">
+      AND s.pay_dt &gt;= TO_DATE(#{payDtStart}, 'YYYY-MM-DD')
+    </if>
+    <if test="payDtEnd != null and payDtEnd != ''">
+      AND s.pay_dt &lt;= TO_DATE(#{payDtEnd}, 'YYYY-MM-DD')
+    </if>
+    ORDER BY s.revs_ym DESC, s.pay_dt DESC, s.saly_ledg_id DESC
+  </select>
+
+  <!-- ================= 급여대장 단건 ================= -->
+  <select id="selectSalyLedgById" resultType="store.yd2team.insa.service.SalyLedgVO">
+    SELECT
+      s.saly_ledg_id                 AS salyLedgId,
+      s.saly_ledg_nm                 AS salyLedgNm,
+      TO_CHAR(s.revs_ym,'YYYY-MM')   AS revsYm,
+      s.saly_ledg_st                 AS salyLedgSt,
+      c_st.code_nm                   AS salyLedgStNm,
+      TO_CHAR(s.pay_dt,'YYYY-MM-DD') AS payDt,
+      s.dept_id                      AS deptId,
+      d.dept_nm                      AS deptNm,
+      s.rcnt                         AS rcnt,
+      s.tt_pay_amt                   AS ttPayAmt,
+      s.crea_dt                      AS creaDt,
+      s.crea_by                      AS creaBy,
+      s.updt_dt                      AS updtDt,
+      s.updt_by                      AS updtBy,
+      s.vend_id                      AS vendId
+    FROM tb_saly_ledg s
+       LEFT JOIN tb_dept d
+         ON d.dept_id = s.dept_id
+       LEFT JOIN tb_code c_st
+         ON c_st.code_id = s.saly_ledg_st
     WHERE s.saly_ledg_id = #{salyLedgId}
   </select>
 
@@ -77,7 +121,7 @@
       #{salyLedgId},
       #{salyLedgNm},
       TO_DATE(#{revsYm}, 'YYYY-MM'),
-      NVL(#{salyLedgSt}, 'N'),
+      NVL(#{salyLedgSt}, 'sal1'),  <!-- 기본값 sal1(미확정) -->
       TO_DATE(#{payDt}, 'YYYY-MM-DD'),
       #{deptId},
       #{rcnt},
@@ -112,9 +156,11 @@
   </delete>
 
   <!-- ================= 명세서 INSERT(여러 건) ================= -->
+  <!-- Oracle용 INSERT ALL (이미 잘 동작하던 버전 유지) -->
   <insert id="insertSalySpecList">
-    <foreach collection="list" item="item" separator=";">
-      INSERT INTO tb_saly_spec (
+    INSERT ALL
+    <foreach collection="list" item="item">
+      INTO tb_saly_spec (
         saly_spec_id,
         emp_id,
         saly_ledg_id,
@@ -138,6 +184,7 @@
         #{item.updtBy}
       )
     </foreach>
+    SELECT 1 FROM DUAL
   </insert>
 
 </mapper>

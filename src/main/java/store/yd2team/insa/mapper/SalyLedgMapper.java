@@ -20,7 +20,16 @@ public interface SalyLedgMapper {
             @Param("empNm")  String empNm
     );
 
-    // 급여대장 1건 조회(필요시)
+    // 급여대장 목록
+    List<SalyLedgVO> selectSalyLedgList(
+            @Param("vendId")      String vendId,
+            @Param("deptId")      String deptId,
+            @Param("salyLedgNm")  String salyLedgNm,
+            @Param("payDtStart")  String payDtStart,
+            @Param("payDtEnd")    String payDtEnd
+    );
+
+    // 급여대장 1건 조회
     SalyLedgVO selectSalyLedgById(@Param("salyLedgId") String salyLedgId);
 
     int insertSalyLedg(SalyLedgVO vo);

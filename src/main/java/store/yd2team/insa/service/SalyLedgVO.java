@@ -26,8 +26,11 @@ public class SalyLedgVO {
     // 화면: yyyy-MM
     private String revsYm;
 
-    // 급여대장 상태 (Y/N/P 등)
+    // 급여대장 상태 코드 (sal1 / sal2 / sal3)
     private String salyLedgSt;
+
+    // 급여대장 상태명 (tb_code.code_nm: 미확정 / 확정 / 지급완료)
+    private String salyLedgStNm;
 
     // 화면: yyyy-MM-dd
     private String payDt;

@@ -8,4 +8,12 @@ public interface SalyLedgService {
     List<EmpVO> getEmpListForSaly(String vendId, String deptId, String empNm);
 
     String saveSalyLedg(SalyLedgVO vo, String vendId, String loginEmpId);
+
+    List<SalyLedgVO> getSalyLedgList(
+            String vendId,
+            String deptId,
+            String salyLedgNm,
+            String payDtStart,
+            String payDtEnd
+    );
 }
