@@ -37,31 +37,26 @@ public class CreditServiceImpl implements CreditService {
    @Override
    public int evaluateCredit(CreditVO vo) throws Exception {
        // 1) 평가 대상 고객 목록 조회 (조건: custcomId, custcomName)
-       List<CreditVO> targetList = creditMapper.selectEvalTarget(vo);
+       List<CreditVO> targetList = creditMapper.searchCredit(vo);
        if (targetList == null || targetList.isEmpty()) {
            return 0;
        }
        int updatedCount = 0;
        // 2) 각 고객별 평가
        for (CreditVO target : targetList) {
-           // 2-1) 고객별 여신 상태 조회 (연체개월수, 잔액, 한도 등)
+           // 2-1) 고객별 여신 상태 조회 (연체개월수, 여신개월, 잔액, 한도 등)
            CreditVO eval = creditMapper.selectCreditStatus(target);
            if (eval == null) continue;
+           
            // ===========================================
-           //  2-2) 악성여신 판정 로직
+           //  2-2) 악성여신(출하정지) 판정 로직
            //     - maxOverdueMm > creditMm → 악성여신 Y
            // ===========================================
-           String badYn = "N";
-           if (eval.getMaxOverdueMm() > eval.getCreditMm()) {
-               badYn = "Y";
-           }
-           // ===========================================
-           //  2-3) 출하정지 판단 (예: 악성여신이면 출하정지)
-           // ===========================================
            String shipHoldYn = "N";
-           if ("Y".equals(badYn)) {
-               shipHoldYn = "Y";
+           if (eval.getMaxOverdueMm() > eval.getCreditMm()) {
+        	   shipHoldYn = "Y";
            }
+           
            // ===========================================
            //  2-4) 회전일수 계산
            //      turnoverDays = remainAmt / (최근 3개월 평균매출/일수)
@@ -69,8 +64,7 @@ public class CreditServiceImpl implements CreditService {
            // ===========================================
            int turnoverDays = eval.getTurnoverDays(); // Mapper에서 계산된 값을 사용
            // 2-5) 결과 업데이트
-           eval.setBadCreditYn(badYn);
-           eval.setShipHoldYn(shipHoldYn);
+           eval.setShipmntStop(shipHoldYn);
            eval.setTurnoverDays(turnoverDays);
            int update = creditMapper.updateCreditEval(eval);
            updatedCount += update;
@@ -94,6 +88,12 @@ public int insertCdtlnLmt(CreditVO vo) {
 public int insertAtmpt(AtmptVO vo) {
 	// TODO Auto-generated method stub
 	return 0;
+}
+
+@Override
+public int updateShipmnt(CreditVO vo) {
+	return creditMapper.updateShipmnt(vo);
+	
 }
 }
 

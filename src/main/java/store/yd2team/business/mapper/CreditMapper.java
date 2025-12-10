@@ -14,8 +14,11 @@ public interface CreditMapper {
 	
 	//업체정보 모달창
 	CustcomVO selectCustcomDetail(String custcomId);
-	List<CreditVO> selectEvalTarget(CreditVO vo);
+
+	//단건조회
 	CreditVO selectCreditStatus(CreditVO target);
+	
+	//
 	int updateCreditEval(CreditVO eval);
 	
 	//여신등록
@@ -23,6 +26,11 @@ public interface CreditMapper {
 	
 	//미수등록
 	int insertAtmpt(AtmptVO vo);
+	
+	//출하정지
+	int updateShipmnt(CreditVO vo);
+	
+	
 }
 
 

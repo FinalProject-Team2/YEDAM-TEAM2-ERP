@@ -29,4 +29,9 @@ public class RciptServiceImpl implements RciptService {
     public List<RciptVO> searchCustcomName(String keyword) {
         return rciptMapper.searchCustcomName(keyword);
     }
+    //입금내역
+	@Override
+	public int insertRciptDetail(RciptVO vo) {
+		return rciptMapper.insertRciptDetail(vo);
+	}
 }

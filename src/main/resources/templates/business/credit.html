@@ -206,7 +206,7 @@
            // ✅ 신용등급: 더블클릭 시 셀렉트 박스로 편집
            {
              header: '신용등급',
-             name: 'creditGrad',
+             name: 'credtGrad',
              width: 90,
              align: 'center',
              editor: {
@@ -322,10 +322,13 @@
                align: 'center',
                formatter: ({ value }) => {
                    if (value === 'Y') {
-                       return '<span class="ship-hold-badge">정지</span>';
+                	   return `<button class="grid-btn ship-hold-btn" data-value="N">출하해제</button>`;
                    }
-                   return '';
+                   else{                	   
+                   		return `<button class="grid-btn ship-hold-btn" data-value="Y">출하정지</button>`;
+                   }
                }
+               
            },
            {
                header: '회전일수',
@@ -359,7 +362,7 @@
      return Number(str) || 0;
    }
 
-   // 담보/신용/현재잔액 변경 시 여신한도 & 사용률 자동 계산
+    // 담보/신용/현재잔액 변경 시 여신한도 & 사용률 자동 계산
    creditGrid.on('afterChange', (ev) => {
 
      if (!ev.changes || ev.changes.length === 0) return;
@@ -367,17 +370,29 @@
      const affectedRowKeys = new Set();
 
      ev.changes.forEach(change => {
-       const { rowKey, columnName } = change;
+       const { rowKey, columnName, value } = change; 
 
        // 1) 담보한도 또는 신용한도 변경 시 → 여신한도 = 담보 + 신용
-/*        if (columnName === 'mrtggLmt' || columnName === 'creditLmt') {
+       if (columnName === 'mrtggLmt' || columnName === 'creditLmt') {
          const row = creditGrid.getRow(rowKey);
          const mrtgg  = toNumber(row.mrtggLmt);
          const credit = toNumber(row.creditLmt);
          const total  = mrtgg + credit;
 
          creditGrid.setValue(rowKey, 'cdtlnLmt', total);
-       } */
+       } 
+       
+       
+       // 1) 신용등급 변경 시 최대연체(개월) 자동 설정
+       if (columnName === 'credtGrad') {
+           let maxMm = 1; // 기본값: C, D 등급은 1개월
+           if (value === 'A') {
+               maxMm = 3;
+           } else if (value === 'B') {
+               maxMm = 2;
+           }
+           creditGrid.setValue(rowKey, 'maxOverdueMm', maxMm);
+       }
 
        // 2) 사용률 계산에 영향을 주는 컬럼이면 rowKey 기록
        if (columnName === 'mrtggLmt' ||
@@ -388,6 +403,7 @@
        }
      });
 
+     
      // 3) 각 행별로 사용률 재계산
      affectedRowKeys.forEach(rowKey => {
        const row    = creditGrid.getRow(rowKey);
@@ -405,19 +421,9 @@
    });
    
    
-   // 담보/신용 변경 시 여신한도 자동 계산
-   creditGrid.on('afterChange', (ev) => {
-       ev.changes.forEach(change => {
-           const { rowKey, columnName } = change;
-           if (columnName === 'mrtggLmt' || columnName === 'creditLmt') {
-               const row = creditGrid.getRow(rowKey);
-               const mrtgg  = toNumber(row.mrtggLmt);
-               const credit = toNumber(row.creditLmt);
-               const total  = mrtgg + credit;
-               creditGrid.setValue(rowKey, 'cdtlnLmt', total);
-           }
-       });
-   });
+
+   
+   
    // 5-1 검색조건 초기화 버튼
    document.getElementById("creditInit").addEventListener("click", function () {
        const searchForm = { custcomId: "", custcomName: "" };
@@ -519,35 +525,49 @@
            closeCreditModal();
        }
    });
-   // 고객사상세조회 버튼 클릭
    document.addEventListener('click', (e) => {
-       if (!e.target.classList.contains('open-client-modal-btn')) {
-           return;
+	   // 고객사상세조회 버튼 클릭
+       if (e.target.classList.contains('open-client-modal-btn')) {
+	       const custcomId = e.target.dataset.custcomId;
+	       if (!custcomId) {
+	           alert('고객사 코드가 없습니다.');
+	           return;
+	       }
+	       resetCreditModalForm();
+	       $.ajax({
+	           url: '/credit/custcomDetail',
+	           type: 'GET',
+	           data: { custcomId: custcomId },
+	           success: function (res) {
+	               $('#bizAddr').val(res.bizAddr || '');
+	               $('#bizTel').val(res.bizTel || '');
+	               $('#bizFax').val(res.bizFax || '');
+	               $('#psch').val(res.psch || '');
+	               $('#pschTel').val(res.pschTel || '');
+	               $('#pschEmail').val(res.pschEmail || '');
+	               openCreditModal();
+	           },
+	           error: function (err) {
+	               console.error('업체정보 조회 실패', err);
+	               alert('업체 정보를 가져오지 못했습니다.');
+	           }
+	       });
+	      //출하정지버튼 눌렀을때
+       } else if (e.target.classList.contains('ship-hold-btn')){
+    	   $.ajax({
+	           url: '/credit/shipmntStop',
+	           type: 'PUT',
+	           data: { custcomId: custcomId },
+	           success: function (res) {
+	           },
+	           error: function (err) {
+	               alert('출하해제가 되었습니다.');
+	           }
+	       });
+    	   
        }
-       const custcomId = e.target.dataset.custcomId;
-       if (!custcomId) {
-           alert('고객사 코드가 없습니다.');
-           return;
-       }
-       resetCreditModalForm();
-       $.ajax({
-           url: '/credit/custcomDetail',
-           type: 'GET',
-           data: { custcomId: custcomId },
-           success: function (res) {
-               $('#bizAddr').val(res.bizAddr || '');
-               $('#bizTel').val(res.bizTel || '');
-               $('#bizFax').val(res.bizFax || '');
-               $('#psch').val(res.psch || '');
-               $('#pschTel').val(res.pschTel || '');
-               $('#pschEmail').val(res.pschEmail || '');
-               openCreditModal();
-           },
-           error: function (err) {
-               console.error('업체정보 조회 실패', err);
-               alert('업체 정보를 가져오지 못했습니다.');
-           }
-       });
+	   
+	   
    });
    // 7. 여신 평가 버튼 클릭 (악성여신 / 출하정지 등 계산 트리거)
    $('#creditEval').on('click', function () {

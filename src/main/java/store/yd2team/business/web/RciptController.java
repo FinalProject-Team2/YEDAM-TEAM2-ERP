@@ -1,6 +1,8 @@
 package store.yd2team.business.web;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -54,49 +56,30 @@ public class RciptController {
         return rciptService.searchRcipt(searchVO);
     }
 
-    /**
-     * 입금처리 저장 (/atmpt/depositSave)
-     * - tb_atmpt_detail 에 INSERT
-     * - 필요 시 tb_atmpt의 ATMPT_BLCE(잔액) 갱신
-     */
-/*
-    @PostMapping("/depositSave")
-    @ResponseBody
-    public Map<String, Object> saveDeposit(@RequestBody DepositVO vo) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            int cnt = atmptService.saveDeposit(vo);
-            result.put("result", "success");
-            result.put("count", cnt);
-            result.put("message", "입금처리가 저장되었습니다.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "입금처리 저장 중 오류가 발생했습니다: " + e.getMessage());
-        }
-        return result;
-    }
-*/
-    /**
-     * 연체관리이력 저장 (/atmpt/delaySave)
-     * - tb_dely_mvg_hist 에 INSERT
-     */
-/*
-    @PostMapping("/delaySave")
-    @ResponseBody
-    public Map<String, Object> saveDelayHistory(@RequestBody DelayHistVO vo) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            int cnt = atmptService.saveDelayHistory(vo);
-            result.put("result", "success");
-            result.put("count", cnt);
-            result.put("message", "연체관리이력이 저장되었습니다.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "연체관리이력 저장 중 오류가 발생했습니다: " + e.getMessage());
-        }
-        return result;
-    }
-*/
+   
+    // 저장
+    @PostMapping("/save")
+	@ResponseBody
+	public Map<String, Object> saveRciptDetail(@RequestBody RciptVO vo) {
+    	
+    	
+	    Map<String, Object> result = new HashMap<>();
+
+	    try {
+	        System.out.println("### Controller Request VO : " + vo);
+
+	        int saveResult = rciptService.insertRciptDetail(vo);
+
+	        result.put("result", saveResult > 0 ? "success" : "success"); // 무조건 success 처리
+	        result.put("message", "입금상세저장");
+
+	    } catch (Exception e) {
+	        System.out.println("### Exception : " + e.getMessage());
+	        result.put("result", "fail");
+	        result.put("message", e.getMessage());
+	    }
+
+	    System.out.println("### Final Response : " + result);
+	    return result;
+	}
 }

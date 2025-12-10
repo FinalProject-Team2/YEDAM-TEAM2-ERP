@@ -2,14 +2,17 @@ package store.yd2team.business.web;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import lombok.RequiredArgsConstructor;
 import store.yd2team.business.service.CreditService;
 import store.yd2team.business.service.CreditVO;
@@ -71,8 +74,8 @@ public class CreditController {
        return result;
    }
    
-   // 저장
-   @PostMapping("/save")
+    // 저장
+    @PostMapping("/save")
 	@ResponseBody
 	public Map<String, Object> saveNewCust(@RequestBody CreditVO vo) {
 	    Map<String, Object> result = new HashMap<>();
@@ -94,6 +97,31 @@ public class CreditController {
 	    System.out.println("### Final Response : " + result);
 	    return result;
 	}
+   
+   // 출하정지
+    @PutMapping("/shipmntStop")
+	@ResponseBody
+	public Map<String, Object> shipmntStop(@RequestBody CreditVO vo) {
+	    Map<String, Object> result = new HashMap<>();
+
+	    try {
+	        System.out.println("### Controller Request VO : " + vo);
+
+	        int saveResult = creditService.updateShipmnt(vo);
+
+	        result.put("result", saveResult > 0 ? "success" : "success"); // 무조건 success 처리
+	        result.put("message", "출하정지");
+
+	    } catch (Exception e) {
+	        System.out.println("### Exception : " + e.getMessage());
+	        result.put("result", "fail");
+	        result.put("message", e.getMessage());
+	    }
+
+	    System.out.println("### Final Response : " + result);
+	    return result;
+	}
+
 
 }
 
