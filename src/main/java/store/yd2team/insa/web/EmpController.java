@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import store.yd2team.common.dto.SessionDto;
+import store.yd2team.common.util.LoginSession;
 import store.yd2team.insa.service.EdcService;
 import store.yd2team.insa.service.EmpService;
 import store.yd2team.insa.service.EmpVO;
@@ -49,12 +51,14 @@ public class EmpController {
 	@GetMapping("/emp-register")
 	public String empRender(Model model) {
 		Map<String, Object> optionMap = edcService.getInputOption();
-		
+		SessionDto session = LoginSession.getLoginSession();
 	    model.addAttribute("dept", optionMap.get("dept"));   // List<DeptVO>
 	    model.addAttribute("clsfLi", optionMap.get("grade"));   // 직급 grade clsf
 	    model.addAttribute("rspofcLi", optionMap.get("title"));   // 직책 title rspofc
 	    model.addAttribute("emplymTyLi", optionMap.get("emplymTyLi"));   // 고용형태 emplymTyLi emplymTy
 	    model.addAttribute("hffcStLi", optionMap.get("hffcStLi"));   // 재직상태 hffcStLi hffcSt
+	    model.addAttribute("basiLi", optionMap.get("basiLi"));   // 재직상태 hffcStLi hffcSt
+	    model.addAttribute("vendId", session.getVendId());   // 재직상태 hffcStLi hffcSt
 		
 		
 		

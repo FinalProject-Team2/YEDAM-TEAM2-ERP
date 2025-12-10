@@ -14,10 +14,13 @@ import store.yd2team.common.mapper.CodeMapper;
 import store.yd2team.common.service.CodeVO;
 import store.yd2team.insa.mapper.DeptMapper;
 import store.yd2team.insa.mapper.EdcMapper;
+import store.yd2team.insa.mapper.VcatnMapper;
+import store.yd2team.insa.mapper.WkTyMapper;
 import store.yd2team.insa.service.DeptVO;
 import store.yd2team.insa.service.EdcService;
 import store.yd2team.insa.service.EdcVO;
 import store.yd2team.insa.service.EmpVO;
+import store.yd2team.insa.service.HldyWkBasiVO;
 import store.yd2team.common.util.LoginSession;
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class EdcServiceImpl implements EdcService{
 	private final EdcMapper edcMapper;
 	private final CodeMapper codeMapper;
 	private final DeptMapper deptMapper;
+	private final WkTyMapper wkTyMapper;	
 	
 	@Override
 	public List<EdcVO> getListEdcJohoe(EdcVO edc) {
@@ -44,8 +48,9 @@ public class EdcServiceImpl implements EdcService{
 		Map<String, Object> result = new HashMap<>();
 		
 		CodeVO grpId = new CodeVO();
+		String vendVal = LoginSession.getVendId();
 		grpId.setGrpId("k");
-		grpId.setVendId( LoginSession.getVendId() );
+		grpId.setVendId( vendVal );
 		List<CodeVO> gradeList = codeMapper.findCode(grpId);
 		result.put("grade", gradeList); //직급
 		grpId.setGrpId("l");
@@ -57,8 +62,12 @@ public class EdcServiceImpl implements EdcService{
 		grpId.setGrpId("n");
 		List<CodeVO> hffcStList = codeMapper.findCode(grpId);
 		result.put("hffcStLi", hffcStList); //재직상태
-		List<DeptVO> deptList = deptMapper.getListDept( LoginSession.getVendId() );
+		List<DeptVO> deptList = deptMapper.getListDept( vendVal );
 		result.put("dept", deptList);
+		HldyWkBasiVO vendId = new HldyWkBasiVO();
+		vendId.setVendId( vendVal );
+		List<HldyWkBasiVO> selectHldyWkBasiList = wkTyMapper.selectHldyWkBasiList( vendId );
+		result.put("basiLi", selectHldyWkBasiList);
 
 		return result;
 	}

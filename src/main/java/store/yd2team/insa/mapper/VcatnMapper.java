@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import store.yd2team.insa.service.VcatnVO;
+import store.yd2team.insa.service.YrycVO;
 
 @Mapper
 public interface VcatnMapper {
@@ -31,5 +32,8 @@ public interface VcatnMapper {
 			
 	//관리자가 휴가처리 승인/반려처리
 			int vcatnCfmUpdate(VcatnVO val);
+			
+	//사원 등록할 때 같이 등록 되는 연차갯수이력 테이블 최초연차생성 인서트 기능
+			int empYrycRegist(YrycVO val);
 
 }

@@ -15,7 +15,7 @@ a[data-add-more-fields-btn] {
 <body layout:fragment="content">
 <div id="tree"></div>
 <script src="https://cdn.balkan.app/orgchart.js"></script>
-<script>
+<script th:inline="javascript">
 
 //JavaScript
 
@@ -44,33 +44,38 @@ var chart = new OrgChart(document.getElementById("tree"), {
     editForm: {
         titleBinding: "EmployeeName",
         photoBinding: "ImgUrl",
-      /* 'Add element' */
-        addMoreBtn: null,
-        /* addMore: 'Add more elements', 
-        addMoreFieldName: 'Element name',*/
-        buttons: {
+       //'Add element' 
+        //addMoreBtn: null,
+         //addMore: 'Add more elements', 
+        //addMoreFieldName: 'Element name',
+         buttons: {
             edit: {
                 icon: OrgChart.icon.edit(24, 24, '#fff'),
                 text: 'Edit',
                 hideIfEditMode: true,
-                hideIfDetailsMode: false
+                hideIfDetailsMode: true
             },
             share: {
                 icon: OrgChart.icon.share(24, 24, '#fff'),
-                text: 'Share'
+                text: 'Share',
+                hideIfEditMode: true,
+                hideIfDetailsMode: true
             },
             pdf: {
                 icon: OrgChart.icon.pdf(24, 24, '#fff'),
-                text: 'Save as PDF'
+                text: 'Save as PDF',
+                hideIfEditMode: true,
+                hideIfDetailsMode: true
             },
             remove: {
                 icon: OrgChart.icon.remove(24, 24, '#fff'),
                 text: 'Remove',
+                hideIfEditMode: true,
                 hideIfDetailsMode: true
             }
         },
-        generateElementsFromFields: true,
-        elements: [
+        generateElementsFromFields: true, 
+        /* elements: [
             { type: 'textbox', label: 'Full Name', binding: 'EmployeeName' },
             { type: 'textbox', label: 'Job Title', binding: 'Title' },
 //{ type: 'textbox', label: 'Email Address', binding: 'Email', vlidators: { required: 'Is required', email: 'Invalid email' } },
@@ -84,7 +89,7 @@ var chart = new OrgChart(document.getElementById("tree"), {
                 { type: 'textbox', label: 'City', binding: 'Vity' },
             ],
             { type: 'textbox', label: 'Photo Url', binding: 'ImgUrl', btn: 'Upload' },
-        ]
+        ] */
     },
     /* nodeMenu: {
         edit: { text: "Edit" },
@@ -93,9 +98,9 @@ var chart = new OrgChart(document.getElementById("tree"), {
         remove: { text: "Remove" }
     }, */
     nodeBinding: {
-        field_0: "EmployeeName",
-        field_1: "Title",
-        img_0: "ImgUrl"
+        field_0: "nm",
+        field_1: "deptNm",        
+        img_0: "proofPhoto"
     }
 });
 
@@ -113,10 +118,42 @@ chart.on('update', function(sender, oldNode, newNode){
     console.log("노드 업데이트됨:", newNode);    
 });
 
-chart.load([
+let orgList = [[${orgList}]]
+	console.log(orgList);
+let num = 1;
+for(let v of orgList) {
+	v["id"] = num;
+	num++;
+}
+for(let emp of orgList) {	
+	let imsiUprDeptId = null;
+	if(emp.empId == emp.deptHeadId) {
+		if(emp.uprDeptId == null) {
+			
+		}else{
+			imsiUprDeptId = emp.uprDeptId;
+			for(let emp2 of orgList) {
+				if(emp2.deptId == imsiUprDeptId && emp2.deptHeadId == emp2.empId) {
+					emp["pid"] = emp2.id;					
+				}
+			}
+		}
+	}else{
+		let headEmpId = emp.deptHeadId;
+		for(let emp3 of orgList) {
+			if(emp3.empId == headEmpId) {				
+				emp["pid"] = emp3.id;
+			}
+		}
+	}
+}
+console.log("바꾸고난뒤");
+console.log(orgList);
+chart.load(orgList);
+/* chart.load([
     { id: "1", EmployeeName: "Jack Hill", Title: "Chairman and CEO", Email: "amber@domain.com", ImgUrl: "https://cdn.balkan.app/shared/16.jpg", tags: ['orange'] },
     { id: "2", pid: "1", EmployeeName: "Lexie Cole", Title: "QA Lead", Email: "ava@domain.com", ImgUrl: "https://cdn.balkan.app/shared/2.jpg" },
-    { id: "3", pid: "1", EmployeeName: "Janae Barrett", Title: "Technical Director", Email: "jay@domain.com", ImgUrl: "https://cdn.balkan.app/shared/3.jpg" },
+    { id: "3", pid: "1", EmployeeName: "Janae Barrett", Title: "Technical Director", haha: "hello", Email: "jay@domain.com", ImgUrl: "https://cdn.balkan.app/shared/3.jpg" },
     { id: "4", pid: "1", EmployeeName: "Aalyah Webb2", Title: "Manager", Email: "jay@domain.com", ImgUrl: "https://cdn.balkan.app/shared/4.jpg", tags: ['orange'] },
     { id: "5", pid: "2", EmployeeName: "Elliot Ross", Title: "QA", ImgUrl: "https://cdn.balkan.app/shared/5.jpg" },
     { id: "6", pid: "2", EmployeeName: "Anahi Gordon", Title: "QA", ImgUrl: "https://cdn.balkan.app/shared/6.jpg" },
@@ -130,7 +167,7 @@ chart.load([
     { id: "14", pid: "4", EmployeeName: "Lucas West", Title: "Marketer", ImgUrl: "https://cdn.balkan.app/shared/14.jpg" },
     { id: "15", pid: "4", EmployeeName: "Adan Travis", Title: "Designer", ImgUrl: "https://cdn.balkan.app/shared/15.jpg" },
     { id: "16", pid: "4", EmployeeName: "Alex Snider", Title: "Sales Manager", ImgUrl: "https://cdn.balkan.app/shared/16.jpg" }
-]);
+]); */
 
 
 

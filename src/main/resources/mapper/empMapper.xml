@@ -40,7 +40,7 @@ WHERE SUBSTR(emp_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
     INSERT INTO tb_emp (
         emp_id,
         dept_id,
-        basi_id,
+        basi_no,
         vend_id,
         nm,
         brthdy,
@@ -60,7 +60,7 @@ WHERE SUBSTR(emp_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
     ) VALUES (
 	    #{empId},
 	    #{deptId},
-	    #{basiId},
+	    #{basiNo},
 	    #{vendId},
 	    #{nm},
 	    #{brthdy},
@@ -84,7 +84,7 @@ WHERE SUBSTR(emp_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
     UPDATE tb_emp
     SET
         dept_id     = #{deptId},
-        basi_id     = #{basiId},
+        basi_no     = #{basiNo},
         vend_id     = #{vendId},
         nm          = #{nm},
         brthdy      = #{brthdy},
