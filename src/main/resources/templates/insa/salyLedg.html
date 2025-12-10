@@ -13,9 +13,6 @@
   <title>salyLedg</title>
 
   <style>
-    /* =========================
-     * wkTy 스타일 탭 그대로 적용
-     * ========================= */
     .saly-tab-wrapper {
       margin-bottom: 0;
     }
@@ -155,17 +152,16 @@
   </div>
 </div>
 
-<!-- 🔹 실제 모달 include (HTML은 별도 파일) -->
+<!-- 모달 include -->
 <div th:replace="insa/modal/salyRegistModal :: salyRegistModal"></div>
 
 <script>
   /***********************
    * 0. 공통: 부서 셀렉트 로딩
-   *  - /insa/edc/inputOption 사용 (vend_id 필터는 서버에서)
    ***********************/
   function loadDeptOptions() {
-    const searchDept = document.getElementById("dept");      // 상단 검색용
-    const modalDept  = document.getElementById("salyDept");  // 모달용
+    const searchDept = document.getElementById("dept");
+    const modalDept  = document.getElementById("salyDept");
 
     if (searchDept) {
       searchDept.innerHTML = '<option value="">전체</option>';
@@ -199,10 +195,10 @@
   }
 
   /***********************
-   * 1. 메인 그리드 데이터 (실제 DB)
+   * 1. 메인 그리드 데이터
    ***********************/
-  let originalGridData = [];         // ← 더미 삭제, 여기 채움
-  let currentTabStatus = "BEFORE_PAY";   // BEFORE_PAY / PAID
+  let originalGridData = [];
+  let currentTabStatus = "BEFORE_PAY"; // BEFORE_PAY / PAID
   let gridData = [];
 
   /***************************
@@ -225,11 +221,11 @@
           return `<input type="radio" name="salyLedgRadio" data-row-key="${rowKey}" />`;
         }
       },
-      { header: "귀속연월",     name: "revsMmdd",  align: "center" },
-      { header: "지급일",       name: "payDt",     align: "center" },
+      { header: "귀속연월",     name: "revsMmdd",   align: "center" },
+      { header: "지급일",       name: "payDt",      align: "center" },
       { header: "급여대장명칭", name: "salyLedgNm" },
       { header: "부서명",       name: "deptNm" },
-      { header: "인원수",       name: "rcnt",      align: "right" },
+      { header: "인원수",       name: "rcnt",       align: "right" },
       {
         header: "지급총액",
         name: "ttPayAmt",
@@ -244,21 +240,14 @@
       },
       {
         header: "상태",
-        name: "status",
-        align: "center",
-        formatter: ({ value }) => {
-          if (value === "BEFORE_CONFIRM") return "미확정";
-          if (value === "CONFIRMED")      return "확정";
-          if (value === "PAID")           return "지급완료";
-          return value || "";
-        }
+        name: "salyLedgStNm",
+        align: "center"
       }
     ]
   });
 
   /************************
    * 3. DB에서 급여대장 목록 조회
-   *   GET /insa/saly/list
    ************************/
   function loadSalyList() {
     const deptSel = document.getElementById("dept");
@@ -266,8 +255,8 @@
     const payDtStartInput = document.getElementById("payDtStart");
     const payDtEndInput   = document.getElementById("payDtEnd");
 
-    const deptId   = deptSel ? (deptSel.value || "") : "";
-    const salyNm   = salyNmInput ? salyNmInput.value.trim() : "";
+    const deptId    = deptSel ? (deptSel.value || "") : "";
+    const salyNm    = salyNmInput ? salyNmInput.value.trim() : "";
     const payDtStart = payDtStartInput ? payDtStartInput.value.trim() : "";
     const payDtEnd   = payDtEndInput ? payDtEndInput.value.trim() : "";
 
@@ -278,35 +267,40 @@
     if (payDtEnd)   params.append("payDtEnd", payDtEnd);
 
     fetch("/insa/saly/list?" + params.toString())
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("급여대장 목록 조회 실패 (HTTP " + res.status + ")");
+        }
+        return res.json();
+      })
       .then(list => {
-        // 백엔드 VO 기준: salyLedgId, salyLedgNm, deptNm, revsYm, payDt, rcnt, status, ttPayAmt ...
         originalGridData = (list || []).map(r => {
-          // revsYm: "2025-07" → "2025.07"
+          // revsYm: "2025-07" → "2025-07" 그대로 (하이픈 유지)
           let revsMmdd = "";
           if (r.revsYm) {
-            revsMmdd = String(r.revsYm).replace(/-/g, ".");
+            revsMmdd = String(r.revsYm);
           }
 
-          // payDt: Date or String → "yyyy.MM.dd"
+          // payDt: "2025-10-25" 하이픈 그대로
           let payDtStr = "";
           if (r.payDt) {
             let raw = String(r.payDt);
             if (raw.includes("T")) {
               raw = raw.substring(0, 10);
             }
-            payDtStr = raw.replace(/-/g, ".");
+            payDtStr = raw; // 하이픈 그대로
           }
 
           return {
-            salyLedgId: r.salyLedgId,
-            revsMmdd  : revsMmdd,
-            payDt     : payDtStr,
-            salyLedgNm: r.salyLedgNm,
-            deptNm    : r.deptNm,
-            rcnt      : r.rcnt,
-            status    : r.status,
-            ttPayAmt  : r.ttPayAmt
+            salyLedgId : r.salyLedgId,
+            revsMmdd   : revsMmdd,
+            payDt      : payDtStr,
+            salyLedgNm : r.salyLedgNm,
+            deptNm     : r.deptNm,
+            rcnt       : r.rcnt,
+            salyLedgSt : r.salyLedgSt,              // 코드: sal1/sal2/sal3
+            salyLedgStNm: r.salyLedgStNm || "",     // 코드명: 미확정/확정/지급완료
+            ttPayAmt   : r.ttPayAmt
           };
         });
 
@@ -327,7 +321,9 @@
     const checked = document.querySelector('input[name="salyLedgRadio"]:checked');
     if (!checked) return null;
     const rowKey = Number(checked.dataset.rowKey);
-    return grid.getRow(rowKey);
+    const row = grid.getRow(rowKey);
+    if (!row) return null;
+    return { rowKey, row };
   }
 
   /*************************
@@ -342,16 +338,16 @@
 
   function applyTabFilter() {
     if (currentTabStatus === "PAID") {
-      gridData = originalGridData.filter(row => row.status === "PAID");
+      // sal3 = 지급완료
+      gridData = originalGridData.filter(row => row.salyLedgSt === "sal3");
     } else {
-      // 지급전: PAID 아닌 것들 (미확정 + 확정)
-      gridData = originalGridData.filter(row => row.status !== "PAID");
+      // 지급전: sal1(미확정) + sal2(확정)
+      gridData = originalGridData.filter(row => row.salyLedgSt !== "sal3");
     }
     grid.resetData(gridData);
 
     const isPaidTab = currentTabStatus === "PAID";
 
-    // 지급완료 탭에서는 명세서 조회만 보이게
     if (btnSalyDelete) {
       btnSalyDelete.style.display = isPaidTab ? "none" : "";
       btnSalyDelete.disabled      = isPaidTab;
@@ -391,66 +387,80 @@
   function updateConfirmButtonLabel() {
     if (!btnToggleConfirm) return;
 
-    const row = getSelectedRow();
-    if (!row) {
+    const selected = getSelectedRow();
+    if (!selected) {
       btnToggleConfirm.textContent = "확정/취소";
       return;
     }
 
-    if (row.status === "BEFORE_CONFIRM") {
+    const { row } = selected;
+    const code = row.salyLedgSt;
+
+    if (code === "sal1") {          // 미확정
       btnToggleConfirm.textContent = "확정";
-    } else if (row.status === "CONFIRMED") {
+    } else if (code === "sal2") {   // 확정
       btnToggleConfirm.textContent = "확정취소";
-    } else if (row.status === "PAID") {
+    } else if (code === "sal3") {   // 지급완료
       btnToggleConfirm.textContent = "확정";
     }
   }
 
   if (btnToggleConfirm) {
     btnToggleConfirm.addEventListener("click", () => {
-      const row = getSelectedRow();
-      if (!row) {
+      const selected = getSelectedRow();
+      if (!selected) {
         alert("확정/취소할 급여대장을 선택해주세요.");
         return;
       }
 
-      if (row.status === "PAID") {
+      const { rowKey, row } = selected;
+      const code = row.salyLedgSt;
+
+      if (code === "sal3") {
         alert("지급완료된 급여대장은 확정 상태를 변경할 수 없습니다.");
         return;
       }
 
-      // TODO: /insa/saly/confirm API 붙이면 여기서 호출
-      if (row.status === "BEFORE_CONFIRM") {
-        grid.setValue(row.rowKey, "status", "CONFIRMED");
-      } else if (row.status === "CONFIRMED") {
-        grid.setValue(row.rowKey, "status", "BEFORE_CONFIRM");
+      // sal1(미확정) <-> sal2(확정) 토글
+      if (code === "sal1") {
+        grid.setValue(rowKey, "salyLedgSt", "sal2");
+        grid.setValue(rowKey, "salyLedgStNm", "확정");
+      } else if (code === "sal2") {
+        grid.setValue(rowKey, "salyLedgSt", "sal1");
+        grid.setValue(rowKey, "salyLedgStNm", "미확정");
       }
+
       updateConfirmButtonLabel();
+
+      // TODO: 실제 DB 업데이트 API(/insa/saly/confirm) 붙이면 여기서 호출
     });
   }
 
   grid.on("click", ev => {
     const target = ev.target;
-    if (target instanceof HTMLElement && target.matches('input[type="radio"][name="salyLedgRadio"]')) {
+    if (target instanceof HTMLElement &&
+        target.matches('input[type="radio"][name="salyLedgRadio"]')) {
       updateConfirmButtonLabel();
     }
   });
 
   /*************************
-   * 7. 삭제 버튼 (지금은 프론트 배열 기준)
+   * 7. 삭제 버튼 (현재는 프론트 배열 기준)
    *************************/
   if (btnSalyDelete) {
     btnSalyDelete.addEventListener("click", () => {
-      const row = getSelectedRow();
-      if (!row) {
+      const selected = getSelectedRow();
+      if (!selected) {
         alert("삭제할 급여대장을 선택해주세요.");
         return;
       }
+      const { row } = selected;
+
       if (!confirm("선택한 급여대장을 삭제하시겠습니까?")) {
         return;
       }
 
-      // TODO: /insa/saly/delete API 붙이면 여기서 호출
+      // TODO: /insa/saly/delete API 연동
       const idx = originalGridData.findIndex(r =>
         r.salyLedgId === row.salyLedgId
       );
@@ -468,23 +478,23 @@
    *************************/
   if (btnSalyCalc) {
     btnSalyCalc.addEventListener("click", () => {
-      const row = getSelectedRow();
-      if (!row) {
+      const selected = getSelectedRow();
+      if (!selected) {
         console.log("신규 급여계산 모드");
       } else {
-        console.log("선택 급여대장 기준 급여계산/조회:", row);
+        console.log("선택 급여대장 기준 급여계산/조회:", selected.row);
       }
     });
   }
 
   if (btnSalySpec) {
     btnSalySpec.addEventListener("click", () => {
-      const row = getSelectedRow();
-      if (!row) {
+      const selected = getSelectedRow();
+      if (!selected) {
         alert("명세서를 조회할 급여대장을 선택해주세요.");
         return;
       }
-      console.log("명세서 조회:", row);
+      console.log("명세서 조회:", selected.row);
     });
   }
 
@@ -578,11 +588,11 @@
 
   if (openSalyRegistBtn) {
     openSalyRegistBtn.addEventListener("click", () => {
-      const row = getSelectedRow();
-      if (!row) {
+      const selected = getSelectedRow();
+      if (!selected) {
         console.log("신규 등록 모드");
       } else {
-        console.log("선택 급여대장 수정 모드:", row);
+        console.log("선택 급여대장 수정 모드:", selected.row);
         // 수정 모드 바인딩은 나중에
       }
       openSalyModal();
@@ -615,14 +625,13 @@
   modalDept?.addEventListener("change", loadEmpList);
 
   /***********************
-   * 10. revs_ym / payDt 연동 (귀속연월 캘린더)
+   * 10. 귀속연월/지급일자 datepicker (기존 그대로)
    ***********************/
   $(function () {
     const $revsYm = $("#revs_ym");
     const $payDt  = $("#payDt");
 
     if ($revsYm.length) {
-      // 귀속연월: 연·월만 선택
       $revsYm.datepicker({
         format: "yyyy-mm",
         autoclose: true,
@@ -643,7 +652,6 @@
     }
 
     if ($payDt.length) {
-      // 지급일자: 일반 일자 선택
       $payDt.datepicker({
         format: "yyyy-mm-dd",
         autoclose: true,
@@ -729,17 +737,17 @@
     }
 
     $revsYm.on("changeDate", syncFromRevsYm);
-    $revsYm.on("blur", syncFromRevsYm);
-    $payDt.on("changeDate", syncFromPayDt);
-    $payDt.on("blur", syncFromPayDt);
+    $revsYm.on("blur",       syncFromRevsYm);
+    $payDt.on("changeDate",  syncFromPayDt);
+    $payDt.on("blur",        syncFromPayDt);
   });
 
   /***********************
    * 11. 급여대장 저장 (모달 등록/수정)
-   *      → /insa/saly/save
    ***********************/
-  if (btnSalySave) {
-    btnSalySave.addEventListener("click", () => {
+  const btnSalySaveEl = document.getElementById("btnSalySave");
+  if (btnSalySaveEl) {
+    btnSalySaveEl.addEventListener("click", () => {
       const salyNmInput = document.getElementById("salyNm");
       const deptSel     = document.getElementById("salyDept");
       const revsYmInput = document.getElementById("revs_ym");
@@ -786,6 +794,7 @@
         revsYm     : revsYm,
         payDt      : payDt,
         empIdList  : empIdList
+        // salyLedgSt는 서버에서 기본값 sal1 세팅
       };
 
       fetch("/insa/saly/save", {
@@ -803,7 +812,6 @@
 
         alert("저장되었습니다.");
 
-        // 저장 후 리스트 다시 조회 (DB 기준)
         loadSalyList();
         closeSalyRegistModal();
       })
@@ -818,8 +826,8 @@
    * 12. 페이지 로드 시 초기작업
    ***********************/
   document.addEventListener("DOMContentLoaded", () => {
-    loadDeptOptions();   // 상단 검색 + 모달 부서 셀렉트 채우기
-    loadSalyList();      // 초기 급여대장 목록 조회
+    loadDeptOptions();
+    loadSalyList();
   });
 </script>
 </body>

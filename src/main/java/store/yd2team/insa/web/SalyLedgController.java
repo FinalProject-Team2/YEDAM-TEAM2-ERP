@@ -1,3 +1,4 @@
+// src/main/java/store/yd2team/insa/web/SalyLedgController.java
 package store.yd2team.insa.web;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,31 @@ public class SalyLedgController {
             return (SessionDto) obj;
         }
         return null;
+    }
+
+    /* ===========================
+     * 급여대장 목록 조회
+     *  - URL : GET /insa/saly/list
+     *  - Query:
+     *      deptId, salyLedgNm, payDtStart, payDtEnd
+     * =========================== */
+    @GetMapping("/insa/saly/list")
+    @ResponseBody
+    public List<SalyLedgVO> list(
+            @RequestParam(value = "deptId", required = false) String deptId,
+            @RequestParam(value = "salyLedgNm", required = false) String salyLedgNm,
+            @RequestParam(value = "payDtStart", required = false) String payDtStart,
+            @RequestParam(value = "payDtEnd", required = false) String payDtEnd,
+            HttpSession session) {
+
+        SessionDto login = getLogin(session);
+        if (login == null) {
+            log.warn("[salyList] 세션 없음");
+            return List.of();
+        }
+
+        String vendId = login.getVendId();
+        return salyLedgService.getSalyLedgList(vendId, deptId, salyLedgNm, payDtStart, payDtEnd);
     }
 
     /* ===========================

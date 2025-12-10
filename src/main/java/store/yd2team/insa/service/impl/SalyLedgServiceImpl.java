@@ -1,4 +1,4 @@
-// src/main/java/store/yd2team/insa/service/SalyLedgServiceImpl.java
+// src/main/java/store/yd2team/insa/service/impl/SalyLedgServiceImpl.java
 package store.yd2team.insa.service.impl;
 
 import java.util.ArrayList;
@@ -44,8 +44,14 @@ public class SalyLedgServiceImpl implements SalyLedgService {
         vo.setCreaBy(loginEmpId);
         vo.setUpdtBy(loginEmpId);
         vo.setRcnt(vo.getEmpIdList().size());
-        if (vo.getTtPayAmt() == null) vo.setTtPayAmt(0d);
-        if (vo.getSalyLedgSt() == null || vo.getSalyLedgSt().isEmpty()) vo.setSalyLedgSt("N");
+
+        if (vo.getTtPayAmt() == null) {
+            vo.setTtPayAmt(0d);
+        }
+        // 상태 코드가 비어있으면 미확정(sal1)
+        if (vo.getSalyLedgSt() == null || vo.getSalyLedgSt().isEmpty()) {
+            vo.setSalyLedgSt("sal1");
+        }
 
         boolean isNew = (vo.getSalyLedgId() == null || vo.getSalyLedgId().isEmpty());
 
@@ -81,5 +87,21 @@ public class SalyLedgServiceImpl implements SalyLedgService {
         }
 
         return salyLedgId;
+    }
+
+    @Override
+    public List<SalyLedgVO> getSalyLedgList(String vendId,
+                                            String deptId,
+                                            String salyLedgNm,
+                                            String payDtStart,
+                                            String payDtEnd) {
+
+        // 공백 문자열은 null로 넘겨서 <if test="... != null and ... != ''"> 에 걸리도록
+        String dept = (deptId != null && !deptId.isBlank()) ? deptId : null;
+        String nm   = (salyLedgNm != null && !salyLedgNm.isBlank()) ? salyLedgNm : null;
+        String dtS  = (payDtStart != null && !payDtStart.isBlank()) ? payDtStart : null;
+        String dtE  = (payDtEnd != null && !payDtEnd.isBlank()) ? payDtEnd : null;
+
+        return salyLedgMapper.selectSalyLedgList(vendId, dept, nm, dtS, dtE);
     }
 }
