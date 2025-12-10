@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
 import store.yd2team.business.service.BusinessVO;
+import store.yd2team.business.service.ChurnStdrVO;
 import store.yd2team.business.service.ContactVO;
 import store.yd2team.business.service.DemoVO;
 import store.yd2team.business.service.LeadVO;
@@ -15,7 +16,9 @@ import store.yd2team.business.service.churnRiskVO;
 
 @Mapper
 public interface BusinessMapper {
-		
+	
+	//휴면,이탈 기준조회
+	List<ChurnStdrVO> getChurnStdrList(ChurnStdrVO churn);
 	//휴면,이탈고객 검색조회
 	List<churnRiskVO> getchurnRiskList(churnRiskVO vo);
 	//휴면, 이탈고객 평균
@@ -67,6 +70,7 @@ public interface BusinessMapper {
 		int insertDemo(DemoVO vo);
 	    int updateDemo(DemoVO vo);
 }
+
 
 
 

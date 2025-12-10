@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="store.yd2team.business.mapper.BusinessMapper">
-
+	<!-- 휴면,이탈 기준조회 -->
+	<select id="getChurnStdrList" parameterType="store.yd2team.business.service.ChurnStdrVO">
+		SELECT 
+		    churn_risk_id 		as churnRiskId,
+		    cust_aggregate_no	as custAggregateNo,
+		    vend_id 			as vendId,
+		    sales_change		as salesChange,
+		    ty					as TY,			
+		    stdr_value			as stdrValue,
+		    stdr_dc				as stdrDc,
+		    yn					as YN,
+		    crea_dt				as creaDt,
+		    crea_by				as creaBy,
+		    updt_dt				as updtDt,
+		    updt_by				as updtBy
+		FROM  
+   		tb_churn_risk_stdr
+	</select>
+	
 	<!-- 휴면,이탈고객 검색조회 -->
 	<select id="getchurnRiskList" parameterType="store.yd2team.business.service.churnRiskVO">
 	SELECT
@@ -33,7 +51,7 @@
 		
 	<!-- 휴면, 이탈 조건별 점수화 -->
 	<select id="getMonthlySalesChange"
-       resultType="store.yd2team.business.service.MonthlySalesDTO">
+      resultType="store.yd2team.business.service.MonthlySalesDTO">
 			WITH MONTHLY_SALES AS (
 			   SELECT
 			       a.CUSTcom_ID CUSTOMER_ID,
@@ -164,10 +182,9 @@
 			   </if>
 			ORDER BY finalScore DESC
 </select>
-
- <!-- 잠재고객 전체조회 -->
-   <select id="getList" resultType="store.yd2team.business.service.BusinessVO">
-       SELECT
+<!-- 잠재고객 전체조회 -->
+  <select id="getList" resultType="store.yd2team.business.service.BusinessVO">
+      SELECT
 	            potential_info_no  as potentialInfoNo,
 	            potential_cond_no  as potentialCondNo,
 	            vend_id            as vendId,
@@ -177,12 +194,12 @@
 	            company_size       as companySize,
 	            region             as region,
 	             establish_date AS establishDate
-       FROM 	tb_potential_cust_list
-      ORDER BY potential_info_no desc
-   </select>
-   
-  	<!-- 잠재고객 기준상세목록 조회 -->
-	<select id="getPotentialStdrDetailList" 
+      FROM 	tb_potential_cust_list
+     ORDER BY potential_info_no desc
+  </select>
+ 
+ 	<!-- 잠재고객 기준상세목록 조회 -->
+	<select id="getPotentialStdrDetailList"
 				parameterType="store.yd2team.business.service.PotentialStdrVO"
 				resultType="store.yd2team.business.service.PotentialStdrVO">
 		SELECT
@@ -212,10 +229,10 @@
 	<!-- 잠재고객조건 상세목록 수정 -->
 	<update id="updatePotentialStdrDetail"  parameterType="store.yd2team.business.service.PotentialStdrVO">
 	  UPDATE TB_POTENTIAL_STDR_DETAIL
-         SET 
-         	 STDR_ITEAM_INFO = #{stdrIteamInfo},
-             INFO_SCORE     = #{infoScore}
-       WHERE STDR_DETAIL_ID  = #{stdrDetailId}
+        SET
+        	 STDR_ITEAM_INFO = #{stdrIteamInfo},
+            INFO_SCORE     = #{infoScore}
+      WHERE STDR_DETAIL_ID  = #{stdrDetailId}
 	</update>
 	<!-- 잠재고객 기준상세목록 삭제 -->
 	<delete id="deletePotentialStdr" parameterType="store.yd2team.business.service.PotentialStdrVO">
@@ -247,17 +264,17 @@
 	        to_date(#{establishDate}, 'yyyy-mm-dd')
 	    )
 	</insert>
-	   
-   <!-- 공공데이터 고객 건수 카운트 -->
-   <select id="existsPotentialInfoNo">
+	  
+  <!-- 공공데이터 고객 건수 카운트 -->
+  <select id="existsPotentialInfoNo">
 	    SELECT COUNT(*)
 	    FROM tb_potential_cust_list
 	    WHERE potential_info_no = #{potentialInfoNo}
-   </select>
-   
-   <!-- 잠재고객검색조회 -->
-   <select id="getBusinessList" parameterType="store.yd2team.business.service.BusinessVO">
-   	SELECT
+  </select>
+ 
+  <!-- 잠재고객검색조회 -->
+  <select id="getBusinessList" parameterType="store.yd2team.business.service.BusinessVO">
+  	SELECT
 	        potential_info_no,
 	        potential_cond_no,
 	        vend_id,
@@ -272,8 +289,8 @@
 	        updt_dt,
 	        updt_by
 	FROM
-     	  	tb_potential_cust_list
-   WHERE 1 = 1
+    	  	tb_potential_cust_list
+  WHERE 1 = 1
 	    <if test="industryType != null and industryType != ''">
 	        AND industry_type LIKE '%' || #{industryType} || '%'
 	    </if>
@@ -289,7 +306,7 @@
 	    <if test="endEstablishDate != null and endEstablishDate != ''">
 	        AND establish_date &lt;= TO_DATE(#{endEstablishDate}, 'YYYY-MM-DD')
 	    </if>
-   ORDER BY rank
+  ORDER BY rank
 	</select>
 	
 	
@@ -320,50 +337,50 @@
 	<!-- 잠재고개객 각 항목 선택-->
 	<!-- 접촉사항조회 -->
 	<select id="selectContactListByVend"
-            parameterType="string"
-            resultType="store.yd2team.business.service.ContactVO">
-        SELECT
-            CONTACT_NO        AS contactNo,
-            POTENTIAL_INFO_NO AS potentialInfoNo,
-            VEND_ID           AS vendId,
-            TO_CHAR(CONTACT_DT, 'YYYY-MM-DD') AS contactDt,
-            CONTACT_MANAGER   AS contactManager,
-            CONTACT_WAY       AS contactWay,
-            CONTACT_CNTN      AS contactCntn,
-            CREA_DT           AS creaDt,
-            CREA_BY           AS creaBy,
-            UPDT_DT           AS updtDt,
-            UPDT_BY           AS updtBy
-        FROM TB_CONTACT
-        WHERE VEND_ID = #{vendId}
-        ORDER BY CONTACT_DT DESC
-    </select>
-    
-    <!-- 접촉사항 등록 -->
-    <insert id="insertContact"
-            parameterType="store.yd2team.business.service.ContactVO">
-        INSERT INTO TB_CONTACT
-        (
-            CONTACT_NO,
-            POTENTIAL_INFO_NO,
-            VEND_ID,
-            CONTACT_DT,
-            CONTACT_MANAGER,
-            CONTACT_WAY,
-            CONTACT_CNTN
-        )
-        VALUES
-        (
-            CONTACT_SEQ.NEXTVAL,
-            #{potentialInfoNo},
-            #{vendId},
-            TO_DATE(#{contactDt}, 'YYYY-MM-DD'),
-            #{contactManager},
-            #{contactWay},
-            #{contactCntn}
-        )
-    </insert>
-    
+           parameterType="string"
+           resultType="store.yd2team.business.service.ContactVO">
+       SELECT
+           CONTACT_NO        AS contactNo,
+           POTENTIAL_INFO_NO AS potentialInfoNo,
+           VEND_ID           AS vendId,
+           TO_CHAR(CONTACT_DT, 'YYYY-MM-DD') AS contactDt,
+           CONTACT_MANAGER   AS contactManager,
+           CONTACT_WAY       AS contactWay,
+           CONTACT_CNTN      AS contactCntn,
+           CREA_DT           AS creaDt,
+           CREA_BY           AS creaBy,
+           UPDT_DT           AS updtDt,
+           UPDT_BY           AS updtBy
+       FROM TB_CONTACT
+       WHERE VEND_ID = #{vendId}
+       ORDER BY CONTACT_DT DESC
+   </select>
+  
+   <!-- 접촉사항 등록 -->
+   <insert id="insertContact"
+           parameterType="store.yd2team.business.service.ContactVO">
+       INSERT INTO TB_CONTACT
+       (
+           CONTACT_NO,
+           POTENTIAL_INFO_NO,
+           VEND_ID,
+           CONTACT_DT,
+           CONTACT_MANAGER,
+           CONTACT_WAY,
+           CONTACT_CNTN
+       )
+       VALUES
+       (
+           CONTACT_SEQ.NEXTVAL,
+           #{potentialInfoNo},
+           #{vendId},
+           TO_DATE(#{contactDt}, 'YYYY-MM-DD'),
+           #{contactManager},
+           #{contactWay},
+           #{contactCntn}
+       )
+   </insert>
+  
 	<!-- 접촉사항 수정 -->
 	<update id="updateContact"
 		        parameterType="store.yd2team.business.service.ContactVO">
@@ -379,48 +396,48 @@
 	
 	<!-- 리드내역조회 -->
 	<select id="getLeadListByVend"
-            parameterType="string"
-            resultType="store.yd2team.business.service.LeadVO">
-        SELECT
-            lead_no				as leadNo,
+           parameterType="string"
+           resultType="store.yd2team.business.service.LeadVO">
+       SELECT
+           lead_no				as leadNo,
 			vend_id				as vendId,
 			lead_dt				as leadDt,
 			lead_manager		as leadManager,
 			required_dt			as requiredDt,
 			competitor_yn		as competitorYn,
 			budget_avail_yn		as budgetAvailYn
-        FROM tb_lead
-        WHERE VEND_ID = #{vendId}
-        ORDER BY lead_dt DESC
-    </select>
-    
-    <!-- 리드내역 등록 -->
-    <insert id="insertLead"
-            parameterType="store.yd2team.business.service.LeadVO">
-        INSERT INTO TB_LEAD
-        (
-           LEAD_NO,
-           POTENTIAL_INFO_NO,
-           VEND_ID,
-           LEAD_DT,
-           LEAD_MANAGER,
-           REQUIRED_DT,
-           COMPETITOR_YN,
-           BUDGET_AVAIL_YN
-        )
-        VALUES
-        (
-            SEQ_TB_LEAD_NO.NEXTVAL,
-            #{potentialInfoNo},
-            #{vendId},
-            TO_DATE(#{leadDt}, 'YYYY-MM-DD'),
-            #{leadManager},
-            #{requiredDt},
-            SUBSTR(#{competitorYn}, 1, 1),   <!-- ★ 여기서 1글자로 강제 -->
-        	SUBSTR(#{budgetAvailYn}, 1, 1)   <!-- ★ 여기서 1글자로 강제 -->
-        )
-    </insert>
-    
+       FROM tb_lead
+       WHERE VEND_ID = #{vendId}
+       ORDER BY lead_dt DESC
+   </select>
+  
+   <!-- 리드내역 등록 -->
+   <insert id="insertLead"
+           parameterType="store.yd2team.business.service.LeadVO">
+       INSERT INTO TB_LEAD
+       (
+          LEAD_NO,
+          POTENTIAL_INFO_NO,
+          VEND_ID,
+          LEAD_DT,
+          LEAD_MANAGER,
+          REQUIRED_DT,
+          COMPETITOR_YN,
+          BUDGET_AVAIL_YN
+       )
+       VALUES
+       (
+           SEQ_TB_LEAD_NO.NEXTVAL,
+           #{potentialInfoNo},
+           #{vendId},
+           TO_DATE(#{leadDt}, 'YYYY-MM-DD'),
+           #{leadManager},
+           #{requiredDt},
+           SUBSTR(#{competitorYn}, 1, 1),   <!-- ★ 여기서 1글자로 강제 -->
+       	SUBSTR(#{budgetAvailYn}, 1, 1)   <!-- ★ 여기서 1글자로 강제 -->
+       )
+   </insert>
+  
 	<!-- 리드내역 수정 -->
 	<update id="updateLead"
 		        parameterType="store.yd2team.business.service.LeadVO">
@@ -435,10 +452,10 @@
 	
 	<!-- 데모내역조회 -->
 	<select id="getDemoListByVend"
-            parameterType="string"
-            resultType="store.yd2team.business.service.DemoVO">
-        SELECT
-            DEMO_QUOTATIO_NO	as	demoQuotatioNo,
+           parameterType="string"
+           resultType="store.yd2team.business.service.DemoVO">
+       SELECT
+           DEMO_QUOTATIO_NO	as	demoQuotatioNo,
 			POTENTIAL_INFO_NO	as	potentialInfoNo,
 			VEND_ID				as	vendId,
 			DEMO_QUOTATIO_DT	as	demoQuotatioDt,
@@ -449,17 +466,17 @@
 			CUST_QY				as	custQy,
 			CUST_DISCOUNT		as	custDiscount,
 			CUST_DELIVERY		as	custDelivery
-        FROM TB_DEMO_QUOTATIO
-        WHERE VEND_ID = #{vendId}
-        ORDER BY DEMO_QUOTATIO_DT DESC
-    </select>
-    
-    <!-- 데모내역 등록 -->
-    <insert id="insertDemo"
-            parameterType="store.yd2team.business.service.DemoVO">
-        INSERT INTO TB_DEMO_QUOTATIO
-        (
-            DEMO_QUOTATIO_NO,
+       FROM TB_DEMO_QUOTATIO
+       WHERE VEND_ID = #{vendId}
+       ORDER BY DEMO_QUOTATIO_DT DESC
+   </select>
+  
+   <!-- 데모내역 등록 -->
+   <insert id="insertDemo"
+           parameterType="store.yd2team.business.service.DemoVO">
+       INSERT INTO TB_DEMO_QUOTATIO
+       (
+           DEMO_QUOTATIO_NO,
 			POTENTIAL_INFO_NO,
 			VEND_ID,
 			DEMO_QUOTATIO_DT,
@@ -470,23 +487,23 @@
 			CUST_QY,
 			CUST_DISCOUNT,
 			CUST_DELIVERY
-        )
-        VALUES
-        (
-            SEQ_TB_DEMO_QUOTATIO_NO.NEXTVAL,
-            #{potentialInfoNo},
-            #{vendId},
-            TO_DATE(#{demoQuotatioDt}, 'YYYY-MM-DD'),
-            #{demoManager},
-            #{demoDc},
-            #{custReaction},
-            #{samplePrivide},
-            #{custQy},
-            #{custDiscount},
-            #{custDelivery}
-        )
-    </insert>
-    
+       )
+       VALUES
+       (
+           SEQ_TB_DEMO_QUOTATIO_NO.NEXTVAL,
+           #{potentialInfoNo},
+           #{vendId},
+           TO_DATE(#{demoQuotatioDt}, 'YYYY-MM-DD'),
+           #{demoManager},
+           #{demoDc},
+           #{custReaction},
+           #{samplePrivide},
+           #{custQy},
+           #{custDiscount},
+           #{custDelivery}
+       )
+   </insert>
+  
 	<!-- 데모내역 수정 -->
 	<update id="updateDemo"
 		        parameterType="store.yd2team.business.service.DemoVO">
@@ -502,5 +519,4 @@
 		</update>
 	
 </mapper>
-
 
