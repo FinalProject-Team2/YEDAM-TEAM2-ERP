@@ -5,59 +5,13 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<title>견적서 관리</title>
+<title>발주 관리</title>
 <style>
-.ui-autocomplete {
-  z-index: 9999 !important;
-}
-.approve-btn,
-.reject-btn,
-.order-btn {
-  padding: 6px 8px;
-  font-size: 14px;
-  line-height: 1;
-  min-width: 50px;
-  border-radius: 4px;
-}
-
-/* 버튼 사이 간격 */
-.approve-btn + .reject-btn {
-  margin-left: 4px; 
-}
-
-/* 모달 합계 css */
-.order-summary-bar {
-  margin-top: 8px;
-  padding: 10px 16px;
-  border-radius: 6px;
-  background-color: #fff9e6;   /* 옅은 노랑 */
-  display: flex;
-  justify-content: flex-end;
-  gap: 32px;
-  font-size: 14px;
-}
-
-.order-summary-item {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.order-summary-label {
-  color: #666;
-  font-weight: 500;
-}
-
-.order-summary-value {
-  color: #222;
-  font-weight: 700;
-}
 </style>
-
 </head>
 <body layout:fragment="content">
-	<div class="esti-manage-wrapper">
-		<!-- 견적 조회 카드 -->
+	<div class="so-manage-wrapper">
+		<!-- 발주 조회 카드 -->
 		<div class="row mb-3">
 			<div class="col-md-12">
 				<div class="card">
@@ -65,11 +19,11 @@
 					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 					<div class="card-header">
 						<div class="card-header-left">
-							<h5 class="card-title">견적서 조회</h5>
+							<h5 class="card-title">발주 조회</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-dark" id="btnReset">초기화</button>
-							<button type="button" class="btn btn-outline-dark" id="btnSearch">조회</button>
+							<button type="button" class="btn btn-dark" id="SearchInitBtn">초기화</button>
+							<button type="button" class="btn btn-outline-dark" id="SearchBtn">조회</button>
 						</div>
 					</div>
 					<!-- end card-header -->
@@ -77,11 +31,9 @@
 					<div class="card-body">
 						<div class="row g-2">
 							<div class="col-md-3">
-								<label for="custcomName" class="form-label">고객사명</label>
-								<input id="custcomName" type="text" class="form-control" placeholder="고객사명을 입력해주세요">
+								<label for="custcomName" class="form-label">거래처 명</label>
+								<input id="custcomName" type="text" class="form-control" placeholder="거래처명 입력">
 							</div>
-							
-							<div class="col-1"></div>
 
 							<div class="col-md-6">
 								<label class="form-label">납기일</label>
@@ -89,9 +41,11 @@
 
 									<!-- 시작일 -->
 									<div class="input-group date">
-										<input type="text" class="form-control datepicker js-date-range-start" placeholder="시작일">
-										<span class="input-group-text js-date-range-icon-start">
-										<i class="bi bi-calendar"></i>
+										<input type="text"
+											class="form-control datepicker js-date-range-start"
+											placeholder="시작일"> <span
+											class="input-group-text js-date-range-icon-start"> <i
+											class="bi bi-calendar"></i>
 										</span>
 									</div>
 
@@ -99,9 +53,11 @@
 
 									<!-- 종료일 -->
 									<div class="input-group date ms-2">
-										<input type="text" class="form-control datepicker js-date-range-end" placeholder="종료일">
-										<span class="input-group-text js-date-range-icon-end">
-										<i class="bi bi-calendar"></i>
+										<input type="text"
+											class="form-control datepicker js-date-range-end"
+											placeholder="종료일"> <span
+											class="input-group-text js-date-range-icon-end"> <i
+											class="bi bi-calendar"></i>
 										</span>
 									</div>
 
@@ -117,43 +73,40 @@
 		</div>
 		<!-- end row -->
 
-		<!-- 견적서목록 카드 -->
+		<!-- 주문서목록 카드 -->
 		<div class="row">
 
-			<!-- 견적서목록 그리드 -->
+			<!-- 주문서목록 그리드 -->
 			<div class="col-md-12 d-flex">
 				<div class="card w-100 h-100">
 
 					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
 					<div class="card-header with-actions">
 						<div class="card-header-left">
-							<h5 class="card-title">견적서 목록</h5>
+							<h5 class="card-title">발주 목록</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark" id="newEstiBtn">신규</button>
+							<button type="button" class="btn btn-outline-dark" id="newPoBtn">신규</button>
 						</div>
 					</div>
 
 					<div class="card-body">
-						<div class="estiGridWrap">
-							<div id="estiGrid"></div>
+						<div class="poGridWrap">
+							<div id="poGrid"></div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<!-- end 견적서목록 카드 -->
+		<!-- end 주문서목록 카드 -->
 	</div>
-	<!-- end esti-manage-wrapper -->
+	<!-- end so-manage-wrapper -->
 
-
-<div th:replace="business/modal/newEstiModal :: newEstiModal"></div>
-<div th:replace="business/modal/newSoModal :: newSoModal"></div>
-
+<div th:replace="business/modal/newPoModal :: newPoModal"></div>
 
 <script>
 	// 0. 데이터
-	const estiData = [];
+	const poData = [];
 	let searchForm = {
 		    custcomName: "",
 		    dueStart: "",
@@ -161,77 +114,31 @@
 	};
 
 	// 1-1. Grid 공통 옵션
-	const estiGridOptions = {
+	const poGridOptions = {
 	    bodyHeight: 400,
 	    scrollX: true,
 	    scrollY: true,  // 세로
-	    /* rowHeaders: ['checkbox'],     // 좌측 체크박스 */
+	    rowHeaders: ['checkbox'],     // 좌측 체크박스 
 	    columnOptions: {
 	        minWidth: 80,
 	        resizable: true
 	    }
 	}; // 1-1. 끝
 
-	// 1-2. 견적서 목록 그리드 생성
-	const estiGrid = new tui.Grid({
-		el: document.getElementById('estiGrid'),
-		data: estiData,
-		...estiGridOptions,
+	// 1-2. 발주 목록 그리드 생성
+	const poGrid = new tui.Grid({
+		el: document.getElementById('poGrid'),
+		data: poData,
+		...poGridOptions,
 		columns: [
-			{ header: '견적서코드', name: 'estiId' },
-			{ header: '버전', name: 'version' },
-			{ header: '고객사명', name: 'custcomNameResult' },
-			{ header: '여신한도', name: 'cdtlnLmt', align: 'right' },
+			{ header: '발주ID', name: 'poId' },
+			{ header: '거래처명', name: 'custcomNameResult' },
+			{ header: '제품명', name: 'cdtlnLmt', align: 'right' },
 			{ header: '금액합계(원)', name: 'totalAmount', align: 'right'  },
 			{ header: '상품명', name: 'productName' },
 			{ header: '납기일', name: 'dueDt', align: 'right'  },
-			{
-			    header: '승인 / 반려',
-			    name: 'apRj',
-			    align: 'center',
-			    formatter: ({ row }) => {
-			    	if (row.estiSt === 'es1') {
-		    	      return `
-		    	        <button class="btn btn-success approve-btn" data-id="${row.estiId}">승인</button>
-		    	        <button class="btn btn-danger reject-btn" data-id="${row.estiId}">반려</button>
-		    	      `;
-		    	    }
-
-		    	    if (row.estiSt === 'es2') {
-		    	      return `
-		    	        <button class="btn btn-primary order-btn" data-id="${row.estiId}">주문서 등록</button>
-		    	      `;
-		    	    }
-		    	    
-		    	    if (row.estiSt === 'es3') {
-		    	      return `
-		    	        <button class="btn btn-success approve-btn" disabled style="opacity:0.5; cursor:not-allowed;">승인</button>
-		    	        <button class="btn btn-danger reject-btn" disabled style="opacity:0.5; cursor:not-allowed;">반려</button>
-		    	      `;
-		    	    }
-		    	    
-		    	    return "";
-			    }
-	    	},
-			{ 
-	    		header: '상태', 
-	    		name: 'estiStNm', 
-	    		align: 'center',
-	    		formatter: ({ row }) => {
-	    		    // 반려일 경우 비고도 보여줌
-	    		    if (row.estiSt === 'es3') {
-	    		      return `
-	    		        <div style="line-height:1.2;">
-	    		          <div>${row.estiStNm}</div>              <!-- 반려 -->
-	    		          <div style="color:#dc3545; font-size:12px;">${row.recallResn || ''}</div>
-	    		        </div>
-	    		      `;
-	    		    }
-	    		  return row.estiStNm;   // 승인/대기 등은 원래 그대로
-    		    } 
-			},
 		]
-	}); // 1-2. 견적서목록 그리드 생성 끝
+	}); // 1-2. 발주 그리드 생성 끝
 	
 	// 2. 버튼 이벤트
 	// 2-1. 초기화 버튼 이벤트
@@ -267,7 +174,7 @@
 	    console.log("보낼 searchForm >>> ", searchForm);
 	
 	    // 2) 백엔드 조회 요청 (POST /esti/list)
-	    axios.post("/esti/list", searchForm)
+	    axios.post("/po/list", searchForm)
 	        .then(res => {
 	            console.log("조회결과 >>> ", res.data);
 	
@@ -279,89 +186,6 @@
 	
 	
 	
-	// 2-3. 승인 버튼 이벤트
-	$(document).on('click', '.approve-btn', function () {
-	
-	  const estiId = $(this).data('id');   // data-id
-	  const row = estiGrid.getData().find(r => r.estiId == estiId);  // rowKey = estiId 가정
-	
-	  if (!row) {
-	    console.warn('행을 찾을 수 없습니다. estiId =', estiId);
-	    return;
-	  }
-	
-	  const limit = Number(row.cdtlnLmt ?? 0);      // 여신한도
-	  const total = Number(row.totalAmount ?? 0);  // 금액합계
-	  const version = row.version;
-	
-	  if (limit < total) {
-	    const confirmed = confirm("여신한도가 부족합니다.\n그래도 승인하시겠습니까?");
-	    if (!confirmed) return;
-	  }
-	
-	  // jQuery AJAX로 상태 업데이트 호출
-	  $.ajax({
-	    url: '/esti/updateStatus',
-	    method: 'POST',
-	    contentType: 'application/json',
-	    data: JSON.stringify({
-	      estiId: estiId,
-	      version: version,
-	      estiSt: 'es2'   // 승인 코드
-	    })
-	  })
-	  .done(function () {
-	    alert('승인 처리되었습니다.');
-	    // 그리드 상태 갱신
-	    const rowKey = row.rowKey ?? estiId;
-	    estiGrid.setValue(rowKey, 'estiSt', 'es2');
-	    estiGrid.setValue(rowKey, 'estiStNm', '승인');
-	  })
-	  .fail(function () {
-    	alert('승인 처리 중 오류가 발생했습니다.');
-	  });
-	}); // 2-3 승인 버튼 이벤트 끝
-	
-	
-	
-	// 2-4. 반려 버튼 이벤트
-	$(document).on('click', '.reject-btn', function () {
-	
-	  const estiId = $(this).data('id');
-	  const row = estiGrid.getData().find(r => r.estiId == estiId);
-	
-	  if (!row) return;
-	
-	  // 반려 사유 입력
-	  const reason = prompt("반려 사유를 입력하세요:");
-	  if (!reason) return;
-	
-	  $.ajax({
-	    url: '/esti/updateStatus',
-	    method: 'POST',
-	    contentType: 'application/json',
-	    data: JSON.stringify({
-	      estiId: estiId,
-	      estiSt: 'es3',
-	      version: row.version,     // ★ version 포함해야 함
-	      recallResn: reason        // ★ 반려 사유 필드
-	    })
-	  })
-	  .done(function () {
-	    alert('반려 처리되었습니다.');
-	
-	    // 그리드 즉시 갱신
-	    estiGrid.setValue(row.rowKey ?? estiId, 'estiSt', 'es3');
-	    estiGrid.setValue(row.rowKey ?? estiId, 'estiStNm', '반려');
-	    estiGrid.setValue(row.rowKey ?? estiId, 'recallResn', reason);
-	  })
-	  .fail(function (xhr) {
-	    console.error(xhr);
-	    alert('반려 처리 중 오류가 발생했습니다.');
-	  });
-	  
-	  /* console.log("row.rowKey : ", row.rowKey); */
-	}); // 2-4. 반려 버튼 이벤트 끝
 
 	
 // ====================================================================================================================== 모달
@@ -371,7 +195,7 @@
       TeamCommon.autocomplete.init({
         inputSelector: '#autoCustcomId',
         listSelector: '#autoCustcomIdSuggest',
-        url: '/esti/custcomIdSearch',
+        url: '/po/custcomIdSearch',
         paramName: 'keyword',
         minLength: 1,
         delay: 300,
@@ -421,7 +245,6 @@
       console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
     }
 
-
 	
 // 1. 모달 내부 상품명 auto complete
 class ProductAutoComplete {
@@ -436,7 +259,7 @@ class ProductAutoComplete {
       minLength: 1,
       source: function(request, response) {
         $.ajax({
-          url: '/esti/productSearch',
+          url: '/po/productSearch',
           data: { keyword: request.term },
           success: function(data) {
         	  response(data.map(item => ({
@@ -480,15 +303,15 @@ class ProductAutoComplete {
 	
 // ---------------------------- 신규 견적서 모달 스크립트
 	//1. 그리드 생성
-	window.newEstiGrid = null;
+	window.newPoGrid = null;
 
-	function loadNewEstiGrid(data = []) {
-	  if (window.newEstiGrid) {
-	    window.newEstiGrid.resetData(data);
+	function loadNewPoGrid(data = []) {
+	  if (window.newPoGrid) {
+	    window.newPoGrid.resetData(data);
 	    return;
 	  }
 	
-	  window.newEstiGrid = new tui.Grid({
+	  window.newPoGrid = new tui.Grid({
 	    el: document.getElementById('newEstiGrid'),
 	    scrollX: true,
 	    scrollY: true,
@@ -530,11 +353,10 @@ class ProductAutoComplete {
 	    	    return value ? value.toLocaleString() : '';
 	    	  }
 	      },
-	      { name: 'soDt', hidden: true },
 	    ]
 	  });
 	  
-	  window.newEstiGrid.on('afterChange', (ev) => {
+	  window.newPoGrid.on('afterChange', (ev) => {
 	      ev.changes.forEach(change => {
 	          const rowKey = change.rowKey;
 
@@ -555,38 +377,38 @@ class ProductAutoComplete {
 	
 // -------------------------------- 모달오픈 버튼이벤트
 	// 신규 버튼 클릭 이벤트
-	$(document).on("click", "#newEstiBtn", function () {
-	  openNewEstiModal();
+	$(document).on("click", "#newPoBtn", function () {
+	  openNewPoModal();
 	});
 
 
     // 1-1 신규 견적서 모달
-	const openBtn = document.getElementById("newEstiBtn");
-	const modal   = document.getElementById("newEstiModal");
-	const back    = document.getElementById("newEstiBackdrop");
+	const openBtn = document.getElementById("newPoBtn");
+	const modal   = document.getElementById("newPoModal");
+	const back    = document.getElementById("newPoBackdrop");
 	
-	function openNewEstiModal() {
+	function openNewPoModal() {
 		modal.classList.add("show");
 		modal.style.display = "block";
 		back.style.display = "block";
 		
-		if (!window.newEstiGrid) {
-		  loadNewEstiGrid();
+		if (!window.newPoGrid) {
+		  loadNewPoGrid();
 		} else {
-		  window.newEstiGrid.refreshLayout();
+		  window.newPoGrid.refreshLayout();
 		}
 	} // openNewEstiModal
 	
-	function closeNewEstiModal() {
+	function closeNewPoModal() {
 		modal.classList.remove("show");
 		modal.style.display = "none";
 		back.style.display = "none";
 		
 		// 모달 닫을 때 입력값 초기화
-		resetNewEstiForm();
+		resetNewPoForm();
 	} // closeNewEstiModal
 	
-	function resetNewEstiForm() {
+	function resetNewPoForm() {
 
 		// 1) 모달 입력창 초기화
 		$('#autoCustcomId').val('');
@@ -596,15 +418,15 @@ class ProductAutoComplete {
 		$('#applyDate').val('');
 		
 		// 2) 그리드 데이터 초기화
-		if (window.newEstiGrid) {
-		  window.newEstiGrid.resetData([]);   // 빈 배열로 초기화
+		if (window.newPoGrid) {
+		  window.newPoGrid.resetData([]);   // 빈 배열로 초기화
 		}
 	} // resetNewEstiForm
 	
 	// 바깥 클릭 시 닫기
 	modal.addEventListener("click", (event) => {
 		if (!event.target.closest(".modal-content")) {
-		  closeNewEstiModal();
+		  closeNewPoModal();
 		}
 	});
 
@@ -624,13 +446,13 @@ class ProductAutoComplete {
 	    };
 	
 	    // 그리드에 행 추가 (맨 마지막에 추가)
-	    window.newEstiGrid.appendRow(newRow, { at: 0 });
+	    window.newPoGrid.appendRow(newRow, { at: 0 });
 	
 	});
 	
 	// 3. 모달 행삭제 버튼 이벤트
 	$('#deleteRowBtn').on('click', function () {
-	    const rowKeys = window.newEstiGrid.getCheckedRowKeys();   // 체크된 row key 목록
+	    const rowKeys = window.newPoGrid.getCheckedRowKeys();   // 체크된 row key 목록
 	
 	    if (rowKeys.length === 0) {
 	        alert("삭제할 행을 선택해주세요.");
@@ -638,34 +460,14 @@ class ProductAutoComplete {
 	    }
 	
 	    // 선택된 row 제거
-	    window.newEstiGrid.removeRows(rowKeys);
+	    window.newPoGrid.removeRows(rowKeys);
 	});
 	
 	// 4. 모달 저장버튼 이벤트
-	document.getElementById("btnEstiSave").addEventListener("click", function () {
+	document.getElementById("btnPoSave").addEventListener("click", function () {
 	
-		// 고객사 입력 체크
-	    const custcomId = document.getElementById("autoCustcomId").value;
-	    if (!custcomId || custcomId.trim() === "") {
-	        alert("고객사가 선택되지 않았습니다.");
-	        return;   // 저장 중단
-	    }
-	    
-	 	// 납기일 입력 체크
-	    const dueDt = document.getElementById("applyDate").value;
-	    if (!dueDt || dueDt.trim() === "") {
-	        alert("납기일이 선택되지 않았습니다.");
-	        return;   // 저장 중단
-	    }
-	    
 	    // 1) 그리드 데이터
-	    const rows = window.newEstiGrid.getData();
-	    
-	    // 상품 입력 체크
-	    if (!rows || rows.length === 0) {
-	        alert("상품이 입력되지 않았습니다.\n상품을 추가해주세요.");
-	        return;
-	    }
+	    const rows = window.newPoGrid.getData();
 	
 	    const detailList = rows.map(row => ({
 	        estiDetailNo: null,                 // 신규이므로 null
@@ -681,9 +483,9 @@ class ProductAutoComplete {
 	
 	    // 2) 헤더 폼 값
 	    const estiIdVal   = document.getElementById("estiIdHidden").value;           // 신규: "", 수정: 기존값
-	    /* const custcomId   = document.getElementById("autoCustcomId").value; */
+	    const custcomId   = document.getElementById("autoCustcomId").value;
 	    const custcomName = document.getElementById("autoCustcomName").value;
-	    /* const dueDt       = document.getElementById("applyDate").value;             // yyyy-MM-dd */
+	    const dueDt       = document.getElementById("applyDate").value;             // yyyy-MM-dd
 	
 	    const payload = {
 	        estiId: estiIdVal ? estiIdVal : null,    // null 이면 신규, 값 있으면 이력 INSERT
@@ -702,7 +504,7 @@ class ProductAutoComplete {
 	
 	    console.log("esti 저장 payload >>> ", payload);
 	
-	    fetch("/esti/save", {
+	    fetch("/po/save", {
 	        method: "POST",
 	        headers: { "Content-Type": "application/json" },
 	        body: JSON.stringify(payload)
@@ -717,11 +519,11 @@ class ProductAutoComplete {
 	                document.getElementById("estiIdHidden").value = result.estiId;
 	                
 	             	// 1) 모달 닫기 - Bootstrap API 사용
-	                const modalEl = document.getElementById("estiModal"); // 실제 모달 id로 맞추기
+	                const modalEl = document.getElementById("poModal"); // 실제 모달 id로 맞추기
 	                if (modalEl) {
-	                    const estiModal = bootstrap.Modal.getInstance(modalEl) 
+	                    const poModal = bootstrap.Modal.getInstance(modalEl) 
 	                                   || new bootstrap.Modal(modalEl);
-	                    estiModal.hide();
+	                    poModal.hide();
 	                }
 
 	                // 2) 그리드 재조회
@@ -740,17 +542,17 @@ class ProductAutoComplete {
 	
 // ========================================================================== 주문서 등록 버튼 모달
 	// 0. 주문서 그리드 전역
-	window.newSoGrid = null;
+	window.newPoGrid = null;
 	
 	// 0-1. 주문서 상세 그리드 생성
-	function loadNewSoGrid(data = []) {
-	  if (window.newSoGrid) {
-	    window.newSoGrid.resetData(data);
+	function loadNewPoGrid(data = []) {
+	  if (window.newPoGrid) {
+	    window.newPoGrid.resetData(data);
 	    return;
 	  }
 	
-	  window.newSoGrid = new tui.Grid({
-	    el: document.getElementById("newSoGrid"),
+	  window.newPoGrid = new tui.Grid({
+	    el: document.getElementById("newPoGrid"),
 	    data: data,
 	    scrollX: true,
 	    scrollY: true,
@@ -768,13 +570,13 @@ class ProductAutoComplete {
 	
 	// 1. 견적 그리드 - 주문서 등록 버튼 클릭
 	$(document).on("click", ".order-btn", function () {
-	  const estiId = $(this).data("id");
+	  const poId = $(this).data("id");
 	
-	  fetch(`/so/fromEsti/${estiId}`)
+	  fetch(`/po/fromPo/${poId}`)
 	    .then(res => {
 	      if (!res.ok) {
 	        return res.text().then(text => {
-	          console.error("GET /so/fromEsti 에러 응답 >>>", text);
+	          console.error("GET /po/fromPo 에러 응답 >>>", text);
 	          throw new Error("server error");
 	        });
 	      }
@@ -784,13 +586,12 @@ class ProductAutoComplete {
 		  const header = data.header;
 		  const detailList = data.detailList || [];
 		
-		  $("#newSoEstiId").val(header.estiId);
-		  $("#newSoEstiIdView").val(header.estiId);
-		  $("#newSoVersion").val(header.version);
-		  $("#newSoCustcomId").val(header.custcomId);
-		  $("#newSoCustcomName").val(header.custcomNameResult);
-		  $("#newSoDueDt").val(header.dueDt);
-		  /* $("#newSoDt").val(header.soDt); */
+		  $("#newPoEstiId").val(header.estiId);
+		  $("#newPoEstiIdView").val(header.estiId);
+		  $("#newPoVersion").val(header.version);
+		  $("#newPoCustcomId").val(header.custcomId);
+		  $("#newPoCustcomName").val(header.custcomNameResult);
+		  $("#newPoDueDt").val(header.dueDt);
 		
 		  // ▶ 공급가 합계 계산
 		  const totalSupply = detailList.reduce((sum, row) => {
@@ -800,12 +601,12 @@ class ProductAutoComplete {
 		    totalSupply ? totalSupply.toLocaleString() : ""
 		  ); */
 		
-		  loadNewSoGrid(detailList);
+		  loadNewPoGrid(detailList);
 		  
 		  // 하단 합계 갱신
 	      updateOrderSummary(detailList);
 		  
-		  openNewSoModal();
+		  openNewPoModal();
 		})
 	    .catch(err => {
 	      console.error(err);
@@ -814,65 +615,65 @@ class ProductAutoComplete {
 	});
 	
 	// 2. 모달 열기/닫기
-	function openNewSoModal() {
-	  const modal = document.getElementById("newSoModal");
-	  const back  = document.getElementById("newSoBackdrop");
+	function openNewPoModal() {
+	  const modal = document.getElementById("newPoModal");
+	  const back  = document.getElementById("newPoBackdrop");
 	
 	  modal.classList.add("show");
 	  modal.style.display = "block";
 	  back.style.display  = "block";
 	
-	  if (window.newSoGrid) window.newSoGrid.refreshLayout();
+	  if (window.newPoGrid) window.newPoGrid.refreshLayout();
 	}
 	
 	function closeNewSoModal() {
-	  document.getElementById("newSoModal").classList.remove("show");
-	  document.getElementById("newSoModal").style.display = "none";
-	  document.getElementById("newSoBackdrop").style.display = "none";
+	  document.getElementById("newPoModal").classList.remove("show");
+	  document.getElementById("newPoModal").style.display = "none";
+	  document.getElementById("newPoBackdrop").style.display = "none";
 	
 	  resetNewSoForm();
 	}
 	
-	function resetNewSoForm() {
-	  $("#newSoEstiId").val("");
-	  $("#newSoId").val("");
-	  $("#newSoEstiIdView").val("");
-	  $("#newSoVersion").val("");
-	  $("#newSoCustcomName").val("");
-	  $("#newSoDueDt").val("");
-	  $("#newSoShipAddr").val("");
-	  $("#newSoRm").val("");
+	function resetNewPoForm() {
+	  $("#newPoEstiId").val("");
+	  $("#newPoId").val("");
+	  $("#newPoEstiIdView").val("");
+	  $("#newPoVersion").val("");
+	  $("#newPoCustcomName").val("");
+	  $("#newPoDueDt").val("");
+	  $("#newPoShipAddr").val("");
+	  $("#newPoRm").val("");
 	
-	  if (window.newSoGrid) {
-	    window.newSoGrid.resetData([]);
+	  if (window.newPoGrid) {
+	    window.newPoGrid.resetData([]);
 	  }
 	}
 	
 	// 모달 바깥 클릭 시 닫기
-	document.getElementById("newSoModal")
+	document.getElementById("newPoModal")
 	  .addEventListener("click", (event) => {
 	    if (!event.target.closest(".modal-content")) {
-	      closeNewSoModal();
+	      closeNewPoModal();
 	    }
 	  });
 	
 	// 3. 모달 초기화 버튼
-	$("#newSoModalInit").on("click", function () {
-	  resetNewSoForm();
+	$("#newPoModalInit").on("click", function () {
+	  resetNewPoForm();
 	});
 	
 	// 4. 모달 저장 버튼
-	$("#newSoModalSaveBtn").on("click", function () {
+	$("#newPoModalSaveBtn").on("click", function () {
 	  // ▶ id 이름 newSoXXX 로 맞추기
-	  const estiId   = $("#newSoEstiId").val();
-	  const version  = $("#newSoVersion").val();  // 견적 버전
-	  const custcomId = $("#newSoCustcomId").val();
-	  const dueDt     = $("#newSoDueDt").val();
-	  const shipAddr = $("#newSoShipAddr").val();
-	  const orderRm  = $("#newSoRm").val();
+	  const estiId   = $("#newPoEstiId").val();
+	  const version  = $("#newPoVersion").val();  // 견적 버전
+	  const custcomId = $("#newPoCustcomId").val();
+	  const dueDt     = $("#newPoDueDt").val();
+	  const shipAddr = $("#newPoShipAddr").val();
+	  const orderRm  = $("#newPoRm").val();
 	
 	  // ▶ grid 객체 이름 newSoGrid 사용
-	  const rows = window.newSoGrid ? window.newSoGrid.getData() : [];
+	  const rows = window.newPoGrid ? window.newPoGrid.getData() : [];
 	
 	  const detailList = rows.map(r => ({
 	    productId: r.productId,
@@ -914,27 +715,9 @@ class ProductAutoComplete {
 	    });
 	});
 	
-	// 주문서등록 모달 합계등록 함수
-	function updateOrderSummary(detailList) {
-	  const supplyTotal = detailList.reduce((sum, row) => {
-	    return sum + Number(row.supplyAmt || 0);
-	  }, 0);
-	
-	  const vatTotal = Math.floor(supplyTotal * 0.1);
-	  const grandTotal = supplyTotal + vatTotal;
-	
-	  $("#sumSupply").text(
-	    supplyTotal ? supplyTotal.toLocaleString() : "0"
-	  );
-	  $("#sumVat").text(
-	    vatTotal ? vatTotal.toLocaleString() : "0"
-	  );
-	  $("#sumTotal").text(
-	    grandTotal ? grandTotal.toLocaleString() : "0"
-	  );
-	}
 	
 </script>
+
 
 </body>
 </html>
