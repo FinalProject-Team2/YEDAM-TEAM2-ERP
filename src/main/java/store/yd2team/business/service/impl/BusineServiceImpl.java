@@ -131,53 +131,30 @@ public class BusineServiceImpl implements BusinessService {
    }
    //
    //
-   //잠재고객기준상세목록조회
-	@Override
-	 public List<PotentialStdrVO> getStdrDetailAll() {
-       return businessMapper.getStdrDetailAll();
+   // 잠재고객 기준상세목록 전제조회
+   public List<PotentialStdrVO> getPotentialStdrDetailList(PotentialStdrVO cond) {
+       return businessMapper.getPotentialStdrDetailList(cond);
    }
-	
-	@Override
-	public void saveAllPotential(List<PotentialStdrVO> list) {
-//		if (list == null) return;
-//
-//        for (PotentialStdrVO row : list) {
-//            row.setVendId(vendId);
-//            row.setPotentialInfoNo(potentialInfoNo);
-//            
-//			if( row.getLeadNo()  == null  || row.getLeadNo().equals("") ) {
-//				businessMapper.insertLead(row);
-//			}
-//			else {   
-//				businessMapper.updateLead(row);
-//				
-//			}
-//        }
-//		
-	}
-   //잠재고객기준상세목록수정
-//   public void saveAll(List<BusinessVO> list) {
-//       if (list == null) return;
-//       for (BusinessVO vo : list) {
-//           // 1) 아예 내용이 없으면 건너뛰기
-//           String info = vo.getStdrIteamInfo();
-//           Integer score = vo.getInfoScore();
-//           boolean noInfo  = (info == null || info.trim().isEmpty());
-//           boolean noScore = (score == null);
-//           if (noInfo && noScore) {
-//               continue; // 아무 값도 없으면 skip
-//           }
-//           // 2) PK 없으면 INSERT, 있으면 UPDATE
-//           if (vo.getStdrId() == null || vo.getStdrId().trim().isEmpty()) {
-//           	businessMapper.insertDetail(vo);
-//           } else {
-//           	businessMapper.updateDetail(vo);
-//           }
-//       }
-//   }
-//   public List<BusinessVO> getListByCond(String condGb) {
-//       return businessMapper.selectByCondGb(condGb);
-//   }
+   // 잠재고객 기준상세목록 등록 및 수정 - I/U 통합 저장
+   public void savePotentialStdrDetailList(List<PotentialStdrVO> list) {
+       for (PotentialStdrVO row : list) {
+           if ("I".equals(row.getRowStatus())) {
+        	   businessMapper.insertPotentialStdrDetail(row);
+           } else if ("U".equals(row.getRowStatus())) {
+        	   businessMapper.updatePotentialStdrDetail(row);
+           } 
+           }
+       }
+   // 잠재고객 기준상세목록 삭제
+   @Override
+   public int deletePotentialStdrList(List<String> idList) {
+       int cnt = 0;
+       for (String id : idList) {
+           businessMapper.deletePotentialStdr(id);
+           cnt++;
+       }
+       return cnt;
+   }
 	@Override
 	public List<BusinessVO> getcustaddrtype(String cond) {
 		 List<BusinessVO> list = businessMapper.getcustaddrtype(cond);
@@ -300,11 +277,7 @@ public class BusineServiceImpl implements BusinessService {
         }
     }
 
-	@Override
-	public List<PotentialStdrVO> getListByCond(String condGb) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 
 	
