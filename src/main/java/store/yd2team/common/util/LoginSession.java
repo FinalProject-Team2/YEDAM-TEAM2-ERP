@@ -107,6 +107,16 @@ public class LoginSession {
         return (s != null) ? s.getHp() : null;
     }
     
+    public static String getEmail() {
+        SessionDto s = getLoginSession();
+        return (s != null) ? s.getEmail() : null;
+    }
+    
+    public static String getProofPhoto() {
+        SessionDto s = getLoginSession();
+        return (s != null) ? s.getProofPhoto() : null;
+    }
+    
     
     // ==========================
     // 1) 역할 / 권한 Getter

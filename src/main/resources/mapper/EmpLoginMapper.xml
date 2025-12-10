@@ -25,7 +25,9 @@
                 v.bizcnd,    
                 v.addr,  
                 e.cttpc,
-                v.hp     
+                v.hp,
+                e.email,
+                e.proof_photo     
         FROM TB_EMP_ACCT a
         LEFT JOIN TB_EMP e
                ON a.EMP_ID = e.EMP_ID

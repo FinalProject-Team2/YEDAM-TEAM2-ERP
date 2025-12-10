@@ -62,6 +62,11 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 
         String requestURI = request.getRequestURI();
         String queryString = request.getQueryString();
+        
+        // ✅ 1) 프로필 이미지 요청은 로그인 체크 없이 항상 통과
+        if (requestURI.equals("/emp/profile/photo")) {
+            return true;
+        }
 
         log.debug("[LoginCheckInterceptor] uri={}", requestURI);
 

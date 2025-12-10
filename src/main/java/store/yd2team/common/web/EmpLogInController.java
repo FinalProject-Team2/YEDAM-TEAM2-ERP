@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.consts.SessionConst;
 import store.yd2team.common.dto.EmpLoginResultDto;
+import store.yd2team.common.dto.MenuAuthDto;
 import store.yd2team.common.dto.SessionDto;
+import store.yd2team.common.mapper.MenuAuthMapper;
 import store.yd2team.common.service.EmpAcctVO;
 import store.yd2team.common.service.EmpLoginService;
 import store.yd2team.common.service.SecPolicyService;
@@ -24,6 +26,7 @@ public class EmpLogInController {
     final EmpLoginService empAcctService;
     final SmsService smsService;
     final SecPolicyService secPolicyService;
+    final MenuAuthMapper menuAuthMapper;
 
     // OTP 기본값 (정책이 비어있을 때 대비)
     private static final int DEFAULT_OTP_VALID_MIN  = 5;  // 5분
@@ -86,7 +89,7 @@ public class EmpLogInController {
             
             log.info(">>> 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={},"
             		+ " empId={}, loginId={}, vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={},"
-            		+ " AuthCodes={}, RoleIds = {}",
+            		+ " AuthCodes={}, RoleIds = {}, ProofPhoto = {}",
                     session.getId(),
                     loginEmp.getEmpAcctId(), loginEmp.getEmpNm(),
                     loginEmp.getDeptNm(), loginEmp.getDeptId(),
@@ -94,7 +97,7 @@ public class EmpLogInController {
                     loginEmp.getVendId(), loginEmp.getMasYn(),
                     loginEmp.getBizcnd(), loginEmp.getAddr(),
                     loginEmp.getCttpc(), loginEmp.getHp(),
-                    loginEmp.getAuthCodes(), loginEmp.getRoleIds());
+                    loginEmp.getAuthCodes(), loginEmp.getRoleIds(), loginEmp.getProofPhoto());
 
             return result; // success=true, otpRequired=false
         }
@@ -220,7 +223,9 @@ public class EmpLogInController {
         
         applySessionPolicy(session, loginEmp.getVendId());
 
-        log.info(">>> OTP 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={}, empId={}, loginId={}, vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={}, roleId={}",
+        log.info(">>> OTP 로그인 + 세션 저장 완료: sessionId={}, empAcctId={}, empNm={}, deptNm={}, deptId={}, empId={}, loginId={},"
+        		+ " vendId={}, masYn={}, bizcnd={}, addr={}, cttpc={}, hp={}, AuthCodes={}, RoleIds ={}"
+        		+ " roleId={}, proofPhoto={}",
                 session.getId(),
                 loginEmp.getEmpAcctId(), loginEmp.getEmpNm(),
                 loginEmp.getDeptNm(), loginEmp.getDeptId(),
@@ -228,7 +233,8 @@ public class EmpLogInController {
                 loginEmp.getVendId(), loginEmp.getMasYn(),
                 loginEmp.getBizcnd(), loginEmp.getAddr(),
                 loginEmp.getCttpc(), loginEmp.getHp(),
-                loginEmp.getAuthCodes(), loginEmp.getRoleIds());
+                loginEmp.getAuthCodes(), loginEmp.getRoleIds(),
+                loginEmp.getRoleId(), loginEmp.getProofPhoto());
 
         // OTP 관련 임시 세션은 제거
         clearOtpSession(session);
@@ -277,14 +283,35 @@ public class EmpLogInController {
         loginEmp.setTempYn(empAcct.getTempYn());
         loginEmp.setRoleIds(empAcct.getRoleIds());
         loginEmp.setAuthCodes(empAcct.getAuthCodes());
-
+        loginEmp.setEmail(empAcct.getEmail());
+        loginEmp.setProofPhoto(empAcct.getProofPhoto());
+        
         // 🔽 추가된 부분: masYn 기준으로 roleId 세팅
         //  - 예시: masYn == 'e1' 이면 HR 관리자 권한
-		/*
-		 * String roleId = "ROLE_USER"; if ("e1".equals(empAcct.getMasYn())) { roleId =
-		 * "ROLE_HR_ADMIN"; } loginEmp.setRoleIds(roleId); // 🔼 여기까지만 새로 추가됨
-		 */
-		 return loginEmp;
+        String roleId = "ROLE_USER";
+        if ("e1".equals(empAcct.getMasYn())) {
+            roleId = "ROLE_HR_ADMIN";
+        }
+        loginEmp.setRoleId(roleId);
+        // 🔼 여기까지만 새로 추가됨
+        
+        // empAcct.getEmpAcctId() = tb_emp_acct PK
+        // empAcct.getVendId()    = 회사 코드
+        java.util.List<MenuAuthDto> menuAuthList =
+                menuAuthMapper.selectMenuAuthByEmpAcct(empAcct.getEmpAcctId(), empAcct.getVendId());
+
+        java.util.Map<String, MenuAuthDto> menuAuthMap = new java.util.HashMap<>();
+        for (MenuAuthDto dto : menuAuthList) {
+            // key 는 menuId 기준으로 사용 (예: "HR_ATTD", "HR_VCATN"...)
+            menuAuthMap.put(dto.getMenuId(), dto);
+        }
+        loginEmp.setMenuAuthMap(menuAuthMap);
+        
+        log.info(">>> 메뉴 권한 로드: empAcctId={}, size={}",
+                empAcct.getEmpAcctId(),
+                loginEmp.getMenuAuthMap() != null ? loginEmp.getMenuAuthMap().size() : 0);
+        
+		return loginEmp;
 		 
     }
 

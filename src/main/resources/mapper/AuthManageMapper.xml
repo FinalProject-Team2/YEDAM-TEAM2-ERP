@@ -49,7 +49,7 @@
 	      ON a.menu_id = m.menu_id
 	     AND a.role_id = #{roleId}
 	     <if test="vendId != null and vendId != ''">
-	       AND a.vend_id = #{vendId}
+	       AND NVL(a.vend_id, #{vendId}) = #{vendId}
 	     </if>
 	    WHERE 1 = 1
 	      <if test="vendId != null and vendId != ''">

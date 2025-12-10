@@ -1,7 +1,9 @@
 package store.yd2team.common.dto;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
@@ -29,7 +31,13 @@ public class SessionDto implements Serializable{
     private String cttpc;	  // 사원 연락처
     private String hp;        // 거래처 핸드폰 번호
     private String tempYn;    // 임시 비밀번호 여부
+    private String email;		// 이메일
+    private String proofPhoto; // 사진
+    
     
     private List<String> roleIds;
     private Set<String> authCodes;
+    private String roleId;
+    
+    private Map<String, MenuAuthDto> menuAuthMap = new HashMap<>();
 }
