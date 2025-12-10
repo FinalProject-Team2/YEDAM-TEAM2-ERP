@@ -25,6 +25,10 @@
 .form-select {
 	color: #000 !important;
 }
+
+.stIsShow {
+	display: none;
+}
 </style>
 </head>
 <body layout:fragment="content">
@@ -105,9 +109,9 @@
 						<h5 class="card-title">기본정보&인사정보</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark">근로계약서</button>
+						<button class="btn btn-outline-dark stIsShow" id="emp-deta">근로계약서</button>
 						<button class="btn btn-outline-dark" id="btn-save">등록</button>
-						<button class="btn btn-outline-danger ">삭제</button>
+						<!-- <button class="btn btn-outline-danger ">삭제</button> -->
 					</div>
 				</div>
 				<div class="card-body ">
@@ -125,7 +129,7 @@
 									<label class="form-label ">사번</label> <input id="v_empId"
 										type="text" class="form-control readonly-input"
 										readonly="readonly" placeholder="사번(자동생성)" /> <input
-										id="v_vendId" value="V001" type="text" style="display: none;">
+										id="v_vendId" th:value="${vendId}" type="text" style="display: none;">
 								</div>
 								<div class="col-md-6">
 									<label for="userName" class="form-label">입사일</label>
@@ -230,13 +234,12 @@
 						</div>
 
 						<div class="col-md-4">
-							<label class="form-label">근무형태</label> <select id="v_basiId"
+							<label class="form-label">근무형태</label> <select id="v_basiNo"
 								class="form-select">
-								<option value="B001">인사팀 기준근무</option>
-								<option value="B002">생산1팀 교대근무</option>
-								<option value="B003">생산2팀 교대근무</option>
-								<option value="B004">생산3팀 교대근무</option>
-								<option value="B005">생산4팀 교대근무</option>
+								<th:block th:each="val : ${basiLi}">
+									<option th:value="${val.basiNo}" th:text="${val.basiNm}"></option>
+								</th:block>
+								<option value="B005">하드코딩메뉴(선택x)</option>
 							</select>
 						</div>
 
@@ -354,16 +357,26 @@
 			
 			});
 		
+		let empData = () => {
+			//근로계약서 버튼 관련
+			$("#v_empId").val() == ""? $("#emp-deta").addClass("stIsShow") : $("#emp-deta").removeClass("stIsShow")			
+		}
+		
+		
 		//초기화버튼 눌러서 입력칸 초기화
 		$("#empReset").on("click", () => {
 			$("[id^='v_']").each(function() {
-			    console.log($(this).attr("id")); // 해당 id 출력
+			    //console.log($(this).attr("id")); // 해당 id 출력
 			    $(this).val("");
 			    if($(this).attr("id") == "v_proofPhoto") {
 			    	$(this).attr("src", "/images/profil/nonUser.jpeg");
 			    }
 			});
+			console.log($("#v_empId").val());
+			empData();
 		})
+		
+		
 		
 		
 		/* =====================================================
@@ -427,11 +440,10 @@
 			//모달페이지 안에서 메소드
 			$(document).ready(function() {
 			  $("#agreeCheck").on("change", function() {
-			    if ($(this).is(":checked")) {
-			      $("#registBtn").show();   // 체크되면 버튼 보이기
-			    } else {
-			      $("#registBtn").hide();   // 체크 해제되면 버튼 숨기기
-			    }
+				  if($("#m_empId").val() == "") {
+					  $(this).is(":checked") ? $("#registBtn").show() : $("#registBtn").hide();					    
+				  }
+			    
 			  });
 			});
 			
@@ -445,8 +457,9 @@ grid.on('click', function(ev) {
     const rowData = grid.getRow(ev.rowKey);
     if (!rowData) return;
 
-    bindGridToForm(rowData);    
-    
+    bindGridToForm(rowData);      
+	
+	empData();
     const dto = formToJson();  
     console.log(dto);
 });

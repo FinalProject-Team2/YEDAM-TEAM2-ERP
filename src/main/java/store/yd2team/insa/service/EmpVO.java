@@ -17,8 +17,10 @@ public class EmpVO {
 
 	private String empId;        // 주식별자
 	private String deptId;       // 부서ID FK
+	private String deptHeadId;       // 사원 테이블 FK (부서장)
+	private String uprDeptId;       // 상위부서ID
 	private String deptNm;       // 부서이름
-	private String basiId;       // 부서별 근무시간기준 FK
+	private String basiNo;       // 부서별 근무시간기준 FK	
 	private String vendId;       // 구독시 생성된ID FK
 	private String nm;           // 개인정보-이름
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -50,4 +52,5 @@ public class EmpVO {
 	private String rspofcNm;   // 급여타입
 	private String emplymTyNm;   // 급여타입
 	private String hffcStNm;   // 급여타입
+	private String basiNm;       // 부서별 근무시간기준 이름
 }

@@ -21,6 +21,36 @@ on a.emp_id = c.emp_id
 </where>
 </select>
 
+<insert id="empYrycRegist">
+<selectKey keyProperty="yrycId" resultType="String" order="BEFORE">
+SELECT 'yryc' || TO_CHAR(SYSDATE, 'YYMM') ||
+       LPAD(NVL(MAX(SUBSTR(yryc_id, LENGTH(yryc_id)-2, 3)), 0) + 1, 3, '0') AS yryc_id
+FROM tb_yryc
+WHERE SUBSTR(yryc_id, 5, 4) = TO_CHAR(SYSDATE, 'YYMM')
+</selectKey>
+INSERT INTO tb_yryc (
+            yryc_id,
+            vcatn_year,
+            tt_occrrnc_yryc,
+            use_yryc,
+            remndr_yryc,
+            yryc_extsh_dt,
+            crea_dt,
+            crea_by,
+            emp_id
+        ) VALUES (
+            #{yrycId},                  
+            #{vcatnYear},             
+            15,
+            0,
+            15,
+            #{yrycExtshDt}, 
+            SYSDATE,
+            'myk',
+            #{empId}
+        )
+</insert>
+
 <select id="yrycUserRemndrChk">
 SELECT NVL(
     (
@@ -72,7 +102,9 @@ insert into tb_vcatn(
 <update id="vcatnUpdateYrycData">
 UPDATE tb_yryc
 SET use_yryc   = use_yryc + #{vcatnDe},
-    remndr_yryc = remndr_yryc - #{vcatnDe}
+    remndr_yryc = remndr_yryc - #{vcatnDe},
+    ,updt_dt = SYSDATE
+    ,updt_by = 'myk'
 WHERE emp_id = #{empId}
   AND vcatn_year = (
         SELECT MAX(vcatn_year)
@@ -89,7 +121,9 @@ delete from tb_vcatn where vcatn_id = #{vcatnId}
 <update id="yrycRollback">
 UPDATE tb_yryc
 SET use_yryc   = use_yryc - #{vcatnDe},
-    remndr_yryc = remndr_yryc + #{vcatnDe}
+    remndr_yryc = remndr_yryc + #{vcatnDe},
+    ,updt_dt = SYSDATE
+    ,updt_by = 'myk'
 WHERE emp_id = #{empId}
   AND vcatn_year = (
         SELECT MAX(vcatn_year)

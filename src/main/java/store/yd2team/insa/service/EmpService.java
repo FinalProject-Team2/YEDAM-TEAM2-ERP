@@ -15,4 +15,7 @@ public interface EmpService {
 	
 	//db저장추가
 	int setDbAdd(EmpVO emp);
+	
+	//조직도 불러올 데이터 조회
+	List<EmpVO>  getOrgRenderList(String val);
 }
