@@ -234,7 +234,10 @@ public class EmpLogInController {
                 loginEmp.getBizcnd(), loginEmp.getAddr(),
                 loginEmp.getCttpc(), loginEmp.getHp(),
                 loginEmp.getAuthCodes(), loginEmp.getRoleIds(),
+
                 loginEmp.getRoleId(), loginEmp.getProofPhoto());
+
+
 
         // OTP 관련 임시 세션은 제거
         clearOtpSession(session);
@@ -294,6 +297,7 @@ public class EmpLogInController {
         }
         loginEmp.setRoleId(roleId);
         // 🔼 여기까지만 새로 추가됨
+
         
         // empAcct.getEmpAcctId() = tb_emp_acct PK
         // empAcct.getVendId()    = 회사 코드
@@ -312,6 +316,7 @@ public class EmpLogInController {
                 loginEmp.getMenuAuthMap() != null ? loginEmp.getMenuAuthMap().size() : 0);
         
 		return loginEmp;
+
 		 
     }
 

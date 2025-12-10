@@ -9,4 +9,7 @@ public class PotentialStdrVO {
     private String vendId;           // 거래처 VEND_ID
     private String stdrIteamInfo;    // 조건상세항목 STDR_ITEAM_INFO
     private Integer infoScore;       // 점수 INFO_SCORE
+    
+    // 그리드에서 INSERT/UPDATE 구분용
+    private String rowStatus;      // "I" = insert, "U" = update
 }

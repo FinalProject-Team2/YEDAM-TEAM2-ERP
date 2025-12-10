@@ -8,4 +8,29 @@ FROM    tb_dept
 WHERE   (vend_id IS NULL OR vend_id = #{vendId})
 </select>
 
+<select id="getOrgRenderList">
+select
+  a.emp_id
+ ,a.dept_id
+ ,a.nm
+ ,a.dty
+ ,a.proof_photo
+ ,b.emp_id "dept_head_id"
+ ,b.dept_nm
+ ,b.upr_dept_id
+ ,e.code_nm AS clsf_nm
+ ,d.code_nm AS rspofc_nm
+ ,e.code_nm AS emplymTy_nm
+ ,f.code_nm AS hffcSt_nm
+from tb_emp a
+join tb_dept b
+on a.dept_id = b.dept_id
+LEFT JOIN tb_code c ON a.clsf = c.code_id
+LEFT JOIN tb_code d ON a.rspofc = d.code_id
+LEFT JOIN tb_code e ON a.emplym_ty = e.code_id
+LEFT JOIN tb_code f ON a.hffc_st = f.code_id
+where a.vend_id = #{vendId}
+order by a.dept_id desc
+</select>
+
 </mapper>

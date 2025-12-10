@@ -5,20 +5,19 @@ public interface BusinessService {
 	
 	void fetchAndSaveFromApi();
 	
-	//검색조건조회
-	List<BusinessVO> getBusinessList(BusinessVO vo);
+   //검색조건조회
+   List<BusinessVO> getBusinessList(BusinessVO vo);
 	
-	//번호조회
+   //번호조회
    int existsPotentialInfoNo(Long potentialInfoNo);
    //
    //
-   //잠재고객기준상세목록조회
-   public List<PotentialStdrVO> getStdrDetailAll();
-  
-   //잠재고객기준상세목록수정
-   List<PotentialStdrVO> getListByCond(String condGb);
-  
-   public void saveAllPotential(List<PotentialStdrVO> list);
+   // 전체 조회 (cond는 안 써도 시그니처는 남김)
+   public List<PotentialStdrVO> getPotentialStdrDetailList(PotentialStdrVO cond);
+   //잠재고객 기준상세목록 등록 및 수정
+   public void savePotentialStdrDetailList(List<PotentialStdrVO> list);
+   //잠재고객 기준상세목록 삭제
+   public int deletePotentialStdrList(List<String> idList);
   
    //로그인한 거래처의 주소, 업체명 조회
    public List<BusinessVO> getcustaddrtype(String info);
@@ -30,6 +29,7 @@ public interface BusinessService {
    int getAVG();
    //모든조건 점수화
    List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo);
+   //
    //
    //
    //접촉사항 조회

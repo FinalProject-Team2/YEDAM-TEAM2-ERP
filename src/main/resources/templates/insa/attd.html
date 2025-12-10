@@ -34,18 +34,18 @@
             <div class="card-body">
                 <div class="row">
 
-                    <!-- 부서명 : HR 관리자만 노출 -->
+                    <!-- 부서명 : HR 관리자만 노출 (tb_user_role 기준 roleIds 사용) -->
                     <div class="col-md-3"
-                         th:if="${session.LOGIN_EMP != null and session.LOGIN_EMP.roleId == 'ROLE_HR_ADMIN'}">
+                         th:if="${session.LOGIN_EMP != null and #lists.contains(session.LOGIN_EMP.roleIds, 'ROLE_HR_ADMIN')}">
                         <label class="form-label">부서명</label>
                         <select class="form-select" id="deptSelect">
                             <option value="">전체</option>
                         </select>
                     </div>
 
-                    <!-- 사원명 : HR 관리자만 검색용 인풋 노출 -->
+                    <!-- 사원명 : HR 관리자만 검색용 인풋 노출 (tb_user_role 기준 roleIds 사용) -->
                     <div class="col-md-3"
-                         th:if="${session.LOGIN_EMP != null and session.LOGIN_EMP.roleId == 'ROLE_HR_ADMIN'}">
+                         th:if="${session.LOGIN_EMP != null and #lists.contains(session.LOGIN_EMP.roleIds, 'ROLE_HR_ADMIN')}">
                         <label class="form-label">사원명</label>
                         <input type="text" id="empNmCond" class="form-control" placeholder="사원명 입력">
                     </div>
@@ -88,7 +88,7 @@
 
         <!-- ================= 목록 ================= -->
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header">
                 <h5 class="card-title mb-0">근태 목록</h5>
             </div>
             <div class="card-body">
@@ -106,17 +106,17 @@
     const attGrid = new tui.Grid({
         el: document.getElementById("attGrid"),
         data: [],
-        bodyHeight: 431,
+        bodyHeight: 437,
         scrollX: false,
         scrollY: true,
         rowHeaders: [],
         columns: [
             { header: "근무일자", name: "wkDt",    align: "center" },
-            { header: "부서명",   name: "deptNm",  align: "center" },
-            { header: "직급",     name: "roleNm",  align: "center" },
-            { header: "사원ID",   name: "empId",   align: "center" },
-            { header: "사원명",   name: "empNm",   align: "center" },
-            { header: "근태종류", name: "attdTy",  align: "center" },
+            { header: "부서명",   name: "deptNm",  align: "left" },
+            { header: "직급",     name: "roleNm",  align: "left" },
+            { header: "사원ID",   name: "empId",   align: "left" },
+            { header: "사원명",   name: "empNm",   align: "left" },
+            { header: "근태종류", name: "attdTy",  align: "left" },
             { header: "출근시간", name: "attdIn",  align: "center" },
             { header: "퇴근시간", name: "attdOut", align: "center" }
         ]
@@ -150,7 +150,7 @@
 
     /***********************
      * 공통 조회 함수
-     *  - 여기서 근무일자 최신순 정렬
+     *  - 근무일자 최신순 정렬
      ***********************/
     function loadAttdList() {
         const deptSelect = document.getElementById("deptSelect");   // HR 관리자만 존재
@@ -172,12 +172,11 @@
         })
         .then(res => res.json())
         .then(data => {
-            // 🔥 근무일자(wkDt, 'YYYY.MM.DD' 형식)를 기준으로 최신순 정렬
+            // 근무일자(wkDt, 'YYYY.MM.DD' 형식)를 기준으로 최신순 정렬
             const sorted = (data || []).slice().sort((a, b) => {
                 const da = a.wkDt || '';
                 const db = b.wkDt || '';
-                // 문자열이 'YYYY.MM.DD' 형태라서 역순 비교만 해도 최신순 됨
-                return db.localeCompare(da);
+                return db.localeCompare(da); // 내림차순 = 최신순
             });
             attGrid.resetData(sorted);
         })
@@ -195,10 +194,16 @@
     });
 
     /***********************
-     * 엔터키 검색 (사원명 인풋)
+     * 페이지 로드 시 처리
+     *  - HR이면 부서 셀렉트 채우기
+     *  - 엔터/부서 변경 시 검색
+     *  - 첫 화면 전체 조회
      ***********************/
     document.addEventListener("DOMContentLoaded", function () {
+        // HR 관리자일 때만 존재
         const empNmInput = document.getElementById("empNmCond");
+        const deptSelect = document.getElementById("deptSelect");
+
         if (empNmInput) {
             empNmInput.addEventListener("keydown", function (e) {
                 if (e.key === "Enter") {
@@ -207,20 +212,17 @@
             });
         }
 
-        const deptSelect = document.getElementById("deptSelect");
         if (deptSelect) {
             deptSelect.addEventListener("change", function () {
                 loadAttdList();
             });
         }
-    });
 
-    /***********************
-     * 페이지 로드 시 1회 전체 조회 + 부서 목록 로딩
-     ***********************/
-    document.addEventListener("DOMContentLoaded", function () {
-        loadDeptOptionsForAttd();  // HR 관리자면 부서 셀렉트 채움
-        loadAttdList();            // 그리드 첫 화면 로딩
+        // HR이면 셀렉트 박스 채워지고, 일반사용자는 그냥 패스
+        loadDeptOptionsForAttd();
+
+        // 첫 화면 전체 조회
+        loadAttdList();
     });
 </script>
 </body>

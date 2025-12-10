@@ -15,8 +15,10 @@ import lombok.NoArgsConstructor;
 @Data
 public class DeptVO {
 
+	private int id;      // 주식별자
 	private String deptId;      // 주식별자
     private String empId;       // 사원 테이블 FK (부서장)
+    private String deptHeadId;       // 사원 테이블 FK (부서장)
     private String vendId;       // 거래처ID
     private String uprDeptId;   // 상위부서 ID(부서_ID 자기참조)
     private String deptNm;      // 부서명

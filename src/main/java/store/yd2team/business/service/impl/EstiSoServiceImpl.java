@@ -12,6 +12,7 @@ import store.yd2team.business.mapper.EstiSoMapper;
 import store.yd2team.business.service.EstiSoDetailVO;
 import store.yd2team.business.service.EstiSoService;
 import store.yd2team.business.service.EstiSoVO;
+import store.yd2team.business.service.OustVO;
 
 @Service
 @RequiredArgsConstructor
@@ -325,6 +326,18 @@ public class EstiSoServiceImpl implements EstiSoService {
         result.put("success", true);
         result.put("message", "취소 처리 완료되었습니다.");
         return result;
+    }
+    
+    
+    // 출하지시서 작성 저장 버튼
+    @Override
+    public void saveOust(OustVO vo) throws Exception {
+
+        // 1) 출하지시서 INSERT
+        estiSoMapper.insertOust(vo);
+
+        // 2) 주문서 상태 es6 로 변경
+        estiSoMapper.updateSoStatus(vo.getSoId(), "es6");
     }
     
 }

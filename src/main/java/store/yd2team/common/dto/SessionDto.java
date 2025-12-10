@@ -35,6 +35,8 @@ public class SessionDto implements Serializable{
     private String proofPhoto; // 사진
     
     
+    
+    
     private List<String> roleIds;
     private Set<String> authCodes;
     private String roleId;

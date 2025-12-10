@@ -29,7 +29,7 @@
 					<div class="card-body">
 						<div class="row g-2">
 							<div class="col-md-3">
-								<label for="custcomName" class="form-label">고객사 명</label>
+								<label for="custcomName" class="form-label">고객사명</label>
 								<input id="custcomName" type="text" class="form-control" placeholder="YEDAM">
 							</div>
 							
@@ -122,7 +122,7 @@
 	// 2. 출고의뢰 목록 그리드
 	// 2-1. Grid 공통 옵션
 	const oustGridOptions = {
-	    bodyHeight: 240,
+	    bodyHeight: 400,
 	    scrollX: true,
 	    scrollY: true,  // 세로
 	    /* rowHeaders: ['checkbox'],     // 좌측 체크박스 */
@@ -138,11 +138,13 @@
 		data: oustData,
 		...oustGridOptions,
 		columns: [
-			{ header: '출하지시번호', name: 'oustId', width: 180 },
-			{ header: '고객사명', name: 'custcomName' },
+			{ header: '출하지시ID', name: 'oustId', width: 130, align: 'center' },
+			{ header: '고객사명', name: 'custcomName', width: 200 },
 			{ header: '담당자', name: 'psch', width: 120 },
-			{ header: '담당자연락처', name: 'pschTel', width: 180 },
-			{ header: '납기일', name: 'dueDt', width: 180 },
+			{ header: '담당자연락처', name: 'pschTel', width: 130, align: 'right' },
+			{ header: '납기일', name: 'oustDueDt', width: 100, align: 'right' },
+			{ header: '출하예정일', name: 'oustPlanDt', width: 100, align: 'right' },
+			{ header: '출하요청일', name: 'oustRequestDt', width: 100, align: 'right' },
 			{ header: '배송지', name: 'shipAddr', width: 400 },
 			{ header: '요청사항', name: 'rm' },
 		]
@@ -188,7 +190,7 @@
 	            console.log("조회결과 >>> ", res.data);
 	
 	            // 3) 그리드 데이터 반영
-	            estiGrid.resetData(res.data);
+	            oustGrid.resetData(res.data);
 	        })
 	        .catch(err => console.error("조회 중 오류:", err));
 	});

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.business.mapper.OustMapper">
+	<select id="selectOust" parameterType="store.yd2team.business.service.OustVO" resultType="store.yd2team.business.service.OustVO">
+		SELECT ou.oust_id
+		     , cu.custcom_name
+		     , cu.psch
+		     , cu.psch_tel
+		     , so.due_dt AS OustDueDt
+		     , ou.oust_plan_dt AS oustPlanDt
+		     , ou.oust_request_dt AS oustRequestDt
+		     , ou.ship_addr
+		     , ou.rm
+		FROM tb_oust ou
+		JOIN tb_so so
+          ON ou.so_id = so.so_id
+        JOIN tb_custcom cu
+          ON so.custcom_id = cu.custcom_id 
+		WHERE (#{custcomName} IS NULL OR cu.custcom_name LIKE '%' || #{custcomName} || '%')
+	      AND (#{dueStart} IS NULL OR so.due_dt >= #{dueStart})
+	      AND (#{dueEnd} IS NULL OR so.due_dt &lt;= #{dueEnd})
+		ORDER BY so.due_dt DESC
+	</select>
+
+</mapper>

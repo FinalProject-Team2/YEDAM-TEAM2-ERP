@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>반품 관리</title>
+<style>
+</style>
+</head>
+<body layout:fragment="content">
+	<div class="so-manage-wrapper">
+		<!-- 반품 조회 카드 -->
+		<div class="row mb-3">
+			<div class="col-md-12">
+				<div class="card">
+
+					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
+					<div class="card-header">
+						<div class="card-header-left">
+							<h5 class="card-title">반품 조회</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-dark" id="SearchInitBtn">초기화</button>
+							<button type="button" class="btn btn-outline-dark" id="SearchBtn">조회</button>
+						</div>
+					</div>
+					<!-- end card-header -->
+
+					<div class="card-body">
+						<div class="row g-2">
+							<div class="col-md-3">
+								<label for="custcomName" class="form-label">고객사 명</label>
+								<input id="custcomName" type="text" class="form-control" placeholder="고객사 명 입력">
+							</div>
+
+							<div class="col-md-6">
+								<label class="form-label">납기일</label>
+								<div class="d-flex align-items-center js-date-range">
+
+									<!-- 시작일 -->
+									<div class="input-group date">
+										<input type="text"
+											class="form-control datepicker js-date-range-start"
+											placeholder="시작일"> <span
+											class="input-group-text js-date-range-icon-start"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+
+									<span class="mx-1 fw-bold fs-5">~</span>
+
+									<!-- 종료일 -->
+									<div class="input-group date ms-2">
+										<input type="text"
+											class="form-control datepicker js-date-range-end"
+											placeholder="종료일"> <span
+											class="input-group-text js-date-range-icon-end"> <i
+											class="bi bi-calendar"></i>
+										</span>
+									</div>
+
+								</div>
+							</div>
+
+						</div>
+					</div>
+					<!-- card-body -->
+				</div>
+				<!-- end card -->
+			</div>
+		</div>
+		<!-- end row -->
+
+		<!-- 주문서목록 카드 -->
+		<div class="row">
+
+			<!-- 주문서목록 그리드 -->
+			<div class="col-md-12 d-flex">
+				<div class="card w-100 h-100">
+
+					<!-- 카드 헤더 : 제목 + 잠금 해제 버튼 -->
+					<div class="card-header with-actions">
+						<div class="card-header-left">
+							<h5 class="card-title">주문서 목록</h5>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-outline-dark" id="addOustBtn">출하지시서 작성</button>
+							<button type="button" class="btn btn-outline-dark" id="approveSoBtn">승인</button>
+							<button type="button" class="btn btn-outline-dark" id="rejectSoBtn">보류</button>
+							<button type="button" class="btn btn-danger" id="deleteSoBtn">주문취소</button>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div class="soGridWrap">
+							<!-- <div id="soGrid"></div> -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- end 주문서목록 카드 -->
+	</div>
+	<!-- end so-manage-wrapper -->
+
+</body>
+</html>
