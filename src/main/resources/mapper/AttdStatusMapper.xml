@@ -17,9 +17,9 @@
     <!-- ============================
          관리자용: 전체 사원 근태 조회
          - 직급: tb_emp.rspofc -> tb_code.code_nm
-         - 근태유형:
-             * a.vcatn_id IS NOT NULL  -> tb_vcatn.vcatn_ty
-             * ELSE                     -> a.attd_ty
+         - 근태유형(attdTy):
+             * a.vcatn_id IS NOT NULL  -> tb_vcatn.vcatn_ty 코드명을 tb_code에서 조회
+             * ELSE                     -> a.attd_ty 그대로 사용
        ============================ -->
     <select id="selectAttdListAdmin"
             parameterType="store.yd2team.insa.service.AttdStatusVO"
@@ -32,7 +32,7 @@
             , a.emp_id                       AS empId
             , e.nm                           AS empNm
             , CASE
-                  WHEN a.vcatn_id IS NOT NULL THEN v.vcatn_ty
+                  WHEN a.vcatn_id IS NOT NULL THEN vcatn_cd.code_nm
                   ELSE a.attd_ty
               END                            AS attdTy
             , TO_CHAR(a.atdc_tm, 'HH24:MI')  AS attdIn
@@ -46,7 +46,10 @@
             AND d.vend_id = e.vend_id
       LEFT JOIN tb_vcatn v
              ON a.vcatn_id = v.vcatn_id
-      LEFT JOIN tb_code rspofc_cd
+      LEFT JOIN tb_code vcatn_cd             <!-- 휴가유형 코드명 조인 -->
+             ON vcatn_cd.code_id = v.vcatn_ty
+            AND (vcatn_cd.vend_id IS NULL OR vcatn_cd.vend_id = a.vend_id)
+      LEFT JOIN tb_code rspofc_cd            <!-- 직급 코드명 조인 -->
              ON rspofc_cd.code_id = e.rspofc
             AND (rspofc_cd.vend_id IS NULL OR rspofc_cd.vend_id = e.vend_id)
         WHERE a.vend_id = #{vendId}
@@ -61,7 +64,6 @@
             AND e.nm LIKE '%' || #{empNmCond} || '%'
         </if>
 
-        <!-- 🔥 날짜 조건 분리 -->
         <!-- 시작일만 입력된 경우: 시작일 이상 -->
         <if test="startDt != null and startDt != '' and (endDt == null or endDt == '')">
             AND a.wk_dt &gt;= TO_DATE(#{startDt}, 'YYYY-MM-DD')
@@ -95,7 +97,7 @@
             , a.emp_id                       AS empId
             , e.nm                           AS empNm
             , CASE
-                  WHEN a.vcatn_id IS NOT NULL THEN v.vcatn_ty
+                  WHEN a.vcatn_id IS NOT NULL THEN vcatn_cd.code_nm
                   ELSE a.attd_ty
               END                            AS attdTy
             , TO_CHAR(a.atdc_tm, 'HH24:MI')  AS attdIn
@@ -109,13 +111,16 @@
             AND d.vend_id = e.vend_id
       LEFT JOIN tb_vcatn v
              ON a.vcatn_id = v.vcatn_id
-      LEFT JOIN tb_code rspofc_cd
+      LEFT JOIN tb_code vcatn_cd             <!-- 휴가유형 코드명 조인 -->
+             ON vcatn_cd.code_id = v.vcatn_ty
+            AND (vcatn_cd.vend_id IS NULL OR vcatn_cd.vend_id = a.vend_id)
+      LEFT JOIN tb_code rspofc_cd            <!-- 직급 코드명 조인 -->
              ON rspofc_cd.code_id = e.rspofc
             AND (rspofc_cd.vend_id IS NULL OR rspofc_cd.vend_id = e.vend_id)
         WHERE a.vend_id = #{vendId}
           AND a.emp_id  = #{loginEmpId}
 
-        <!-- 🔥 날짜 조건 분리 (로직 동일) -->
+        <!-- 날짜 조건 동일하게 적용 -->
         <if test="startDt != null and startDt != '' and (endDt == null or endDt == '')">
             AND a.wk_dt &gt;= TO_DATE(#{startDt}, 'YYYY-MM-DD')
         </if>
