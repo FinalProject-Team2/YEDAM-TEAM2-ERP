@@ -182,7 +182,9 @@
    </select>
    
   	<!-- 잠재고객 기준상세목록 조회 -->
-	<select id="getStdrDetailAll" parameterType="store.yd2team.business.service.PotentialStdrVO">
+	<select id="getPotentialStdrDetailList" 
+				parameterType="store.yd2team.business.service.PotentialStdrVO"
+				resultType="store.yd2team.business.service.PotentialStdrVO">
 		SELECT
 		        STDR_DETAIL_ID   AS stdrDetailId,
 		        STDR_ID          AS stdrId,
@@ -190,45 +192,36 @@
 		        STDR_ITEAM_INFO  AS stdrIteamInfo,
 		        INFO_SCORE       AS infoScore
 	    FROM 	TB_POTENTIAL_STDR_DETAIL
-	    ORDER BY INFO_SCORE DESC
+	    ORDER BY STDR_ID, STDR_DETAIL_ID
 	</select>
 	
-	<!-- 잠재고객 조건상세목록 수정 -->
-	<!-- <select id="selectByCondGb" parameterType="store.yd2team.business.service.PotentialStdrVO">
-	   SELECT
-             STDR_DETAIL_ID   AS stdrDetailId
-           , STDR_ID          AS stdrId
-           , VEND_ID          AS vendId
-           , STDR_ITEAM_INFO  AS stdrIteamInfo
-           , INFO_SCORE       AS infoScore
-       FROM TB_POTENTIAL_STDR_DETAIL
-       WHERE STDR_ID = #{condGb}
-       ORDER BY STDR_ID, STDR_DETAIL_ID
-	</select> -->
 	<!-- 잠재고객 조건상세목록 등록 -->
-	<insert id="insertDetail" parameterType="store.yd2team.business.service.PotentialStdrVO">
+	<insert id="insertPotentialStdrDetail" parameterType="store.yd2team.business.service.PotentialStdrVO">
 				  INSERT INTO TB_POTENTIAL_STDR_DETAIL (
 		              STDR_DETAIL_ID
 		            , STDR_ID
-		            , VEND_ID
-		            , STDR_IT	EAM_INFO
+		            , STDR_ITEAM_INFO
 		            , INFO_SCORE
 		        ) VALUES (
 		              #{stdrDetailId}    <!-- 실제 시퀀스명에 맞게 수정 -->
 		            , #{stdrId}
-		            , #{vendId}
 		            , #{stdrIteamInfo}
 		            , #{infoScore}
 		        )
 	</insert>
 	<!-- 잠재고객조건 상세목록 수정 -->
-	<update id="updateDetail"  parameterType="store.yd2team.business.service.PotentialStdrVO">
+	<update id="updatePotentialStdrDetail"  parameterType="store.yd2team.business.service.PotentialStdrVO">
 	  UPDATE TB_POTENTIAL_STDR_DETAIL
-         SET STDR_ITEAM_INFO = #{stdrIteamInfo}
-           , INFO_SCORE      = #{infoScore}
-           , UPDT_DT         = SYSDATE
+         SET 
+         	 STDR_ITEAM_INFO = #{stdrIteamInfo},
+             INFO_SCORE     = #{infoScore}
        WHERE STDR_DETAIL_ID  = #{stdrDetailId}
 	</update>
+	<!-- 잠재고객 기준상세목록 삭제 -->
+	<delete id="deletePotentialStdr" parameterType="store.yd2team.business.service.PotentialStdrVO">
+	    DELETE FROM TB_POTENTIAL_STDR_DETAIL
+	    WHERE STDR_DETAIL_ID = #{stdrDetailId}
+	</delete>
 	
 	<!-- 공공데이터 insert -->
 	<insert id="insertPotential" parameterType="store.yd2team.business.service.BusinessVO">

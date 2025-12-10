@@ -1,9 +1,6 @@
 package store.yd2team.business.web;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import store.yd2team.business.service.BusinessService;
@@ -59,52 +57,35 @@ public class BusinessController {
 	//
 	//
 	//
-	// 잠재고객 기준상세목록 가져오기
+	// 잠재고객 기준상세목록 가져오기 및 페이지열람
 	@GetMapping("/potentialCustRegister")
 	public String churnRiskStdrRegister(Model model) {
-		   List<PotentialStdrVO> allList = businessService.getStdrDetailAll();
-		    List<PotentialStdrVO> industryList  = new ArrayList<>();
-		    List<PotentialStdrVO> sizeList      = new ArrayList<>();
-		    List<PotentialStdrVO> establishList = new ArrayList<>();
-		    List<PotentialStdrVO> regionList    = new ArrayList<>();
-		    for (PotentialStdrVO vo : allList) {
-		        String id = vo.getStdrId();
-		        if ("STDR-001".equals(id)) {
-		            industryList.add(vo);      // 업종
-		        }
-		         else if ("STDR-002".equals(id))
-		         {
-		            sizeList.add(vo);          // 규모
-		        }
-		         else if ("STDR-003".equals(id))
-		         {
-		            establishList.add(vo);     // 설립
-		        }
-		         else if ("STDR-004".equals(id))
-		         {
-		            regionList.add(vo);        // 지역/상권
-		        }
-		    }
-		    model.addAttribute("industryList",  industryList);
-		    model.addAttribute("sizeList",      sizeList);
-		    model.addAttribute("establishList", establishList);
-		    model.addAttribute("regionList",    regionList);
-	    	return "business/potentialCustRegister";
+		model.addAttribute("test", "testone");
+    	return "business/potentialCustRegister";
 	}
 	//
-	//잠재고객 조건상세목록 수정
-	@PostMapping("/potentialCustRegister")
-	@ResponseBody
-	public Map<String, List<PotentialStdrVO>> saveAll(@RequestBody List<PotentialStdrVO> list) {
-		businessService.saveAllPotential(list);
-		
-		Map<String, List<PotentialStdrVO>> result = new HashMap<>();
-		result.put("industryList",  businessService.getListByCond("IND"));
-		result.put("sizeList",      businessService.getListByCond("SIZE"));
-		result.put("establishList", businessService.getListByCond("EST"));
-		result.put("regionList",    businessService.getListByCond("REG"));
-		return result;
-	}
+//	// 상세 전체 조회 (그리드 4개 공통)
+    @RequestMapping("/potentialCustRegister/get")
+    @ResponseBody
+    public List<PotentialStdrVO> getPotentialStdrDetailList(PotentialStdrVO cond) {
+        return businessService.getPotentialStdrDetailList(cond);
+    }
+    // 상세 등록, 수정
+    @RequestMapping("/potentialCustRegister/save")
+    @ResponseBody
+    public String savePotentialStdrDetailList(@RequestBody List<PotentialStdrVO> list) {
+    	businessService.savePotentialStdrDetailList(list);
+        return "OK";
+    }
+    // 상세 삭제
+    @PostMapping("/business/potentialStdr/delete")
+    @ResponseBody
+    public int deletePotentialStdr(@RequestBody List<String> idList) {
+        return businessService.deletePotentialStdrList(idList);
+    }
+
+    
+    
 	//
 	// 잠재고객 검색조회 페이지열람
 	@GetMapping("/potentialCustList")
