@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
+import store.yd2team.business.service.ChurnStdrVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.churnRiskVO;
@@ -23,16 +24,17 @@ public class BusinessController {
 	BusinessService businessService;
 
 	@GetMapping("/samplepage")
-	public String sample(Model model) {
+	public String sample(Model model, ChurnStdrVO churn) {
 		System.out.println("=== BusinessController.insert() 호출됨 ===");
 		model.addAttribute("test", "testone");
 		return "business/samplepage"; // /는 빼도 됨
 	}
 	//휴면,이탈객 기준등록 페이지열람
 	@GetMapping("/churnRiskStdrRegister")
-	public String insert(Model model) {
+	public String insert(Model model, ChurnStdrVO churn) {
 		System.out.println("=== BusinessController.insert() 호출됨 ===");
-		model.addAttribute("test", "testone");
+		List<ChurnStdrVO> getChurnStdrList = businessService.getChurnStdrList(churn);
+		model.addAttribute("getChurnStdrList", getChurnStdrList);
 		return "business/churnRiskStdrRegister"; // /는 빼도 됨
 	}
 	//
@@ -141,5 +143,6 @@ public class BusinessController {
 
 }
 	
+
 
 

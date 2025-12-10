@@ -10,20 +10,17 @@
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 </head>
-<title>employee-register</title>
 <style>
 .fixed-photo {
 	width: 150px; /* 원하는 가로 크기 */
 	height: 200px; /* 원하는 세로 크기 */
 	object-fit: cover; /* 비율 유지하며 영역에 맞게 채움 */
 }
-
 .form-select {
 	color: #000 !important;
 }
 </style>
 <body layout:fragment="content">
-
 	<!-- 휴면기준 -->
 	<div class="card mb-3">
 		<div class="card-header">
@@ -33,17 +30,15 @@
 			<!-- card-header-left end -->
 			<div class="card-header-right">
 				<button class="btn btn-dark">초기화</button>
-				<button class="btn btn-outline-dark">조회</button>
-				<button class="btn btn-outline-dark">등록</button>
+				<button type="button" class="btn btn-outline-dark" id="btnsave">등록</button>
 			</div>
 			<!-- //card-header right end -->
 		</div>
 		<!-- //card-header -->
 		<div class="card-body">
-			<div id="dormancygrid" style="margin: 20px;"></div>
+			<div id="ChurnStdrgrid" style="margin: 20px;"></div>
 		</div>
 	</div>
-
 	<!-- 이탈위험기준 -->
 	<div class="card mb-3">
 		<div class="card-header">
@@ -53,10 +48,7 @@
 			<!-- card-header-left end -->
 			<div class="card-header-right">
 				<button class="btn btn-dark">초기화</button>
-				<button class="btn btn-outline-dark">조회</button>
-				<button class="btn btn-outline-dark">등록</button>
-				<button class="btn btn-outline-dark">삭제</button>
-				<button class="btn btn-outline-dark">근로계약서</button>
+				<button type="button" class="btn btn-outline-dark" id="btnsave">등록</button>
 			</div>
 			<!-- //card-header right end -->
 		</div>
@@ -64,10 +56,8 @@
 			<div id="churnriskgrid" style="margin: 20px;"></div>
 		</div>
 	</div>
-
-
-	<script>
-		// 휴면기준 데이터
+	<script th:inline="javascript">
+ 		// 그리드 디자인
 		tui.Grid.applyTheme('default', {
 			cell : {
 				normal : { // 일반 셀(본문)
@@ -92,47 +82,35 @@
 				}
 			}
 		});
-		const dormancygridData = [ {
-			name : "거래중단기간",
-			stdrValue : "6개월",
-			account : "고객이 최근 특정기간 이상 아무 거래도 하지 않았을 때 판단하는 기준.",
-			yn : "Y",
-		}, {
-			name : "미갱신기간",
-			stdrValue : "3개월",
-			account : "계약 종료 후 특정기간 이상 갱신이 되지 않은 경우를 판단하는 기준.",
-			yn : "Y",
-		} ];
+		  const ChurnStdrData = /*[[${getChurnStdrList}]]*/ [];
+		    console.log('ChurnStdrData = ', ChurnStdrData);
 		// Grid 생성
-		const dormancygrid = new tui.Grid({
-			el : document.getElementById('dormancygrid'),
-			data : dormancygridData,
+		const ChurnStdrgrid = new tui.Grid({
+			el : document.getElementById('ChurnStdrgrid'),
+			data : ChurnStdrData,
 			scrollX : false,
 			scrollY : false,
-			minBodyHeight : 0,
-			autoWidth : true,
 			columns : [ {
 				header : '기준유형',
-				name : 'stdrType',
+				name : 'ty',
 				sortable : 'true',
 				align : 'center',
-				width: 250
+				width: 150
 			}, {
 				header : '기준값',
 				name : 'stdrValue',
 				editor : 'text',
 				align : 'center',
-				width: 250
+				width: 150
 			}, {
 				header : '설명',
-				name : 'account',
+				name : 'stdrDc',
 				editor : 'text'
 			}, {
 				header : '사용여부',
 				name : 'yn',
 				align : 'center',
-				align : 'center',
-				width: 200
+				width: 150
 			} ]
 		});
 		// 이탈위험기준 데이터
