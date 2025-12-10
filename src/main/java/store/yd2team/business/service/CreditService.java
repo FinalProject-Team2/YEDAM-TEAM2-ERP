@@ -22,6 +22,9 @@ public interface CreditService {
 	
 	//미수등록
 	int insertAtmpt(AtmptVO vo);
+	
+	//출하정지
+	int updateShipmnt(CreditVO vo);
 }
 
 

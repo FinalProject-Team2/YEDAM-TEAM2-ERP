@@ -102,7 +102,7 @@
    
    
    <!-- CreditMapper.xml 예시 -->
-<insert id="insertCdtlnLmt"
+	<insert id="insertCdtlnLmt"
         parameterType="store.yd2team.business.service.CreditVO">
 
     <!-- PK 생성용 시퀀스 (필요 시 이름 변경) -->
@@ -176,5 +176,21 @@
         , SYSDATE
     )
 </insert>
+
+<update id="updateShipmnt" parameterType="store.yd2team.business.service.CreditVO">
+	UPDATE tb_cdtln_lmt SET shipmnt_stop = #{shipmntStop} WHERE CDTLN_NO = #{cdtlnNo}
+	
+</update>
    
+<update id="updateCreditEval">
+UPDATE tb_cdtln_lmt SET 
+       shipmnt_stop = #{shipmntStop}
+       ,turnover_days = #{turnoverDays}
+WHERE CDTLN_NO = #{cdtlnNo}
+</update>   
+
+<select id="selectCreditStatus">
+
+
+</select>
 </mapper>

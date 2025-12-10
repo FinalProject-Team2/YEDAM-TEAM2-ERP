@@ -35,14 +35,6 @@ public class RciptVO {
      *  조회 결과 (리스트/그리드용 필드)
      * ========================= */
 
-    // 고객코드 (tb_rcipt)
-    // SELECT r.custcom_id
-    private String rcustcomId;   // 필요하면 custcomId로 재사용해도 됨
-
-    // 고객사명 (tb_custcom)
-    // SELECT c.custcom_name
-    private String rcustcomName;
-
     // 거래일자
     // SELECT r.trns_dt
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -77,4 +69,11 @@ public class RciptVO {
     // SELECT r.ltst_rcipt_dt AS ltstRciptDt
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate ltstRciptDt;
+    
+    // -- 입금내역 테이블(tb_rcipt_detail)
+    private String vendId;
+    private String rciptDt;
+    private Long rciptAmt;
+    private String pmtMtd;
+    private String rm;
 }

@@ -4,93 +4,106 @@
   <div class="modal-backdrop" id="rciptTretBackdrop"></div>
   <div class="modal" id="rciptTretModal">
     <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 600px;">
-      <div class="modal-content">
-        <div class="modal-body">
-	          <div class="row">
-		        <!-- 검색조건 -->
-		        <div class="col-md-12">
-		        	<div class="card-header with-actions">
-						<div class="card-header-left">
-				          	<h5 class="modal-title">입금처리</h5>
-						</div>
-						<div class="card-header-right">
-							<button type="button" class="btn btn-dark" id="modalInit">초기화</button>
-			           		<button type="button" class="btn btn-outline-dark" id="modalSaveBtn">저장</button>
-						</div>
-					</div>
-					
-			<div class="col-md-12 d-flex">
-    			<div class="card w-100 h-100">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div class="row">
+						<!-- 검색조건 -->
+						<div class="col-md-12">
+							<div class="card-header with-actions">
+								<div class="card-header-left">
+									<h5 class="modal-title">입금처리</h5>
+								</div>
+								<div class="card-header-right">
+									<button type="button" class="btn btn-dark" id="modalInit">초기화</button>
+									<button type="button" class="btn btn-outline-dark" id="modalSaveBtn">저장</button>
+								</div>
+							</div>
 
-					
+							<div class="col-md-12 d-flex">
+								<div class="card w-100 h-100" >
 
-					<!-- 신규등록폼 -->
-					<div class="card-body d-flex flex-column justify-content-between">
-						  <div class="row g-3">
-						  
-						  <!-- custcomId 유지용 -->
-						  <input type="hidden" id="custcomIdHidden" value="">
-						  
-							    <!-- 위쪽 영역 -->
-							    <div class="col-6">
-							      <label for="custcomName" class="form-label">고객사명</label>
-							      <input id="custcomName" type="text" class="form-control" readonly>
-							    </div>
-							    
-							    <!-- <div class="col-1"></div> -->
-							    
-							    <div class="col-6">
-							      <label for="userName" class="form-label">입금일자</label>
-									<div class="input-group date" id="applyDatePicker">
-									    <input type="text" class="form-control" id="applyDate" placeholder="날짜 선택">
-									    <span class="input-group-text" id="icon-calendar">
-									        <i class="bi bi-calendar"></i>
-									    </span>
+
+
+									<!-- 신규등록폼 -->
+									<form name="rciptdetailform"   id="rciptdetailform">
+									<div
+										class="card-body d-flex flex-column justify-content-between">
+										<div class="row g-3">
+
+											<!-- custcomId 유지용 -->
+											<input type="hidden" id="custcomIdHidden" name="custcomIdHidden" value="" >
+
+											<!-- 위쪽 영역 -->
+											
+											<div class="col-6">
+											
+												<label for="custcomName" class="form-label">고객사명</label> <input
+													id="custcomName" type="text" class="form-control" readonly>
+
+											</div>
+
+											<!-- <div class="col-1"></div> -->
+
+											<div class="col-6">
+												<label for="userName" class="form-label">입금일자</label>
+												<div class="input-group date" id="applyDatePicker">
+													<input type="text" class="form-control" id="applyDate" name="rciptDt"
+														placeholder="날짜 선택"> <span
+														class="input-group-text" id="icon-calendar"> <i
+														class="bi bi-calendar"></i>
+													</span>
+												</div>
+											</div>
+										</div>
+
+										<div class="row g-3">
+											<!-- 2번째줄 -->
+											<div class="col-md-6">
+												<label for="mbizAddr" class="form-label">입금금액</label> <input
+													id="rciptAmt" name="rciptAmt" type="text" class="form-control"
+													placeholder="YEDAM" align-items-center>
+											</div>
+
+
+
+											<div class="col-md-6">
+												<label for="mbizTel" class="form-label">결제방법</label> <select
+													id="pmtMtd" name="pmtMtd" class="form-select">
+													<option value="">선택</option>
+													<option value="CASH">현금</option>
+													<option value="CARD">카드</option>
+													<option value="TRANSFER">계좌이체</option>
+												</select>
+											</div>
+										</div>
+										<div class="row g-3">
+											<!-- 아래 : 비고 (아래쪽에 붙도록) -->
+											<div class="col-md-12">
+												<div class="col-md-12">
+													<label for="mbizTel" class="form-label">비고</label> <input
+														id="rm" name="rm" type="text" class="form-control"
+														placeholder="YEDAM" align-items-center>
+												</div>
+											</div>
+										</div>
 									</div>
-							    </div>
-						  </div>
-							
-						  <div class="row g-3">
-							    <!-- 2번째줄 -->
-							    <div class="col-md-6">
-	                                <label for="mbizAddr" class="form-label">입금금액</label> 
-									<input id="mbizAddr" type="text" class="form-control" placeholder="YEDAM" align-items-center>
+									</form>
+									<!-- 신규등록폼 end -->
+
 								</div>
-								
-								
-								
-								<div class="col-md-6">
-	                                <label for="mbizTel" class="form-label">결제방법</label> 
-									<select id="payMethod" class="form-select">
-					                  <option value="">선택</option>
-					                  <option value="CASH">현금</option>
-					                  <option value="CARD">카드</option>
-					                  <option value="TRANSFER">계좌이체</option>
-					                </select>
-								</div>
-						</div>
-						<div class="row g-3">	
-							    <!-- 아래 : 비고 (아래쪽에 붙도록) -->
-								<div class="col-md-12">
-	                                <div class="col-md-12">
-		                                <label for="mbizTel" class="form-label">비고</label> 
-										<input id="mbizTel" type="text" class="form-control" placeholder="YEDAM" align-items-center>
-									</div>
-								</div>
-						</div>	
-					</div> <!-- 신규등록폼 end -->
-					
-				</div>
-			</div><!-- 신규등록 카드 end -->
-<!-- 	           </div> col-md-12 end
+							</div>
+							<!-- 신규등록 카드 end -->
+							<!-- 	           </div> col-md-12 end
 		               
 	                <div class="card-body">
 	                </div>
 		            
 	        </div> -->
-		    
-        </div>
-      </div>
-    </div>
-  </div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>

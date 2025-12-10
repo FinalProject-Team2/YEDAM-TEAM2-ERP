@@ -10,5 +10,6 @@ public interface RciptService {
 
 	List<RciptVO> searchCustcomName(String keyword);
 
-
+	//입금내역
+	int insertRciptDetail(RciptVO vo);
 }

@@ -16,4 +16,7 @@ public interface RciptMapper {
 	// 조회 고객사 auto complete(고객코드, 고객사명)
 	List<RciptVO> searchCustcomId(String keyword);    // 고객사코드(아이디) 검색
 	List<RciptVO> searchCustcomName(String keyword);  // 고객사명 검색
+	
+	//입금내역
+	int insertRciptDetail(RciptVO vo);
 }
