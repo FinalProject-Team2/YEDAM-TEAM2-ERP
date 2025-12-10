@@ -86,7 +86,7 @@
 							<h5 class="card-title">주문서 목록</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark" id="addOustBtn">출하지시서</button>
+							<button type="button" class="btn btn-outline-dark" id="addOustBtn">출하지시서 작성</button>
 							<button type="button" class="btn btn-outline-dark" id="approveSoBtn">승인</button>
 							<button type="button" class="btn btn-outline-dark" id="rejectSoBtn">보류</button>
 							<button type="button" class="btn btn-danger" id="deleteSoBtn">주문취소</button>
@@ -105,6 +105,8 @@
 	</div>
 	<!-- end so-manage-wrapper -->
 
+<div th:replace="business/modal/addOustModal :: addOustModal"></div>
+
 <script>
 	// 0. 데이터
 	const soData = [];
@@ -117,7 +119,7 @@
 
 	// 1-1. Grid 공통 옵션
 	const soGridOptions = {
-	    bodyHeight: 340,
+	    bodyHeight: 400,
 	    scrollX: true,
 	    scrollY: true,  // 세로
 	    rowHeaders: ['checkbox'],     // 좌측 체크박스
@@ -162,9 +164,165 @@
 			{ name: 'header', hidden: true },
 			{ name: 'stResn', hidden: true },
 			{ name: 'progrsSt', hidden: true },
-			{ name: 'soDetailNo', hidden: true }
+			{ name: 'soDetailNo', hidden: true },
+			{ name: 'rm', hidden: true },
+			{ name: 'shipAddr', hidden: true }
 		]	
 	}); // 1-2. 주문서목록 그리드 생성 끝
+	
+	
+	// ===================================  1-3. 출하지시서등록 모달
+	// 1-1. 출하지시서 작성 버튼 모달
+	$(document).on("click", "#addOustBtn", function () {
+	  openAddOustModal();
+	});
+
+
+    // 1-1 신규 견적서 모달
+	const openBtn = document.getElementById("addOustBtn");
+	const modal   = document.getElementById("addOustModal");
+	const back    = document.getElementById("addOustBackdrop");
+	
+	function openAddOustModal() {
+		modal.classList.add("show");
+		modal.style.display = "block";
+		back.style.display = "block";
+		
+	} // openAddOustModal
+	
+	function closeAddOustModal() {
+		modal.classList.remove("show");
+		modal.style.display = "none";
+		back.style.display = "none";
+		
+		// 모달 닫을 때 입력값 초기화
+		resetAddOustForm();
+	} // closeAddOustModal
+	
+	function resetAddOustForm() {
+
+		// 모달 입력창 초기화
+		$('#applyDate').val('');
+		
+	} // resetNewEstiForm
+	
+	// 바깥 클릭 시 닫기
+	modal.addEventListener("click", (event) => {
+		if (!event.target.closest(".modal-content")) {
+			closeAddOustModal();
+		}
+	}); // end 출하지시서작성 모달
+	
+	
+	// 1-2. 출하지시서 작성 버튼 클릭 이벤트
+	document.getElementById('addOustBtn').addEventListener('click', () => {
+	
+	    const checked = soGrid.getCheckedRowKeys();
+	    if (checked.length === 0) {
+	        alert("출하지시서를 작성할 주문서를 선택해주세요.");
+	        return;
+	    }
+	
+	    const parentKeys = checked.filter(key => {
+	        const row = soGrid.getRow(key);
+	        return row._children && row._children.length > 0; // 부모만
+	    });
+	
+	    if (parentKeys.length !== 1) {
+	        alert("출하지시서는 한 건씩만 작성할 수 있습니다.");
+	        return;
+	    }
+	
+	    const row = soGrid.getRow(parentKeys[0]);
+	
+	    // 승인된 (es2) 상태만 가능
+	    if (row.progrsSt !== 'es2') {
+	        alert("승인 완료된 주문서가 아닙니다.");
+	        return;
+	    }
+	
+	    // --- 모달 데이터 세팅 ---
+	    document.getElementById("viewSoId").value = row.soId;
+	    document.getElementById("viewCustcom").value = row.custcomName;
+	    document.getElementById("viewDueDt").value = row.dueDt;
+	
+	    // 출하예정일 = 납기일 - 3일
+	    const dueDate = new Date(row.dueDt);
+	    dueDate.setDate(dueDate.getDate() - 3);
+	    document.getElementById("viewPlanDt").value = dueDate.toISOString().slice(0, 10);
+	
+	    // 출하요청일 초기값
+	    document.getElementById("applyDate").value = "";
+	
+	    document.getElementById("viewAddr").value = row.shipAddr || "";
+	    document.getElementById("viewRm").value = row.rm || "";
+	
+	    // 모달 열기
+	    document.getElementById("addOustModal").style.display = "block";
+	    document.getElementById("addOustBackdrop").style.display = "block";
+	});
+	
+	
+	
+	// 1-3. 출하지시서 작성 초기화 버튼 이벤트
+	document.getElementById("addOustInit").addEventListener("click", () => {
+		document.querySelector(".oust-request-datepicker").value = "";
+	});
+	
+	
+	// 1-4. 출하시지서 작성 저장 버튼 이벤트
+	document.getElementById("addOustSaveBtn").addEventListener("click", async () => {
+	
+	    const soId = document.getElementById("viewSoId").value;
+	    const dueDt = document.getElementById("viewDueDt").value;
+	    const planDt = document.getElementById("viewPlanDt").value;
+	    const requestDt = document.getElementById("applyDate").value;
+	    const addr = document.getElementById("viewAddr").value;
+	    const rm = document.getElementById("viewRm").value;
+	
+	    // --- 필수값 체크 ---
+	    if (!requestDt) {
+	        alert("출하요청일을 입력해주세요.");
+	        return;
+	    }
+	
+	    if (!addr.trim()) {
+	        alert("배송지 주소를 입력해주세요.");
+	        return;
+	    }
+	
+	    const payload = {
+	        soId,
+	        oustPlanDt: planDt,
+	        oustRequestDt: requestDt,
+	        shipAddr: addr,
+	        rm
+	    };
+	
+	    if (!confirm("출하지시서를 저장하시겠습니까?")) return;
+	
+	    try {
+	        const res = await axios.post("/so/oust/save", payload);
+	
+	        if (res.data.success) {
+	            alert("출하지시서가 저장되었습니다.");
+	
+	            // 모달 닫기
+	            document.getElementById("addOustModal").style.display = "none";
+	            document.getElementById("addOustBackdrop").style.display = "none";
+	
+	            // 목록 재조회
+	            document.getElementById("SearchBtn").click();
+	        } else {
+	            alert(res.data.message || "저장에 실패했습니다.");
+	        }
+	    } catch (e) {
+	        console.error(e);
+	        alert("저장 중 오류가 발생했습니다.");
+	    }
+	});
+
+
 	
 	
 	
@@ -381,6 +539,9 @@
 	    alert("취소 처리 중 오류가 발생했습니다.");
 	  }
 	});
+	
+	// 2-6. 출하지시서작성 모달 저장버튼 이벤트
+	
 	
 </script>
 

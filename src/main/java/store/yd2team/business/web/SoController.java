@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import lombok.RequiredArgsConstructor;
 import store.yd2team.business.service.EstiSoService;
 import store.yd2team.business.service.EstiSoVO;
+import store.yd2team.business.service.OustVO;
 
 
 @Controller
@@ -107,6 +108,18 @@ public class SoController {
 
         return estiSoService.cancelOrder(soId, reason);
     }
+    
+ // 출하지시서 작성 버튼 저장 이벤트
+ 	@PostMapping("/oust/save")
+ 	@ResponseBody
+ 	public Map<String, Object> saveOust(@RequestBody OustVO vo) {
+ 	    try {
+ 	        estiSoService.saveOust(vo);
+ 	        return Map.of("success", true);
+ 	    } catch (Exception e) {
+ 	        return Map.of("success", false, "message", e.getMessage());
+ 	    }
+ 	}
     
     
 }

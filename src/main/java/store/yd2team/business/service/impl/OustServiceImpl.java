@@ -15,9 +15,9 @@ public class OustServiceImpl implements OustService {
 
 	private final OustMapper oustMapper;
 	
-	// 견적서 조회
-    @Override
-    public List<OustVO> getOustList(OustVO cond) {
-        return oustMapper.selectOust(cond);
+	// 출하지시서 조회
+	@Override
+    public List<OustVO> selectOust(OustVO vo) {
+        return oustMapper.selectOust(vo);
     }
 }
