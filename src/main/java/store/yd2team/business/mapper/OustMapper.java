@@ -9,6 +9,7 @@ import store.yd2team.business.service.OustVO;
 @Mapper
 public interface OustMapper {
 
-	// 견적서 목록 조회
-    List<OustVO> selectOust(OustVO cond);
+	// 출하지시서 조회
+    List<OustVO> selectOust(OustVO vo);
+
 }

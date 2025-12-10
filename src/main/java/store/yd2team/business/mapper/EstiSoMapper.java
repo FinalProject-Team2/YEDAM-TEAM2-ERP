@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import store.yd2team.business.service.EstiSoDetailVO;
 import store.yd2team.business.service.EstiSoVO;
+import store.yd2team.business.service.OustVO;
 
 @Mapper
 public interface EstiSoMapper {
@@ -70,5 +71,9 @@ public interface EstiSoMapper {
     // 주문취소버튼 이벤트
     void updateCancelStatus(@Param("soId") String soId,
             @Param("reason") String reason);
+    
+    // 출하지시서 작성 저장 버튼
+    void insertOust(OustVO vo);
+    void updateSoStatus(@Param("soId") String soId, @Param("status") String status);
 
 }

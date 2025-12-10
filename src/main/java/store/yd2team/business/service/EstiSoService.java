@@ -45,4 +45,7 @@ public interface EstiSoService {
     
     // 주문취소버튼 이벤트
     Map<String, Object> cancelOrder(String soId, String reason);
+    
+    // 출하지시서 작성 저장 버튼
+    void saveOust(OustVO vo) throws Exception;
 }

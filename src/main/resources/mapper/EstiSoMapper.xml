@@ -359,7 +359,9 @@
 	        so.progrs_st AS progrsSt,
 	        code.code_id,
 	        code.code_nm,
-	        so.st_resn AS stResn
+	        so.st_resn AS stResn,
+	        so.rm,
+	        so.ship_addr AS shipAddr
 	    FROM tb_so so
 	    JOIN tb_custcom c
 	      ON so.custcom_id = c.custcom_id
@@ -432,5 +434,36 @@
 	           st_resn = #{reason},
 	           updt_dt = SYSDATE
 	     WHERE so_id = #{soId}
+	</update>
+	
+	<!-- 출하지시 INSERT -->
+	<insert id="insertOust">
+	    INSERT INTO tb_oust (
+	        oust_id,
+	        so_id,
+	        oust_plan_dt,
+	        oust_request_dt,
+	        ship_addr,
+	        rm,
+	        crea_dt
+	    ) VALUES (
+	        fn_oust_id(),
+	        #{soId},
+	        #{oustPlanDt},
+	        #{oustRequestDt},
+	        #{shipAddr},
+	        #{rm},
+	        SYSDATE
+	    )
+	</insert>
+	
+	
+	<!-- 주문서 상태 수정 -->
+	<update id="updateSoStatus">
+	    UPDATE tb_so
+	    SET progrs_st = #{status},
+	        updt_dt = SYSDATE,
+	        updt_by = 'SYSTEM'
+	    WHERE so_id = #{soId}
 	</update>
 </mapper>
