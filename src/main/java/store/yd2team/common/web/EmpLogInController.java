@@ -228,7 +228,7 @@ public class EmpLogInController {
                 loginEmp.getVendId(), loginEmp.getMasYn(),
                 loginEmp.getBizcnd(), loginEmp.getAddr(),
                 loginEmp.getCttpc(), loginEmp.getHp(),
-                loginEmp.getRoleId());
+                loginEmp.getAuthCodes(), loginEmp.getRoleIds());
 
         // OTP 관련 임시 세션은 제거
         clearOtpSession(session);
@@ -280,14 +280,12 @@ public class EmpLogInController {
 
         // 🔽 추가된 부분: masYn 기준으로 roleId 세팅
         //  - 예시: masYn == 'e1' 이면 HR 관리자 권한
-        String roleId = "ROLE_USER";
-        if ("e1".equals(empAcct.getMasYn())) {
-            roleId = "ROLE_HR_ADMIN";
-        }
-        loginEmp.setRoleId(roleId);
-        // 🔼 여기까지만 새로 추가됨
-
-        return loginEmp;
+		/*
+		 * String roleId = "ROLE_USER"; if ("e1".equals(empAcct.getMasYn())) { roleId =
+		 * "ROLE_HR_ADMIN"; } loginEmp.setRoleIds(roleId); // 🔼 여기까지만 새로 추가됨
+		 */
+		 return loginEmp;
+		 
     }
 
     // ==========================
