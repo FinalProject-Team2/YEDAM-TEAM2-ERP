@@ -2,19 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="store.yd2team.business.mapper.RciptMapper">
     
-    <!-- 입출금목록조회 -->
+    <!-- 채권관리 -->
 	<select id="selectRciptList" parameterType="store.yd2team.business.service.RciptVO" resultType="store.yd2team.business.service.RciptVO">
 	    SELECT 
 	           r.custcom_id,
 	           c.custcom_name,
 	           r.trns_dt,
-	           r.trns_fg,
+	           r.ltst_rcipt,
+	           r.bond_amt,
 	           r.sale_amt,
-	           r.borw_amt,
-	           r.prinsum_baln,
+	           r.rcipt_amt,
+	           r.bond_baln,
 	           r.rcipt_appo_amt AS rciptAppoAmt,
 	           r.rcipt_appo_dt  AS rciptAppoDt,
-	           r.ltst_rcipt_dt  AS ltstRciptDt
+	           r.ltst_rcipt_dt  AS ltstRciptDt,
+	           r.stm_mtd
 	    FROM tb_rcipt r
 	    JOIN tb_custcom c
 	      ON r.custcom_id = c.custcom_id
@@ -25,14 +27,14 @@
 	        AND r.custcom_id = #{custcomId}
 	    </if>
 	
-	    <!-- 2) 고객사명 (부분검색) -->
+	    <!-- 2) 고객사명  -->
 	    <if test="custcomName != null and custcomName != ''">
 	        AND c.custcom_name LIKE '%' || #{custcomName} || '%'
 	    </if>
 	
-	    <!-- 3) 입출금구분 (psch, 부분검색) -->
-	    <if test="psch != null and psch != ''">
-	        AND c.psch LIKE '%' || #{psch} || '%'
+	    <!-- 3) 결제구분 -->
+	    <if test="pmtMtd != null and pmtMtd != ''">
+	        AND c.pmtMtd LIKE '%' || #{pmtMtd} || '%'
 	    </if>
 	
 	    <!-- 4) 거래일자 범위 (trns_dt 기준) -->
