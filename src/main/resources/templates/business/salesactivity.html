@@ -23,12 +23,6 @@
 </style>
 <body layout:fragment="content">
 
-	<span th:text="${list != null ? #lists.size(list) : 0}">0</span>
-	<form th:action="@{/potential/sync}" method="post" class="mb-2">
-		<button class="btn btn-primary">공공데이터 동기화</button>
-	</form>
-
-
 	<form th:action="@{/salesActivity}" method="post">
 		<div class="row">
 			<div class="col-md-12 mb-3">
@@ -39,33 +33,33 @@
 						</div>
 						<div class="card-header-right">
 							<form th:action="@{/potential/sync}" method="post" class="mb-2">
-								<button class="btn btn-primary">공공데이터 동기화</button>
+								<button class="btn btn-primary">공공데이터조회</button>
 							</form>
-							<button class="btn btn-dark">초기화</button>
-							<button class="btn btn-outline-dark" type="submit">조회</button>
+							<!-- <button class="btn btn-dark">초기화</button> -->
+							<button class="btn btn-outline-dark" type="submit">검색조회</button>
 						</div>
 					</div>
 					<div class="card-body">
 						<div class="row mb-2">
 							<div class="row mb-2">
 								<div class="col-md-3">
-									<label class="form-label">업종</label> <input class="form-select"
-										name="industryType">
+									<label class="form-label">업종</label> 
+									<input type="text" class="form-control" name="industryType">
 									<!-- <option>코딩</option>
 										<option>분석</option>
 										<option>제과</option>
 										<option>의류</option> -->
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">업체규모</label> <input type="text"
-										class="form-control" placeholder="Value" name="companySize">
+									<label class="form-label">업체규모</label> 
+									<input type="text" class="form-control" placeholder="Value" name="companySize">
 								</div>
 								<div class="col-md-3">
 									<label class="form-label">지역/상권</label> <input type="text"
 										class="form-control" placeholder="Value" name="region">
 								</div>
 							</div>
-							<div class="col-md-6">
+							<!-- <div class="col-md-6">
 								<label class="form-label">설립일</label>
 								<div class="d-flex align-items-center js-date-range">
 									<div class="input-group date">
@@ -86,7 +80,7 @@
 										</span>
 									</div>
 								</div>
-							</div>
+							</div> -->
 						</div>
 					</div>
 				</div>
@@ -104,14 +98,14 @@
 			</div>
 			<div class="card-body">
 				<div id="potentialgrid"
-					style="height: 400px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+					style="height: 150px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 			</div>
 		</div>
 	</form>
 
 
 	<form th:action="@{/salesActivity/contact}" method="post">
-		<div class="card mb-3">
+		<div class="card mb-3" >
 			<div class="card-header">
 				<!-- 탭 -->
 				<div class="card-header-left">
@@ -141,23 +135,20 @@
 			</div>
 
 			<!-- 탭 내용 -->
-			<div class="card-body" style="height: 520px;">
+			<div class="card-body" style="height: 300px;">
 				<!-- 접촉사항 탭 -->
 				<div id="tabContact" class="tab-pane-custom">
-					<div id="contactGrid"
-						style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+					<div id="contactGrid" style="height: 280px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 				</div>
 
 				<!-- 리드분석 탭 -->
 				<div id="tabLead" class="tab-pane-custom" style="display: none;">
-					<div id="leadgrid"
-						style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+					<div id="leadgrid" style="height: 280px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 				</div>
 
 				<!-- 견적 및 데모활동 탭 -->
 				<div id="tabDemo" class="tab-pane-custom" style="display: none;">
-					<div id="demoGrid"
-						style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+					<div id="demoGrid" style="height: 280px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 				</div>
 			</div>
 		</div>
@@ -326,7 +317,10 @@
             }, editor: 'text' }
         ]
     });
-
+    //
+    //
+    //
+    //
     // 잠재고객 클릭 시 접촉/리드/데모 조회
     potentialgrid.on('click', function (ev) {
         const row = potentialgrid.getRow(ev.rowKey);

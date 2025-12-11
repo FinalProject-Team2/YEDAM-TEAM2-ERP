@@ -38,6 +38,25 @@ public class BusineServiceImpl implements BusinessService {
 	public List<ChurnStdrVO> getChurnStdrList(ChurnStdrVO churn) {
 		return businessMapper.getChurnStdrList(churn);
 	}
+  //휴면,이탈 기준 수정
+  @Override
+  public int updateChurnStdrList(List<ChurnStdrVO> dormancyList, List<ChurnStdrVO> churnList) {
+      int cnt = 0;
+
+      if (dormancyList != null) {
+          for (ChurnStdrVO vo : dormancyList) {
+              cnt += businessMapper.updateChurnStdr(vo);
+          }
+      }
+
+      if (churnList != null) {
+          for (ChurnStdrVO vo : churnList) {
+              cnt += businessMapper.updateChurnStdr(vo);
+          }
+      }
+
+      return cnt;
+  }
  
   @Override
   public List<BusinessVO> getList() {
@@ -274,6 +293,8 @@ public class BusineServiceImpl implements BusinessService {
 			}
        }
    }
+
+	
 	
 	
 	

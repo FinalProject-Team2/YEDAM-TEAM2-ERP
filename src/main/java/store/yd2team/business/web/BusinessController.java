@@ -37,6 +37,18 @@ public class BusinessController {
 		model.addAttribute("getChurnStdrList", getChurnStdrList);
 		return "business/churnRiskStdrRegister"; // /는 빼도 됨
 	}
+	//휴면,이탈 기준 수정
+	@PostMapping("/churnRiskStdrRegister/update")
+	@ResponseBody
+	public int updateChurnStdrList(@RequestBody ChurnStdrVO req) {
+	    System.out.println("=== BusinessController.updateChurnStdrList() 호출됨 ===");
+	    int cnt = businessService.updateChurnStdrList(
+		        req.getDormancyList(),
+		        req.getChurnList()
+	    );
+
+	    return cnt; // 업데이트 된 건수
+	}
 	//
 	//휴면,이탈고객 조회페이지열람
 	@GetMapping("/churnRiskList")

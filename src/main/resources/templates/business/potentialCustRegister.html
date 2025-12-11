@@ -25,14 +25,11 @@
 </head>
 <body layout:fragment="content">
 
-	<div class="d-flex justify-content-end mb-2">
-		<button class="btn btn-outline-dark" id="btnSaveAll">전체 저장</button>
-	</div>
 
 	<div class="row">
 		<div class="col-md-6">
 			<!-- 업종 -->
-			<div class="card mb-3" style="height: 500px;">
+			<div class="card mb-3" style="height: 400px;">
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
@@ -51,7 +48,7 @@
 			</div>
 
 			<!-- 설립 -->
-			<div class="card" style="height: 500px;">
+			<div class="card" style="height: 400px;">
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
@@ -73,7 +70,7 @@
 		<!-- 우측 패널 -->
 		<div class="col-md-6">
 			<!-- 규모 -->
-			<div class="card mb-3" style="height: 500px;">
+			<div class="card mb-3" style="height: 400px;">
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
@@ -92,7 +89,7 @@
 			</div>
 
 			<!-- 지역/상권 -->
-			<div class="card mb-3" style="height: 500px;">
+			<div class="card mb-3" style="height: 400px;">
 				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
@@ -110,6 +107,8 @@
 				</div>
 			</div>
 		</div>
+	
+	
 	
 	
 	
@@ -164,6 +163,7 @@
 	    el: document.getElementById('industryGrid'),
 	    scrollX: false,
 	    scrollY: true,
+	    minBodyHeight : 0,
 	    rowHeaders: ['checkbox'],
 	    columns: [
 	        { header: '상세', name: 'stdrIteamInfo', editor: 'text'},
@@ -406,6 +406,25 @@
 	    if (sendList.length === 0) {
 	        alert('변경된 내용이 없습니다.');
 	        return;
+	    }
+	    
+	    // ★ 빈 칸 검증 (삭제 D는 제외)
+	    for (let row of sendList) {
+	        if (row.rowStatus === 'D') {
+	            continue; // 삭제건은 스킵
+	        }
+
+	        // 상세값 체크
+	        if (!row.stdrIteamInfo || row.stdrIteamInfo.trim() === "") {
+	            alert('상세를 모두 입력해주세요.');
+	            return;
+	        }
+
+	        // 점수값 체크
+	        if (row.infoScore === null || row.infoScore === undefined || row.infoScore === "") {
+	            alert('점수를 모두 입력해주세요.');
+	            return;
+	        }
 	    }
 
 	    $.ajax({
