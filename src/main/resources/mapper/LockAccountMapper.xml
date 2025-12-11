@@ -29,7 +29,7 @@
 	        ea.vend_id     AS vendId,
 	        v.vend_nm      AS clientName,
 	        ea.login_id    AS accountId,
-	        e.nm           AS userName,
+	        v.rpstr_nm     AS userName,
 	        ea.st          AS status,
 	        c.code_nm      AS statusNm,
 	        ea.lock_dttm   AS lockTime
@@ -50,7 +50,7 @@
 	        AND ea.login_id LIKE '%' || #{accountId} || '%'
 	    </if>
 	    <if test="userName != null and userName != ''">
-	        AND e.nm LIKE '%' || #{userName} || '%'
+	        AND v.rpstr_nm LIKE '%' || #{userName} || '%'
 	    </if>
 	    <if test="status != null and status != ''">
 	        AND ea.st = #{status}
@@ -114,15 +114,14 @@
             resultType="store.yd2team.common.dto.AutoCompleteItemDto">
         SELECT
             ea.emp_acct_id AS id,
-            e.nm           AS label,
-            e.nm           AS value
+            v.rpstr_nm     AS label,
+            v.rpstr_nm     AS value
         FROM tb_emp_acct ea
-            JOIN tb_emp e
-              ON ea.emp_id  = e.emp_id
-             AND ea.vend_id = e.vend_id
+            JOIN tb_vend v
+              ON ea.vend_id  = v.vend_id
         WHERE ea.mas_yn = 'e1'
-          AND e.nm LIKE '%' || #{keyword} || '%'
-        ORDER BY e.nm
+          AND v.rpstr_nm LIKE '%' || #{keyword} || '%'
+        ORDER BY v.rpstr_nm
     </select>
 
 </mapper>
