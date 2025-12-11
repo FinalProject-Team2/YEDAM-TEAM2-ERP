@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import store.yd2team.common.util.LoginSession;
 import store.yd2team.insa.mapper.MlssMapper;
-import store.yd2team.insa.service.EmpVO;
 import store.yd2team.insa.service.MlssRequestVO;
 import store.yd2team.insa.service.MlssService;
 import store.yd2team.insa.service.MlssVO;
@@ -36,7 +37,7 @@ public class MlssServiceImpl implements MlssService{
 		String baseId = mlssMapper.mlssCreateId();
 		int seq = Integer.parseInt(baseId.substring(baseId.length() - 3)); // 마지막 3자리 숫자
 		
-		//헤더등록
+		//헤더등록.
 		MlssVO mvo = new MlssVO();
 		mvo.setMlssNm( val.getMlssNm() );
 		mvo.setEvlBeginDt( val.getEvlBeginDt() );
@@ -49,7 +50,7 @@ public class MlssServiceImpl implements MlssService{
 			MlssVO vo = empIdList.get(i);
 			vo.setMlssId(mvo.getMlssId());
 			vo.setCreaDt( val.getCreaDt() );
-			String newId = "mlss" + ym  + String.format("%03d", seq + i);
+			String newId = "mlss_emp" + ym  + String.format("%03d", seq + i);
 			vo.setMlssEmpId(newId);
 		}
 		
@@ -130,8 +131,10 @@ public class MlssServiceImpl implements MlssService{
 
 	@Override
 	public List<MlssVO> FinalResultMlssList(String vendId, String deptId, String mlssId, String empId) {
-		
-		return mlssMapper.FinalResultMlssList(vendId, deptId, mlssId, empId);
+		List<MlssVO> vo = mlssMapper.FinalResultMlssList(vendId, deptId, mlssId, empId);
+		List<MlssVO> vo2 = mlssMapper.FinalResultMlssEtcList(vendId, deptId, mlssId, empId);
+		vo.addAll(vo2);
+		return vo;
 	}
 
 }
