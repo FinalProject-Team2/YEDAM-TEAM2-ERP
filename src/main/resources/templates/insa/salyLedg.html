@@ -440,29 +440,20 @@
     });
   }
 
-  // ✅ 그리드 클릭 시 선택 rowKey 저장 + 라디오 체크 동기화
+  // ✅ 그리드 클릭: 라디오 버튼 클릭일 때만 선택 반영
   grid.on("click", ev => {
-    const { rowKey, columnName, nativeEvent } = ev;
+    const { rowKey, nativeEvent } = ev;
     if (rowKey == null) return;
 
-    selectedRowKey = rowKey;
-    updateConfirmButtonLabel();
-
-    // 클릭한 행의 라디오만 체크되도록 처리 (시각적 동기화)
     const target = nativeEvent.target;
+
+    // 라디오 버튼을 클릭한 경우에만 선택 상태/라벨 업데이트
     if (target instanceof HTMLElement && target.type === "radio") {
-      // 브라우저 기본 동작으로 충분
-      return;
-    } else {
-      // 행의 '선택' 셀 안 라디오를 찾아서 체크
-      const rowEl = grid.getElement(rowKey, "선택");
-      if (rowEl) {
-        const radio = rowEl.querySelector('input[type="radio"][name="salyLedgRadio"]');
-        if (radio) {
-          radio.checked = true;
-        }
-      }
+      selectedRowKey = rowKey;
+      updateConfirmButtonLabel();
+      // 라디오 체크는 name="salyLedgRadio" 공통이라 브라우저 기본 동작에 맡김
     }
+    // 그 외 셀 클릭 시에는 아무 것도 하지 않음
   });
 
   /*************************
