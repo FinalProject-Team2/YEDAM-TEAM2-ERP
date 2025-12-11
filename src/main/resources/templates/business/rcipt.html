@@ -31,23 +31,23 @@
 				<div class="card-body">
 					<div class="row">
 						<div class="col-md-3">
-							<label for="custcomId" class="form-label">고객사코드</label>
+							<label for="custcomId" class="form-label">고객코드</label>
 							<input id="custcomId" type="text" class="form-control">
 						</div>
 						<div class="col-md-3">
 							<label for="custcomName" class="form-label">고객사명</label>
 							<select id="custcomName" class="form-control">
-								<option>전체</option>
+								<option value="">전체</option>
 								<option>무신사</option>
 								<option>29cm</option>
 							</select>
 						</div>
 						<div class="col-md-2">
-							<label class="form-label">담당자</label>
+							<label class="form-label">입/출금</label>
 							<select id="psch" class="form-control">
-								<option>전체</option>
-								<option>논개</option>
-								<option>구론산</option>
+								<option value="">전체</option>
+								<option>입금</option>
+								<option>출금</option>
 							</select>
 						</div>
 						<div class="col-md-4">
@@ -82,7 +82,7 @@
 			</div>
 
 			
-			<div class="card">
+			<div class="card w-100 h-80">
 				<div class="card-header">
 					<h5 class="card-title">입출금관리</h5>
 					<div class="card-header-right">
@@ -124,39 +124,50 @@
             el: document.getElementById('grid'),
             bodyHeight: 360,
             data: gridData,
+            columnOptions: {
+            	minWidth: 80,
+            	resizable: true
+            },
             scrollX: true,
             scrollY: true,
-            minBodyHeight: 0,
             autoWidth: true,
             columns: [
-                {header: '고객코드', name: 'custcomId', align: 'center'},
-                {header: '고객사', name: 'custcomName', align: 'center'},
-                {header: '거래일자', name: 'trnsDate'},
-                {header: '매출내역', name: 'saleCtnt'},
+                {header: '고객코드', name: 'custcomId', width: 130, align: 'center'},
+                {header: '고객사명', name: 'custcomName', width: 210, align: 'center'},
+                {header: '대출거래일자', name: 'trnsDate', width: 120, align: 'right'},
                 {
-                    header: '매출금액',
-                    name: 'saleAmt',
-                    editor: 'text',
-                    align: 'right',
-                    formatter: ({value}) => {
-                        const num = toNumber(value);
-                        return num ? num.toLocaleString() : '';
-                    }
+                	header: '최근납입일', 
+                	name: 'ltstRciptDt',
+                	width: 120,
+                	align: 'right'
                 },
+                {header: '거래구분', name: 'trnsFg', width: 130, align: 'center'},
+                {header: '입/출금', name: 'saleCtnt', width: 100, align: 'center'},
                 {
                     header: '대출금액',
                     name: 'borwAmt',
                     editor: 'text',
+                    width: 180,
                     align: 'right',
                     formatter: ({value}) => {
                         const num = toNumber(value);
                         return num ? num.toLocaleString() : '';
                     }
                 },
+                /* {
+                    header: '매출금액',
+                    name: 'saleAmt',
+                    width: 180,
+                    align: 'right',
+                    formatter: ({value}) => {
+                        const num = toNumber(value);
+                        return num ? num.toLocaleString() : '';
+                    }
+                }, */
                 {
                     header: '입금금액',
                     name: 'rciptAmt',
-                    editor: 'text',
+                    width: 180,
                     align: 'right',
                     formatter: ({value}) => {
                         const num = toNumber(value);
@@ -166,25 +177,14 @@
                 {
                     header: '원금잔액',
                     name: 'prinsumBaln',
-                    editor: 'text',
+                    width: 180,
                     align: 'right',
                     formatter: ({value}) => {
                         const num = toNumber(value);
                         return num ? num.toLocaleString() : '';
                     }
                 },
-                {
-                    header: '입금약속액',
-                    name: 'rciptAppoAmt',
-                    editor: 'text',
-                    align: 'right',
-                    formatter: ({value}) => {
-                        const num = toNumber(value);
-                        return num ? num.toLocaleString() : '';
-                    }
-                },
-                {header: '입금약속일', name: 'rciptAppoDt', align: 'right'},
-                {header: '최근납입일', name: 'ltstRciptDt', align: 'right'}
+                {header: '비고', name: 'rm', editor: 'text', width: 180, align: 'center'},
             ]
         });
         

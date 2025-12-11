@@ -9,6 +9,7 @@
       <div class="modal-content">
         <div class="modal-body">
           <h5 class="modal-title mb-3">급여대장 등록/수정</h5>
+
           <div class="row">
             <div class="col-md-12">
 
@@ -22,72 +23,92 @@
                 </div>
 
                 <div class="card-body">
-                  <div class="row">
-                    <div class="col-md-6">
+                  <div class="row g-3">
+                    <!-- 급여대장 명칭 -->
+                    <div class="col-md-4">
                       <label class="form-label astar">급여대장명칭</label>
                       <input type="text" id="salyNm" class="form-control">
                     </div>
-                    <div class="col-md-6">
-                      <label class="form-label astar">부서명</label>
-                      <select id="salyDept" class="form-select">
-                        <option value="">선택</option>
-                      </select>
-                    </div>
-                    <div class="col-md-6 mt-2">
-                      <label class="form-label astar">귀속연월</label>
-                      <div class="input-group date me-2 js-ym-single">
-                        <input
-                          type="text"
-                          class="form-control js-ym-input"
-                          id="revs_ym"
-                          placeholder="날짜 선택">
-                        <span class="input-group-text js-ym-icon">
-                          <i class="bi bi-calendar"></i>
-                        </span>
-                      </div>
-                    </div>
-                    <div class="col-md-6 mt-2">
-                      <label class="form-label astar">지급일자</label>
-                      <div class="input-group date me-2 js-date-single">
-                        <input
-                          type="text"
-                          class="form-control js-date-input"
-                          id="payDt"
-                          placeholder="날짜 선택">
-                        <span class="input-group-text js-date-icon">
-                          <i class="bi bi-calendar"></i>
-                        </span>
-                      </div>
-                    </div>
+
+					<!-- 귀속연월 -->
+					<div class="col-md-4">
+					  <label class="form-label astar">귀속연월</label>
+					  <div class="input-group date js-ym-single">
+					    <input
+					      type="text"
+					      class="form-control js-ym-input"
+					      id="revs_ym"
+					      name="revs_ym_dummy"
+					      autocomplete="off"
+					      placeholder="날짜 선택">
+					    <span class="input-group-text js-ym-icon">
+					      <i class="bi bi-calendar"></i>
+					    </span>
+					  </div>
+					</div>
+					
+					<!-- 지급일자 -->
+					<div class="col-md-4">
+					  <label class="form-label astar">지급일자</label>
+					  <div class="input-group date js-date-single">
+					    <input
+					      type="text"
+					      class="form-control js-date-input"
+					      id="payDt"
+					      name="payDt_dummy"
+					      autocomplete="off"
+					      placeholder="날짜 선택">
+					    <span class="input-group-text js-date-icon">
+					      <i class="bi bi-calendar"></i>
+					    </span>
+					  </div>
+					</div>
+
                   </div>
                 </div>
-              </div>
+              </div><!-- /card 기본정보 -->
 
               <!-- 📋 카드 2 : 사원목록 -->
               <div class="card border">
                 <div class="card-header">
                   <h5 class="card-title mb-0">사원목록</h5>
-
-                  <!-- 🔹 사원명 인풋: 제목 아래 전체 폭 -->
-                  <div class="d-flex align-items-center mt-2">
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="salyEmpNmCond"
-                      placeholder="사원명">
-                  </div>
-
-                  <!-- 🔹 조회 버튼: 우측 영역 -->
                   <div class="card-header-right">
-                    <button class="btn btn-outline-dark" id="btnSalyEmpSearch">
-                      조회
-                    </button>
+                    <!-- wkTyModal 과 동일한 스타일의 조회 버튼 -->
+                    <button class="btn btn-outline-dark" id="btnSalyEmpSearch">조회</button>
                   </div>
                 </div>
-                <div class="card-body">
-                  <div id="grid2" class="mt-3"></div>
-                </div>
-              </div>
+
+					<div class="card-body">
+					
+					  <!-- 🔍 검색조건 영역 중앙 정렬 -->
+					  <div class="row mb-3 justify-content-center">
+					
+					    <!-- 부서명 -->
+					    <div class="col-md-3">
+					      <label class="form-label">부서명</label>
+					      <select id="salyDept" class="form-select">
+					        <option value="">전체</option>
+					      </select>
+					    </div>
+					
+					    <!-- 사원명 -->
+					    <div class="col-md-4">
+					      <label class="form-label">사원명</label>
+					      <input
+					        type="text"
+					        class="form-control"
+					        id="salyEmpNmCond"
+					        placeholder="사원명">
+					    </div>
+					
+					  </div>
+					
+					  <!-- 📊 그리드 -->
+					  <div id="grid2" class="mt-2"></div>
+					
+					</div>
+
+              </div><!-- /card 사원목록 -->
 
             </div>
           </div><!-- /.row -->

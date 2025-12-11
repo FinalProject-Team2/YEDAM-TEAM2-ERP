@@ -8,7 +8,7 @@
 	           r.custcom_id,
 	           c.custcom_name,
 	           r.trns_dt,
-	           r.sale_ctnt,
+	           r.trns_fg,
 	           r.sale_amt,
 	           r.borw_amt,
 	           r.prinsum_baln,
@@ -30,7 +30,7 @@
 	        AND c.custcom_name LIKE '%' || #{custcomName} || '%'
 	    </if>
 	
-	    <!-- 3) 담당자 (psch, 부분검색) -->
+	    <!-- 3) 입출금구분 (psch, 부분검색) -->
 	    <if test="psch != null and psch != ''">
 	        AND c.psch LIKE '%' || #{psch} || '%'
 	    </if>

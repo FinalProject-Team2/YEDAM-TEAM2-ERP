@@ -112,6 +112,13 @@
 <div th:replace="business/modal/addOustModal :: addOustModal"></div>
 
 <script>
+//숫자 변환 유틸
+function toNumber(val) {
+  if (val === null || val === undefined) return 0;
+  const str = String(val).replace(/,/g, '').trim();
+  if (str === '') return 0;
+  return Number(str) || 0;
+}
 	// 0. 데이터
 	const soData = [];
 	const loadedSoSet = new Set();  // 어떤 so_id 의 상세를 이미 불러왔는지 체크용
@@ -150,9 +157,24 @@
 			{ header: '연락처', name: 'pschTel', align: 'right'  },
 			{ header: '납기일', name: 'dueDt', align: 'right' },
 			{ header: '상품명', name: 'productName', width: 250 },
-			{ header: '금액합계(원)', name: 'ttSupplyAmt', align: 'right' },
-			{ header: '총주문수량', name: 'ttSoQy', align: 'right' },
-			{ header: '재고수량', name: 'currStockQy', align: 'right' },
+			{ header: '금액합계(원)', name: 'ttSupplyAmt', align: 'right',
+				formatter: ({ value }) => {
+	                   const num = toNumber(value);
+	                   return num ? num.toLocaleString() : '';
+	               }
+			},
+			{ header: '총주문수량', name: 'ttSoQy', align: 'right', align: 'right',
+				formatter: ({ value }) => {
+	                   const num = toNumber(value);
+	                   return num ? num.toLocaleString() : '';
+	               } 
+			},
+			{ header: '재고수량', name: 'currStockQy', align: 'right', align: 'right',
+	   				formatter: ({ value }) => {
+		                   const num = toNumber(value);
+		                   return num ? num.toLocaleString() : '';
+		               } 
+	   		},
 			{ 
 			  header: '진행상태',
 			  name: 'codeNm',
@@ -177,12 +199,12 @@
 	
 	// ===================================  1-3. 출하지시서등록 모달
 	// 1-1. 출하지시서 작성 버튼 모달
-	$(document).on("click", "#addOustBtn", function () {
+/* 	$(document).on("click", "#addOustBtn", function () {
 	  openAddOustModal();
 	});
+ */
 
-
-    // 1-1 신규 견적서 모달
+    // 1-1 출하지시서 모달
 	const openBtn = document.getElementById("addOustBtn");
 	const modal   = document.getElementById("addOustModal");
 	const back    = document.getElementById("addOustBackdrop");

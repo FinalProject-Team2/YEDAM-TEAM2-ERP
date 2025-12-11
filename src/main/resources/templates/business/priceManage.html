@@ -246,40 +246,6 @@
 	// DOM 준비되면 공통코드부터 로딩
 	window.addEventListener('DOMContentLoaded', loadPriceTypeCodes);
 
-	
-	// 1. Toast UI Grid 테마
-	tui.Grid.applyTheme('default', {
-		cell: {
-			normal: {
-			  border: '#dedede',
-			  background: '#ffffff',
-			  showVerticalBorder: true
-			},
-			header: {
-			  border: '#dedede',
-			  background: '#f5f5f5',
-			  showVerticalBorder: true
-			},
-			// ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
-			rowHeader: {
-			  border: '#dedede',
-			  background: '#ffffff',
-			  showVerticalBorder: true
-			},
-			editable: {
-			  background: '#FFFDF0',
-			  text: '#000'
-			},
-			selectedHeader: {
-			  background: '#f5f5f5'
-			},
-			selected: {
-			  background: '#ffffff'
-			}
-		}
-	}); // 1. 끝
-
-
 
     // 2. 데이터
     const priceData = []; // 2. 끝
@@ -385,8 +351,8 @@
       priceForm.percent.value   = row.percent || '';
 
       // select 박스는 value 로 지정
-      if (row.type) {
-        priceForm.priceType.value = row.type;
+      if (row.priceType) {
+        priceForm.priceType.value = row.priceType;
       } else {
         priceForm.priceType.value = ''; // 필요시 기본값
       }
@@ -394,6 +360,8 @@
       priceForm.beginDt.value = row.beginDt || '';
       priceForm.endDt.value   = row.endDt || '';
       priceForm.rm.value      = row.rm || '';
+      
+      console.log('priceForm : ' + priceForm.priceType.value);
     }); // 6. 끝
     
     

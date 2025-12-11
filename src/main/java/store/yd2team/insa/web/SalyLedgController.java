@@ -52,12 +52,11 @@ public class SalyLedgController {
      * 급여대장 목록 조회
      *  - URL : GET /insa/saly/list
      *  - Query:
-     *      deptId, salyLedgNm, payDtStart, payDtEnd
+     *      salyLedgNm, payDtStart, payDtEnd
      * =========================== */
     @GetMapping("/insa/saly/list")
     @ResponseBody
     public List<SalyLedgVO> list(
-            @RequestParam(value = "deptId", required = false) String deptId,
             @RequestParam(value = "salyLedgNm", required = false) String salyLedgNm,
             @RequestParam(value = "payDtStart", required = false) String payDtStart,
             @RequestParam(value = "payDtEnd", required = false) String payDtEnd,
@@ -70,14 +69,33 @@ public class SalyLedgController {
         }
 
         String vendId = login.getVendId();
-        return salyLedgService.getSalyLedgList(vendId, deptId, salyLedgNm, payDtStart, payDtEnd);
+        return salyLedgService.getSalyLedgList(vendId, salyLedgNm, payDtStart, payDtEnd);
+    }
+
+    /* ===========================
+     * 급여대장 상세 조회 (수정용)
+     *  - URL : GET /insa/saly/detail?salyLedgId=...
+     *  - 응답: SalyLedgVO + empIdList
+     * =========================== */
+    @GetMapping("/insa/saly/detail")
+    @ResponseBody
+    public SalyLedgVO detail(@RequestParam("salyLedgId") String salyLedgId,
+                             HttpSession session) {
+
+        SessionDto login = getLogin(session);
+        if (login == null) {
+            log.warn("[salyDetail] 세션 없음");
+            return null;
+        }
+
+        String vendId = login.getVendId();
+        return salyLedgService.getSalyLedgDetail(salyLedgId, vendId);
     }
 
     /* ===========================
      * 모달: 사원 목록 조회
      *  - URL : /insa/saly/empList
      *  - Body: { deptId, empNm }
-     *  - 세션의 vend_id + 재직(hffc_st='n1') 필터
      * =========================== */
     @PostMapping("/insa/saly/empList")
     @ResponseBody
@@ -86,7 +104,6 @@ public class SalyLedgController {
 
         SessionDto login = getLogin(session);
         if (login == null) {
-            // 세션 없으면 빈 리스트 리턴
             log.warn("[salyEmpList] 세션 없음");
             return List.of();
         }
@@ -102,7 +119,7 @@ public class SalyLedgController {
      * 급여대장 + 급여명세서 저장
      *  - URL : /insa/saly/save
      *  - Body: SalyLedgVO
-     *    (salyLedgId, salyLedgNm, revsYm, payDt, deptId, empIdList ...)
+     *    (salyLedgId, salyLedgNm, revsYm, payDt, empIdList ...)
      * =========================== */
     @PostMapping("/insa/saly/save")
     @ResponseBody
@@ -119,7 +136,7 @@ public class SalyLedgController {
         }
 
         String vendId   = login.getVendId();
-        String loginEmp = login.getEmpId();   // 필요 시 필드명 맞춰서 수정
+        String loginEmp = login.getEmpId();
 
         try {
             String salyLedgId = salyLedgService.saveSalyLedg(vo, vendId, loginEmp);
@@ -129,6 +146,44 @@ public class SalyLedgController {
             res.put("rcnt", vo.getEmpIdList() != null ? vo.getEmpIdList().size() : 0);
         } catch (Exception e) {
             log.error("급여대장 저장 중 오류", e);
+            res.put("result", "FAIL");
+            res.put("message", e.getMessage());
+        }
+
+        return res;
+    }
+
+    /* ===========================
+     * 급여대장 삭제 (명세서 포함)
+     *  - URL : /insa/saly/delete
+     *  - Body: { salyLedgId }
+     * =========================== */
+    @PostMapping("/insa/saly/delete")
+    @ResponseBody
+    public Map<String, Object> delete(@RequestBody Map<String, String> body,
+                                      HttpSession session) {
+
+        Map<String, Object> res = new HashMap<>();
+
+        SessionDto login = getLogin(session);
+        if (login == null) {
+            res.put("result", "FAIL");
+            res.put("message", "세션이 만료되었습니다. 다시 로그인해주세요.");
+            return res;
+        }
+
+        String salyLedgId = body.get("salyLedgId");
+        if (salyLedgId == null || salyLedgId.isBlank()) {
+            res.put("result", "FAIL");
+            res.put("message", "삭제할 급여대장 ID가 없습니다.");
+            return res;
+        }
+
+        try {
+            salyLedgService.deleteSalyLedg(salyLedgId, login.getVendId());
+            res.put("result", "SUCCESS");
+        } catch (Exception e) {
+            log.error("급여대장 삭제 중 오류", e);
             res.put("result", "FAIL");
             res.put("message", e.getMessage());
         }

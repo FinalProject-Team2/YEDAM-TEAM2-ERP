@@ -36,7 +36,7 @@
                     <input type="hidden" id="newSoDt">
 					<input type="hidden" id="newSoCustcomId">
 
-                    <!-- 1행: 견적번호 / 버전 / 고객사명 -->
+                    <!-- 1행: 견적번호 / 버전  -->
                     <div class="col-md-4">
                       <label for="newSoEstiIdView" class="form-label">견적서코드</label>
                       <input id="newSoEstiIdView" type="text" class="form-control" readonly>
@@ -47,19 +47,53 @@
                       <input id="newSoVersion" type="text" class="form-control" readonly>
                     </div>
 					
+					<div class="col-md-4"></div>
+					
+					
+					<!-- 2행 고객사명 / 납기일 -->
                     <div class="col-md-4">
                       <label for="newSoCustcomName" class="form-label">고객사명</label>
                       <input id="newSoCustcomName" type="text" class="form-control" readonly>
                     </div>
-                    
-                    <!-- 2행: 납기일 / 배송지 주소 -->
                     
                     <div class="col-md-4">
                       <label for="newSoDueDt" class="form-label">납기일</label>
                       <input id="newSoDueDt" type="text" class="form-control" readonly>
                     </div>
                     
-                    <div class="col-md-8">
+                    <div class="col-md-4"></div>
+                    
+                    
+                    <!-- 3행 입금약속일 / 입금약속금액 / 결제방법 -->
+                    <div class="col-md-4">
+						<label for="rciptAppoDt" class="form-label">적용일</label>
+						<div class="input-group date js-date-single">
+							<input id="rciptAppoDt" type="text"
+								class="form-control datepicker js-date-input"
+								placeholder="입금약속일 선택"> <span
+								class="input-group-text js-date-icon"> <i
+								class="bi bi-calendar"></i>
+							</span>
+						</div>
+                    </div>
+                    
+                    
+                    <div class="col-md-4">
+                      <label for="rciptAppoAmt" class="form-label">입금약속금액</label>
+                      <input id="rciptAppoAmt" type="text" class="form-control" placeholder="입금약속금액을 입력해주세요." >
+                    </div>
+                    
+                    <div class="col-md-4">
+						<label class="form-label">결제방법</label>
+						<select id="sttlMthd" class="form-select same-height price-type">
+							<option value="">현금</option>
+							<option value="">카드</option>
+							<option value="">계좌이체</option>
+						</select>
+                    </div>
+                    
+                    
+                    <div class="col-md-12">
                       <label for="newSoShipAddr" class="form-label">배송지주소</label>
                       <input id="newSoShipAddr" type="text" class="form-control" placeholder="배송지를 입력해주세요.">
                     </div>

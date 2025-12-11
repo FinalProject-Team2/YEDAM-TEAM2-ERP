@@ -7,7 +7,7 @@
 		    churn_risk_id 		as churnRiskId,
 		    cust_aggregate_no	as custAggregateNo,
 		    vend_id 			as vendId,
-		    sales_change		as salesChange,
+		    TRIM(sales_change)	as salesChange,
 		    ty					as TY,			
 		    stdr_value			as stdrValue,
 		    stdr_dc				as stdrDc,
@@ -17,8 +17,19 @@
 		    updt_dt				as updtDt,
 		    updt_by				as updtBy
 		FROM  
-   		tb_churn_risk_stdr
+   			tb_churn_risk_stdr
+   		ORDER BY CHURN_RISK_ID
 	</select>
+	
+	<update id="updateChurnStdr" parameterType="store.yd2team.business.service.ChurnStdrVO">
+	    UPDATE tb_churn_risk_stdr
+	    SET
+	        stdr_value = #{stdrValue},
+	        stdr_dc    = #{stdrDc},
+	        yn         = #{yn}
+	    WHERE
+	        churn_risk_id = #{churnRiskId}
+	</update>
 	
 	<!-- 휴면,이탈고객 검색조회 -->
 	<select id="getchurnRiskList" parameterType="store.yd2team.business.service.churnRiskVO">

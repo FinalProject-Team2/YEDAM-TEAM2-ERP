@@ -18,7 +18,7 @@ public interface MlssService {
 	MlssVO mlssVisitChk(String val);
 	
 	//다면평가 평가완료 카운트 불러오기
-	List<MlssVO> mlssStLoadBefore(String vendId, String deptId, String mlssId);
+	List<MlssVO> mlssStLoadBefore(String vendId, String deptId, String mlssId, String empId);
 	
 	//다면평가 상사 및 동료 리스트 불러오기
 	List<MlssVO> mlssEmpList(String empId, String deptId);
@@ -30,5 +30,5 @@ public interface MlssService {
 	int mlssWrterRegist(MlssRequestVO val);
 	
 	//다면평가 결과지 확인 눌럿을 때 보낼 데이터
-	List<MlssVO> FinalResultMlssList(String vendId, String deptId, String mlssId);
+	List<MlssVO> FinalResultMlssList(String vendId, String deptId, String mlssId, String empId);
 }

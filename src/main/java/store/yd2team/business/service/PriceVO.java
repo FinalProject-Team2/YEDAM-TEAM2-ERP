@@ -25,6 +25,8 @@ public class PriceVO {
     private String creaBy;
     private String updtBy;
     
+    private String type;
+    
  // 다건 디테일 목록 (VO 분리 안 할 때)
     private List<Map<String, Object>> detailList;
     

@@ -59,10 +59,10 @@
                <div class="card-body">
                    <div class="row">
                        <div class="col-md-4">
-                           <label for="autoCustcomId" class="form-label">고객사코드</label>
+                           <label for="autoCustcomId" class="form-label">고객코드</label>
                            <div class="position-relative">
                                <input id="autoCustcomId" type="text" class="form-control"
-                                      placeholder="고객사코드를 입력해주세요" autocomplete="off">
+                                      placeholder="고객코드를 입력해주세요" autocomplete="off">
                                <ul id="autoCustcomIdSuggest"
                                    class="list-group position-absolute w-100"
                                    style="z-index: 2000;">
@@ -123,43 +123,14 @@
    <div th:replace="business/modal/creditCustModal :: creditModal"></div>
 </div><!-- /.lock-account-wrapper -->
 <script>
-   // 1. Toast UI Grid 테마
-   tui.Grid.applyTheme('default', {
-       cell: {
-           normal: {
-               border: '#dedede',
-               background: '#ffffff',
-               showVerticalBorder: true
-           },
-           header: {
-               border: '#dedede',
-               background: '#f5f5f5',
-               showVerticalBorder: true
-           },
-           rowHeader: {
-               border: '#dedede',
-               background: '#ffffff',
-               showVerticalBorder: true
-           },
-           editable: {
-               background: '#FFFDF0',
-               text: '#000'
-           },
-           selectedHeader: {
-               background: '#f5f5f5'
-           },
-           selected: {
-               background: '#ffffff'
-           }
-       }
-   });
-   // 2. 더미 데이터 (백엔드에서 내려주는 컬럼 예시)
+   
+   // 1. 더미 데이터 (백엔드에서 내려주는 컬럼 예시)
    // custcomId, custcomName, creditGrad, cdtlnCheck,
    // mrtggLmt, creditLmt, cdtlnLmt, lmtoverCheck,
    // applcBeginDt, applcEndDt,
    // remainAmt, maxOverdueMm, badCreditYn, shipHoldYn, turnoverDays
    const creditData = [];
-   // 3. Grid 공통 옵션
+   // 2. Grid 공통 옵션
    const businessGridOptions = {
        bodyHeight: 260,
        scrollX: true,
@@ -180,7 +151,7 @@
        if (str === '') return 0;
        return Number(str) || 0;
    }
-   // 4. 여신한도 / 여신현황 Grid 생성
+   // 3. 여신한도 / 여신현황 Grid 생성
    const creditGrid = new tui.Grid({
        el: document.getElementById('creditGrid'),
        data: creditData,

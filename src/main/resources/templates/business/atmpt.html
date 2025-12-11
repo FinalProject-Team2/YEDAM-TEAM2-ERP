@@ -154,136 +154,16 @@
 		</div>
 	</div>
 
-	<!-- 미수 처리 상세 -->
-	<div class="card arrear-detail-area">
-			<h5 class="card-title">미수 처리 상세</h5>
-		<div class="card-header-left">
-		<button class="btn btn-outline-dark" id="openDelayModal">연체관리이력</button>
-		</div>
 
-		<div class="card-body">
-			<!-- 1행 : 금액 / 수금구분 -->
-			<div class="row g-2">
-				<!-- 매출금액 -->
-				<div class="col-md-3">
-					<label for="saleAmt" class="form-label">매출금액</label> <input
-						type="text" id="saleAmt" class="form-control text-end"
-						placeholder="0" />
-				</div>
-
-				<!-- 수금누계금액 -->
-				<div class="col-md-3">
-					<label for="rcvTotalAmt" class="form-label">수금누계금액</label> <input
-						type="text" id="rcvTotalAmt" class="form-control text-end"
-						placeholder="0" />
-				</div>
-
-				<!-- 미수금액 -->
-				<div class="col-md-3">
-					<label for="arrearAmt" class="form-label">미수금액</label> <input
-						type="text" id="arrearAmt" class="form-control text-end"
-						placeholder="0" />
-				</div>
-
-				<!-- 수금구분 -->
-				<div class="col-md-3">
-					<label for="rcvType" class="form-label">수금구분</label> <select
-						id="rcvType" class="form-select">
-						<option value="">선택</option>
-						<option value="CASH">현금</option>
-						<option value="BANK">계좌이체</option>
-						<option value="CARD">카드</option>
-						<option value="NOTE">어음</option>
-					</select>
-				</div>
-			</div>
-
-			<!-- 2행 : 수금예정일 / 연체구분 / 상환여부 -->
-			<div class="row g-2 mt-3">
-				<!-- 수금예정일 -->
-				<div class="col-md-3">
-					<label for="planRcvDt" class="form-label">수금예정일</label>
-					<div class="input-group">
-						<input type="text" id="planRcvDt" class="form-control"
-							placeholder="YYYY-MM-DD" /> <span class="input-group-text">
-							<i class="bi bi-calendar"></i>
-						</span>
-					</div>
-				</div>
-
-				<!-- 연체구분 -->
-				<div class="col-md-3">
-					<label for="delayType" class="form-label">연체구분</label> <select
-						id="delayType" class="form-select">
-						<option value="">선택</option>
-						<option value="NORM">정상</option>
-						<option value="SHORT">단기연체</option>
-						<option value="LONG">장기연체</option>
-						<option value="LOSS">대손처리</option>
-					</select>
-				</div>
-
-				<!-- 상환여부 -->
-				<div class="col-md-3 ms-4">
-					<label class="form-label d-block mb-1">상환여부</label>
-
-					<div class="d-flex align-items-center gap-3">
-						<div class="form-check form-check-inline">
-							<input class="form-check-input" type="radio" name="repayYn"
-								id="repayY" value="Y" checked /> <label
-								class="form-check-label" for="repayY">Y</label>
-						</div>
-
-						<div class="form-check form-check-inline">
-							<input class="form-check-input" type="radio" name="repayYn"
-								id="repayN" value="N" /> <label class="form-check-label"
-								for="repayN">N</label>
-						</div>
-					</div>
-				</div>
-
-			</div>
-		</div>
-	</div>
 	<div th:replace="business/modal/delayModal :: delayModal"></div>
 	
-	<script>
-
-
-	
-    // 1. Toast UI Grid 테마
-	tui.Grid.applyTheme('default', {
-	  cell: {
-	    normal: {
-	      border: '#dedede',
-	      background: '#ffffff',
-	      showVerticalBorder: true
-	    },
-	    header: {
-	      border: '#dedede',
-	      background: '#f5f5f5',
-	      showVerticalBorder: true
-	    },
-	    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
-	    rowHeader: {
-	      border: '#dedede',
-	      background: '#ffffff',
-	      showVerticalBorder: true
-	    },
-	    editable: {
-	      background: '#FFFDF0',
-	      text: '#000'
-	    },
-	    selectedHeader: {
-	      background: '#f5f5f5'
-	    },
-	    selected: {
-	      background: '#ffffff'
-	    }
-	  }
-	});
-
-
+<script>
+	function toNumber(val) {
+	    if (val === null || val === undefined) return 0;
+	    const str = String(val).replace(/,/g, '').trim();
+	    if (str === '') return 0;
+	    return Number(str) || 0;
+	}
 
     // 2. 더미 데이터
     const detailData = [
@@ -330,12 +210,51 @@
         columns: [
             { header: '고객코드', name: 'custcomId' },
             { header: '고객사', name: 'custcomName' },
-            { header: '신용등급', name: 'creditGrade' },
-            { header: '연체구분', name: 'delayFg' },
-            { header: '당월매출금액', name: 'monthSaleAmt' },
-            { header: '기초미수잔액', name: 'basicAtmptBlce' },
-            { header: '수금', name: 'recpt' },
-            { header: '미수금액', name: 'atmptAmt' },
+            { header: '신용등급', name: 'creditGrade', width: 90, align: 'center' },
+            {
+	            header: '입금약속액',
+	            name: 'rciptAppoAmt',
+	            editor: 'text',
+	            align: 'right',
+	            formatter: ({value}) => {
+	                const num = toNumber(value);
+	                return num ? num.toLocaleString() : '';
+	            }
+       		},
+        	{
+	        	header: '입금약속일', 
+	        	name: 'rciptAppoDt', 
+	        	align: 'right',
+	        	editor: 'text'
+        	},
+            { header: '연체구분', name: 'delayFg', width: 90, align: 'center' },
+            { header: '당월매출금액', name: 'monthSaleAmt', align: 'right',
+            	 formatter: ({value}) => {
+ 	                const num = toNumber(value);
+ 	                return num ? num.toLocaleString() : '';
+ 	            }
+            },
+            { header: '기초미수잔액', name: 'basicAtmptBlce', align: 'right',
+            	 formatter: ({value}) => {
+ 	                const num = toNumber(value);
+ 	                return num ? num.toLocaleString() : '';
+ 	            }
+            },
+            { header: '수금', name: 'recpt', align: 'right',
+           	 formatter: ({value}) => {
+	                const num = toNumber(value);
+	                return num ? num.toLocaleString() : '';
+	            } 
+           	},
+           	{ header: '수금구분', name: 'recptFg', align: 'center'}, 
+            { header: '미수금액', name: 'atmptAmt', align: 'right',
+            	 formatter: ({value}) => {
+ 	                const num = toNumber(value);
+ 	                return num ? num.toLocaleString() : '';
+ 	            }
+            },
+           	{ header: '연체구분', name: 'delayFg', align: 'center'},
+           	{ header: '상환여부', name: 'rpayAt', align: 'center'},
         ]
     });
 

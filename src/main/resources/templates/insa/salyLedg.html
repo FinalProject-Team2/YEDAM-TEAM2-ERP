@@ -189,6 +189,8 @@
   let originalGridData = [];
   let currentTabStatus = "BEFORE_PAY"; // BEFORE_PAY / PAID
   let gridData = [];
+  // ✅ 현재 선택된 rowKey (라디오 선택용)
+  let selectedRowKey = null;
 
   /***************************
    * 2. 메인 급여대장 TUI Grid
@@ -206,8 +208,9 @@
         name: "선택",
         width: 50,
         align: "center",
-        formatter: ({ rowKey }) => {
-          return `<input type="radio" name="salyLedgRadio" data-row-key="${rowKey}" />`;
+        formatter: () => {
+          // DOM 라디오 자체는 단순 표시용, rowKey는 JS 변수로 관리
+          return `<input type="radio" name="salyLedgRadio" />`;
         }
       },
       { header: "귀속연월",     name: "revsMmdd",   align: "center" },
@@ -286,6 +289,8 @@
           };
         });
 
+        // 리스트 새로 불러오면 선택 초기화
+        selectedRowKey = null;
         applyTabFilter();
       })
       .catch(err => {
@@ -296,16 +301,31 @@
 
   document.getElementById("btnSearch")?.addEventListener("click", loadSalyList);
 
+  // 🔎 검색조건 엔터로도 조회
+  const srchSalyNmEl   = document.getElementById("srchSalyNm");
+  const payDtStartEl   = document.getElementById("payDtStart");
+  const payDtEndEl     = document.getElementById("payDtEnd");
+
+  [srchSalyNmEl, payDtStartEl, payDtEndEl].forEach(el => {
+    if (!el) return;
+    el.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        loadSalyList();
+      }
+    });
+  });
+
   /*************************
    * 4. 라디오 선택 헬퍼
    *************************/
   function getSelectedRow() {
-    const checked = document.querySelector('input[name="salyLedgRadio"]:checked');
-    if (!checked) return null;
-    const rowKey = Number(checked.dataset.rowKey);
-    const row = grid.getRow(rowKey);
+    if (selectedRowKey === null || selectedRowKey === undefined) {
+      return null;
+    }
+    const row = grid.getRow(selectedRowKey);
     if (!row) return null;
-    return { rowKey, row };
+    return { rowKey: selectedRowKey, row };
   }
 
   /*************************
@@ -359,6 +379,8 @@
       statusTabs.forEach(t => t.classList.remove("active"));
       this.classList.add("active");
       currentTabStatus = this.dataset.status || "BEFORE_PAY";
+      // 탭 바꾸면 선택 초기화
+      selectedRowKey = null;
       applyTabFilter();
     });
   });
@@ -418,11 +440,28 @@
     });
   }
 
+  // ✅ 그리드 클릭 시 선택 rowKey 저장 + 라디오 체크 동기화
   grid.on("click", ev => {
-    const target = ev.target;
-    if (target instanceof HTMLElement &&
-        target.matches('input[type="radio"][name="salyLedgRadio"]')) {
-      updateConfirmButtonLabel();
+    const { rowKey, columnName, nativeEvent } = ev;
+    if (rowKey == null) return;
+
+    selectedRowKey = rowKey;
+    updateConfirmButtonLabel();
+
+    // 클릭한 행의 라디오만 체크되도록 처리 (시각적 동기화)
+    const target = nativeEvent.target;
+    if (target instanceof HTMLElement && target.type === "radio") {
+      // 브라우저 기본 동작으로 충분
+      return;
+    } else {
+      // 행의 '선택' 셀 안 라디오를 찾아서 체크
+      const rowEl = grid.getElement(rowKey, "선택");
+      if (rowEl) {
+        const radio = rowEl.querySelector('input[type="radio"][name="salyLedgRadio"]');
+        if (radio) {
+          radio.checked = true;
+        }
+      }
     }
   });
 
