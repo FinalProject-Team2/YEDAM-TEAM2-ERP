@@ -11,9 +11,14 @@ public interface SalyLedgService {
 
     List<SalyLedgVO> getSalyLedgList(
             String vendId,
-            String deptId,
             String salyLedgNm,
             String payDtStart,
             String payDtEnd
     );
+
+    /** 급여대장 + 사원 ID 리스트(명세서 기준) */
+    SalyLedgVO getSalyLedgDetail(String salyLedgId, String vendId);
+
+    /** 급여대장 + 해당 명세서 전체 삭제 */
+    void deleteSalyLedg(String salyLedgId, String vendId);
 }
