@@ -35,9 +35,6 @@ public class SalyLedgVO {
     // 화면: yyyy-MM-dd
     private String payDt;
 
-    private String deptId;
-    private String deptNm;
-
     private Integer rcnt;        // 인원수
     private Double ttPayAmt;     // 총지급액
 
