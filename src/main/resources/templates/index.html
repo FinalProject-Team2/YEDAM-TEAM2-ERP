@@ -32,6 +32,12 @@ legend.scheduler-border {
 </head>
 <body layout:fragment="content">
 <h1>태초마을</h1>
+
+<p>
+  WRITE 권한?
+  <span th:text="${@authView.canWrite('HR_EMP_ACCT')} ? '예' : '아니오'"></span>
+</p>
+
 <h1>[[${test}]]</h1>
 <fieldset class="scheduler-border">
   <legend class="scheduler-border">검색조건</legend>

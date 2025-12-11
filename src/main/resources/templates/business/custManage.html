@@ -115,7 +115,8 @@
 							<h5 class="card-title">고객정보</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark" id="newCustBtn">신규</button>
+							<!-- <button type="button" class="btn btn-outline-dark" id="newCustBtn">신규</button> -->
+							<div th:replace="~{fragments/buttons :: newButton('MENU_SALES_005', 'newCustBtn')}"></div>
 							<!-- <button type="button" class="btn btn-outline-dark" id="saveBtn">저장</button> -->
 						</div>
 

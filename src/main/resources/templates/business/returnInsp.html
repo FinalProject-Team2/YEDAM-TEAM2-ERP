@@ -86,10 +86,14 @@
 							<h5 class="card-title">주문서 목록</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark" id="addOustBtn">출하지시서 작성</button>
-							<button type="button" class="btn btn-outline-dark" id="approveSoBtn">승인</button>
-							<button type="button" class="btn btn-outline-dark" id="rejectSoBtn">보류</button>
-							<button type="button" class="btn btn-danger" id="deleteSoBtn">주문취소</button>
+							<!-- <button type="button" class="btn btn-outline-dark" id="addOustBtn">출하지시서 작성</button> -->
+							<div th:replace="~{fragments/buttons :: oustButton('MENU_SALES_016', 'addOustBtn')}"></div>
+							<!-- <button type="button" class="btn btn-outline-dark" id="approveSoBtn">승인</button> -->
+							<div th:replace="~{fragments/buttons :: approveButton('MENU_SALES_016', 'approveSoBtn')}"></div>
+							<!-- <button type="button" class="btn btn-outline-dark" id="rejectSoBtn">보류</button> -->
+							<div th:replace="~{fragments/buttons :: rejectButton('MENU_SALES_016', 'rejectSoBtn')}"></div>
+							<!-- <button type="button" class="btn btn-danger" id="deleteSoBtn">주문취소</button> -->
+							<div th:replace="~{fragments/buttons :: deleteSoButton('MENU_SALES_016', 'deleteSoBtn')}"></div>
 						</div>
 					</div>
 

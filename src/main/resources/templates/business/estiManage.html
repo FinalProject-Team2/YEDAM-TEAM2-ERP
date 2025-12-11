@@ -56,7 +56,7 @@
 
 </head>
 <body layout:fragment="content">
-	<div class="esti-manage-wrapper">
+	<div class="esti-manage-wrapper" th:data-can-write-esti="${@authView.canWrite('MENU_SALES_002')}">
 		<!-- 견적 조회 카드 -->
 		<div class="row mb-3">
 			<div class="col-md-12">
@@ -130,7 +130,8 @@
 							<h5 class="card-title">견적서 목록</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark" id="newEstiBtn">신규</button>
+							<!-- <button type="button" class="btn btn-outline-dark" id="newEstiBtn">신규</button> -->
+							<div th:replace="~{fragments/buttons :: newButton('MENU_SALES_002', 'newEstiBtn')}"></div>
 						</div>
 					</div>
 
@@ -150,8 +151,11 @@
 <div th:replace="business/modal/newEstiModal :: newEstiModal"></div>
 <div th:replace="business/modal/newSoModal :: newSoModal"></div>
 
-
 <script>
+/* 정재민 추가함  */
+	const wrapper = document.querySelector('.esti-manage-wrapper');
+	const CAN_WRITE_ESTI = wrapper && wrapper.dataset.canWriteEsti === 'true';
+
 	// 0. 데이터
 	const estiData = [];
 	let searchForm = {
@@ -186,33 +190,51 @@
 			{ header: '상품명', name: 'productName' },
 			{ header: '납기일', name: 'dueDt', align: 'right'  },
 			{
-			    header: '승인 / 반려',
-			    name: 'apRj',
-			    align: 'center',
-			    formatter: ({ row }) => {
-			    	if (row.estiSt === 'es1') {
-		    	      return `
-		    	        <button class="btn btn-success approve-btn" data-id="${row.estiId}">승인</button>
-		    	        <button class="btn btn-danger reject-btn" data-id="${row.estiId}">반려</button>
-		    	      `;
-		    	    }
+				  header: '승인 / 반려',
+				  name: 'apRj',
+				  align: 'center',
+				  formatter: ({ row }) => {
+				    const estiId = row.estiId;
 
-		    	    if (row.estiSt === 'es2') {
-		    	      return `
-		    	        <button class="btn btn-primary order-btn" data-id="${row.estiId}">주문서 등록</button>
-		    	      `;
-		    	    }
-		    	    
-		    	    if (row.estiSt === 'es3') {
-		    	      return `
-		    	        <button class="btn btn-success approve-btn" disabled style="opacity:0.5; cursor:not-allowed;">승인</button>
-		    	        <button class="btn btn-danger reject-btn" disabled style="opacity:0.5; cursor:not-allowed;">반려</button>
-		    	      `;
-		    	    }
-		    	    
-		    	    return "";
-			    }
-	    	},
+				    // 대기 (es1) → 승인/반려
+				    if (row.estiSt === 'es1') {
+				      if (CAN_WRITE_ESTI) {
+				        return `
+				          <button class="btn btn-success approve-btn" data-id="${estiId}">승인</button>
+				          <button class="btn btn-danger reject-btn" data-id="${estiId}">반려</button>
+				        `;
+				      } else {
+				        return `
+				          <button class="btn btn-success approve-btn btn-disabled" data-id="${estiId}" disabled>승인</button>
+				          <button class="btn btn-danger reject-btn btn-disabled" data-id="${estiId}" disabled>반려</button>
+				        `;
+				      }
+				    }
+
+				    // 승인됨 (es2) → 주문서 등록
+				    if (row.estiSt === 'es2') {
+				      if (CAN_WRITE_ESTI) {
+				        return `
+				          <button class="btn btn-primary order-btn" data-id="${estiId}">주문서 등록</button>
+				        `;
+				      } else {
+				        return `
+				          <button class="btn btn-primary order-btn btn-disabled" data-id="${estiId}" disabled>주문서 등록</button>
+				        `;
+				      }
+				    }
+
+				    // 반려 (es3) → 그냥 disabled
+				    if (row.estiSt === 'es3') {
+				      return `
+				        <button class="btn btn-success approve-btn btn-disabled" disabled>승인</button>
+				        <button class="btn btn-danger reject-btn btn-disabled" disabled>반려</button>
+				      `;
+				    }
+
+				    return "";
+				  }
+			},
 			{ 
 	    		header: '상태', 
 	    		name: 'estiStNm', 

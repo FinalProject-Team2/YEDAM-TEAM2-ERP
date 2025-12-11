@@ -171,9 +171,12 @@
         <h5 class="card-title">휴일 기준 관리</h5>
         <!-- ✅ 버튼 영역에 아이디 추가 -->
         <div class="card-header-right" id="hldyHeaderBtns">
-          <button class="btn btn-danger" id="btnHldyDel">삭제</button>
-          <button class="btn btn-outline-dark" id="btnHldyAdd">행추가</button>
-          <button class="btn btn-outline-dark" id="btnHldySave">저장</button>
+          <!-- <button class="btn btn-outline-dark" id="btnHldyAdd">행추가</button> -->
+          <div th:replace="~{fragments/buttons :: addRowButton('MENU_HR_010', 'btnHldyAdd')}"></div>
+          <!-- <button class="btn btn-outline-dark" id="btnHldySave">저장</button> -->
+          <div th:replace="~{fragments/buttons :: saveButton('MENU_HR_010', 'btnHldySave')}"></div>
+          <!-- <button class="btn btn-danger" id="btnHldyDel">삭제</button> -->
+          <div th:replace="~{fragments/buttons :: deleteButton('MENU_HR_010', 'btnHldyDel')}"></div>
         </div>
       </div>
       <div class="card-body">
@@ -217,9 +220,11 @@
         <div class="card-header-right">
           <!-- ✅ 버튼에 id 부여 -->
           <button class="btn btn-dark"          id="btnWkReset">초기화</button>
-          <button class="btn btn-danger"        id="btnWkDelete">삭제</button>
-          <button class="btn btn-outline-dark"  id="btnWkSave">저장</button>
           <button class="btn btn-outline-dark"  id="openGuideModal">조회</button>
+          <!-- <button class="btn btn-outline-dark"  id="btnWkSave">저장</button> -->
+          <div th:replace="~{fragments/buttons :: saveButton('MENU_HR_010', 'btnWkSave')}"></div>
+          <!-- <button class="btn btn-danger"        id="btnWkDelete">삭제</button> -->
+          <div th:replace="~{fragments/buttons :: deleteButton('MENU_HR_010', 'btnWkDelete')}"></div>
         </div>
       </div>
 

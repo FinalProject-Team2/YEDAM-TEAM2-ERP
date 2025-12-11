@@ -39,10 +39,9 @@
 						<h5 class="card-title">업종</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark" onclick="addIndustryRow()">추가</button>
-						<button class="btn btn-outline-dark"
-								onclick="savePotentialStdrDetailList()">등록</button>
-						<button type="button" id="btnDeleteIndustry" class="btn btn-outline-dark">삭제</button>
+						<div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_012', 'btnAddIndustry')}"></div>
+						<div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_012', 'btnSaveIndustry')}"></div>
+						<div th:replace="~{fragments/buttons :: deleteButton('MENU_SALES_012', 'btnDeleteIndustry')}"></div>
 					</div>
 				</div>
 				<div class="card-body">
@@ -58,10 +57,9 @@
 						<h5 class="card-title">설립</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark" onclick="addYearRow()">추가</button>
-						<button class="btn btn-outline-dark"
-								onclick="savePotentialStdrDetailList()">등록</button>
-						<button type="button" id="btnDeleteYear" class="btn btn-outline-dark">삭제</button>
+						<div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_012', 'btnAddYear')}"></div>
+						<div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_012', 'btnSaveYear')}"></div>
+						<div th:replace="~{fragments/buttons :: deleteButton('MENU_SALES_012', 'btnDeleteYear')}"></div>
 					</div>
 				</div>
 				<div class="card-body">
@@ -80,10 +78,9 @@
 						<h5 class="card-title">규모</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark" onclick="addSizeRow()">추가</button>
-						<button class="btn btn-outline-dark"
-							onclick="savePotentialStdrDetailList()">등록</button>
-						<button type="button" id="btnDeleteSize" class="btn btn-outline-dark">삭제</button>
+						<div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_012', 'btnAddSize')}"></div>
+						<div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_012', 'btnSaveSize')}"></div>
+						<div th:replace="~{fragments/buttons :: deleteButton('MENU_SALES_012', 'btnDeleteSize')}"></div>
 					</div>
 				</div>
 				<div class="card-body">
@@ -99,9 +96,9 @@
 						<h5 class="card-title">지역/상권</h5>
 					</div>
 					<div class="card-header-right">
-							<button class="btn btn-outline-dark" onclick="addRegionRow()">추가</button>
-							<button class="btn btn-outline-dark" onclick="savePotentialStdrDetailList()">등록</button>
-							<button type="button" id="btnDeleteRegion" class="btn btn-outline-dark">삭제</button>
+							<div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_012', 'btnAddRegion')}"></div>
+						    <div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_012', 'btnSaveRegion')}"></div>
+						    <div th:replace="~{fragments/buttons :: deleteButton('MENU_SALES_012', 'btnDeleteRegion')}"></div>
 						</div>
 					</div>
 				<div class="card-body">
@@ -265,6 +262,49 @@
  	// 전체 저장 버튼 이벤트
 	    $('#btnSaveAll').on('click', function () {
 	        savePotentialStdrDetailList();
+	    });
+	 // === 업종 카드 ===
+	    $('#btnAddIndustry').on('click', function () {
+	      addIndustryRow();
+	    });
+	    $('#btnSaveIndustry').on('click', function () {
+	      savePotentialStdrDetailList();
+	    });
+	    $('#btnDeleteIndustry').on('click', function () {
+	      deleteRows(industryGrid);
+	    });
+
+	    // === 설립 카드 ===
+	    $('#btnAddYear').on('click', function () {
+	      addYearRow();
+	    });
+	    $('#btnSaveYear').on('click', function () {
+	      savePotentialStdrDetailList();
+	    });
+	    $('#btnDeleteYear').on('click', function () {
+	      deleteRows(yearGrid);
+	    });
+
+	    // === 규모 카드 ===
+	    $('#btnAddSize').on('click', function () {
+	      addSizeRow();
+	    });
+	    $('#btnSaveSize').on('click', function () {
+	      savePotentialStdrDetailList();
+	    });
+	    $('#btnDeleteSize').on('click', function () {
+	      deleteRows(sizeGrid);
+	    });
+
+	    // === 지역/상권 카드 ===
+	    $('#btnAddRegion').on('click', function () {
+	      addRegionRow();
+	    });
+	    $('#btnSaveRegion').on('click', function () {
+	      savePotentialStdrDetailList();
+	    });
+	    $('#btnDeleteRegion').on('click', function () {
+	      deleteRows(regionGrid);
 	    });
 	});
 	//

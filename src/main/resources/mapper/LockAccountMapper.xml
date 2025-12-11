@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.common.mapper.LockAccountMapper">
+
+    <select id="selectEmpAcctStatusCodes"
+            resultType="store.yd2team.common.dto.CodeDto">
+        SELECT
+            code_id AS codeId,
+            grp_id  AS grpId,
+            vend_id AS vendId,
+            code_nm AS codeNm,
+            yn,
+            crea_dt AS creaDt,
+            crea_by AS creaBy,
+            updt_dt AS updtDt,
+            updt_by AS updtBy
+        FROM tb_code
+        WHERE grp_id = 'r'
+        ORDER BY code_id
+    </select>
+
+
+    <select id="selectLockAccountList"
+	        parameterType="store.yd2team.common.dto.LockAccountSearchDto"
+	        resultType="store.yd2team.common.dto.LockAccountDto">
+	
+	    SELECT
+	        ea.emp_acct_id AS empAcctId,
+	        ea.vend_id     AS vendId,
+	        v.vend_nm      AS clientName,
+	        ea.login_id    AS accountId,
+	        e.nm           AS userName,
+	        ea.st          AS status,
+	        c.code_nm      AS statusNm,
+	        ea.lock_dttm   AS lockTime
+	    FROM tb_emp_acct ea
+	        JOIN tb_vend v
+	          ON ea.vend_id = v.vend_id
+	        LEFT JOIN tb_emp e
+	          ON ea.emp_id  = e.emp_id
+	         AND ea.vend_id = e.vend_id
+	        LEFT JOIN tb_code c
+	          ON ea.st      = c.code_id
+	         AND c.grp_id   = 'r'
+	    WHERE ea.mas_yn = 'e1'   <!-- 마스터 계정만 -->
+	    <if test="clientName != null and clientName != ''">
+	        AND v.vend_nm LIKE '%' || #{clientName} || '%'
+	    </if>
+	    <if test="accountId != null and accountId != ''">
+	        AND ea.login_id LIKE '%' || #{accountId} || '%'
+	    </if>
+	    <if test="userName != null and userName != ''">
+	        AND e.nm LIKE '%' || #{userName} || '%'
+	    </if>
+	    <if test="status != null and status != ''">
+	        AND ea.st = #{status}
+	    </if>
+	    <if test="lockStartDt != null and lockStartDt != ''">
+	        <![CDATA[
+	        AND ea.lock_dttm >= TO_DATE(#{lockStartDt}, 'YYYY-MM-DD')
+	        ]]>
+	    </if>
+	    <if test="lockEndDt != null and lockEndDt != ''">
+	        <![CDATA[
+	        AND ea.lock_dttm < TO_DATE(#{lockEndDt}, 'YYYY-MM-DD') + 1
+	        ]]>
+	    </if>
+	    ORDER BY ea.lock_dttm DESC NULLS LAST,
+	             v.vend_nm,
+	             ea.login_id
+	</select>
+
+    <update id="updateAccountStatus"
+            parameterType="store.yd2team.common.dto.LockAccountUpdateDto">
+        UPDATE tb_emp_acct
+           SET st      = #{status},
+               updt_dt = SYSDATE,
+               updt_by = #{updtBy}
+         WHERE emp_acct_id = #{empAcctId}
+           AND mas_yn      = 'e1'
+    </update>
+
+    <select id="selectVendAutoComplete"
+            parameterType="string"
+            resultType="store.yd2team.common.dto.AutoCompleteItemDto">
+        SELECT
+            v.vend_id AS id,
+            v.vend_nm AS label,
+            v.vend_nm AS value
+        FROM tb_vend v
+        WHERE v.vend_nm LIKE '%' || #{keyword} || '%'
+        ORDER BY v.vend_nm
+    </select>
+
+
+    <!-- 5) 자동완성 - 계정 ID (마스터 계정만) -->
+    <select id="selectAccountIdAutoComplete"
+            parameterType="string"
+            resultType="store.yd2team.common.dto.AutoCompleteItemDto">
+        SELECT
+            ea.emp_acct_id AS id,
+            ea.login_id    AS label,
+            ea.login_id    AS value
+        FROM tb_emp_acct ea
+        WHERE ea.mas_yn   = 'e1'
+          AND ea.login_id LIKE '%' || #{keyword} || '%'
+        ORDER BY ea.login_id
+    </select>
+
+
+    <!-- 6) 자동완성 - 사용자 이름 (마스터 계정만) -->
+    <select id="selectUserNameAutoComplete"
+            parameterType="string"
+            resultType="store.yd2team.common.dto.AutoCompleteItemDto">
+        SELECT
+            ea.emp_acct_id AS id,
+            e.nm           AS label,
+            e.nm           AS value
+        FROM tb_emp_acct ea
+            JOIN tb_emp e
+              ON ea.emp_id  = e.emp_id
+             AND ea.vend_id = e.vend_id
+        WHERE ea.mas_yn = 'e1'
+          AND e.nm LIKE '%' || #{keyword} || '%'
+        ORDER BY e.nm
+    </select>
+
+</mapper>

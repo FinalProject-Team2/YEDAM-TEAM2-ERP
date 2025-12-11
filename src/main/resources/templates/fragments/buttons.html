@@ -7,35 +7,203 @@
     <title>공통 버튼</title>
 </head>
 <body>
-
+<!-- <div th:replace="~{fragments/buttons :: saveButton('MENU_COMM_001', 'insertBtn')}"></div>  -->
 <!-- 저장 버튼 (등록+수정 공용) -->
-<th:block th:fragment="saveButton(menuId)">
-    <th:block th:if="${@authView.canWrite(menuId)}">
-        <button type="button" class="btn btn-primary btn-sm"
-                id="btnSave">
-            저장
-        </button>
-    </th:block>
+<th:block th:fragment="saveButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        저장
+    </button>
+</th:block>
+
+<!-- 등록/수정 조회 버튼 (등록+수정 공용) -->
+<th:block th:fragment="regButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        등록/수정
+    </button>
+</th:block>
+
+<!-- 확정/취소 조회 버튼 (등록+수정 공용) -->
+<th:block th:fragment="confirmButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        확정/취소
+    </button>
+</th:block>
+
+<!-- 급여 계산 버튼 (등록+수정 공용) -->
+<th:block th:fragment="calcButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        급여 계산
+    </button>
+</th:block>
+
+<!-- 잠금 해제 버튼 (등록+수정 공용) -->
+<th:block th:fragment="unlockButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        잠금 해제
+    </button>
+</th:block>
+
+<!-- 역할 조회 버튼 (등록+수정 공용) -->
+<th:block th:fragment="roleButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        역할 조회
+    </button>
+</th:block>
+
+<!-- 반려 버튼 (등록+수정 공용) -->
+<th:block th:fragment="rejButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        반려
+    </button>
+</th:block>
+
+<!-- 출하처리 버튼 (등록+수정 공용) -->
+<th:block th:fragment="tretButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        출하처리
+    </button>
+</th:block>
+
+<!-- 입금처리 버튼 (등록+수정 공용) -->
+<th:block th:fragment="rciptButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        입금처리
+    </button>
+</th:block>
+
+<!-- 출하지시서 버튼 (등록+수정 공용) -->
+<th:block th:fragment="oustButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        출하지시서 작성
+    </button>
+</th:block>
+
+<!-- 승인 버튼 (등록+수정 공용) -->
+<th:block th:fragment="approveButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        승인
+    </button>
+</th:block>
+
+<!-- 보류 버튼 (등록+수정 공용) -->
+<th:block th:fragment="rejectButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        보류
+    </button>
+</th:block>
+
+<!-- 주문취소 버튼 -->
+<th:block th:fragment="deleteSoButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-danger"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canDelete(menuId)}"
+            th:classappend="${!@authView.canDelete(menuId)} ? ' btn-disabled'">
+        주문취소
+    </button>
+</th:block>
+
+<!-- 신규 버튼 (등록+수정 공용) -->
+<th:block th:fragment="newButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        신규
+    </button>
+</th:block>
+
+<!-- 초기화 버튼 (등록+수정 공용) -->
+<th:block th:fragment="resetButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        초기화
+    </button>
 </th:block>
 
 <!-- 삭제 버튼 -->
-<th:block th:fragment="deleteButton(menuId)">
-    <th:block th:if="${@authView.canDelete(menuId)}">
-        <button type="button" class="btn btn-danger btn-sm"
-                id="btnDelete">
-            삭제
-        </button>
-    </th:block>
+<th:block th:fragment="deleteButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-danger"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canDelete(menuId)}"
+            th:classappend="${!@authView.canDelete(menuId)} ? ' btn-disabled'">
+        삭제
+    </button>
 </th:block>
 
-<!-- 조회 버튼 (필요하면) -->
-<th:block th:fragment="searchButton(menuId)">
-    <th:block th:if="${@authView.canRead(menuId)}">
-        <button type="button" class="btn btn-secondary btn-sm"
-                id="btnSearch">
-            조회
-        </button>
-    </th:block>
+<!-- 조회 버튼 -->
+<th:block th:fragment="searchButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canRead(menuId)}"
+            th:classappend="${!@authView.canRead(menuId)} ? ' btn-disabled'">
+        조회
+    </button>
+</th:block>
+
+<!-- 행 추가 버튼 -->
+<th:block th:fragment="addRowButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-outline-dark"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canWrite(menuId)}"
+            th:classappend="${!@authView.canWrite(menuId)} ? ' btn-disabled'">
+        행 추가
+    </button>
 </th:block>
 
 </body>

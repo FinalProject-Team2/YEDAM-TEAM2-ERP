@@ -147,8 +147,11 @@
 							<h5 class="card-title">공통 코드 목록</h5>
 						</div>
 						<div class="card-header-right">
-							<button id="addRowBtn" class="btn btn-outline-dark">행추가</button>
-							<button id="insertBtn" type="button" class="btn btn-outline-dark">저장</button>
+							<!-- <button id="addRowBtn" class="btn btn-outline-dark">행추가</button> -->
+							<div th:replace="~{fragments/buttons :: addRowButton('MENU_COMM_001', 'addRowBtn')}"></div>
+							<!-- <button id="insertBtn" type="button" class="btn btn-outline-dark">저장</button> -->
+							
+							<div th:replace="~{fragments/buttons :: saveButton('MENU_COMM_001', 'insertBtn')}"></div>
 						</div>
 					</div>
 

@@ -134,9 +134,11 @@
 
 				<!-- 버튼 -->
 				<div class="card-header-right">
-					<button type="button" class="btn btn-outline-dark"
-						id="btnContactAdd">추가</button>
-					<button type="button" class="btn btn-primary" id="btnContactSave">저장</button>
+					<!-- <button type="button" class="btn btn-outline-dark"
+						id="btnContactAdd">추가</button> -->
+					<div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_014', 'btnContactAdd')}"></div>
+					<!-- <button type="button" class="btn btn-primary" id="btnContactSave">저장</button> -->
+					<div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_014', 'btnContactSave')}"></div>
 				</div>
 			</div>
 

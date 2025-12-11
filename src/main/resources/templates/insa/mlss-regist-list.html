@@ -76,9 +76,12 @@
 			class="card-header d-flex justify-content-between align-items-center">
 			<h5 class="card-title mb-0">다면평가 목록</h5>
 			<div>
-				<button class="btn btn-outline-dark">삭제</button>
-				<button id="mlssAdd" class="btn btn-outline-dark">행 추가</button>
-				<button id="mlssRegist" class="btn btn-outline-dark">저장</button>
+				<!-- <button id="mlssAdd" class="btn btn-outline-dark">행 추가</button> -->
+				<div th:replace="~{fragments/buttons :: addRowButton('MENU_HR_006', 'mlssAdd')}"></div>
+				<!-- <button id="mlssRegist" class="btn btn-outline-dark">저장</button> -->
+				<div th:replace="~{fragments/buttons :: saveButton('MENU_HR_006', 'mlssRegist')}"></div>
+				<!-- <button class="btn btn-outline-dark">삭제</button> -->
+				<div th:replace="~{fragments/buttons :: deleteButton('MENU_HR_006', 'del')}"></div>
 			</div>
 		</div>
 		<div class="card-body">

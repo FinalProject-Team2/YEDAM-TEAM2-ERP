@@ -79,18 +79,13 @@
       </div>
       <div class="card-body">
         <div class="row">
-          <!-- 3 / 3 / 6 배치 -->
-          <div class="col-md-3">
-            <label class="form-label">부서명</label>
-            <select id="dept" class="form-select">
-              <option value="">전체</option>
-            </select>
-          </div>
-          <div class="col-md-3">
+          <!-- 급여대장명칭 -->
+          <div class="col-md-2">
             <label class="form-label">급여대장명칭</label>
             <input type="text" id="srchSalyNm" class="form-control">
           </div>
-          <div class="col-md-6">
+          <!-- 지급일자 기간 -->
+          <div class="col-md-4">
             <label class="form-label">지급일자</label>
             <div class="d-flex align-items-center js-date-range">
               <div class="input-group date me-2">
@@ -123,11 +118,15 @@
       <div class="card-header">
         <h5 class="card-title mb-0">급여목록</h5>
         <div class="card-header-right d-flex gap-2">
-          <button class="btn btn-danger" id="btnSalyDelete">삭제</button>
-          <button class="btn btn-outline-dark" id="btnSalyCalc">급여계산</button>
+          <!-- <button class="btn btn-outline-dark" id="btnSalyCalc">급여계산</button> -->
+          <div th:replace="~{fragments/buttons :: calcButton('MENU_HR_008', 'btnSalyCalc')}"></div>
           <button class="btn btn-outline-dark" id="btnSalySpec">명세서 조회</button>
-          <button class="btn btn-outline-dark" id="openSalyRegistModal">등록/수정</button>
-          <button class="btn btn-outline-dark" id="btnToggleConfirm">확정/취소</button>
+          <!-- <button class="btn btn-outline-dark" id="openSalyRegistModal">등록/수정</button> -->
+          <div th:replace="~{fragments/buttons :: regButton('MENU_HR_008', 'openSalyRegistModal')}"></div>
+          <!-- <button class="btn btn-outline-dark" id="btnToggleConfirm">확정/취소</button> -->
+          <div th:replace="~{fragments/buttons :: confirmButton('MENU_HR_008', 'btnToggleConfirm')}"></div>
+          <!-- <button class="btn btn-danger" id="btnSalyDelete">삭제</button> -->
+          <div th:replace="~{fragments/buttons :: deleteButton('MENU_HR_008', 'btnSalyDelete')}"></div>
         </div>
       </div>
       <div class="card-body saly-card-body">
@@ -157,17 +156,13 @@
 
 <script>
   /***********************
-   * 0. 공통: 부서 셀렉트 로딩
+   * 0. 공통: 부서 셀렉트 로딩 (모달용만 사용)
    ***********************/
   function loadDeptOptions() {
-    const searchDept = document.getElementById("dept");
     const modalDept  = document.getElementById("salyDept");
 
-    if (searchDept) {
-      searchDept.innerHTML = '<option value="">전체</option>';
-    }
     if (modalDept) {
-      modalDept.innerHTML = '<option value="">선택</option>';
+      modalDept.innerHTML = '<option value="">전체</option>';
     }
 
     fetch('/insa/edc/inputOption')
@@ -175,12 +170,6 @@
       .then(data => {
         const deptList = data.dept || [];
         deptList.forEach(d => {
-          if (searchDept) {
-            const opt1 = document.createElement("option");
-            opt1.value = d.deptId;
-            opt1.textContent = d.deptNm;
-            searchDept.appendChild(opt1);
-          }
           if (modalDept) {
             const opt2 = document.createElement("option");
             opt2.value = d.deptId;
@@ -224,7 +213,6 @@
       { header: "귀속연월",     name: "revsMmdd",   align: "center" },
       { header: "지급일",       name: "payDt",      align: "center" },
       { header: "급여대장명칭", name: "salyLedgNm" },
-      { header: "부서명",       name: "deptNm" },
       { header: "인원수",       name: "rcnt",       align: "right" },
       {
         header: "지급총액",
@@ -250,18 +238,15 @@
    * 3. DB에서 급여대장 목록 조회
    ************************/
   function loadSalyList() {
-    const deptSel = document.getElementById("dept");
-    const salyNmInput = document.getElementById("srchSalyNm");
+    const salyNmInput    = document.getElementById("srchSalyNm");
     const payDtStartInput = document.getElementById("payDtStart");
     const payDtEndInput   = document.getElementById("payDtEnd");
 
-    const deptId    = deptSel ? (deptSel.value || "") : "";
     const salyNm    = salyNmInput ? salyNmInput.value.trim() : "";
     const payDtStart = payDtStartInput ? payDtStartInput.value.trim() : "";
     const payDtEnd   = payDtEndInput ? payDtEndInput.value.trim() : "";
 
     const params = new URLSearchParams();
-    if (deptId)    params.append("deptId", deptId);
     if (salyNm)    params.append("salyLedgNm", salyNm);
     if (payDtStart) params.append("payDtStart", payDtStart);
     if (payDtEnd)   params.append("payDtEnd", payDtEnd);
@@ -275,20 +260,18 @@
       })
       .then(list => {
         originalGridData = (list || []).map(r => {
-          // revsYm: "2025-07" → "2025-07" 그대로 (하이픈 유지)
           let revsMmdd = "";
           if (r.revsYm) {
             revsMmdd = String(r.revsYm);
           }
 
-          // payDt: "2025-10-25" 하이픈 그대로
           let payDtStr = "";
           if (r.payDt) {
             let raw = String(r.payDt);
             if (raw.includes("T")) {
               raw = raw.substring(0, 10);
             }
-            payDtStr = raw; // 하이픈 그대로
+            payDtStr = raw;
           }
 
           return {
@@ -296,10 +279,9 @@
             revsMmdd   : revsMmdd,
             payDt      : payDtStr,
             salyLedgNm : r.salyLedgNm,
-            deptNm     : r.deptNm,
             rcnt       : r.rcnt,
-            salyLedgSt : r.salyLedgSt,              // 코드: sal1/sal2/sal3
-            salyLedgStNm: r.salyLedgStNm || "",     // 코드명: 미확정/확정/지급완료
+            salyLedgSt : r.salyLedgSt,
+            salyLedgStNm: r.salyLedgStNm || "",
             ttPayAmt   : r.ttPayAmt
           };
         });
@@ -396,11 +378,11 @@
     const { row } = selected;
     const code = row.salyLedgSt;
 
-    if (code === "sal1") {          // 미확정
+    if (code === "sal1") {
       btnToggleConfirm.textContent = "확정";
-    } else if (code === "sal2") {   // 확정
+    } else if (code === "sal2") {
       btnToggleConfirm.textContent = "확정취소";
-    } else if (code === "sal3") {   // 지급완료
+    } else if (code === "sal3") {
       btnToggleConfirm.textContent = "확정";
     }
   }
@@ -421,7 +403,7 @@
         return;
       }
 
-      // sal1(미확정) <-> sal2(확정) 토글
+      // sal1(미확정) <-> sal2(확정) 토글 (프론트 표현만)
       if (code === "sal1") {
         grid.setValue(rowKey, "salyLedgSt", "sal2");
         grid.setValue(rowKey, "salyLedgStNm", "확정");
@@ -445,7 +427,7 @@
   });
 
   /*************************
-   * 7. 삭제 버튼 (현재는 프론트 배열 기준)
+   * 7. 삭제 버튼 (API 연동)
    *************************/
   if (btnSalyDelete) {
     btnSalyDelete.addEventListener("click", () => {
@@ -460,41 +442,25 @@
         return;
       }
 
-      // TODO: /insa/saly/delete API 연동
-      const idx = originalGridData.findIndex(r =>
-        r.salyLedgId === row.salyLedgId
-      );
-      if (idx > -1) {
-        originalGridData.splice(idx, 1);
-      }
-
-      applyTabFilter();
-      alert("삭제되었습니다.");
-    });
-  }
-
-  /*************************
-   * 8. 급여계산 / 명세서 버튼 (추후 구현)
-   *************************/
-  if (btnSalyCalc) {
-    btnSalyCalc.addEventListener("click", () => {
-      const selected = getSelectedRow();
-      if (!selected) {
-        console.log("신규 급여계산 모드");
-      } else {
-        console.log("선택 급여대장 기준 급여계산/조회:", selected.row);
-      }
-    });
-  }
-
-  if (btnSalySpec) {
-    btnSalySpec.addEventListener("click", () => {
-      const selected = getSelectedRow();
-      if (!selected) {
-        alert("명세서를 조회할 급여대장을 선택해주세요.");
-        return;
-      }
-      console.log("명세서 조회:", selected.row);
+      fetch("/insa/saly/delete", {
+        method : "POST",
+        headers: { "Content-Type": "application/json" },
+        body   : JSON.stringify({ salyLedgId: row.salyLedgId })
+      })
+      .then(res => res.json())
+      .then(body => {
+        if (!body || body.result !== "SUCCESS") {
+          const msg = (body && body.message) || "삭제 중 오류가 발생했습니다.";
+          alert(msg);
+          return;
+        }
+        alert("삭제되었습니다.");
+        loadSalyList();
+      })
+      .catch(err => {
+        console.error("급여대장 삭제 오류", err);
+        alert("급여대장 삭제 중 오류가 발생했습니다.");
+      });
     });
   }
 
@@ -511,6 +477,12 @@
   const grid2El = document.getElementById("grid2");
   let grid2 = null;
 
+  // 수정 모드 플래그
+  let editMode = false;
+  let editingSalyLedgId = null;
+  // 수정 시 초기 체크할 사원 ID 목록
+  let initialCheckedEmpIds = [];
+
   function initEmpGrid() {
     if (!grid2El || grid2) return;
     grid2 = new tui.Grid({
@@ -526,6 +498,16 @@
         { header: "고용형태", name: "emplymTyNm" },
         { header: "부서명",   name: "deptNm" }
       ]
+    });
+  }
+
+  function applyCheckedEmpIdsToGrid2() {
+    if (!grid2 || !initialCheckedEmpIds || initialCheckedEmpIds.length === 0) return;
+    const rows = grid2.getData();
+    rows.forEach(row => {
+      if (initialCheckedEmpIds.includes(row.empId)) {
+        grid2.check(row.rowKey);
+      }
     });
   }
 
@@ -554,11 +536,103 @@
         deptNm:     e.deptNm || ""
       }));
       grid2.resetData(data);
+      // 수정 모드일 때 기존 사원 체크
+      applyCheckedEmpIdsToGrid2();
     })
     .catch(err => {
       console.error("사원 조회 오류", err);
       alert("사원 목록 조회 중 오류가 발생했습니다.");
     });
+  }
+
+  /***********************
+   * 9-1. 귀속연월/지급일자 datepicker 초기화 함수
+   *      - 귀속연월: 지난 달까지 선택 가능
+   *      - 지급일자: 오늘 이전 날짜 선택 불가
+   ***********************/
+  function initRevsYmPicker() {
+    const $revsYm = $("#revs_ym");
+    if (!$revsYm.length) return;
+
+    if ($revsYm.data("datepicker")) {
+      $revsYm.datepicker("destroy");
+    }
+
+    const today = new Date();
+    // 지난 달의 마지막 날 (예: 오늘이 12월이면 11월 30일)
+    const lastMonthLastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+
+    $revsYm
+      .datepicker({
+        format: "yyyy-mm",
+        autoclose: true,
+        minViewMode: 1,   // 월 단위
+        language: "ko",
+        endDate: lastMonthLastDay
+      })
+      .on("show", function () {
+        const $self  = $(this);
+        const $modal = $self.closest(".modal");
+        if (!$modal.length) return;
+
+        const modalZ = parseInt($modal.css("z-index"), 10) || 1055;
+        setTimeout(function () {
+          $(".datepicker-dropdown").each(function () {
+            this.style.setProperty(
+              "z-index",
+              String(modalZ + 10),
+              "important"
+            );
+          });
+        }, 0);
+      });
+  }
+
+  function initPayDtPicker() {
+    const $payDt = $("#payDt");
+    if (!$payDt.length) return;
+
+    if ($payDt.data("datepicker")) {
+      $payDt.datepicker("destroy");
+    }
+
+    const today = new Date();
+    const todayZero = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
+    $payDt
+      .datepicker({
+        format: "yyyy-mm-dd",
+        autoclose: true,
+        language: "ko",
+        startDate: todayZero,
+        beforeShowDay: function (date) {
+          const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+          if (d < todayZero) {
+            return false;
+          }
+          return true;
+        }
+      })
+      .on("show", function () {
+        const $self  = $(this);
+        const $modal = $self.closest(".modal");
+        if (!$modal.length) return;
+
+        const modalZ = parseInt($modal.css("z-index"), 10) || 1055;
+        setTimeout(function () {
+          $(".datepicker-dropdown").each(function () {
+            this.style.setProperty(
+              "z-index",
+              String(modalZ + 10),
+              "important"
+            );
+          });
+        }, 0);
+      });
   }
 
   function openSalyModal() {
@@ -567,6 +641,10 @@
     modal.classList.add("show");
     modal.style.display = "block";
     back.style.display  = "block";
+
+    // ✅ 모달이 열릴 때마다 datepicker 재초기화
+    initRevsYmPicker();
+    initPayDtPicker();
 
     initEmpGrid();
     loadEmpList();
@@ -584,19 +662,78 @@
     if (back) {
       back.style.display = "none";
     }
+    editMode = false;
+    editingSalyLedgId = null;
+    initialCheckedEmpIds = [];
   }
 
   if (openSalyRegistBtn) {
     openSalyRegistBtn.addEventListener("click", () => {
       const selected = getSelectedRow();
+
       if (!selected) {
-        console.log("신규 등록 모드");
+        // 신규 모드
+        editMode = false;
+        editingSalyLedgId = null;
+        initialCheckedEmpIds = [];
+
+        // 모달 폼 초기화
+        if (window.TeamCommon && TeamCommon.modal && typeof TeamCommon.modal.reset === "function") {
+          TeamCommon.modal.reset(modal);
+        }
+
+        openSalyModal();
       } else {
-        console.log("선택 급여대장 수정 모드:", selected.row);
-        // 수정 모드 바인딩은 나중에
+        // 수정 모드
+        const { row } = selected;
+        editMode = true;
+        editingSalyLedgId = row.salyLedgId;
+        initialCheckedEmpIds = [];
+
+        fetch("/insa/saly/detail?salyLedgId=" + encodeURIComponent(row.salyLedgId))
+          .then(res => res.json())
+          .then(vo => {
+            if (!vo || !vo.salyLedgId) {
+              alert("급여대장 정보를 불러오지 못했습니다.");
+              return;
+            }
+
+            initialCheckedEmpIds = Array.isArray(vo.empIdList) ? vo.empIdList : [];
+
+            // 모달 열고 값 세팅
+            openSalyModal();
+            fillSalyModal(vo);
+
+            // 사원 체크 반영(그리드 데이터 로딩 이후에도 한 번 더)
+            setTimeout(applyCheckedEmpIdsToGrid2, 0);
+          })
+          .catch(err => {
+            console.error("급여대장 상세 조회 오류", err);
+            alert("급여대장 상세 조회 중 오류가 발생했습니다.");
+          });
       }
-      openSalyModal();
     });
+  }
+
+  function fillSalyModal(vo) {
+    const salyNmInput = document.getElementById("salyNm");
+    const revsYmInput = document.getElementById("revs_ym");
+    const payDtInput  = document.getElementById("payDt");
+
+    if (salyNmInput) salyNmInput.value = vo.salyLedgNm || "";
+    if (revsYmInput) revsYmInput.value = vo.revsYm || "";
+    if (payDtInput)  payDtInput.value  = vo.payDt || "";
+
+    // datepicker 실제 값도 업데이트
+    const revsYm = vo.revsYm || null;
+    const payDt  = vo.payDt || null;
+
+    if (revsYm && $('#revs_ym').data('datepicker')) {
+      $('#revs_ym').datepicker('update', revsYm);
+    }
+    if (payDt && $('#payDt').data('datepicker')) {
+      $('#payDt').datepicker('update', payDt);
+    }
   }
 
   if (back) {
@@ -625,145 +762,21 @@
   modalDept?.addEventListener("change", loadEmpList);
 
   /***********************
-   * 10. 귀속연월/지급일자 datepicker (기존 그대로)
-   ***********************/
-  $(function () {
-    const $revsYm = $("#revs_ym");
-    const $payDt  = $("#payDt");
-
-    if ($revsYm.length) {
-      $revsYm.datepicker({
-        format: "yyyy-mm",
-        autoclose: true,
-        minViewMode: 1,
-        language: "ko"
-      }).on("show", function () {
-        const $self  = $(this);
-        const $modal = $self.closest(".modal");
-        if (!$modal.length) return;
-
-        const modalZ = parseInt($modal.css("z-index"), 10) || 1055;
-        setTimeout(function () {
-          $(".datepicker-dropdown").each(function () {
-            this.style.setProperty("z-index", String(modalZ + 10), "important");
-          });
-        }, 0);
-      });
-    }
-
-    if ($payDt.length) {
-      $payDt.datepicker({
-        format: "yyyy-mm-dd",
-        autoclose: true,
-        language: "ko"
-      }).on("show", function () {
-        const $self  = $(this);
-        const $modal = $self.closest(".modal");
-        if (!$modal.length) return;
-
-        const modalZ = parseInt($modal.css("z-index"), 10) || 1055;
-        setTimeout(function () {
-          $(".datepicker-dropdown").each(function () {
-            this.style.setProperty("z-index", String(modalZ + 10), "important");
-          });
-        }, 0);
-      });
-    }
-
-    function ymToFirstDay(ym) {
-      if (!ym) return null;
-      const m = /^(\d{4})-(\d{2})$/.exec(ym);
-      if (!m) return null;
-      const y  = parseInt(m[1], 10);
-      const mo = parseInt(m[2], 10) - 1;
-      const d  = new Date(y, mo, 1);
-      if (d.getFullYear() !== y || d.getMonth() !== mo) return null;
-      return d;
-    }
-
-    function dateToYm(date) {
-      if (!date) return "";
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      return y + "-" + m;
-    }
-
-    function hasDatepicker($el) {
-      return !!$el.data("datepicker");
-    }
-
-    function syncFromRevsYm() {
-      if (!hasDatepicker($payDt)) return;
-
-      const ymStr = $revsYm.val().trim();
-      if (!ymStr) {
-        $payDt.datepicker("setStartDate", null);
-        return;
-      }
-
-      const startDate = ymToFirstDay(ymStr);
-      if (!startDate) {
-        $payDt.datepicker("setStartDate", null);
-        return;
-      }
-
-      $payDt.datepicker("setStartDate", startDate);
-
-      const curPay = $payDt.datepicker("getDate");
-      if (curPay && curPay < startDate) {
-        $payDt.datepicker("setDate", startDate);
-      }
-    }
-
-    function syncFromPayDt() {
-      if (!hasDatepicker($revsYm)) return;
-
-      const payDate = $payDt.datepicker("getDate");
-      if (!payDate) {
-        $revsYm.datepicker("setEndDate", null);
-        return;
-      }
-
-      const maxYmDate = new Date(payDate.getFullYear(), payDate.getMonth(), 1);
-      $revsYm.datepicker("setEndDate", maxYmDate);
-
-      const curYmStr  = $revsYm.val().trim();
-      const curYmDate = ymToFirstDay(curYmStr);
-
-      if (curYmDate && curYmDate > maxYmDate) {
-        $revsYm.datepicker("setDate", maxYmDate);
-        $revsYm.val(dateToYm(maxYmDate));
-      }
-    }
-
-    $revsYm.on("changeDate", syncFromRevsYm);
-    $revsYm.on("blur",       syncFromRevsYm);
-    $payDt.on("changeDate",  syncFromPayDt);
-    $payDt.on("blur",        syncFromPayDt);
-  });
-
-  /***********************
-   * 11. 급여대장 저장 (모달 등록/수정)
+   * 11. 급여대장 저장 (신규/수정 공통)
    ***********************/
   const btnSalySaveEl = document.getElementById("btnSalySave");
   if (btnSalySaveEl) {
     btnSalySaveEl.addEventListener("click", () => {
       const salyNmInput = document.getElementById("salyNm");
-      const deptSel     = document.getElementById("salyDept");
       const revsYmInput = document.getElementById("revs_ym");
       const payDtInput  = document.getElementById("payDt");
 
       const salyNm = salyNmInput ? salyNmInput.value.trim() : "";
-      const deptId = deptSel ? (deptSel.value || "") : "";
       const revsYm = revsYmInput ? revsYmInput.value.trim() : "";
       const payDt  = payDtInput ? payDtInput.value.trim() : "";
 
       if (!salyNm) {
         alert("급여대장명칭을 입력하세요.");
-        return;
-      }
-      if (!deptId) {
-        alert("부서를 선택하세요.");
         return;
       }
       if (!revsYm) {
@@ -786,15 +799,14 @@
       }
 
       const empIdList = checkedRows.map(r => r.empId);
+      const isEdit = editMode && editingSalyLedgId;
 
       const payload = {
-        salyLedgId : null,          // 신규
+        salyLedgId : isEdit ? editingSalyLedgId : null,
         salyLedgNm : salyNm,
-        deptId     : deptId,
         revsYm     : revsYm,
         payDt      : payDt,
         empIdList  : empIdList
-        // salyLedgSt는 서버에서 기본값 sal1 세팅
       };
 
       fetch("/insa/saly/save", {

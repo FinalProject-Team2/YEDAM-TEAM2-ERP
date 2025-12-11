@@ -30524,6 +30524,12 @@ label.astar::after,
   color: #000 !important;
 }
 
+.btn.btn-disabled:disabled {
+  pointer-events: auto;
+  cursor: not-allowed;
+}
+
+
 /* 전체 스크롤 잠금 */
 /*html, body {
   overflow: hidden;

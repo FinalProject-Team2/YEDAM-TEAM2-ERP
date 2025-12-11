@@ -82,10 +82,13 @@
             <div class="card-header">
                 <h5 class="card-title">수당/공제 항목 관리</h5>
                 <div class="card-header-right">
-                    <button class="btn btn-danger" id="btnRowDel">삭제</button>
-                    <button class="btn btn-outline-dark" id="btnRowAdd">행추가</button>
                     <button class="btn btn-outline-dark" id="openGuideModal">가이드</button>
-                    <button class="btn btn-outline-dark" id="btnSave">저장</button>
+                    <!-- <button class="btn btn-outline-dark" id="btnRowAdd">행추가</button> -->
+                    <div th:replace="~{fragments/buttons :: addRowButton('MENU_HR_009', 'btnRowAdd')}"></div>
+                    <!-- <button class="btn btn-outline-dark" id="btnSave">저장</button> -->
+                    <div th:replace="~{fragments/buttons :: saveButton('MENU_HR_009', 'btnSave')}"></div>
+                    <!-- <button class="btn btn-danger" id="btnRowDel">삭제</button> -->
+                    <div th:replace="~{fragments/buttons :: deleteButton('MENU_HR_009', 'btnRowDel')}"></div>
                 </div>
             </div>
 

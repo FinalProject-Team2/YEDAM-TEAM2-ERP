@@ -31,6 +31,7 @@ public class CodeController {
 	@PostMapping("/code/codeId")
 	public List<CodeVO> commonCode(@RequestBody CodeVO vo) {
 		
+		System.out.println(vo);
 		String vendId = LoginSession.getVendId();
 		vo.setVendId(vendId);
 		

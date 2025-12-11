@@ -48,8 +48,9 @@
 					<div class="card-header-right">
 						<button type="button" id="btnResetPlan"
 							class="btn btn-dark">초기화</button>
-						<button type="submit" form="subscriptionPlanForm"
-							class="btn btn-outline-dark">저장</button>
+						<!-- <button type="submit" form="subscriptionPlanForm"
+							class="btn btn-outline-dark">저장</button> -->
+					    <div th:replace="~{fragments/buttons :: saveButton('MENU_COMM_009', 'btnSavePlan')}"></div>
 					</div>
 				</div>
 				<div class="card-body">
@@ -294,6 +295,22 @@
 				hiddenYn.value = (this.value === 'Y') ? 'e1' : 'e2';
 			});
 		});
+		
+		document.addEventListener('DOMContentLoaded', function () {
+			  const saveBtn = document.getElementById('btnSavePlan');
+			  if (saveBtn) {
+			    saveBtn.addEventListener('click', function () {
+			      // 권한 없어서 disabled면 클릭 자체가 안 들어오지만, 혹시 몰라 방어
+			      if (saveBtn.disabled) {
+			        return;
+			      }
+			      const form = document.getElementById('subscriptionPlanForm');
+			      if (form) {
+			        form.submit();   // 기존 type="submit" + form="..." 역할을 JS로 수행
+			      }
+			    });
+			  }
+			});
 		/*]]>*/
 	</script>
 

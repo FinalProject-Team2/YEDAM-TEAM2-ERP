@@ -86,7 +86,8 @@
 				<div class="card-header">
 					<h5 class="card-title">입출금관리</h5>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark" id="openRciptTretModal">입금처리</button>
+						<!-- <button class="btn btn-outline-dark" id="openRciptTretModal">입금처리</button> -->
+						<div th:replace="~{fragments/buttons :: rciptButton('MENU_SALES_007', 'openRciptTretModal')}"></div>
 					</div>
 				</div>
 				<div class="card-body">

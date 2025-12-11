@@ -92,8 +92,11 @@
 						<h5 class="card-title">교육 기본 정보</h5>
 					</div>
 					<div class="card-header-right">
-						<button class="btn btn-outline-dark " id="openRegistModal">등록</button>
-						<button class="btn btn-outline-dark ">삭제</button>
+						<!-- <button class="btn btn-outline-dark " id="openRegistModal">등록</button> -->
+						<div th:replace="~{fragments/buttons :: saveButton('MENU_HR_003', 'openRegistModal')}"></div>
+						<!-- <button class="btn btn-outline-dark ">삭제</button> -->
+						<!-- 삭제 기능 없음? 버튼 id : del -->
+						<div th:replace="~{fragments/buttons :: deleteButton('MENU_HR_003', 'del')}"></div>
 					</div>
 				</div>
 				<div class="card-body">

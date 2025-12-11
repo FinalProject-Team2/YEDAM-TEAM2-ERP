@@ -86,7 +86,8 @@
 							<h5 class="card-title">발주 목록</h5>
 						</div>
 						<div class="card-header-right">
-							<button type="button" class="btn btn-outline-dark" id="newPoBtn">신규</button>
+							<!-- <button type="button" class="btn btn-outline-dark" id="newPoBtn">신규</button> -->
+							<div th:replace="~{fragments/buttons :: newButton('MENU_SALES_017', 'newPoBtn')}"></div>
 						</div>
 					</div>
 

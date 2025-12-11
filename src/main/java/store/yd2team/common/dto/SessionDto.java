@@ -33,10 +33,7 @@ public class SessionDto implements Serializable{
     private String tempYn;    // 임시 비밀번호 여부
     private String email;		// 이메일
     private String proofPhoto; // 사진
-    
-    
-    
-    
+ 
     private List<String> roleIds;
     private Set<String> authCodes;
     private String roleId;
