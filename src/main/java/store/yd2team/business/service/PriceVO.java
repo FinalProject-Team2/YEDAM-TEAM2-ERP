@@ -22,6 +22,9 @@ public class PriceVO {
     private LocalDate endDt;
     private String yn;
     private String rm;
+    
+    // session
+    private String vendId;
     private String creaBy;
     private String updtBy;
     
