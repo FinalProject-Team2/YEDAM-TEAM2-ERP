@@ -3,7 +3,7 @@
 <mapper namespace="store.yd2team.business.mapper.PriceMapper">
 
 <!-- 단가정책 조회 -->
-	  <select id="selectPolicy" parameterType="PriceVO"  resultType="PriceVO">
+	  <select id="selectPolicy" parameterType="store.yd2team.business.service.PriceVO"  resultType="store.yd2team.business.service.PriceVO">
 
 	    SELECT
 	           p.price_policy_id AS priceId
@@ -53,7 +53,7 @@
 	        SELECT 
 	            #{priceId} AS price_policy_id,
 	            #{priceName} AS price_policy_name,
-	            #{type} AS price_ty,
+	            #{priceType} AS price_ty,
 	            #{percent} AS basis_dc_rate,
 	            #{beginDt} AS applc_begin_dt,
 	            #{endDt} AS applc_end_dt,

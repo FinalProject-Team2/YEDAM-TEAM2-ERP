@@ -76,6 +76,11 @@ public class EstiSoVO {
     
     private String header;
     
+    private String sttlMthd;
+    private Long rciptAppoAmt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate rciptAppoDt;
+    
     private List<EstiSoDetailVO> details;
 }
 
