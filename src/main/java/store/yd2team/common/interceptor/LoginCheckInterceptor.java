@@ -23,7 +23,8 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
     private static final List<String> WHITE_LIST_EXACT = List.of(
             "/logIn",           // 로그인 화면
             "/error",
-            "/favicon.ico"
+            "/favicon.ico",
+            "/pdf"
     );
 
     /**
