@@ -48,19 +48,21 @@
 
 <!-- 저장버튼 insert update 머지문 -->
 	<update id="savePricePolicy" parameterType="PriceVO">
-	    MERGE INTO tb_price t
+	    MERGE INTO TB_PRICE t
 	    USING (
 	        SELECT 
-	            #{priceId} AS price_policy_id,
+	            #{priceId}   AS price_policy_id,
 	            #{priceName} AS price_policy_name,
 	            #{priceType} AS price_ty,
-	            #{percent} AS basis_dc_rate,
-	            #{beginDt} AS applc_begin_dt,
-	            #{endDt} AS applc_end_dt,
-	            #{yn} AS yn,
-	            #{rm} AS rm,
-	            #{creaBy} AS crea_by,
-	            #{updtBy} AS updt_by
+	            #{percent}   AS basis_dc_rate,
+	            #{beginDt}   AS applc_begin_dt,
+	            #{endDt}     AS applc_end_dt,
+	            #{yn}        AS yn,
+	            #{rm}        AS rm,
+	
+	            #{vendId}    AS vend_id,   -- 회사코드
+	            #{creaBy}    AS crea_by,   -- 등록자
+	            #{updtBy}    AS updt_by    -- 수정자
 	        FROM dual
 	    ) s
 	    ON (t.price_policy_id = s.price_policy_id)
@@ -72,8 +74,10 @@
 	            t.basis_dc_rate     = s.basis_dc_rate,
 	            t.applc_begin_dt    = s.applc_begin_dt,
 	            t.applc_end_dt      = s.applc_end_dt,
-	            t.yn                = 'Y',
+	            t.yn                = COALESCE(s.yn, 'Y'),
 	            t.rm                = s.rm,
+	
+	            t.vend_id           = s.vend_id,   -- 회사코드 업데이트
 	            t.updt_dt           = SYSDATE,
 	            t.updt_by           = s.updt_by
 	
@@ -87,19 +91,23 @@
 	            applc_end_dt,
 	            yn,
 	            rm,
+	
+	            vend_id,     -- 회사코드 저장
 	            crea_dt,
 	            crea_by
 	        ) VALUES (
-	            fn_price_policy_id(),  -- 신규 생성
+	            fn_price_policy_id(),
 	            s.price_policy_name,
 	            s.price_ty,
-	            s.basis_dc_rate, 
-	            s.applc_begin_dt, 
+	            s.basis_dc_rate,
+	            s.applc_begin_dt,
 	            s.applc_end_dt,
-	            'Y', 
-	            s.rm, 
+	            COALESCE(s.yn, 'Y'),
+	            s.rm,
+	
+	            s.vend_id,   -- 회사코드
 	            SYSDATE,
-	            s.crea_by
+	            s.crea_by    -- 등록자
 	        )
 	</update>
 	

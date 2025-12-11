@@ -135,7 +135,7 @@
 	</select>
 	
 
-<!--  모달 저장버튼 -->
+<!--  신규 견적서 모달 저장버튼 -->
 <!-- ======================= 헤더 INSERT (항상 INSERT) ======================= -->
     <insert id="insertEsti" parameterType="store.yd2team.business.service.EstiSoVO">
 

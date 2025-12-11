@@ -10,6 +10,7 @@ import store.yd2team.business.mapper.PriceMapper;
 import store.yd2team.business.service.CommonCodeVO;
 import store.yd2team.business.service.PriceService;
 import store.yd2team.business.service.PriceVO;
+import store.yd2team.common.util.LoginSession;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +34,20 @@ public class PriceServiceImpl implements PriceService {
     @Override
     public int savePricePolicy(PriceVO vo) throws Exception {
         System.out.println("### Service savePricePolicy 호출 ###");
+
+        // 🔥 로그인 세션 정보
+        String vendId = LoginSession.getVendId();
+        String empId  = LoginSession.getEmpId();  // 등록자 / 수정자
+
+        // 🔥 MERGE 문에서 사용할 값 세팅
+        vo.setVendId(vendId);
+        vo.setCreaBy(empId);
+        vo.setUpdtBy(empId);
+
         int result = priceMapper.savePricePolicy(vo);
+
         System.out.println("### result = " + result);
-        return 1;   // 변화 건수 상관없이 성공 처리
+        return 1;   // 성공 처리
     }
     
     // 삭제
@@ -52,27 +64,33 @@ public class PriceServiceImpl implements PriceService {
             throw new RuntimeException("PRICE_POLICY_ID 가 없습니다.");
         }
 
-        // 🔥 detailList null 또는 empty 검사 (서버 레벨 방어)
         if (vo.getDetailList() == null || vo.getDetailList().isEmpty()) {
             throw new RuntimeException("고객사 detailList 가 비어있습니다.");
         }
 
         String priceId = vo.getPriceId();
+        String vendId = LoginSession.getVendId();
+        String empId  = LoginSession.getEmpId();
 
-        // 1) 기존 detail 삭제
+        // 1) 기존 고객사 detail 삭제
         priceMapper.deletePriceDetail(priceId);
 
-        // 2) 새 detail 저장
+        // 2) 새 고객사 detail 저장
         int idx = 1;
         for (Map<String, Object> d : vo.getDetailList()) {
 
             d.put("priceId", priceId);
-            d.put("detailNo", idx++);
+            d.put("detailNo", idx++);  // 고객사 detail 번호
 
-            // 헤더 공통값
+            // 공통 헤더값
             d.put("applcStartDt", vo.getBeginDt());
             d.put("applcEndDt", vo.getEndDt());
             d.put("dcRate", vo.getPercent());
+
+            // 🔥 세션 기반 컬럼
+            d.put("vendId", vendId);
+            d.put("creaBy", empId);
+            d.put("updtBy", empId);
 
             priceMapper.insertPriceDetail(d);
         }
@@ -112,6 +130,8 @@ public class PriceServiceImpl implements PriceService {
         }
 
         String priceId = vo.getPriceId();
+        String vendId = LoginSession.getVendId();
+        String empId  = LoginSession.getEmpId();
 
         // 1) 기존 상품 detail 삭제
         priceMapper.deletePriceProductDetail(priceId);
@@ -119,15 +139,19 @@ public class PriceServiceImpl implements PriceService {
         // 2) 새 상품 detail 저장
         if (vo.getDetailList() != null && !vo.getDetailList().isEmpty()) {
 
-
             for (Map<String, Object> d : vo.getDetailList()) {
 
                 d.put("priceId", priceId);
 
-                // 공통 헤더 값
+                // 공통 헤더값
                 d.put("applcStartDt", vo.getBeginDt());
                 d.put("applcEndDt", vo.getEndDt());
                 d.put("dcRate", vo.getPercent());
+
+                // 🔥 세션 정보
+                d.put("vendId", vendId);
+                d.put("creaBy", empId);
+                d.put("updtBy", empId);
 
                 priceMapper.insertPriceProductDetail(d);
             }

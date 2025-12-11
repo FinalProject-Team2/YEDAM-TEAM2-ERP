@@ -802,7 +802,7 @@ class ProductAutoComplete {
 	    data: data,
 	    scrollX: true,
 	    scrollY: true,
-	    bodyHeight: 250,
+	    bodyHeight: 180,
 	    rowHeaders: [],    // 읽기 전용이면 체크박스 없어도 됨
 	    columns: [
 	      { name: 'productId', header: '상품ID', hidden: true },
@@ -831,6 +831,8 @@ class ProductAutoComplete {
 	    .then(data => {
 		  const header = data.header;
 		  const detailList = data.detailList || [];
+		  
+		  console.log("📌 header.soDt =", header.soDt);
 		
 		  $("#newSoEstiId").val(header.estiId);
 		  $("#newSoEstiIdView").val(header.estiId);
@@ -838,7 +840,7 @@ class ProductAutoComplete {
 		  $("#newSoCustcomId").val(header.custcomId);
 		  $("#newSoCustcomName").val(header.custcomNameResult);
 		  $("#newSoDueDt").val(header.dueDt);
-		  /* $("#newSoDt").val(header.soDt); */
+		  $("#newSoDt").val(header.soDt);
 		
 		  // ▶ 공급가 합계 계산
 		  const totalSupply = detailList.reduce((sum, row) => {
@@ -916,8 +918,12 @@ class ProductAutoComplete {
 	  const version  = $("#newSoVersion").val();  // 견적 버전
 	  const custcomId = $("#newSoCustcomId").val();
 	  const dueDt     = $("#newSoDueDt").val();
+	  const soDt = $("#newSoDt").val();
 	  const shipAddr = $("#newSoShipAddr").val();
 	  const orderRm  = $("#newSoRm").val();
+	  const rciptAppoDt = $("rciptAppoDt").val();
+	  const rciptAppoAmt = $("rciptAppoAmt").val();
+	  const sttlMthd = $("sttlMthd").val();
 	
 	  // ▶ grid 객체 이름 newSoGrid 사용
 	  const rows = window.newSoGrid ? window.newSoGrid.getData() : [];
