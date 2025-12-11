@@ -40,9 +40,9 @@ public class RciptVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate trnsDt;
 
-    // 거래내역(내용)
-    // SELECT r.sale_ctnt
-    private String saleCtnt;
+    // 거래구분
+    // SELECT r.trns_fg
+    private String trnsFg;
 
     // 매출금액
     // SELECT r.sale_amt

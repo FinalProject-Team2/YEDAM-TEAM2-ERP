@@ -174,45 +174,12 @@
 	window.addEventListener('DOMContentLoaded', loadBSTypeCodes);
 
 
-	
-    // 1. Toast UI Grid 테마
-		tui.Grid.applyTheme('default', {
-		  cell: {
-		    normal: {
-		      border: '#dedede',
-		      background: '#ffffff',
-		      showVerticalBorder: true
-		    },
-		    header: {
-		      border: '#dedede',
-		      background: '#f5f5f5',
-		      showVerticalBorder: true
-		    },
-		    // ✅ rowHeader는 기본 흰색으로 두기 (헤더/바디 공통)
-		    rowHeader: {
-		      border: '#dedede',
-		      background: '#ffffff',
-		      showVerticalBorder: true
-		    },
-		    editable: {
-		      background: '#FFFDF0',
-		      text: '#000'
-		    },
-		    selectedHeader: {
-		      background: '#f5f5f5'
-		    },
-		    selected: {
-		      background: '#ffffff'
-		    }
-		  }
-		}); // 1. 끝
 
 
-
-	// 2. 더미 데이터
+	// 1. 더미 데이터
 	const custData = [];
 
-	// 3. Grid 공통 옵션
+	// 2. Grid 공통 옵션
 	const custGridOptions = {
 	    bodyHeight: 320,
 	    scrollX: true,
@@ -224,7 +191,7 @@
 	    }
 	};
 
-	// 4. 계정 목록 Grid 생성
+	// 3. 계정 목록 Grid 생성
 	const custGrid = new tui.Grid({
 	    el: document.getElementById('custGrid'),
 	    data: custData,
@@ -242,10 +209,10 @@
 	        { header: '이메일', name: 'pschEmail', width: 200, align: 'center' },
 	        { header: '사업장주소', name: 'bizAddr', minWidth: 350 },
 	    ]
-	}); // 4. 끝
+	}); // 3. 끝
     
     
-	// 5. 모달 폼 요소 캐싱
+	// 4. 모달 폼 요소 캐싱
 	const newCustForm = {
 		custcomId:  document.getElementById('mcustcomId'),
 		custcomName: document.getElementById('mcustcomName'),
@@ -259,7 +226,7 @@
 		rpstr:      document.getElementById('mrpstr'),
 		rpstrTel:   document.getElementById('mrpstrTel'),
 		bsTy:       document.getElementById('mbsTy')
-	}; // 5. 모달 폼 요소 캐싱
+	}; // 4. 모달 폼 요소 캐싱
 
 
 	    
