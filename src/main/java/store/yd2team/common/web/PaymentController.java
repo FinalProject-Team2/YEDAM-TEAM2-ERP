@@ -23,10 +23,9 @@ public class PaymentController {
 	@Autowired
 	PaymentService paymentService;
 	
-	// 구독 결제 페이지로 이동 (SubscriptionChoice에서 POST)
-	@PostMapping("/Payment")
-	public String Payment(@RequestParam("planName") String planName,
-			@RequestParam("billingCycle") String billingCycle,
+	// 공통: 결제 페이지 세팅 로직 (GET/POST 둘 다에서 사용)
+	private String setupPaymentPage(String planName,
+			String billingCycle,
 			Model model,
 			HttpSession session) throws Exception {
 		// DB에서 실제 플랜/주기에 따른 금액 조회
@@ -67,6 +66,24 @@ public class PaymentController {
 		model.addAttribute("customerName", vendorName);
 
 		return "subscription/payment";
+	}
+	
+	// 구독 결제 페이지로 이동 (SubscriptionChoice에서 POST)
+	@PostMapping("/Payment")
+	public String Payment(@RequestParam("planName") String planName,
+			@RequestParam("billingCycle") String billingCycle,
+			Model model,
+			HttpSession session) throws Exception {
+		return setupPaymentPage(planName, billingCycle, model, session);
+	}
+	
+	// 구독 연장 등에서 GET으로 직접 진입 (예: /subscription/extend → redirect:/Payment)
+	@GetMapping("/Payment")
+	public String PaymentGet(@RequestParam("planName") String planName,
+			@RequestParam("billingCycle") String billingCycle,
+			Model model,
+			HttpSession session) throws Exception {
+		return setupPaymentPage(planName, billingCycle, model, session);
 	}
 	
 	// Toss 결제 성공 콜백

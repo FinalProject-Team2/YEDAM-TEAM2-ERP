@@ -63,4 +63,10 @@ public interface SubscriptionMapper {
 	// vendId 기준 tb_subsp 구독 정보 수정
 	int updateSubscriptionByVendId(SubscriptionVO vo);
 	
+	// === 신규 추가: vendId 기준 현재 구독 플랜 조회 (tb_subsp.subsp_plan_id -> tb_subsp_plan 조인) ===
+	subscriptionPlanVO selectCurrentPlanByVendId(@Param("vendId") String vendId);
+	
+	// === 신규 추가: API 사용량 증가 (tb_subsp.api_use_cnt = api_use_cnt + 1) ===
+	int incrementApiUseCountByVendId(@Param("vendId") String vendId);
+	
 }// end interface

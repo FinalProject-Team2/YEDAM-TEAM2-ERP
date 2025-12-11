@@ -30,8 +30,15 @@
     <div class="row mb-2">
         <div class="col-12 d-flex justify-content-end">
             <!-- 구독 연장 버튼 (왼쪽) -->
-            <button type="button" class="btn btn-outline-dark me-2" onclick="location.href='http://localhost/SubscriptionChoice'">
+            <button type="button" class="btn btn-outline-dark me-2"
+                    onclick="location.href='/subscription/extend'"
+                    th:disabled="${!canExtend}">
                 구독 연장
+            </button>
+
+            <!-- 구독 변경 버튼 -->
+            <button type="button" class="btn btn-outline-dark me-2" onclick="location.href='http://localhost/SubscriptionChoice'">
+                구독 변경
             </button>
 
             <!-- 기존 구독 해지 버튼 -->
