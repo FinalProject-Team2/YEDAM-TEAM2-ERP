@@ -110,6 +110,7 @@
 			p.plan_nm        AS planNm,
 			s.crea_dt        AS creaDt,
 			s.start_dt       AS startDt,
+			s.end_dt         AS endDt,
 			p.sttl_perd      AS sttlPerd,
 			p.acct_issu_cnt  AS acctIssuCnt,
 			p.api_issu_cnt   AS apiIssuCnt,
@@ -221,4 +222,33 @@
 		WHERE s.vend_id = #{vendId}
 		ORDER BY s.crea_dt DESC
 	</select>
+
+	<!-- === 신규 추가: vendId 기준 현재 구독 플랜 조회 (tb_subsp.subsp_plan_id -> tb_subsp_plan 조인) === -->
+	<select id="selectCurrentPlanByVendId" parameterType="string" resultType="store.yd2team.common.service.subscriptionPlanVO">
+		SELECT
+			p.subsp_plan_id AS subspPlanId,
+			p.plan_nm       AS planNm,
+			p.acct_issu_cnt AS acctIssuCnt,
+			p.api_issu_cnt  AS apiIssuCnt,
+			p.amt           AS amt,
+			p.sttl_perd     AS sttlPerd,
+			p.applc_dt      AS applcDt,
+			p.yn            AS yn,
+			p.crea_dt       AS creaDt,
+			p.crea_by       AS creaBy,
+			p.updt_dt       AS updtDt,
+			p.updt_by       AS updtBy
+		FROM tb_subsp s
+		JOIN tb_subsp_plan p
+		  ON s.subsp_plan_id = p.subsp_plan_id
+		WHERE s.vend_id = #{vendId}
+	</select>
+
+	<!-- 신규 추가: vendId 기준 API 사용량 증가 (tb_subsp.api_use_cnt = api_use_cnt + 1) -->
+	<update id="incrementApiUseCountByVendId" parameterType="string">
+		UPDATE tb_subsp
+		SET api_use_cnt = NVL(api_use_cnt, 0) + 1
+		WHERE vend_id = #{vendId}
+	</update>
+
 </mapper>

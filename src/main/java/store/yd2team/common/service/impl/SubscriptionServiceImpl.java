@@ -94,4 +94,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 		return subscriptionMapper.selectSttlHistoryByVendId(vendId);
 	}
 	
+	// === 신규 추가: vendId 기준 현재 구독 플랜 조회 ===
+	@Override
+	public subscriptionPlanVO getCurrentPlanByVendId(String vendId) throws Exception {
+		if (vendId == null || vendId.isEmpty()) {
+			return null;
+		}
+		return subscriptionMapper.selectCurrentPlanByVendId(vendId);
+	}
+	
 }// end class

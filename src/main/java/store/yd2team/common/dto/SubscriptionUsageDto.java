@@ -14,6 +14,7 @@ public class SubscriptionUsageDto {
 	private String planNm;      // 구독 플랜 명
 	private Date creaDt;        // (기존) 플랜 생성일 기준
 	private Date startDt;       // tb_subsp.start_dt (실제 구독 시작일)
+	private Date endDt;         // tb_subsp.end_dt   (실제 구독 종료일)
 	private String sttlPerd;    // 결제주기
 	private Long acctIssuCnt;   // 계정 발급 허용 수
 	private Long apiIssuCnt;    // 월 API 허용 수
