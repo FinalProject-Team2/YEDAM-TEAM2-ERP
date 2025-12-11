@@ -63,8 +63,17 @@ public class GlobalMenuAdvice {
 
         return result;
     }
+    
+    @ModelAttribute("menuAuthMap")
+    public Map<String, MenuAuthDto> exposeMenuAuthMap() {
+        SessionDto s = LoginSession.getLoginSession();
+        if (s == null || s.getMenuAuthMap() == null) {
+            return Collections.emptyMap();
+        }
+        return s.getMenuAuthMap();
+    }
 
-    // 간단 버전: moduleId → 모듈 이름 매핑 (나중에 DB(t경 모듈 테이블)로 빼도 됨)
+    // 간단 버전: moduleId → 모듈 이름 매핑 
     private String toModuleName(String moduleId) {
         if (moduleId == null) return "기타";
 
@@ -72,7 +81,7 @@ public class GlobalMenuAdvice {
             case "d1" -> "인사";   // HR
             case "d2" -> "공통";   // COMM
             case "d3" -> "영업";   // SALES
-            default    -> "기타";
+            default   -> "기타";
         };
     }
 }

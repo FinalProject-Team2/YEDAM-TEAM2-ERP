@@ -156,8 +156,10 @@
             <h5 class="card-title">역할 목록</h5>
           </div>
           <div class="card-header-right">
-            <button id="btnRoleAdd" type="button" class="btn btn-outline-dark me-2">행 추가</button>
-            <button id="btnRoleSave" type="button" class="btn btn-outline-dark">저장</button>
+            <!-- <button id="btnRoleAdd" type="button" class="btn btn-outline-dark me-2">행 추가</button> -->
+            <div th:replace="~{fragments/buttons :: addRowButton('MENU_COMM_004', 'btnRoleAdd')}"></div>
+            <!-- <button id="btnRoleSave" type="button" class="btn btn-outline-dark">저장</button> -->
+            <div th:replace="~{fragments/buttons :: saveButton('MENU_COMM_004', 'btnRoleSave')}"></div>
           </div>
         </div>
 
@@ -176,7 +178,8 @@
             <h5 class="card-title">권한 설정</h5>
           </div>
           <div class="card-header-right">
-            <button id="btnAuthSave" type="button" class="btn btn-outline-dark">저장</button>
+            <!-- <button id="btnAuthSave" type="button" class="btn btn-outline-dark">저장</button> -->
+            <div th:replace="~{fragments/buttons :: saveButton('MENU_COMM_004', 'btnAuthSave')}"></div>
           </div>
         </div>
 

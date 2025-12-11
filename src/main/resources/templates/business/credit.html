@@ -98,9 +98,11 @@
                    <div class="card-header-right">
                        <!-- 여신 평가 버튼 추가 -->
                        <button type="button" class="btn btn-outline-danger me-2" id="creditEval">여신평가</button>
-                       <button type="button" class="btn btn-outline-dark" id="newBtn">행추가</button>
+                       <!-- <button type="button" class="btn btn-outline-dark" id="newBtn">행추가</button> -->
+                       <div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_006', 'newBtn')}"></div>
                        <button type="button" class="btn btn-dark" id="limitInit">초기화</button>
-                       <button type="button" class="btn btn-outline-dark" id="saveBtn">저장</button>
+                       <!-- <button type="button" class="btn btn-outline-dark" id="saveBtn">저장</button> -->
+                       <div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_006', 'saveBtn')}"></div>
                    </div>
                </div>
                <div class="card-body">

@@ -110,7 +110,8 @@
 					</div>
 					<div class="card-header-right">
 						<button class="btn btn-outline-dark stIsShow" id="emp-deta">근로계약서</button>
-						<button class="btn btn-outline-dark" id="btn-save">등록</button>
+						<!-- <button class="btn btn-outline-dark" id="btn-save">등록</button> -->
+						<div th:replace="~{fragments/buttons :: saveButton('MENU_HR_001', 'btn-save')}"></div>
 						<!-- <button class="btn btn-outline-danger ">삭제</button> -->
 					</div>
 				</div>

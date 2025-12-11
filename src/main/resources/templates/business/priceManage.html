@@ -109,7 +109,8 @@
 						<div class="card-header-right">
 <!-- 							<button type="button" class="btn btn-outline-dark" id="custcomBtn">고객사설정</button>
 							<button type="button" class="btn btn-outline-dark" id="itemBtn">품목설정</button> -->
-							<button type="button" class="btn btn-danger" id="btnDelete">삭제</button>
+							<!-- <button type="button" class="btn btn-danger" id="btnDelete">삭제</button> -->
+							<div th:replace="~{fragments/buttons :: deleteButton('MENU_SALES_001', 'btnDelete')}"></div>
 						</div>
 					</div>
 
@@ -132,7 +133,8 @@
 						</div>
 						<div class="card-header-right">
 							<button type="button" class="btn btn-dark" id="btnInsertInit">초기화</button>
-							<button type="button" class="btn btn-outline-dark" id="btnInsertSave">저장</button>
+							<!-- <button type="button" class="btn btn-outline-dark" id="btnInsertSave">저장</button> -->
+							<div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_001', 'btnInsertSave')}"></div>
 						</div>
 					</div>
 

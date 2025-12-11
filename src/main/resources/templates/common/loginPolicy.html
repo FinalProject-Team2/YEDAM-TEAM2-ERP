@@ -57,8 +57,10 @@
 					<h5 class="card-title">보안 정책 설정</h5>
 				</div>
 				<div class="card-header-right">
-					<button type="button" class="btn btn-dark" id="btnReset">초기화</button>
-					<button type="button" class="btn btn-outline-dark" id="btnSave">저장</button>
+					<!-- <button type="button" class="btn btn-dark" id="btnReset">초기화</button> -->
+					<div th:replace="~{fragments/buttons :: resetButton('MENU_COMM_002', 'btnReset')}"></div>
+					<!-- <button type="button" class="btn btn-outline-dark" id="btnSave">저장</button> -->
+					<div th:replace="~{fragments/buttons :: saveButton('MENU_COMM_002', 'btnSave')}"></div>
 				</div>
 			</div>
 

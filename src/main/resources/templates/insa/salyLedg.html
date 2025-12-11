@@ -118,11 +118,15 @@
       <div class="card-header">
         <h5 class="card-title mb-0">급여목록</h5>
         <div class="card-header-right d-flex gap-2">
-          <button class="btn btn-danger" id="btnSalyDelete">삭제</button>
-          <button class="btn btn-outline-dark" id="btnSalyCalc">급여계산</button>
+          <!-- <button class="btn btn-outline-dark" id="btnSalyCalc">급여계산</button> -->
+          <div th:replace="~{fragments/buttons :: calcButton('MENU_HR_008', 'btnSalyCalc')}"></div>
           <button class="btn btn-outline-dark" id="btnSalySpec">명세서 조회</button>
-          <button class="btn btn-outline-dark" id="openSalyRegistModal">등록/수정</button>
-          <button class="btn btn-outline-dark" id="btnToggleConfirm">확정/취소</button>
+          <!-- <button class="btn btn-outline-dark" id="openSalyRegistModal">등록/수정</button> -->
+          <div th:replace="~{fragments/buttons :: regButton('MENU_HR_008', 'openSalyRegistModal')}"></div>
+          <!-- <button class="btn btn-outline-dark" id="btnToggleConfirm">확정/취소</button> -->
+          <div th:replace="~{fragments/buttons :: confirmButton('MENU_HR_008', 'btnToggleConfirm')}"></div>
+          <!-- <button class="btn btn-danger" id="btnSalyDelete">삭제</button> -->
+          <div th:replace="~{fragments/buttons :: deleteButton('MENU_HR_008', 'btnSalyDelete')}"></div>
         </div>
       </div>
       <div class="card-body saly-card-body">

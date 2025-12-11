@@ -171,7 +171,8 @@
             <h5 class="card-title">사원 계정 정보</h5>
           </div>
           <div class="card-header-right">
-            <button type="button" class="btn btn-outline-dark" id="btnEmpAcctSave">저장</button>
+            <!-- <button type="button" class="btn btn-outline-dark" id="btnEmpAcctSave">저장</button> -->
+            <div th:replace="~{fragments/buttons :: saveButton('MENU_COMM_003', 'btnEmpAcctSave')}"></div>
           </div>
         </div>
 
@@ -277,11 +278,14 @@
             <span class="help-text">※ 계정이 존재할 경우, 설정 가능합니다.</span>
           </div>
           <div class="card-header-right">
-            <button type="button"
+            <!-- <button type="button"
                     class="btn btn-outline-dark"
-                    id="btnRoleSelectModal">역할 조회</button>
-            <button type="button" class="btn btn-outline-dark" id="btnRoleSave">저장</button>
-            <button type="button" class="btn btn-danger" id="btnRoleDelete">삭제</button>
+                    id="btnRoleSelectModal">역할 조회</button> -->
+            <div th:replace="~{fragments/buttons :: roleButton('MENU_COMM_003', 'btnRoleSelectModal')}"></div>
+            <!-- <button type="button" class="btn btn-outline-dark" id="btnRoleSave">저장</button> -->
+            <div th:replace="~{fragments/buttons :: saveButton('MENU_COMM_003', 'btnRoleSave')}"></div>
+            <!-- <button type="button" class="btn btn-danger" id="btnRoleDelete">삭제</button> -->
+            <div th:replace="~{fragments/buttons :: deleteButton('MENU_COMM_003', 'btnRoleDelete')}"></div>
           </div>
         </div>
 
