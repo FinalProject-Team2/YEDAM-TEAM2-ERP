@@ -189,6 +189,30 @@ where a.mlss_emp_id in (select
                                     and dept_id = #{deptId})
                     and mlss_id = #{mlssId})
 and emp_id = #{empId}
+AND a.evale_relate = '본인'
+group by a.evale_relate, b.ability, b.mlss_iem
+</select>
+
+<select id="FinalResultMlssEtcList">
+select
+ a.evale_relate
+ ,b.ability
+ ,b.mlss_iem
+ ,avg(a.score) "score"
+from tb_mlss_wrter a
+join tb_mlss_iem b
+on a.mlss_iem_id = b.mlss_iem_id
+where a.mlss_emp_id in (select
+                     mlss_emp_id
+                    from tb_mlss_emp
+                    where emp_id in (select
+                                    emp_id
+                                    from tb_emp
+                                    where vend_id = #{vendId}
+                                    and dept_id = #{deptId})
+                    and mlss_id = #{mlssId})
+and emp_id &lt;&gt; #{empId}
+AND a.evale_relate &lt;&gt; '본인'
 group by a.evale_relate, b.ability, b.mlss_iem
 </select>
 
