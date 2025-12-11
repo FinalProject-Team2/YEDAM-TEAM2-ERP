@@ -79,7 +79,7 @@ public class MlssController {
 		}
 		Map<String, List<MlssVO>> list = mlssService.mlssLoadBefore();
 		List<MlssVO> userWrterList = mlssService.mlssWrterLoadBefore(v.getMlssEmpId(), empId);
-		List<MlssVO> stList = mlssService.mlssStLoadBefore(session.getVendId(), session.getDeptId(), v.getMlssId());
+		List<MlssVO> stList = mlssService.mlssStLoadBefore(session.getVendId(), session.getDeptId(), v.getMlssId(), empId);
 		model.addAttribute("userWrterList", userWrterList);
 		model.addAttribute("stList", stList);
 		model.addAttribute("evaleRelateUpr", uprList);
@@ -148,7 +148,7 @@ public class MlssController {
 			public List<MlssVO> mlssFinalData(Model model) {	
 				SessionDto session = LoginSession.getLoginSession();
 				MlssVO v = mlssService.mlssVisitChk( session.getEmpId() );							
-				return mlssService.FinalResultMlssList(session.getVendId(), session.getDeptId(), v.getMlssId() );
+				return mlssService.FinalResultMlssList(session.getVendId(), session.getDeptId(), v.getMlssId(), session.getEmpId());
 			}
 	
 

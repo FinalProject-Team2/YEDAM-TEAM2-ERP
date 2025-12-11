@@ -123,15 +123,15 @@ public class MlssServiceImpl implements MlssService{
 	}
 
 	@Override
-	public List<MlssVO> mlssStLoadBefore(String vendId, String deptId, String mlssId) {
+	public List<MlssVO> mlssStLoadBefore(String vendId, String deptId, String mlssId, String empId) {
 		
-		return mlssMapper.mlssStLoadBefore(vendId, deptId, mlssId);
+		return mlssMapper.mlssStLoadBefore(vendId, deptId, mlssId, empId);
 	}
 
 	@Override
-	public List<MlssVO> FinalResultMlssList(String vendId, String deptId, String mlssId) {
+	public List<MlssVO> FinalResultMlssList(String vendId, String deptId, String mlssId, String empId) {
 		
-		return mlssMapper.FinalResultMlssList(vendId, deptId, mlssId);
+		return mlssMapper.FinalResultMlssList(vendId, deptId, mlssId, empId);
 	}
 
 }

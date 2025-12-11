@@ -55,6 +55,12 @@ dependencies {
 	// 비밀번호 해시(BCrypt)용
 	implementation 'org.springframework.security:spring-security-crypto'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	//pdf출력 라이브러리 -윤기 추가-251211
+	implementation 'net.sf.jasperreports:jasperreports:6.20.0'
+	implementation 'com.lowagie:itext:2.1.7'
+	implementation files('src/main/resources/fonts/Malgun.jar')
+	
+	
 }
 
 dependencyManagement {

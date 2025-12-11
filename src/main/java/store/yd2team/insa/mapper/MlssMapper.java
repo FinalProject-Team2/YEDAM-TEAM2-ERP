@@ -35,8 +35,8 @@ public interface MlssMapper {
 	int insertMlssHead(MlssVO vo);
 	
 	//페이지 로드시 평가 완료 카운트 로드
-	List<MlssVO> mlssStLoadBefore(@Param("vendId") String vendId, @Param("deptId") String deptId, @Param("mlssId") String mlssId);
+	List<MlssVO> mlssStLoadBefore(@Param("vendId") String vendId, @Param("deptId") String deptId, @Param("mlssId") String mlssId, @Param("empId") String empId);
 	
 	//결과지 확인 눌럿을 때 불러오는 값들
-	List<MlssVO> FinalResultMlssList(@Param("vendId") String vendId, @Param("deptId") String deptId, @Param("mlssId") String mlssId);
+	List<MlssVO> FinalResultMlssList(@Param("vendId") String vendId, @Param("deptId") String deptId, @Param("mlssId") String mlssId, @Param("empId") String empId);
 }

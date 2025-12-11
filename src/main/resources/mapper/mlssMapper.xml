@@ -166,6 +166,7 @@ where mlss_emp_id in (select
                                     where vend_id = #{vendId}
                                     and dept_id = #{deptId})
                     and mlss_id = #{mlssId})
+and emp_id = #{empId}
 group by evale_relate
 </select>
 
@@ -187,6 +188,7 @@ where a.mlss_emp_id in (select
                                     where vend_id = #{vendId}
                                     and dept_id = #{deptId})
                     and mlss_id = #{mlssId})
+and emp_id = #{empId}
 group by a.evale_relate, b.ability, b.mlss_iem
 </select>
 

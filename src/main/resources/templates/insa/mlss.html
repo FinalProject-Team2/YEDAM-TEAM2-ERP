@@ -57,11 +57,11 @@ font-weight: bold;
 						</div>
 						<div class="col-md-2">
 							<label class="form-label">상사 평가 완료 여부</label> <input type="text"
-								id="suprrSt" th:value="|${evaleRelateUpr.size()}|" class="form-control" />
+								id="suprrSt" th:value="|0 / ${evaleRelateUpr.size()}|" class="form-control" />
 						</div>
 						<div class="col-md-2">
 							<label class="form-label">동료 평가 완료 여부</label> <input type="text"
-								id="crkSt" th:value="|${evaleRelateLwr.size()}|" class="form-control"/>
+								id="crkSt" th:value="|0 / ${evaleRelateLwr.size()}|" class="form-control"/>
 						</div>
 						<div class="col-md-6">
 								<label for="userName" class="form-label">기간</label>
@@ -411,15 +411,17 @@ let gridColums = [
 				
 			});
 			
-			const stList = [[${stList}]];			
+			const stList = [[${stList}]];	
+			let evalUpr = [[${evaleRelateUpr}]];
+			let evalLwr = [[${evaleRelateLwr}]];			
 			for(let v of stList) {			
 				if(v.evaleRelate == "본인"){
 					$("#selfSt").val(v.mlssEmpIdCount*3+"/ 3");				
 				}else if(v.evaleRelate == "상사"){
-					let old = $("#suprrSt").val();
+					let old = evalUpr.length;					
 					$("#suprrSt").val(v.mlssEmpIdCount+" / "+old)
 				}else{
-					let old = $("#crkSt").val();
+					let old = evalLwr.length;
 					$("#crkSt").val(v.mlssEmpIdCount+" / "+old)
 				}
 			}
