@@ -18,7 +18,8 @@
 </head>
 <body layout:fragment="content">
 	<div class="row">
-		<!-- 검색조건 -->
+	
+		<!-- 채권관리 조회 -->
 		<div class="col-md-12">
 			<div class="card mb-3 searchdiv">
 				<div class="card-header">
@@ -28,6 +29,8 @@
 						<button class="btn btn-outline-dark" id="searchBtn">조회</button>
 					</div>
 				</div>
+				
+				<!-- /card-body start -->
 				<div class="card-body">
 					<div class="row">
 						<div class="col-md-3">
@@ -36,18 +39,16 @@
 						</div>
 						<div class="col-md-3">
 							<label for="custcomName" class="form-label">고객사명</label>
-							<select id="custcomName" class="form-control">
-								<option value="">전체</option>
-								<option>무신사</option>
-								<option>29cm</option>
-							</select>
+							<input id="custcomName" type="text" class="form-control">
 						</div>
 						<div class="col-md-2">
-							<label class="form-label">입/출금</label>
-							<select id="psch" class="form-control">
+							<label class="form-label">결제구분</label>
+							<select id="pmtMtd" class="form-control">
 								<option value="">전체</option>
-								<option>입금</option>
-								<option>출금</option>
+								<option>현금</option>
+								<option>카드</option>
+								<option>계좌이체</option>
+								<option>어음</option>
 							</select>
 						</div>
 						<div class="col-md-4">
@@ -56,11 +57,9 @@
 
 									<!-- 시작일 -->
 									<div class="input-group date">
-										<input type="text"
-											class="form-control datepicker js-date-range-start"
-											placeholder="시작일"> <span
-											class="input-group-text js-date-range-icon-start"> <i
-											class="bi bi-calendar"></i>
+										<input type="text" class="form-control datepicker js-date-range-start" placeholder="시작일"> 
+										<span class="input-group-text js-date-range-icon-start"> 
+										<i class="bi bi-calendar"></i>
 										</span>
 									</div>
 
@@ -68,11 +67,9 @@
 
 									<!-- 종료일 -->
 									<div class="input-group date ms-2">
-										<input type="text"
-											class="form-control datepicker js-date-range-end"
-											placeholder="종료일"> <span
-											class="input-group-text js-date-range-icon-end"> <i
-											class="bi bi-calendar"></i>
+										<input type="text" class="form-control datepicker js-date-range-end" placeholder="종료일"> 
+										<span class="input-group-text js-date-range-icon-end"> 
+										<i class="bi bi-calendar"></i>
 										</span>
 									</div>
 							</div>
@@ -84,7 +81,7 @@
 			
 			<div class="card w-100 h-80">
 				<div class="card-header">
-					<h5 class="card-title">입출금관리</h5>
+					<h5 class="card-title">채권관리</h5>
 					<div class="card-header-right">
 						<!-- <button class="btn btn-outline-dark" id="openRciptTretModal">입금처리</button> -->
 						<div th:replace="~{fragments/buttons :: rciptButton('MENU_SALES_007', 'openRciptTretModal')}"></div>
@@ -134,17 +131,16 @@
             columns: [
                 {header: '고객코드', name: 'custcomId', width: 130, align: 'center'},
                 {header: '고객사명', name: 'custcomName', width: 210, align: 'center'},
-                {header: '대출거래일자', name: 'trnsDate', width: 120, align: 'right'},
+                {header: '거래일자', name: 'trnsDate', width: 120, align: 'right'},
                 {
                 	header: '최근납입일', 
                 	name: 'ltstRciptDt',
                 	width: 120,
                 	align: 'right'
                 },
-                {header: '거래구분', name: 'trnsFg', width: 130, align: 'center'},
-                {header: '입/출금', name: 'saleCtnt', width: 100, align: 'center'},
+                {header: '결제구분', name: 'pmtMtd', width: 130, align: 'center'},
                 {
-                    header: '대출금액',
+                    header: '채권금액',
                     name: 'borwAmt',
                     editor: 'text',
                     width: 180,
@@ -154,7 +150,7 @@
                         return num ? num.toLocaleString() : '';
                     }
                 },
-                /* {
+                {
                     header: '매출금액',
                     name: 'saleAmt',
                     width: 180,
@@ -163,7 +159,7 @@
                         const num = toNumber(value);
                         return num ? num.toLocaleString() : '';
                     }
-                }, */
+                }, 
                 {
                     header: '입금금액',
                     name: 'rciptAmt',
@@ -175,7 +171,7 @@
                     }
                 },
                 {
-                    header: '원금잔액',
+                    header: '채권잔액',
                     name: 'prinsumBaln',
                     width: 180,
                     align: 'right',

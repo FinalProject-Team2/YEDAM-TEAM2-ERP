@@ -33,13 +33,13 @@ public class RciptController {
         return "business/rcipt";   // templates/business/atmpt.html
     }
     
-    // 조회 고객사 auto complete (ID)
+    // 조회 고객코드
     @GetMapping("/custcomIdSearch")
     @ResponseBody
     public List<RciptVO> searchCustcomId(@RequestParam("keyword") String keyword) {
         return rciptService.searchCustcomId(keyword);
     }
-    // 조회 고객사 auto complete (Name)
+    // 조회 고객사명
     @GetMapping("/custcomNameSearch")
     @ResponseBody
     public List<RciptVO> searchCustcomName(@RequestParam("keyword") String keyword) {

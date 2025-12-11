@@ -35,45 +35,39 @@ public class RciptVO {
      *  조회 결과 (리스트/그리드용 필드)
      * ========================= */
 
-    // 거래일자
-    // SELECT r.trns_dt
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    // 거래일자
     private LocalDate trnsDt;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    
+    // 최근납입일
+    private LocalDate ltstRciptDt;
 
-    // 거래구분
-    // SELECT r.trns_fg
-    private String trnsFg;
-
+    // 채권금액
+    private Long bondAmt;
+    
     // 매출금액
-    // SELECT r.sale_amt
     private Long saleAmt;
 
-    // 차입금액(차변금액 등 의미에 맞게 사용)
-    // SELECT r.borw_amt
-    private Long borwAmt;
+    // 채권잔액
+    private Long bondBaln;
 
-    // 원금잔액
-    // SELECT r.prinsum_baln
-    private Long prinsumBaln;
+	/*
+	 * // 입금약속액 private Long rciptAppoAmt;
+	 * 
+	 * // 입금약속일
+	 * 
+	 * @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") private
+	 * LocalDate rciptAppoDt;
+	 */
 
-    // 수금예정금액
-    // SELECT r.rcipt_appo_amt AS rciptAppoAmt
-    private Long rciptAppoAmt;
 
-    // 수금예정일
-    // SELECT r.rcipt_appo_dt AS rciptAppoDt
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate rciptAppoDt;
-
-    // 최종수금일
-    // SELECT r.ltst_rcipt_dt AS ltstRciptDt
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate ltstRciptDt;
     
     // -- 입금내역 테이블(tb_rcipt_detail)
     private String vendId;
     private String rciptDt;
-    private Long rciptAmt;
-    private String pmtMtd;
-    private String rm;
+    private Long rciptAmt;  //입금급액
+    private String pmtMtd; //결제구분
+    private String rm; //비고
 }
