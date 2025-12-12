@@ -26,6 +26,15 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
             "/favicon.ico",
             "/pdf"
     );
+    
+    // 구독 해지 계정이 접근 가능한 URL prefix
+    private static final List<String> SUBS_CANCEL_ALLOWED_PREFIX = List.of(
+        "/SubscriptionChoice",          // 플랜 선택
+        "/Payment",                // 결제
+        "/subscription/check",    // 내 구독 정보
+        "/logIn/logout",       // 로그아웃은 허용
+        "/assets/", "/css/", "/js/", "/images/", "/webjars/"
+    );
 
     /**
      * 로그인 없이 접근 허용 (접두사 기준)
@@ -112,6 +121,27 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
                 return false;
             }
         }
+	        
+	     // ==========================
+	     // 3.5) 구독 해지(r4) 접근 제한 + 최초 진입 제어
+	     // ==========================
+	     if ("r4".equals(loginEmp.getAcctSt())) {
+	
+	         // 1) 루트(/) 접근 시 → 무조건 구독 플랜 페이지
+	         if ("/".equals(requestURI)) {
+	             response.sendRedirect("/subscribe/plan");
+	             return false;
+	         }
+	
+	         // 2) 허용된 URL만 통과
+	         boolean allowed = SUBS_CANCEL_ALLOWED_PREFIX.stream()
+	                 .anyMatch(requestURI::startsWith);
+	
+	         if (!allowed) {
+	             response.sendRedirect("/subscribe/plan");
+	             return false;
+	         }
+	     }
 
         // 4) 정상 로그인 + tempYn != e1 → 그대로 진행
         return true;

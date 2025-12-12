@@ -7,36 +7,70 @@ import static store.yd2team.common.consts.CodeConst.Yn.Y;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import store.yd2team.common.aop.SysLog;
+import store.yd2team.common.aop.SysLogConfig;
 import store.yd2team.common.dto.EmpLoginResultDto;
+import store.yd2team.common.dto.SessionDto;
 import store.yd2team.common.mapper.EmpLoginMapper;
 import store.yd2team.common.service.EmpAcctVO;
 import store.yd2team.common.service.EmpLoginService;
 import store.yd2team.common.service.SecPolicyService;
 import store.yd2team.common.service.SecPolicyVO;
+import store.yd2team.common.service.SystemLogService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SysLogConfig(module = "d2", table = "TB_EMP_ACCT", pkParam = "empAcctId")
 public class EmpLoginServiceImpl implements EmpLoginService {
 
     private final EmpLoginMapper empLoginMapper;
     private final SecPolicyService secPolicyService;
     private final PasswordEncoder passwordEncoder;
+    private final SystemLogService systemLogService;
+    
+    private SessionDto buildPseudoSession(EmpAcctVO acct, String actorEmpId) {
+        SessionDto s = new SessionDto();
+        s.setVendId(acct.getVendId());
+        s.setEmpAcctId(acct.getEmpAcctId());
+        s.setEmpId(actorEmpId);          // 누가 발생시켰는지(자동해제면 SYSTEM)
+        s.setLoginId(acct.getLoginId());
+        s.setEmpNm(acct.getEmpNm());     // 있으면
+        return s;
+    }
+
+    private void writeSysLog(EmpAcctVO acct, String action, String summary, String actorEmpId) {
+        SessionDto pseudo = buildPseudoSession(acct, actorEmpId);
+        systemLogService.writeLog(
+            pseudo,
+            "d2",              // module
+            action,            // lg3/lg4
+            "TB_EMP_ACCT",      // table
+            acct.getEmpAcctId(),// pk
+            summary
+        );
+    }
 
     // 보안 정책이 없을 때 기본 최대 실패 횟수
     private static final int DEFAULT_MAX_FAIL_CNT = 5;
 
+    @SysLog(
+    		  action = "lg2",
+    		  msg = "로그인",
+    		  pkFromSession = false,
+    		  onOk = "lg1",
+    		  onFail = "lg2",
+    		  onOtpStep = "lg6"
+    		)
     @Override
     public EmpLoginResultDto login(String vendId, String loginId, String password) {
 
@@ -91,6 +125,7 @@ public class EmpLoginServiceImpl implements EmpLoginService {
                 empLoginMapper.unlock(empAcct.getEmpAcctId(), "SYSTEM");
                 empAcct.setSt(ACTIVE);   // 상태를 정상(r1)으로 변경
                 empAcct.setFailCnt(0);
+                writeSysLog(empAcct, "lg4", "자동 잠금 해제", "SYSTEM");
             } else {
                 long remain = autoUnlockTm - minutes;
                 return EmpLoginResultDto.fail("잠금된 계정입니다. 약 " + remain + "분 후 다시 시도해주세요.");
@@ -122,18 +157,24 @@ public class EmpLoginServiceImpl implements EmpLoginService {
         // 4-2) 상태(st) 체크 (ACTIVE가 아니면 로그인 불가)
         if (!ACTIVE.equals(st)) {
 
-            // r3 → 비활성 / 관리자 처리 대상
-            if ("r3".equals(st)) {
-                return EmpLoginResultDto.fail("잠금 또는 비활성화된 계정입니다. 관리자에게 문의하세요.");
-            }
-
-            // r4 → 구독 해지
             if ("r4".equals(st)) {
-                return EmpLoginResultDto.fail("구독 해지 상태입니다.");
-            }
+                // 구독 해지: 마스터(masYn=e1)만 로그인 허용
+                String masYn = empAcct.getMasYn(); // EmpAcctVO에 getter 있어야 함
 
-            // 그 밖의 예외 상태
-            return EmpLoginResultDto.fail("로그인할 수 없는 계정 상태입니다. 관리자에게 문의하세요.");
+                if (!"e1".equals(masYn)) {
+                    // e2(일반) 또는 null 등은 전부 차단
+                    return EmpLoginResultDto.fail("구독 해지된 회사입니다.");
+                }
+
+                // 마스터만 계속 진행
+                log.info(">>> [LOGIN] 구독 해지 + 마스터 계정 로그인 허용: empAcctId={}, vendId={}",
+                         empAcct.getEmpAcctId(), empAcct.getVendId());
+
+            } else if ("r3".equals(st)) {
+                return EmpLoginResultDto.fail("잠금 또는 비활성화된 계정입니다. 관리자에게 문의하세요.");
+            } else {
+                return EmpLoginResultDto.fail("로그인할 수 없는 계정 상태입니다. 관리자에게 문의하세요.");
+            }
         }
 
         // ===========================
@@ -163,6 +204,9 @@ public class EmpLoginServiceImpl implements EmpLoginService {
             }
 
             if (nextFailCnt >= maxFailCnt) {
+            	
+            	writeSysLog(empAcct, "lg3", "계정 잠금 발생(비밀번호 실패 횟수 초과)", "SYSTEM");
+            	 
                 return EmpLoginResultDto.fail(
                         "비밀번호를 " + maxFailCnt + "회 이상 잘못 입력하여 계정이 잠겼습니다.",
                         captchaRequiredNext,
@@ -241,6 +285,7 @@ public class EmpLoginServiceImpl implements EmpLoginService {
         return secPolicyService.getByVendIdOrDefault(vendId);
     }
     
+    @SysLog(action = "lg5", msg = "OTP 실패", pkField = "empAcctId")
     @Override
     public void increaseLoginFailByOtp(EmpAcctVO empAcct) {
         if (empAcct == null) {

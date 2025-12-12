@@ -30,4 +30,6 @@ public interface EmpLoginMapper {
 	List<String> selectRoleIdsByEmpAcctId(@Param("empAcctId") String empAcctId);
 	
 	List<String> selectAuthCodesByEmpAcctId(@Param("empAcctId") String empAcctId);
+	
+	EmpAcctVO selectByEmpAcctId(@Param("empAcctId") String empAcctId);
 }

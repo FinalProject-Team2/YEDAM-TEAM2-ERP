@@ -46,4 +46,6 @@ public class EmpLoginResultDto {
     public static EmpLoginResultDto otpStep(EmpAcctVO vo, String message) {
         return new EmpLoginResultDto(false, message, vo, false, true);
     }
+    
+    
 }

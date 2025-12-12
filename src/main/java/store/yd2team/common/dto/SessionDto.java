@@ -37,6 +37,7 @@ public class SessionDto implements Serializable{
     private List<String> roleIds;
     private Set<String> authCodes;
     private String roleId;
+    private String acctSt;
     
     private Map<String, MenuAuthDto> menuAuthMap = new HashMap<>();
 }

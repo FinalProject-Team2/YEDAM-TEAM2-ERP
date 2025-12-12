@@ -24,4 +24,16 @@ public interface SignUpMapper {
 	// 해당 월의 최대 사원계정 ID 시퀀스 조회 (예: mas_acct_202512001 → 001)
 	String getMaxVendAcctSeqOfMonth(@Param("prefix") String prefix);
 	
+	int insertUserRole(
+			@Param("vendId") String vendId,
+		    @Param("empAcctId") String empAcctId,
+		    @Param("roleId") String roleId,
+		    @Param("creaBy") String creaBy
+		);
+	
+	int countUserRole(@Param("vendId") String vendId,
+            @Param("empAcctId") String empAcctId,
+            @Param("roleId") String roleId);
+	
+	
 }// end interface

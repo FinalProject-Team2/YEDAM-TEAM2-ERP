@@ -69,4 +69,8 @@ public interface SubscriptionMapper {
 	// === 신규 추가: API 사용량 증가 (tb_subsp.api_use_cnt = api_use_cnt + 1) ===
 	int incrementApiUseCountByVendId(@Param("vendId") String vendId);
 	
+	// 만료인 계정 r4로 변경
+	List<String> selectExpiredVendIds();
+
+	
 }// end interface

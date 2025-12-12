@@ -1,16 +1,19 @@
 package store.yd2team.common.service.impl;
 
+import static store.yd2team.common.consts.CodeConst.Yn.Y;
+
 import org.springframework.stereotype.Service;
 
-import static store.yd2team.common.consts.CodeConst.Yn.*;
-
 import lombok.RequiredArgsConstructor;
+import store.yd2team.common.aop.SysLog;
+import store.yd2team.common.aop.SysLogConfig;
 import store.yd2team.common.mapper.SecPolicyMapper;
 import store.yd2team.common.service.SecPolicyService;
 import store.yd2team.common.service.SecPolicyVO;
 
 @Service
 @RequiredArgsConstructor
+@SysLogConfig(module = "d2", table = "TB_SEC_POLICY", pkParam = "vendId")
 public class SecPolicyServiceImpl implements SecPolicyService {
 
     private final SecPolicyMapper secPolicyMapper;
@@ -41,6 +44,7 @@ public class SecPolicyServiceImpl implements SecPolicyService {
     }
 
     @Override
+    @SysLog(action = "sp1", msg = "보안 정책 저장", pkParam = "vendId")
     public SecPolicyVO saveForVend(String vendId, String empId, SecPolicyVO reqVo) {
     	
     	validatePolicy(reqVo);

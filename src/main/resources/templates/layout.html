@@ -208,17 +208,47 @@
 		<nav class="sidebar sidebar-offcanvas" id="sidebar">
 			<ul class="nav">
 				<!-- 대시보드는 그냥 고정으로 노출 -->
-				<li class="nav-item"><a class="nav-link" href="/"> <i
-						class="mdi mdi-grid-large menu-icon"></i> <span class="menu-title">Dashboard</span>
-				</a></li>
+				<li class="nav-item">
+				  <a class="nav-link" href="/">
+				    <i class="mdi mdi-grid-large menu-icon"></i>
+				    <span class="menu-title">Dashboard</span>
+				  </a>
+				</li>
+				
+				<!-- ========================= -->
+				<!-- 구독 해지 전용 메뉴 -->
+				<!-- ========================= -->
+				<th:block th:if="${session.LOGIN_EMP != null and session.LOGIN_EMP.acctSt == 'r4' and session.LOGIN_EMP.masYn == 'e1'}">
+				
+				  <li class="nav-item nav-category">
+				    구독 관리
+				  </li>
+				
+				  <li class="nav-item">
+				    <a class="nav-link" href="/SubscriptionChoice">
+				      <i class="mdi mdi-credit-card-outline menu-icon"></i>
+				      <span class="menu-title">구독 플랜 선택</span>
+				    </a>
+				  </li>
+				
+				  <li class="nav-item">
+				    <a class="nav-link" href="/subscription/check">
+				      <i class="mdi mdi-file-document-outline menu-icon"></i>
+				      <span class="menu-title">내 구독 정보</span>
+				    </a>
+				  </li>
+				
+				</th:block>
 
 				<!-- 카테고리 제목 -->
 				<li class="nav-item nav-category"
-					th:if="${session.LOGIN_EMP != null}">메뉴</li>
+				    th:if="${session.LOGIN_EMP != null and session.LOGIN_EMP.acctSt != 'r4'}">
+				  메뉴
+				</li>
 
 				<!-- 🔥 모듈 루프: menuModules 는 @ControllerAdvice 에서 세팅해준다고 가정 -->
 				<li class="nav-item" th:each="module : ${menuModules}"
-					th:if="${session.LOGIN_EMP != null}"><a class="nav-link"
+					th:if="${session.LOGIN_EMP != null and session.LOGIN_EMP.acctSt != 'r4'}"><a class="nav-link"
 					data-bs-toggle="collapse" th:href="'#module-' + ${module.moduleId}"
 					aria-expanded="false"
 					th:aria-controls="'module-' + ${module.moduleId}"> <i

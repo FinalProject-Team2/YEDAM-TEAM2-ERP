@@ -27,11 +27,7 @@ import store.yd2team.common.service.EmpAcctVO;
 import store.yd2team.common.service.SmsService;
 
 
-@SysLogConfig(
-	    module = "COMM",
-	    table  = "TB_EMP_ACCT",
-	    pkParam = "empAcctId"
-	)
+@SysLogConfig(module = "d2", table = "TB_EMP_ACCT", pkParam = "empAcctId")
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -61,10 +57,7 @@ public class EmpAcctServiceImpl implements EmpAcctService{
     
     @Override
     @Transactional
-    @SysLog(
-    		action = "UPDATE",                 // INSERT + UPDATE 겸용이면 SAVE 라고 두고
-    		msg    = "비밀번호 변경"          // 요약만 적어줌
-    		)
+    @SysLog(action = "ac1", msg = "비밀번호 변경", pkFromSession = true, pkField = "empAcctId")
     public void changePassword(String vendId, String loginId, String rawNewPassword) {
 
         EmpAcctVO empAcct = empLoginMapper.selectByLogin(vendId, loginId);

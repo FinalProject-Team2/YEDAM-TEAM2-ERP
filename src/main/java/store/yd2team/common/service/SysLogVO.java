@@ -23,4 +23,7 @@ public class SysLogVO {
 
     // 화면용 추가 필드 (JOIN 결과)
     private String loginId;  // tb_emp_acct.login_id
+    
+    private String modlCodeNm;   
+    private String motionTyNm; 
 }

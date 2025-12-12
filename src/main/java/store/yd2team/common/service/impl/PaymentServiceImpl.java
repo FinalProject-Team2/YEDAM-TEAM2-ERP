@@ -8,11 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import store.yd2team.common.mapper.SignUpMapper;
 import store.yd2team.common.mapper.SubscriptionMapper;
 import store.yd2team.common.service.PaymentService;
+import store.yd2team.common.service.SttlVO;
 import store.yd2team.common.service.SubscriptionVO;
 import store.yd2team.common.service.subscriptionPlanVO;
-import store.yd2team.common.service.SttlVO;
 import store.yd2team.common.util.LoginSession;
 
 @Service
@@ -20,6 +21,9 @@ public class PaymentServiceImpl implements PaymentService {
 	
 	@Autowired
 	SubscriptionMapper subscriptionMapper;
+	
+	@Autowired
+	SignUpMapper signUpMapper;
 	
 	/**
 	 * 결제 성공 시 tb_subsp에 구독 정보 저장 (기존 있으면 UPDATE, 없으면 INSERT) 및 tb_sttl 결제내역 저장.
@@ -36,6 +40,8 @@ public class PaymentServiceImpl implements PaymentService {
 		// 2) 세션에서 로그인 사용자 정보 가져오기
 		String vendId = LoginSession.getVendId();
 		String empId = LoginSession.getEmpId();
+		String empAcctId = LoginSession.getEmpAcctId(); // 추가
+
 		if (vendId == null) {
 			throw new IllegalStateException("로그인 세션 정보(vendId)가 없습니다.");
 		}
@@ -99,6 +105,13 @@ public class PaymentServiceImpl implements PaymentService {
 		sttl.setCreaBy(empId);
 		
 		subscriptionMapper.insertSttl(sttl);
+		
+		// ✅ 7) 결제 성공 시점에 마스터 권한(role) 부여
+	    // 중복방지(없으면 insert)
+	    int existsRole = signUpMapper.countUserRole(vendId, empAcctId, "ROLE_VEND_MASTER");
+	    if (existsRole == 0) {
+	        signUpMapper.insertUserRole(vendId, empAcctId, "ROLE_VEND_MASTER", empId);
+	    }
 	}
 
 }// end class

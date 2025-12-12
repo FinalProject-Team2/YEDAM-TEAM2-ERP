@@ -64,4 +64,9 @@ public interface EmpAcctMapper {
                       @Param("creaBy")    String creaBy);
     
     List<EmpAcctRoleDto> selectEmpAcctRoles(@Param("empAcctId") String empAcctId);
+    
+    int updateAcctStByVendId(@Param("vendId") String vendId,
+				             @Param("st") String st,
+				             @Param("updtBy") String updtBy);
+
 }

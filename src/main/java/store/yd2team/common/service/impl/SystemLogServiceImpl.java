@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import store.yd2team.common.dto.CodeDto;
 import store.yd2team.common.dto.SessionDto;
 import store.yd2team.common.dto.SysLogSearchCond;
 import store.yd2team.common.mapper.SysLogMapper;
@@ -51,7 +52,8 @@ public class SystemLogServiceImpl implements SystemLogService {
         log.setSmry(summary);
         log.setYn("e1");
 
-        log.setCreaBy(session.getEmpAcctId());
+        log.setCreaBy(session.getEmpId());
+        log.setUpdtBy(session.getEmpId());
 
         sysLogMapper.insertLog(log);
     }
@@ -59,5 +61,15 @@ public class SystemLogServiceImpl implements SystemLogService {
     @Override
     public List<SysLogVO> getLogList(SysLogSearchCond cond) {
         return sysLogMapper.selectLogList(cond);
+    }
+    
+    @Override
+    public List<String> getLoginIdList(String keyword) {
+        return sysLogMapper.selectLoginIdList(keyword);
+    }
+
+    @Override
+    public List<CodeDto> getCodeList(String grpId) {
+        return sysLogMapper.selectCodeList(grpId);
     }
 }

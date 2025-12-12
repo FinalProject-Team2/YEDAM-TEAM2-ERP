@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import store.yd2team.common.aop.SysLog;
+import store.yd2team.common.aop.SysLogConfig;
 import store.yd2team.common.mapper.CodeMapper;
 import store.yd2team.common.service.CodeService;
 import store.yd2team.common.service.CodeVO;
@@ -14,6 +16,7 @@ import store.yd2team.common.service.CodeVO;
 
 @Service
 @RequiredArgsConstructor
+@SysLogConfig(module = "cm", table = "TB_CODE", pkParam = "codeId")
 public class CodeServiceImpl implements CodeService{
 	
 	private final CodeMapper codeMapper;
@@ -42,6 +45,7 @@ public class CodeServiceImpl implements CodeService{
 	
 	// 공통 코드 중복 체크
 	@Override
+	@SysLog(action = "co1", msg = "공통코드 등록", pkFromSession = false, pkField = "grpId")
 	public int existsCode(CodeVO vo) {
 		return codeMapper.existsCode(vo);
 	}
@@ -66,6 +70,7 @@ public class CodeServiceImpl implements CodeService{
 	// 공통 코드 수정
 	@Override
 	@Transactional
+	@SysLog(action = "co2", msg = "공통코드 수정", pkFromSession = false, pkField = "grpId")
 	public int modifyCode(CodeVO vo) {
 		
 		if (codeMapper.existsCode(vo) > 0) {

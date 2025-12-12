@@ -250,5 +250,11 @@
 		SET api_use_cnt = NVL(api_use_cnt, 0) + 1
 		WHERE vend_id = #{vendId}
 	</update>
+	
+	<select id="selectExpiredVendIds" resultType="string">
+	  SELECT DISTINCT vend_id
+	    FROM tb_subsp
+	   WHERE end_dt &lt; TRUNC(SYSDATE)
+	</select>
 
 </mapper>

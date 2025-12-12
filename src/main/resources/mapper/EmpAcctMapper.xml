@@ -272,5 +272,20 @@
 	    ORDER BY r.role_nm
 	</select>
 	
+	<update id="updateAcctStByVendId">
+	  UPDATE tb_emp_acct
+	     SET st = #{st},
+	         updt_dt = SYSDATE,
+	         updt_by = #{updtBy}
+	   WHERE vend_id = #{vendId}
+	     AND st <![CDATA[ <> ]]> #{st}
+	</update>
+	
+	<select id="selectExpiredVendIds" resultType="string">
+	  SELECT DISTINCT vend_id
+	    FROM tb_subsp
+	   WHERE end_dt <![CDATA[ < ]]> TRUNC(SYSDATE)
+	</select>
+	
 	
 </mapper>
