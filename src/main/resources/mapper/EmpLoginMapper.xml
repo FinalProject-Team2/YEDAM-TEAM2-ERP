@@ -91,5 +91,43 @@
             ON a.role_id = ur.role_id
          WHERE ur.emp_acct_id = #{empAcctId}
     </select>
+    
+    <select id="selectByEmpAcctId" parameterType="string">
+	    SELECT  a.emp_acct_id,
+	            a.vend_id,
+	            a.emp_id,
+	            a.login_id,
+	            a.login_pwd,
+	            a.st,
+	            a.fail_cnt,
+	            a.lock_dttm,
+	            a.last_login,
+	            a.yn,
+	            a.crea_dt,
+	            a.crea_by,
+	            a.updt_dt,
+	            a.updt_by,
+	            a.temp_yn,
+	            a.mas_yn,
+	            e.nm        AS empNm,
+	            e.dept_id   AS deptId,
+	            d.dept_nm   AS deptNm,
+	            v.bizcnd,
+	            v.addr,
+	            e.cttpc,
+	            v.hp,
+	            e.email,
+	            e.proof_photo
+	    FROM TB_EMP_ACCT a
+	    LEFT JOIN TB_EMP e
+	           ON a.EMP_ID = e.EMP_ID
+	          AND a.VEND_ID = e.VEND_ID
+	    LEFT JOIN TB_DEPT d
+	           ON e.DEPT_ID = d.DEPT_ID
+	          AND e.VEND_ID = d.VEND_ID
+	    LEFT JOIN TB_VEND v
+	           ON a.VEND_ID = v.VEND_ID
+	    WHERE a.EMP_ACCT_ID = #{empAcctId}
+	</select>
     	
 </mapper>

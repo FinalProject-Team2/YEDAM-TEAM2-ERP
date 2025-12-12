@@ -4,9 +4,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import store.yd2team.common.aop.SysLog;
+import store.yd2team.common.aop.SysLogConfig;
 import store.yd2team.common.dto.AuthSaveResult;
 import store.yd2team.common.dto.MenuAuthDto;
 import store.yd2team.common.dto.RoleSaveRequest;
@@ -15,6 +18,7 @@ import store.yd2team.common.mapper.AuthManageMapper;
 import store.yd2team.common.service.AuthManageService;
 import store.yd2team.common.service.RoleVO;
 
+@SysLogConfig(module = "cm", table = "TB_ROLE", pkParam = "roleId")
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -50,7 +54,9 @@ public class AuthManageServiceImpl implements AuthManageService {
         return authManageMapper.selectMenuAuthByRoleAndModule(vendId, roleId, moduleId);
     }
     
+    @Transactional
     @Override
+    @SysLog(action = "au1", msg = "메뉴 권한 저장", pkFromSession = false, pkField = "roleId")
     public AuthSaveResult saveMenuAuth(String vendId,
 			                           String roleId,
 			                           List<MenuAuthDto> authList,
@@ -80,6 +86,7 @@ public class AuthManageServiceImpl implements AuthManageService {
     
     
     @Override
+    @SysLog(action = "ro1", msg = "역할 저장(생성/수정)", pkFromSession = false, pkField = "")
     public RoleSaveResult saveRoleList(String vendId,
                              String empId,
                              RoleSaveRequest req) {

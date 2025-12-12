@@ -32,6 +32,26 @@
 }
 
 /* row header 색상은 style.css 공통(.tui-grid-header-area / body-area) 사용 */
+
+.autocomplete-list{
+  position:absolute;
+  top:100%;
+  left:0;
+  right:0;
+  z-index:9999;
+  background:#fff;
+  border:1px solid #ddd;
+  border-top:0;
+  max-height:220px;
+  overflow:auto;
+}
+.autocomplete-item{
+  padding:8px 10px;
+  cursor:pointer;
+}
+.autocomplete-item:hover{
+  background:#f3f3f3;
+}
 </style>
 </head>
 
@@ -45,35 +65,32 @@
 					<h5 class="card-title">시스템 로그 조회</h5>
 				</div>
 				<div class="card-header-right">
-					<button type="button" class="btn btn-dark">초기화</button>
-					<button type="button" class="btn btn-outline-dark">조회</button>
+					<button type="button" class="btn btn-dark" id="btnReset">초기화</button>
+					<button type="button" class="btn btn-outline-dark" id="btnSearch">조회</button>
 				</div>
 			</div>
 
 			<div class="card-body">
 				<div class="row mb-2">
 					<div class="col-md-3">
-						<label for="accountId" class="form-label">계정 ID</label> <input
-							id="accountId" type="text" class="form-control"
-							placeholder="HONG@NON.AC">
+					  <label for="accountId" class="form-label">계정 ID</label>
+					
+					  <div class="position-relative">
+					    <input id="accountId" type="text" class="form-control"
+					           placeholder="HONG@NON.AC" autocomplete="off">
+					    <div id="accountIdList" class="autocomplete-list d-none"></div>
+					  </div>
 					</div>
 					<div class="col-md-3">
-						<label for="module" class="form-label">모듈</label> <select
-							id="module" class="form-select">
-							<option value="">전체</option>
-							<option value="COMMON">공통</option>
-							<option value="HR">인사</option>
-							<option value="SALES">영업</option>
+						<label for="module" class="form-label">모듈</label>
+						<select id="module" class="form-select">
+						  <option value="">전체</option>
 						</select>
 					</div>
 					<div class="col-md-3">
-						<label for="action" class="form-label">액션</label> <select
-							id="action" class="form-select">
-							<option value="">전체</option>
-							<option value="LOGIN">LOGIN</option>
-							<option value="INSERT">INSERT</option>
-							<option value="UPDATE">UPDATE</option>
-							<option value="DELETE">DELETE</option>
+						<label for="action" class="form-label">액션</label>
+						<select id="action" class="form-select">
+						  <option value="">전체</option>
 						</select>
 					</div>
 
@@ -127,90 +144,155 @@
 
 	</div>
 
-	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			// Toast UI Grid가 없으면 종료 (방어코드)
-			if (!window.tui || !tui.Grid) {
-				return;
-			}
+<script>
+document.addEventListener('DOMContentLoaded', async function () {
+  if (!window.tui || !tui.Grid) return;
 
-			// 화면 테스트용 더미 데이터
-			const logData = [ {
-				occurredAt : '2019-05-05 09:12:54',
-				accountId : 'HONG@YEDAM.AC',
-				module : '공통',
-				action : 'LOGIN',
-				targetTable : '-',
-				targetId : '-',
-				summary : '깃 스테이징용'
-			}, {
-				occurredAt : '2019-05-05 09:12:54',
-				accountId : 'HONG@YEDAM.AC',
-				module : '공통',
-				action : 'LOGIN',
-				targetTable : '-',
-				targetId : '-',
-				summary : '관리자 로그인'
-			}, {
-				occurredAt : '2019-05-06 10:11:22',
-				accountId : 'KIM@NON.AC',
-				module : '주문',
-				action : 'INSERT',
-				targetTable : 'ORDER',
-				targetId : 'ORD_20240501_001',
-				summary : '주문 등록'
-			} ];
+  const $account = document.getElementById('accountId');
+  const $module = document.getElementById('module');
+  const $action = document.getElementById('action');
+  const $start = document.querySelector('.js-date-range-start');
+  const $end = document.querySelector('.js-date-range-end');
 
-			// Grid 생성 (테마, rowHeader 색상은 teamUtil.js + style.css 공통 적용)
-			const logGrid = new tui.Grid({
-				el : document.getElementById('logGrid'),
-				data : logData,
-				bodyHeight : 320,
-				scrollX : false,
-				scrollY : false,
-				rowHeaders : [ 'checkbox' ],
-				columnOptions : {
-					minWidth : 80,
-					resizable : true
-				},
-				columns : [ {
-					header : '발생 일시',
-					name : 'occurredAt',
-					minWidth : 160,
-					align : 'right'
-				}, {
-					header : '계정 ID',
-					name : 'accountId',
-					minWidth : 160
-				}, {
-					header : '모듈',
-					name : 'module',
-					minWidth : 100
-				}, {
-					header : '액션',
-					name : 'action',
-					minWidth : 100
-				}, {
-					header : '대상 테이블',
-					name : 'targetTable',
-					minWidth : 120
-				}, {
-					header : '대상 ID',
-					name : 'targetId',
-					minWidth : 160
-				}, {
-					header : '요약 정보',
-					name : 'summary',
-					minWidth : 200
-				} ]
-			});
+  const $btnSearch = document.getElementById('btnSearch');
+  const $btnReset = document.getElementById('btnReset');
 
-			// 필요 시 리사이즈 대응
-			window.addEventListener('resize', function() {
-				logGrid.refreshLayout();
-			});
-		});
-	</script>
+  const $acList = document.getElementById('accountIdList');
+
+  const logGrid = new tui.Grid({
+    el: document.getElementById('logGrid'),
+    data: [],
+    bodyHeight: 320,
+    scrollX: false,
+    scrollY: false,
+    rowHeaders: ['checkbox'],
+    columnOptions: { minWidth: 80, resizable: true },
+    columns: [
+      { header: '발생 일시',   name: 'occurredAt', minWidth: 160, align: 'right' },
+      { header: '계정 ID',     name: 'accountId',  minWidth: 160 },
+      { header: '모듈',        name: 'moduleNm',   minWidth: 100 },
+      { header: '액션',        name: 'actionNm',   minWidth: 100 },
+      { header: '대상 테이블', name: 'targetTable',minWidth: 120 },
+      { header: '대상 테이블 PK', name: 'targetPk',   minWidth: 160 },
+      { header: '요약 정보',   name: 'summary',    minWidth: 260 }
+    ]
+  });
+
+  async function initFilters() {
+    const res = await fetch('/api/sysLog/filters');
+    const json = await res.json();
+    const modules = json?.data?.modules || [];
+    const actions = json?.data?.actions || [];
+    
+    $module.innerHTML = '<option value="">전체</option>';
+    $action.innerHTML = '<option value="">전체</option>';
+
+    // 기존 옵션(전체) 유지하고 뒤에 붙이기
+    modules.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.codeId;
+      opt.textContent = c.codeNm;
+      $module.appendChild(opt);
+    });
+
+    actions.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.codeId;
+      opt.textContent = c.codeNm;
+      $action.appendChild(opt);
+    });
+  }
+
+  async function loadLogs() {
+    const params = new URLSearchParams({
+      accountId: $account.value || '',
+      module: $module.value || '',
+      action: $action.value || '',
+      startDate: $start?.value || '',
+      endDate: $end?.value || ''
+    });
+
+    const res = await fetch('/api/sysLog/list?' + params.toString());
+    const json = await res.json();
+
+    const list = (json?.data?.contents || []).map(row => ({
+      occurredAt: row.errDttm,
+      accountId: row.loginId,
+      moduleNm: row.modlCodeNm || row.modlCode,
+      actionNm: row.motionTyNm || row.motionTy,
+      targetTable: row.targetTbNm,
+      targetPk: row.targetPk,
+      summary: row.smry
+    }));
+
+    logGrid.resetData(list);
+  }
+
+  // ===== 초기화 =====
+  $btnReset.addEventListener('click', () => {
+    $account.value = '';
+    $module.value = '';
+    $action.value = '';
+    if ($start) $start.value = '';
+    if ($end) $end.value = '';
+    hideAutoComplete();
+    logGrid.resetData([]);
+  });
+
+  // ===== 조회 =====
+  $btnSearch.addEventListener('click', loadLogs);
+
+  // ===== 자동완성 =====
+  function showAutoComplete(items) {
+    if (!items.length) { hideAutoComplete(); return; }
+    $acList.innerHTML = items.map(v => `<div class="autocomplete-item" data-value="${v}">${v}</div>`).join('');
+    $acList.classList.remove('d-none');
+  }
+
+  function hideAutoComplete() {
+    $acList.classList.add('d-none');
+    $acList.innerHTML = '';
+  }
+
+  let acTimer = null;
+  $account.addEventListener('input', () => {
+    const q = $account.value.trim();
+    clearTimeout(acTimer);
+
+    if (!q) { hideAutoComplete(); return; }
+
+    acTimer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/sysLog/loginIds?q=' + encodeURIComponent(q));
+        const json = await res.json();
+        showAutoComplete(json?.data || []);
+      } catch (e) {
+        hideAutoComplete();
+      }
+    }, 200);
+  });
+
+  $acList.addEventListener('click', (e) => {
+    const item = e.target.closest('.autocomplete-item');
+    if (!item) return;
+    $account.value = item.dataset.value;
+    hideAutoComplete();
+  });
+
+  // 바깥 클릭하면 닫기
+  document.addEventListener('click', (e) => {
+    if (e.target === $account || $acList.contains(e.target)) return;
+    hideAutoComplete();
+  });
+
+  // 최초 로딩
+  await initFilters();
+
+  window.addEventListener('resize', () => logGrid.refreshLayout());
+});
+</script>
+
+
 
 </body>
 </html>

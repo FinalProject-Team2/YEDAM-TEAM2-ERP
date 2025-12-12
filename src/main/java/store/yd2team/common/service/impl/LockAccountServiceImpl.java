@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import lombok.RequiredArgsConstructor;
+import store.yd2team.common.aop.SysLog;
+import store.yd2team.common.aop.SysLogConfig;
 import store.yd2team.common.dto.AutoCompleteItemDto;
 import store.yd2team.common.dto.CodeDto;
 import store.yd2team.common.dto.LockAccountDto;
@@ -16,6 +18,7 @@ import store.yd2team.common.service.LockAccountService;
 
 @Service
 @RequiredArgsConstructor
+@SysLogConfig(module = "d2", table = "TB_EMP_ACCT", pkParam = "empAcctId")
 public class LockAccountServiceImpl implements LockAccountService {
 
  private final LockAccountMapper lockAccountMapper;
@@ -31,6 +34,7 @@ public class LockAccountServiceImpl implements LockAccountService {
  }
 
  @Override
+ @SysLog(action = "ac2", msg = "잠금계정 상태 변경", pkFromSession = true, pkField = "empAcctId")
  public int updateAccountStatuses(List<LockAccountUpdateDto> list, String loginId) {
      if (CollectionUtils.isEmpty(list)) {
          return 0;

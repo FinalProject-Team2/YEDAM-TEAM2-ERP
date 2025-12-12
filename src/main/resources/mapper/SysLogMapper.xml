@@ -18,6 +18,9 @@
         <result property="creaBy"      column="crea_by"/>
         <result property="updtDt"      column="updt_dt"/>
         <result property="updtBy"      column="updt_by"/>
+        
+        <result property="modlCodeNm"   column="modl_code_nm"/>
+        <result property="motionTyNm"   column="motion_ty_nm"/>
 
         <!-- JOIN 컬럼 -->
         <result property="loginId"     column="login_id"/>
@@ -25,6 +28,12 @@
 
     <!-- 1) 로그 INSERT -->
     <insert id="insertLog">
+	    <selectKey keyProperty="logId" resultType="string" order="BEFORE">
+		  SELECT 'LOG' || TO_CHAR(SYSDATE,'YYMM') ||
+		         LPAD(NVL(MAX(TO_NUMBER(SUBSTR(log_id, 8))), 0) + 1, 3, '0')
+		    FROM tb_log
+		   WHERE SUBSTR(log_id, 1, 7) = 'LOG' || TO_CHAR(SYSDATE,'YYMM')
+		</selectKey>
         INSERT INTO tb_log (
               log_id
             , emp_acct_id
@@ -43,7 +52,7 @@
               #{logId}
             , #{empAcctId}
             , #{vendId}
-            , NVL(#{errDttm}, SYSDATE)
+            , SYSDATE 	
             , #{modlGrp}
             , #{modlCode}
             , #{targetTbNm}
@@ -61,52 +70,79 @@
         parameterType="store.yd2team.common.dto.SysLogSearchCond"
         resultMap="SysLogResultMap">
 
-	    SELECT
-	          l.log_id
-	        , l.emp_acct_id
-	        , l.vend_id
-	        , l.err_dttm
-	        , l.modl_grp
-	        , l.modl_code
-	        , l.target_tb_nm
-	        , l.target_pk
-	        , l.motion_ty
-	        , l.smry
-	        , l.yn
-	        , l.crea_dt
-	        , l.crea_by
-	        , l.updt_dt
-	        , l.updt_by
-	        , a.login_id
-	    FROM tb_log l
-	    JOIN tb_emp_acct a
-	      ON l.emp_acct_id = a.emp_acct_id
-	    WHERE 1 = 1
-	    <if test="accountId != null and accountId != ''">
-	        AND a.login_id LIKE '%' || #{accountId} || '%'
-	    </if>
-	    <if test="module != null and module != ''">
-	        AND l.modl_code = #{module}
-	    </if>
-	    <if test="action != null and action != ''">
-	        AND l.motion_ty = #{action}
-	    </if>
+	  SELECT
+	      l.log_id,
+	      l.emp_acct_id,
+	      l.vend_id,
+	      TO_CHAR(l.err_dttm, 'YYYY-MM-DD HH24:MI:SS') AS err_dttm,
+	      l.modl_grp,
+	      l.modl_code,
+	      cm.code_nm AS modl_code_nm,
+	      l.target_tb_nm,
+	      l.target_pk,
+	      l.motion_ty,
+	      ca.code_nm AS motion_ty_nm,
+	      l.smry,
+	      l.yn,
+	      TO_CHAR(l.crea_dt, 'YYYY-MM-DD HH24:MI:SS') AS crea_dt,
+	      l.crea_by,
+	      TO_CHAR(l.updt_dt, 'YYYY-MM-DD HH24:MI:SS') AS updt_dt,
+	      l.updt_by,
+	      a.login_id
+	  FROM tb_log l
+	  JOIN tb_emp_acct a
+	    ON l.emp_acct_id = a.emp_acct_id
+	  LEFT JOIN tb_code cm
+	    ON cm.grp_id = 'd' AND cm.code_id = l.modl_code AND cm.yn IN ('e1', 'Y')
+	  LEFT JOIN tb_code ca
+	    ON ca.grp_id = 'ac' AND ca.code_id = l.motion_ty AND ca.yn IN ('e1', 'Y')
+	  WHERE 1 = 1
 	
-	    <!-- 시작일 -->
-	    <if test="startDate != null and startDate != ''">
-	      <![CDATA[
-	        AND l.err_dttm >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
-	      ]]>
-	    </if>
+	  <if test="accountId != null and accountId != ''">
+	    AND a.login_id LIKE '%' || #{accountId} || '%'
+	  </if>
 	
-	    <!-- 종료일 (endDate + 1일 전까지 포함) -->
-	    <if test="endDate != null and endDate != ''">
-	      <![CDATA[
-	        AND l.err_dttm < TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
-	      ]]>
-	    </if>
+	  <if test="module != null and module != ''">
+	    AND l.modl_code = #{module}
+	  </if>
 	
-	    ORDER BY l.err_dttm DESC
+	  <if test="action != null and action != ''">
+	    AND l.motion_ty = #{action}
+	  </if>
+	
+	  <if test="startDate != null and startDate != ''">
+	    <![CDATA[
+	      AND l.err_dttm >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+	    ]]>
+	  </if>
+	
+	  <if test="endDate != null and endDate != ''">
+	    <![CDATA[
+	      AND l.err_dttm < TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+	    ]]>
+	  </if>
+	
+	  ORDER BY l.err_dttm DESC
+	</select>
+	
+	<select id="selectLoginIdList" resultType="string">
+	  SELECT login_id
+	    FROM (
+	      SELECT login_id
+	        FROM tb_emp_acct
+	       WHERE login_id LIKE '%' || #{keyword} || '%'
+	       ORDER BY login_id
+	    )
+	</select>
+	
+	<select id="selectCodeList" resultType="store.yd2team.common.dto.CodeDto">
+	  SELECT
+	      code_id AS codeId,
+	      code_nm AS codeNm
+	    FROM tb_code
+	   WHERE grp_id = #{grpId}
+	     AND yn IN ('e1', 'Y')
+	   ORDER BY code_id
 	</select>
 
 

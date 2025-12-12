@@ -23,11 +23,11 @@ public class SysLogController {
 
     @GetMapping("/list")
     public Map<String, Object> getLogList(
-            @RequestParam(required = false) String accountId,
-            @RequestParam(required = false) String module,
-            @RequestParam(required = false) String action,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate
+    		@RequestParam(name="accountId", required=false) String accountId,
+            @RequestParam(name="module",   required=false) String module,
+            @RequestParam(name="action",   required=false) String action,
+            @RequestParam(name="startDate",required=false) String startDate,
+            @RequestParam(name="endDate",  required=false) String endDate
     ) {
 
         SysLogSearchCond cond = new SysLogSearchCond();
@@ -45,6 +45,29 @@ public class SysLogController {
         Map<String, Object> data = new HashMap<>();
         data.put("contents", list);
         data.put("pagination", Map.of("totalCount", list.size()));
+
+        result.put("data", data);
+        return result;
+    }
+    
+    @GetMapping("/loginIds")
+    public Map<String, Object> loginIdAutoComplete(@RequestParam(name="q", required=false) String q) {
+        List<String> list = systemLogService.getLoginIdList(q == null ? "" : q);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", true);
+        result.put("data", list);
+        return result;
+    }
+    
+    @GetMapping("/filters")
+    public Map<String, Object> filters() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", true);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("modules", systemLogService.getCodeList("d"));   // d1 인사, d2 공통, d3 영업
+        data.put("actions", systemLogService.getCodeList("ac"));  // ac1 로그인, ac2 저장, ac3 삭제
 
         result.put("data", data);
         return result;

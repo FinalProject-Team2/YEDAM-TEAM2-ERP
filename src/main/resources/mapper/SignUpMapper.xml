@@ -91,5 +91,33 @@
 			#{updtBy}
 		)
 	</insert>
+	
+	<insert id="insertUserRole">
+	  INSERT INTO tb_user_role (
+	      vend_id,
+	      emp_acct_id,
+	      role_id,
+	      crea_dt,
+	      crea_by,
+	      updt_dt,
+	      updt_by
+	  ) VALUES (
+	      #{vendId},
+	      #{empAcctId},
+	      #{roleId},
+	      SYSDATE,
+	      #{creaBy},
+	      SYSDATE,
+	      #{creaBy}
+	  )
+	</insert>
+	
+	<select id="countUserRole" resultType="int">
+	  SELECT COUNT(*)
+	  FROM tb_user_role
+	  WHERE vend_id = #{vendId}
+	    AND emp_acct_id = #{empAcctId}
+	    AND role_id = #{roleId}
+	</select>
 
 </mapper>
