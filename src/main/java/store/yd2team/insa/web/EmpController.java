@@ -74,6 +74,8 @@ public class EmpController {
 			               @RequestParam("deptId") String deptId, 
 			               @RequestParam("clsf") String clsf) {
 		EmpVO johoeKeyword = new EmpVO();
+		String vendId = LoginSession.getVendId();
+		johoeKeyword.setVendId(vendId);
 		johoeKeyword.setNm(name);
 		johoeKeyword.setEmpId(empId);
 		johoeKeyword.setDeptId(deptId);

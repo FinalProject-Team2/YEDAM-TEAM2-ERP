@@ -21,6 +21,7 @@ LEFT JOIN tb_code d ON a.emplym_ty = d.code_id
 LEFT JOIN tb_code e ON a.hffc_st = e.code_id
 LEFT JOIN tb_dept f on a.dept_id = f.dept_id
 <where>
+a.vend_id = #{vendId}
 <if test="nm != null">  AND a.nm like '%' || #{nm} || '%'</if>
 <if test="empId != null">  AND a.emp_id like '%' || #{empId} || '%'</if>
 <if test="deptId != null">  AND f.dept_id like '%' || #{deptId} || '%'</if>
