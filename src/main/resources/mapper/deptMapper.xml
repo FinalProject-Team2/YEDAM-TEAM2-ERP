@@ -3,9 +3,16 @@
 <mapper namespace="store.yd2team.insa.mapper.DeptMapper">
 
 <select id="getListDept">
- SELECT  *
-FROM    tb_dept
-WHERE   (vend_id IS NULL OR vend_id = #{vendId})
+ SELECT
+ a.*
+ ,b.dept_nm "upr_dept_nm"
+ ,c.nm
+FROM tb_dept a
+left join tb_dept b
+on a.upr_dept_id = b.dept_id
+join tb_emp c
+on a.emp_id = c.emp_id
+WHERE   (a.vend_id IS NULL OR a.vend_id = #{vendId})
 </select>
 
 <select id="getOrgRenderList">
@@ -31,6 +38,40 @@ LEFT JOIN tb_code e ON a.emplym_ty = e.code_id
 LEFT JOIN tb_code f ON a.hffc_st = f.code_id
 where a.vend_id = #{vendId}
 order by a.dept_id desc
+</select>
+
+<insert id="insertDept">
+<selectKey keyProperty="deptId" resultType="String" order="BEFORE">
+SELECT 'dept' || 
+       LPAD(NVL(MAX(SUBSTR(dept_id, LENGTH(dept_id)-2, 3)), 0) + 1, 3, '0') AS dept_id
+FROM tb_dept
+WHERE SUBSTR(dept_id, 5, 4) = TO_CHAR(SYSDATE, 'YYMM')
+</selectKey>
+insert into tb_dept(
+ dept_id
+ ,emp_id
+ ,upr_dept_id
+ ,dept_nm
+ ,vend_id
+ ,crea_by)
+values(
+ #{deptId}
+ ,#{empId}
+ ,#{uprDeptId}
+ ,#{deptNm}
+ ,#{vendId}
+ 'myk'
+)
+</insert>
+
+<select id="getNonManagerEmployeeIds">
+select
+ emp_id
+ ,nm
+from tb_emp
+where emp_id not in (select emp_id
+                from tb_dept)
+and vend_id = #{vendId}
 </select>
 
 </mapper>

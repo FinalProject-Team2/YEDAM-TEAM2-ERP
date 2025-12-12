@@ -28,5 +28,9 @@ public class DeptVO {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date updtDt;        // 수정날짜
     private String updtBy;      // 수정자
+    
+    //조인용 컬럼
+    private String uprDeptNm;      // 상위부서명
+    private String nm;      // 사원이름
 
 }

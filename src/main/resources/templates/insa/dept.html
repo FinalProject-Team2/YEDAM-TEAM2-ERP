@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>mlss.html</title>
+  
+<!-- ✅ Date / Time Picker -->
+  <link rel="stylesheet"
+        href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
+<!-- ✅ Grid -->
+  <link rel="stylesheet"
+        href="https://uicdn.toast.com/grid/latest/tui-grid.css">
+  
+<style>
+.form-select {
+	color: #000 !important;
+}
+/* 추가 CSS */
+.readonly-input[readonly] {
+	background-color: #e9ecef; /* Bootstrap 기본 disabled 색상 */
+	cursor: not-allowed; /* 마우스 커서도 입력 불가 느낌 */
+}
+
+.stIsShow {
+	display: none;
+}
+
+.menu-item {
+	cursor: pointer; /* 마우스 올리면 손가락 모양 */
+}
+</style>
+</head>
+<body layout:fragment="content">	
+
+	<div class="card mb-3">
+		<div
+			class="card-header d-flex justify-content-between align-items-center">
+			<h5 id="buseo" class="card-title mb-0">부서 관리</h5>
+			<div>
+				<button id="reset" class="btn btn-outline-dark">초기화</button>
+				<!-- <button id="mlssAdd" class="btn btn-outline-dark">행 추가</button> -->
+				<div th:replace="~{fragments/buttons :: addRowButton('MENU_HR_006', 'mlssAdd')}"></div>
+				<!-- <button id="mlssRegist" class="btn btn-outline-dark">저장</button> -->
+				<div th:replace="~{fragments/buttons :: saveButton('MENU_HR_006', 'mlssRegist')}"></div>
+				<!-- <button class="btn btn-outline-dark">삭제</button> -->
+				<div th:replace="~{fragments/buttons :: deleteButton('MENU_HR_006', 'del')}"></div>
+			</div>
+		</div>
+		<div class="card-body">
+			<div id="toastGrid" style="margin: 20px;"></div>
+		</div>
+	</div>
+	<!-- ✅ Date / Time Picker -->
+<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
+<!-- ✅ Grid -->
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<script th:inline="javascript">	
+
+	let lastAddedRowKey = null;
+	$("#reset").on("click", function () {
+		grid.resetData(deptVOList);
+	});
+	let buseoBtn = $("#buseo");
+	buseoBtn.on("click", function () {
+		console.log("리프레시되나?");
+		grid.refreshLayout();
+	});
+	let deptVOList = [[${deptVOList}]];
+	let nonManager = [[${nonManagerData}]];	
+	console.log(deptVOList);
+	console.log(nonManager);
+	const grid = new tui.Grid({
+		  el: $("#toastGrid")[0],
+		  data: deptVOList,		  
+		  editingType: 'cell',
+		  bodyHeight: 440,
+		  scrollX: false,
+		  scrollY: true,
+		  rowHeaders: ['checkbox'],
+		  columnOptions: {
+		    minWidth: 80,
+		    resizable: true
+		  },
+		  columns: [
+		    { header: '부서ID', name: 'deptId', hidden: true},
+		    { header: '사원ID', name: 'empId', hidden: true},		 
+		    { header: '상위부서ID', name: 'uprDeptId', hidden: true },
+		    { header: '부서 명', name: 'deptNm', editor: 'text'},
+		    { header: '부서 장', name: 'nm', editor: {
+		        type: 'select',
+		        options: {
+		            listItems: nonManager.map(item => ({
+		                text: item.nm,
+		                value: item.nm
+		            }))
+		        }
+		    },
+		    formatter: ({ value }) => value
+
+			},
+		    { header: '상위부서 명', name: 'uprDeptNm', editor: {
+		        type: 'select',
+		        options: {
+		            listItems: [
+		                { text: "", value: "" },  // ★ 빈 값 추가
+		                ...deptVOList.map(item => ({
+		                    text: item.deptNm,
+		                    value: item.deptNm
+		                }))
+		            ]
+		        }
+		    },
+		    formatter: ({ value }) => {
+		        const found = deptVOList.find(d => d.deptId === value);
+		        return found ? found.deptNm : value;
+		    }},		    		    
+		  ]
+		});
+	let oldRow = null;
+	// 🔥 1. 빈값으로 바뀌는 문제 해결: 값이 '' 이면 원래 값 유지
+	grid.on('beforeChange', ev => {
+	    ev.changes.forEach(change => {	    	
+	        const { rowKey, value, nextValue, columnName } = change;
+	        oldRow = grid.getRow(rowKey);
+	        // 부서장 컬럼에서 빈 값 선택 시 → 기존 값 유지
+	        if (columnName === 'nm' && (nextValue === null || nextValue === '')) {
+	            change.nextValue = value;  // 원래 값으로 되돌림
+	        }
+	    });
+	});
+
+
+	// 🔥 2. 부서장 변경 시 nonManager 목록에서 제거
+	grid.on('afterChange', ev => {
+	    ev.changes.forEach(change => {	    	
+	    	const rowdata = grid.getRow(change.rowKey);	    	
+	        const {rowKey, value, prevValue, columnName } = change;
+	        
+	     // 🔥 상위부서명 변경 처리
+	        if (columnName === 'uprDeptNm') {
+
+			    // 선택된 uprDeptNm 값(=부서 이름)으로 검색
+			    const selected = deptVOList.find(d => d.deptNm === value);
+			
+			    if (selected) {
+			        // 🔥 uprDeptId 저장
+			        grid.setValue(rowKey, "uprDeptId", selected.deptId);
+			
+			        // uprDeptNm은 name 그대로 둬도 됨
+			        grid.setValue(rowKey, "uprDeptNm", selected.deptNm);
+			    } else {
+			        // 🔥 빈 값 선택 시 둘 다 초기화
+			        grid.setValue(rowKey, "uprDeptId", null);
+			        grid.setValue(rowKey, "uprDeptNm", null);
+			    }
+			}
+
+
+	        if (columnName === 'nm' && value !== prevValue) {	
+	        	// (A) 선택한 부서장 정보 찾기
+	            const selected = nonManager.find(item => item.nm === value);
+	            //console.log("선택된 부서장:", selected);
+
+	            // (A) empId 값을 row에 업데이트
+	            if (selected) {
+	                grid.setValue(rowKey, "empId", selected.empId);
+	            }
+	        	
+	            // (1) 새로 선택한 부서장은 nonManager에서 제거
+	            nonManager = nonManager.filter(item => {
+	            	return item.nm != value
+	            	});	        	
+	            // (2) 예전 부서장은 다시 nonManager에 넣고 싶으면 아래 코드 활성화
+	             if (prevValue) {	            	 
+	                 nonManager.push({empId:rowdata.empId, nm:rowdata.nm});         	 
+	             }
+
+	            // (3) select 옵션 다시 렌더링
+	            grid.refreshLayout();
+	        }
+	    });
+	});
+	
+	let registBtn = $("#mlssRegist");
+	let addBtn = $("#mlssAdd");
+	let delBtn = $("#del");
+	let n = grid.getRowCount();
+	let n2 = grid.getRowCount();
+	
+	//행 추가 눌렀을 때 실행되는 코드
+	addBtn.on("click", () => {
+		if(n == n2+1){alert("등록버튼 누르고 추가하세요!"); return}
+		n++;
+		grid.prependRow({
+			deptId: null,
+			deptNm: "",
+		    nm: "",
+		    uprDeptNm: null		    
+		  }, { focus: true });
+		
+		// 포커스가 이동한 셀에서 rowKey를 얻음
+		  const focused = grid.getFocusedCell && grid.getFocusedCell();
+		  if (focused && focused.rowKey !== undefined && focused.rowKey !== null) {
+		    lastAddedRowKey = focused.rowKey;
+		  } else {
+		    // 안전장치: 포커스 정보가 없으면 첫번째 행의 key 사용 (대개 0 혹은 내부키)
+		    // grid.getRowKey? 직접 API가 없으면 getRowAt(0) 등을 사용해야 하는데, 여기서는 안전하게 null 처리
+		    lastAddedRowKey = null;
+		  }
+	});
+	
+	//등록버튼 눌럿을 때 실행되는 코드
+	registBtn.on("click", () =>{	
+		
+		// 🔥 1. 체크된 rowKey 목록 가져오기
+	    const checkedRowKeys = grid.getCheckedRowKeys();
+
+	    if (checkedRowKeys.length === 0) {
+	        alert("선택된 행이 없습니다.");
+	        return;
+	    }
+
+	    // 🔥 2. 선택된 행의 데이터만 배열로 구성
+	    const selectedRows = checkedRowKeys.map(key => grid.getRow(key));
+
+	    console.log(selectedRows);
+			
+				
+				
+			
+		     /* $.ajax({
+			    url: "/mlssRegist",                // 요청 URL
+			    type: "post",                     // GET 방식 (fetch 코드와 동일)
+			    contentType: "application/json",
+			    data: JSON.stringify(rowData),     // 쿼리 파라미터 자동 변환			        
+			})
+			.done((result) => {
+			    alert(result+"건 등록되었습니다.");			    
+			})
+			.fail((error) => {
+			    console.error(error);
+			    alert("데이터 요청 중 오류 발생");
+			});  */
+			
+		    alert("등록 완료!");
+		  
+	});
+	
+	//삭제버튼 눌럿을 때
+	
+	delBtn.on("click", () =>{
+		console.log("삭제버튼 눌림");
+		let datas = [];		
+		const addedRowKey = grid.getCheckedRowKeys();
+		for(let val of addedRowKey) {
+			const rowData = grid.getRow(val);
+			datas.push(rowData.deptId);
+		}		
+		console.log(datas);
+	});
+	
+		
+		
+		
+		 
+	
+	</script>
+
+</body>
+
+</html>

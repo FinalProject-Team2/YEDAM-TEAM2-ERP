@@ -14,4 +14,7 @@ public interface DeptMapper {
 	
 	//조직도에 쓸 데이터 조회
 	List<EmpVO> getOrgRenderList(String val);
+	
+	//부서 관리에 부서장 제외한 사원목록조회
+	List<DeptVO> getNonManagerEmployeeIds(String val);
 }
