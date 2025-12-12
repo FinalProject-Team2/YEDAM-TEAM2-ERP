@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import store.yd2team.common.aop.SysLog;
+import store.yd2team.common.aop.SysLogConfig;
 import store.yd2team.common.dto.EmpAcctEmployeeDto;
 import store.yd2team.common.dto.EmpAcctRoleDto;
 import store.yd2team.common.dto.EmpAcctSaveRequestDto;
@@ -24,6 +26,12 @@ import store.yd2team.common.service.EmpAcctService;
 import store.yd2team.common.service.EmpAcctVO;
 import store.yd2team.common.service.SmsService;
 
+
+@SysLogConfig(
+	    module = "COMM",
+	    table  = "TB_EMP_ACCT",
+	    pkParam = "empAcctId"
+	)
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -50,9 +58,13 @@ public class EmpAcctServiceImpl implements EmpAcctService{
 
         return passwordEncoder.matches(rawPassword, dbPwd);
     }
-
+    
     @Override
     @Transactional
+    @SysLog(
+    		action = "UPDATE",                 // INSERT + UPDATE 겸용이면 SAVE 라고 두고
+    		msg    = "비밀번호 변경"          // 요약만 적어줌
+    		)
     public void changePassword(String vendId, String loginId, String rawNewPassword) {
 
         EmpAcctVO empAcct = empLoginMapper.selectByLogin(vendId, loginId);

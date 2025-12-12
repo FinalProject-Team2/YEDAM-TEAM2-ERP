@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.common.mapper.SysLogMapper">
+
+<resultMap id="SysLogResultMap" type="store.yd2team.common.service.SysLogVO">
+        <result property="logId"       column="log_id"/>
+        <result property="empAcctId"   column="emp_acct_id"/>
+        <result property="vendId"      column="vend_id"/>
+        <result property="errDttm"     column="err_dttm"/>
+        <result property="modlGrp"     column="modl_grp"/>
+        <result property="modlCode"    column="modl_code"/>
+        <result property="targetTbNm"  column="target_tb_nm"/>
+        <result property="targetPk"    column="target_pk"/>
+        <result property="motionTy"    column="motion_ty"/>
+        <result property="smry"        column="smry"/>
+        <result property="yn"          column="yn"/>
+        <result property="creaDt"      column="crea_dt"/>
+        <result property="creaBy"      column="crea_by"/>
+        <result property="updtDt"      column="updt_dt"/>
+        <result property="updtBy"      column="updt_by"/>
+
+        <!-- JOIN 컬럼 -->
+        <result property="loginId"     column="login_id"/>
+    </resultMap>
+
+    <!-- 1) 로그 INSERT -->
+    <insert id="insertLog">
+        INSERT INTO tb_log (
+              log_id
+            , emp_acct_id
+            , vend_id
+            , err_dttm
+            , modl_grp
+            , modl_code
+            , target_tb_nm
+            , target_pk
+            , motion_ty
+            , smry
+            , yn
+            , crea_dt
+            , crea_by
+        ) VALUES (
+              #{logId}
+            , #{empAcctId}
+            , #{vendId}
+            , NVL(#{errDttm}, SYSDATE)
+            , #{modlGrp}
+            , #{modlCode}
+            , #{targetTbNm}
+            , #{targetPk}
+            , #{motionTy}
+            , #{smry}
+            , NVL(#{yn}, 'e1')
+            , SYSDATE
+            , #{creaBy}
+        )
+    </insert>
+
+    <!-- 2) 로그 조회 -->
+    <select id="selectLogList"
+        parameterType="store.yd2team.common.dto.SysLogSearchCond"
+        resultMap="SysLogResultMap">
+
+	    SELECT
+	          l.log_id
+	        , l.emp_acct_id
+	        , l.vend_id
+	        , l.err_dttm
+	        , l.modl_grp
+	        , l.modl_code
+	        , l.target_tb_nm
+	        , l.target_pk
+	        , l.motion_ty
+	        , l.smry
+	        , l.yn
+	        , l.crea_dt
+	        , l.crea_by
+	        , l.updt_dt
+	        , l.updt_by
+	        , a.login_id
+	    FROM tb_log l
+	    JOIN tb_emp_acct a
+	      ON l.emp_acct_id = a.emp_acct_id
+	    WHERE 1 = 1
+	    <if test="accountId != null and accountId != ''">
+	        AND a.login_id LIKE '%' || #{accountId} || '%'
+	    </if>
+	    <if test="module != null and module != ''">
+	        AND l.modl_code = #{module}
+	    </if>
+	    <if test="action != null and action != ''">
+	        AND l.motion_ty = #{action}
+	    </if>
+	
+	    <!-- 시작일 -->
+	    <if test="startDate != null and startDate != ''">
+	      <![CDATA[
+	        AND l.err_dttm >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+	      ]]>
+	    </if>
+	
+	    <!-- 종료일 (endDate + 1일 전까지 포함) -->
+	    <if test="endDate != null and endDate != ''">
+	      <![CDATA[
+	        AND l.err_dttm < TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+	      ]]>
+	    </if>
+	
+	    ORDER BY l.err_dttm DESC
+	</select>
+
+
+</mapper>
