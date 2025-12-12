@@ -42,7 +42,7 @@
 							<input id="custcomName" type="text" class="form-control">
 						</div>
 						<div class="col-md-2">
-							<label class="form-label">결제구분</label>
+							<label class="form-label">결제방법</label>
 							<select id="pmtMtd" class="form-control">
 								<option value="">전체</option>
 								<option>현금</option>
@@ -108,7 +108,7 @@
 		let searchForm = {
 				custcomId: "",
 			    custcomName: "",
-			    psch: "",
+			    pmtMtd: "",
 			    startDt: "",
 			    endDt: ""
 		};
@@ -131,17 +131,12 @@
             columns: [
                 {header: '고객코드', name: 'custcomId', width: 130, align: 'center'},
                 {header: '고객사명', name: 'custcomName', width: 210, align: 'center'},
-                {header: '거래일자', name: 'trnsDate', width: 120, align: 'right'},
-                {
-                	header: '최근납입일', 
-                	name: 'ltstRciptDt',
-                	width: 120,
-                	align: 'right'
-                },
-                {header: '결제구분', name: 'pmtMtd', width: 130, align: 'center'},
+                {header: '거래일자', name: 'trnsDt', width: 120, align: 'right'},
+                {header: '최근납입일', name: 'ltstRciptDt', width: 120, align: 'right'},
+                {header: '결제방법', name: 'pmtMtd', width: 130, align: 'center'},
                 {
                     header: '채권금액',
-                    name: 'borwAmt',
+                    name: 'bondAmt',
                     editor: 'text',
                     width: 180,
                     align: 'right',
@@ -150,16 +145,6 @@
                         return num ? num.toLocaleString() : '';
                     }
                 },
-                {
-                    header: '매출금액',
-                    name: 'saleAmt',
-                    width: 180,
-                    align: 'right',
-                    formatter: ({value}) => {
-                        const num = toNumber(value);
-                        return num ? num.toLocaleString() : '';
-                    }
-                }, 
                 {
                     header: '입금금액',
                     name: 'rciptAmt',
@@ -172,7 +157,7 @@
                 },
                 {
                     header: '채권잔액',
-                    name: 'prinsumBaln',
+                    name: 'bondBaln',
                     width: 180,
                     align: 'right',
                     formatter: ({value}) => {
@@ -180,7 +165,9 @@
                         return num ? num.toLocaleString() : '';
                     }
                 },
-                {header: '비고', name: 'rm', editor: 'text', width: 180, align: 'center'},
+                {header: '연체구분', name: 'delayFg', width: 100, align: 'center'},
+                {header: '상환여부', name: 'rpayYn', width: 100, align: 'center'},
+                {header: '비고', name: 'rm', width: 150, align: 'center'},
             ]
         });
         
@@ -192,7 +179,7 @@
 	    searchForm = {
 			custcomId: "",
 		    custcomName: "",
-		    psch: "",
+		    pmtMtd: "",
 		    startDt: "",
 		    endDt: ""
 	    };
@@ -201,7 +188,7 @@
 	    // 2) 화면 Input 값 초기화
 	    searchdiv.querySelector("#custcomId").value = "";
 	    searchdiv.querySelector("#custcomName").value = "";
-	    searchdiv.querySelector("#psch").value = "";
+	    searchdiv.querySelector("#pmtMtd").value = "";
 	    searchdiv.querySelector(".js-date-range-start").value = "";
 	    searchdiv.querySelector(".js-date-range-end").value = "";
 	
@@ -218,7 +205,7 @@
 	    // 1) 화면 입력값 → searchForm 에 세팅
 	    searchForm.custcomId = document.querySelector("#custcomId").value.trim();
 	    searchForm.custcomName = document.querySelector("#custcomName").value.trim();
-	    searchForm.psch = document.querySelector("#psch").value.trim();
+	    searchForm.pmtMtd = document.querySelector("#pmtMtd").value.trim(); 
 	    searchForm.startDt = document.querySelector(".js-date-range-start").value;
 	    searchForm.endDt = document.querySelector(".js-date-range-end").value;
 	
@@ -279,7 +266,6 @@
     		}
     	});
     	
-    	
     	// 저장버튼 이벤트
     	document.getElementById('modalSaveBtn').addEventListener('click', () => {
     		const payload = {
@@ -311,7 +297,6 @@
     		    alert('저장 중 오류 발생');
     		  });
     	});
-
         
     </script>
 </body>

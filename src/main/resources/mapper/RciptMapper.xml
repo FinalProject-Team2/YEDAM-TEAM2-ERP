@@ -4,23 +4,23 @@
     
     <!-- 채권관리 -->
 	<select id="selectRciptList" parameterType="store.yd2team.business.service.RciptVO" resultType="store.yd2team.business.service.RciptVO">
-	    SELECT 
-	           r.custcom_id,
-	           c.custcom_name,
-	           r.trns_dt,
-	           r.ltst_rcipt,
-	           r.bond_amt,
-	           r.sale_amt,
-	           r.rcipt_amt,
-	           r.bond_baln,
-	           r.rcipt_appo_amt AS rciptAppoAmt,
-	           r.rcipt_appo_dt  AS rciptAppoDt,
-	           r.ltst_rcipt_dt  AS ltstRciptDt,
-	           r.stm_mtd
-	    FROM tb_rcipt r
-	    JOIN tb_custcom c
-	      ON r.custcom_id = c.custcom_id
-	    WHERE 1 = 1
+		SELECT 
+		      r.custcom_id,
+		      c.custcom_name,
+		      r.trns_dt,
+		      r.ltst_rcipt_dt AS ltstRciptDt,
+		      d.pmt_mtd,
+		      r.bond_amt,
+		      d.rcipt_amt,
+		      r.bond_baln,
+		      r.delay_fg,
+		      r.rpay_yn
+		  FROM tb_rcipt r
+		  LEFT JOIN tb_rcipt_detail d
+		    ON r.rcipt_id = d.rcipt_id
+		  LEFT JOIN tb_custcom c
+		    ON r.custcom_id = c.custcom_id
+	      WHERE 1 = 1
 	    
 	    <!-- 1) 고객코드 -->
 	    <if test="custcomId != null and custcomId != ''">
@@ -37,22 +37,22 @@
 	        AND c.pmtMtd LIKE '%' || #{pmtMtd} || '%'
 	    </if>
 	
-	    <!-- 4) 거래일자 범위 (trns_dt 기준) -->
-	    <!-- 시작일 이상 -->
+	    <!-- 4 거래일자 범위 (trns_dt 기준) -->
+	    <!-- 4-1 시작일 이상 -->
 	    <if test="startDt != null and startDt != ''">
 	        AND r.trns_dt &gt;= TO_DATE(#{startDt}, 'YYYY-MM-DD')
 	    </if>
 	
-	    <!-- 종료일 이하 -->
+	    <!-- 4-2 종료일 이하 -->
 	    <if test="endDt != null and endDt != ''">
 	        AND r.trns_dt &lt;= TO_DATE(#{endDt}, 'YYYY-MM-DD')
 	    </if>
 	
-	    ORDER BY r.trns_dt DESC
+	    ORDER BY d.rcipt_dt DESC
 	</select>
 	
 	<!--입금내역 insert구문  -->
-	<insert id="insertRciptDetail" statementType="CALLABLE"
+<!-- 	<insert id="insertRciptDetail" statementType="CALLABLE"
 	  parameterType="store.yd2team.business.service.RciptVO">
 	
 	CALL prc_apply_receipt
@@ -64,6 +64,38 @@
 		   , #{pmtMtd}
 	       , #{rm}	
 	)
-	</insert>
+	</insert> -->
+	
+	<update id="callInsertRciptProcedure" parameterType="store.yd2team.business.service.RciptVO" statementType="CALLABLE">
+
+    { CALL pr_rcipt_payment(
+        #{vendId,    mode=IN, jdbcType=VARCHAR},
+        #{custcomId, mode=IN, jdbcType=VARCHAR},
+        TO_DATE(#{rciptDt, mode=IN, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+        #{rciptAmt,  mode=IN, jdbcType=NUMERIC},
+        #{pmtMtd,    mode=IN, jdbcType=VARCHAR},
+        #{rm,        mode=IN, jdbcType=VARCHAR},
+        #{creaBy,    mode=IN, jdbcType=VARCHAR},
+        #{updtBy,    mode=IN, jdbcType=VARCHAR},
+        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
+    ) }
+
+</update>
+	
+	<!-- <update id="callInsertRciptProcedure" parameterType="store.yd2team.business.service.RciptVO" statementType="CALLABLE">
+	
+	    { CALL pr_rcipt_payment(
+	        #{vendId,     jdbcType=VARCHAR},
+	        #{custcomId,  jdbcType=VARCHAR},
+	        #{rciptDt,    jdbcType=DATE},
+	        #{rciptAmt,   jdbcType=NUMERIC},
+	        #{pmtMtd,     jdbcType=VARCHAR},
+	        #{rm,         jdbcType=VARCHAR},
+	        #{creaBy,     jdbcType=VARCHAR},
+	        #{updtBy,     jdbcType=VARCHAR},
+	        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
+	    ) }
+	
+	</update> -->
 
 </mapper>
