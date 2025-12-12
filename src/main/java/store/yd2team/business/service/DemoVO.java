@@ -17,6 +17,7 @@ public class DemoVO {
 	private Long custQy;             // 수량 CUST_QY
 	private Long custDiscount;       // 할인 CUST_DISCOUNT
 	private Date custDelivery;       // 납기 CUST_DELIVERY
+	
 	private Date creaDt;             // CREA_DT
 	private String creaBy;           // CREA_BY
 	private Date updtDt;             // UPDT_DT

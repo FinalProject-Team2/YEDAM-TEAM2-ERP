@@ -28,36 +28,94 @@ public class BusineServiceImpl implements BusinessService {
 	
   private final BusinessMapper businessMapper;
   private final AiService aiService;
- 
- 
- 
+  
   @Value("${publicdata.service-key}")
   private String encodedServiceKey;
+  
+  // 세션에서 회사 코드(VEND_ID) 가져오기
+  private String getLoginVendId() {
+      String vendId = LoginSession.getVendId();
+      if (vendId == null || vendId.isEmpty()) {
+          throw new IllegalStateException("로그인 회사 코드(VEND_ID)가 없습니다.");
+      }
+      return vendId;
+  }
+
+  // 세션에서 사원 ID 가져오기
+  private String getLoginEmpId() {
+      String empId = LoginSession.getEmpId();
+      if (empId == null || empId.isEmpty()) {
+          throw new IllegalStateException("로그인 사원 ID가 없습니다.");
+      }
+      return empId;
+  }
  
+ 
+ 
+ 
+  
+ 
+  //휴면,이탈 기준조회(완)
   @Override
 	public List<ChurnStdrVO> getChurnStdrList(ChurnStdrVO churn) {
+	  	churn.setVendId(getLoginVendId());
+	  	System.out.println("vend_id 나온 거 이거임 =" + getLoginVendId());
+	  	System.out.println("churn 나온 거 이거임 =" + churn);
 		return businessMapper.getChurnStdrList(churn);
 	}
-  //휴면,이탈 기준 수정
+  //휴면,이탈 기준 수정(완)
   @Override
   public int updateChurnStdrList(List<ChurnStdrVO> dormancyList, List<ChurnStdrVO> churnList) {
       int cnt = 0;
+      
+      String vendId = getLoginVendId();  // 세션 회사 코드
+      String empId  = getLoginEmpId();   // 세션 사원 ID
 
       if (dormancyList != null) {
           for (ChurnStdrVO vo : dormancyList) {
+        	  vo.setVendId(vendId);   // 어느 기준이든 내 회사 기준
+              vo.setUpdtBy(empId);   // 수정자
               cnt += businessMapper.updateChurnStdr(vo);
           }
       }
 
       if (churnList != null) {
           for (ChurnStdrVO vo : churnList) {
+        	  vo.setVendId(vendId);
+              vo.setUpdtBy(empId);
               cnt += businessMapper.updateChurnStdr(vo);
           }
       }
 
       return cnt;
   }
+	//휴면,이탈검색조회
+	@Override
+	public List<churnRiskVO> getchurnRiskList(churnRiskVO vo) {
+		 vo.setVendId(getLoginVendId());   // 세션 회사코드 세팅
+		return businessMapper.getchurnRiskList(vo);
+	}
+	//휴면,이탈 평균구매주기
+	@Override
+	public int getAVG() {
+		return businessMapper.getAVG();
+	}
+	// 매출변동 조회
+	@Override
+	public List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo) {
+
+	    String vendId = LoginSession.getVendId();
+	    if (vendId == null || vendId.isEmpty()) {
+	        throw new IllegalStateException("로그인 회사 코드(VEND_ID)가 없습니다.");
+	    }
+
+	    vo.setVendId(vendId);   // ★ 회사 기준 필터만 세팅
+
+	    return businessMapper.getMonthlySalesChange(vo);
+	}
+
  
+  //
   @Override
   public List<BusinessVO> getList() {
       return businessMapper.getList();
@@ -153,30 +211,48 @@ public class BusineServiceImpl implements BusinessService {
   }
   //
   //
-  // 잠재고객 기준상세목록 전제조회
+  // 잠재고객 기준상세목록 전제조회 (완)
   public List<PotentialStdrVO> getPotentialStdrDetailList(PotentialStdrVO cond) {
+	  cond.setVendId(getLoginVendId());   // 회사코드 세팅
       return businessMapper.getPotentialStdrDetailList(cond);
   }
-  // 잠재고객 기준상세목록 등록 및 수정 - I/U 통합 저장
+  // 잠재고객 기준상세목록 등록 및 수정(완) - I/U 통합 저장
   public void savePotentialStdrDetailList(List<PotentialStdrVO> list) {
+	  if (list == null) return;
+
+	    String vendId = getLoginVendId();
+	    String empId  = getLoginEmpId();
+	  
       for (PotentialStdrVO row : list) {
+    	  row.setVendId(vendId);  // 항상 세션 회사 기준
+    	  
           if ("I".equals(row.getRowStatus())) {
-       	   businessMapper.insertPotentialStdrDetail(row);
+        	  row.setCreaBy(empId);  // 등록자
+       	   	  businessMapper.insertPotentialStdrDetail(row);
           } else if ("U".equals(row.getRowStatus())) {
-       	   businessMapper.updatePotentialStdrDetail(row);
+        	  row.setUpdtBy(empId);  // 수정자
+       	   		businessMapper.updatePotentialStdrDetail(row);
           }
           }
       }
-  // 잠재고객 기준상세목록 삭제
-  @Override
-  public int deletePotentialStdrList(List<String> idList) {
-      int cnt = 0;
-      for (String id : idList) {
-          businessMapper.deletePotentialStdr(id);
-          cnt++;
-      }
-      return cnt;
-  }
+	//잠재고객 기준상세목록 삭제(완)
+	@Override
+	public int deletePotentialStdrList(List<String> idList) {
+	   if (idList == null) return 0;
+	
+	   int cnt = 0;
+	   String vendId = getLoginVendId();
+	
+	   for (String id : idList) {
+	       PotentialStdrVO vo = new PotentialStdrVO();
+	       vo.setStdrDetailId(id);
+	       vo.setVendId(vendId);              // 회사코드 같이 넘김
+	       businessMapper.deletePotentialStdr(vo);
+	       cnt++;
+	   }
+	
+	   return cnt;
+	}
 	@Override
 	public List<BusinessVO> getcustaddrtype(String cond) {
 		 List<BusinessVO> list = businessMapper.getcustaddrtype(cond);
@@ -194,23 +270,7 @@ public class BusineServiceImpl implements BusinessService {
 		    }
 		    return list;
 	}
-	//
-	//
-	//휴면,이탈검색조회
-	@Override
-	public List<churnRiskVO> getchurnRiskList(churnRiskVO vo) {
-		return businessMapper.getchurnRiskList(vo);
-	}
-	//휴면,이탈 평균구매주기
-	@Override
-	public int getAVG() {
-		return businessMapper.getAVG();
-	}
-	//매풀변동
-	@Override
-	public List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo) {
-		return businessMapper.getMonthlySalesChange(vo);
-	}
+	
 	//
 	//
 	//
@@ -222,77 +282,104 @@ public class BusineServiceImpl implements BusinessService {
 	//
 	//진짜 접촉사항 조회
 	@Override
-   public List<ContactVO> getContactListByVend(String vendId) {
-       return businessMapper.selectContactListByVend(vendId);
-   }
+	public List<ContactVO> getContactListByVend(Integer potentialInfoNo) {
+	    ContactVO cond = new ContactVO();
+	    cond.setVendId(getLoginVendId());
+	    cond.setPotentialInfoNo(potentialInfoNo);
+	    return businessMapper.selectContactListByVend(cond);
+	}
 	//
 	// 접촉내역 저장
-   @Override
-   @Transactional
-   public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> contactList) {
-       if (contactList == null) return;
-       for (ContactVO row : contactList) {
-           row.setVendId(vendId);
-           row.setPotentialInfoNo(potentialInfoNo);
-			if( row.getContactNo() == null  || row.getContactNo().equals("") ) {
-				businessMapper.insertContact(row);
-			}
-			else {  
-				businessMapper.updateContact(row);
-			}
-          
-       }
-   }
-   //
-	//리드내역 조회
-	@Override
-	public List<LeadVO> getLeadListByVend(String vendId) {
-		return businessMapper.getLeadListByVend(vendId);
-	}
-	//리드내역 저장
 	@Override
 	@Transactional
-	public void saveAllLead(String vendId, Integer potentialInfoNo, List<LeadVO> list) {
-		
+	public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> contactList) {
+
+	    if (contactList == null) return;
+
+	    String empId = getLoginEmpId(); // ★ 여기서 세션 사용
+
+	    for (ContactVO row : contactList) {
+	        row.setVendId(vendId);
+	        row.setEmpId(empId);
+	        row.setPotentialInfoNo(potentialInfoNo);
+
+	        if (row.getContactNo() == null) {
+	            businessMapper.insertContact(row);
+	        } else {
+	            businessMapper.updateContact(row);
+	        }
+	    }
+	}
+
+
+   //
+	//리드내역 조회
+	   @Override
+	   public List<LeadVO> getLeadListByVend(Integer potentialInfoNo) {
+	       LeadVO cond = new LeadVO();
+	       cond.setVendId(getLoginVendId());
+	       cond.setPotentialInfoNo(potentialInfoNo);
+	       return businessMapper.getLeadListByVend(cond);
+	   }
+	//리드내역 저장
+   @Override
+   @Transactional
+   public void saveAllLead(String vendId, Integer potentialInfoNo, List<LeadVO> list) {
+
        if (list == null) return;
+
+       String loginVendId = getLoginVendId();
+       String loginEmpId  = getLoginEmpId();
+
        for (LeadVO row : list) {
-           row.setVendId(vendId);
+
+           row.setVendId(loginVendId);
            row.setPotentialInfoNo(potentialInfoNo);
-          
-			if( row.getLeadNo()  == null  || row.getLeadNo().equals("") ) {
-				businessMapper.insertLead(row);
-			}
-			else {  
-				businessMapper.updateLead(row);
-				
-			}
+
+           if (row.getLeadNo() == null) {
+               row.setCreaBy(loginEmpId);
+               businessMapper.insertLead(row);
+           } else {
+               row.setUpdtBy(loginEmpId);
+               businessMapper.updateLead(row);
+           }
        }
    }
+
 	//
 	//데모내역 조회
 	@Override
-	public List<DemoVO> getDemoListByVend(String vendId) {
-		return businessMapper.getDemoListByVend(vendId);
+	public List<DemoVO> getDemoListByVend(Integer potentialInfoNo) {
+	    DemoVO cond = new DemoVO();
+	    cond.setVendId(getLoginVendId());
+	    cond.setPotentialInfoNo(potentialInfoNo);
+	    return businessMapper.getDemoListByVend(cond);
 	}
 	//데모내역 저장
 	@Override
 	@Transactional
 	public void saveAllDemo(String vendId, Integer potentialInfoNo, List<DemoVO> demolist) {
-		
-       if (demolist == null) return;
-       for (DemoVO row : demolist) {
-           row.setVendId(vendId);
-           row.setPotentialInfoNo(potentialInfoNo);
-          
-			if( row.getDemoQuotatioNo()  == null  || row.getDemoQuotatioNo().equals("") ) {
-				businessMapper.insertDemo(row);
-			}
-			else {  
-				businessMapper.updateDemo(row);
-				
-			}
-       }
-   }
+
+	    if (demolist == null) return;
+
+	    String loginVendId = getLoginVendId();
+	    String loginEmpId  = getLoginEmpId();
+
+	    for (DemoVO row : demolist) {
+
+	        row.setVendId(loginVendId);
+	        row.setPotentialInfoNo(potentialInfoNo);
+
+	        if (row.getDemoQuotatioNo() == null) {
+	            row.setCreaBy(loginEmpId);
+	            businessMapper.insertDemo(row);
+	        } else {
+	            row.setUpdtBy(loginEmpId);
+	            businessMapper.updateDemo(row);
+	        }
+	    }
+	}
+
 
 	
 	

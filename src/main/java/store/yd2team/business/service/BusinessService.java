@@ -37,14 +37,14 @@ public interface BusinessService {
 	//접촉사항 조회
 	List<ContactVO> getAction();
 	//잠재고객항목 선택시 해당 접촉내역 조회
-	public List<ContactVO> getContactListByVend(String vendId);
+	public List<ContactVO> getContactListByVend(Integer potentialInfoNo);
 	//접촉사항 내용 저장
-	public void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> contactList);
+	void saveAll(String vendId, Integer potentialInfoNo, List<ContactVO> contactList);
 	//잠재고객항목 선택시 해당 리드내역 조회 및 저장
-	List<LeadVO> getLeadListByVend(String vendId);
+	public List<LeadVO> getLeadListByVend(Integer potentialInfoNo);
 	public void saveAllLead(String vendId, Integer potentialInfoNo, List<LeadVO> leadList);
 	//잠재고객항목 선택시 해당 데모내역 조회 및 저장
-	List<DemoVO> getDemoListByVend(String vendId);
+	public List<DemoVO> getDemoListByVend(Integer potentialInfoNo);
 	public void saveAllDemo(String vendId, Integer potentialInfoNo, List<DemoVO> demoList);
 	}
 

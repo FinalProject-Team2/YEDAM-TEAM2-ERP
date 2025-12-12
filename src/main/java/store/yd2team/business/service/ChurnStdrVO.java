@@ -15,6 +15,7 @@ public class ChurnStdrVO {
 		private String  stdrValue;
 		private String  stdrDc;
 		private String  yn;
+		
 		private Date 	creaDt;  // 생성일시
 	    private String 	creaBy;  // 생성자
 	    private Date 	updtDt;  // 수정일시

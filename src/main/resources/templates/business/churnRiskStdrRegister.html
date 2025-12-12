@@ -71,7 +71,6 @@
 	<script th:inline="javascript">
 	
 	const allList = /*[[${getChurnStdrList}]]*/ [];
-	
  		// 그리드 디자인
 		tui.Grid.applyTheme('default', {
 			cell : {
@@ -98,7 +97,7 @@
 			}
 		});
 		const DormancyData = allList.filter(row => row.salesChange === "휴면");
-		    console.log('ChurnStdrData = ', DormancyData);
+		    console.log('DormancyData = ', DormancyData);
 		// Grid 생성
 		const Dormancygrid = new tui.Grid({
 			el : document.getElementById('Dormancygrid'),

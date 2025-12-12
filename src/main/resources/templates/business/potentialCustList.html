@@ -45,19 +45,21 @@
 							<div class="row mb-2">
 								<div class="col-md-3">
 									<label class="form-label">업종</label> <input
-										class="form-select"  name="industryType">
-										<!-- <option>코딩</option>
-										<option>분석</option>
-										<option>제과</option>
-										<option>의류</option> -->
+										class="form-control" placeholder="코딩"  name="industryType">
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">업체규모</label> <input type="text"
-										class="form-control" placeholder="Value" name="companySize">
+									<label class="form-label">업체규모</label>
+										<select id="selectSize" class="form-select">
+							                <option value="대기업">대기업</option>
+							                <option value="준대기업">준대기업</option>
+							                <option value="중견기업">중견기업</option>
+							                <option value="강소기업">강소기업</option>
+							                <option value="중소기업">중소기업</option>
+						              	</select>
 								</div>
 								<div class="col-md-3">
 									<label class="form-label">지역/상권</label> <input type="text"
-										class="form-control" placeholder="Value" name="region">
+										class="form-control" placeholder="대구" name="region">
 								</div>
 							</div>
 							<div class="col-md-6">
@@ -93,35 +95,6 @@
 		</div>
 	</form>
 	
-	
-	
-	  <!-- 결과 테이블 -->
-	 <!--  <div class="card mb-3" style="height: 500px; overflow-y: auto; overflow-x: auto;">
-    <table border="1">
-        <thead>
-            <tr>
-                <th>잠재정보번호</th>
-                <th>거래처명</th>
-                <th>업종</th>
-                <th>규모</th>
-                <th>지역</th>
-                <th>설립일</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="row : ${potentialstdrList}">
-                <td th:text="${row.potentialInfoNo}"></td>
-                <td th:text="${row.vendNm}"></td>
-                <td th:text="${row.industryType}"></td>
-                <td th:text="${row.companySize}"></td>
-                <td th:text="${row.region}"></td>
-                <td th:text="${row.establishDate}"></td>
-            </tr>
-        </tbody>
-    </table>
-    </div> -->
-	
-
 
 	<!-- 잠재고객 -->
 	<form th:action="@{/potentialCustList}" method="post">
@@ -137,6 +110,15 @@
 		</div>
 	</div>
 	</form>
+
+
+
+
+
+
+
+
+
 
 
 
@@ -183,20 +165,21 @@
 				header : '순위',
 				name : 'rank',
 				sortable : 'true',
-				align : 'center'
+				align : 'center',
+				width: 150
 			}, {
 				header : '업체명',
 				name : 'vendNm',
-				editor : 'text'
+				align  : 'center',
 			}, {
 				header : '업종',
 				name : 'industryType',
 				sortable : 'true',
-				align : 'center'
 			}, {
 				header : '규모',
 				name : 'companySize',
-				align : 'center'
+				align : 'center',
+				width: 150
 			}, {
 	            header: '설립일',
 	            name: 'establishDate',
@@ -204,16 +187,19 @@
 	                const d = new Date(value);
 	                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
 	            },
+	            width: 150,
 	            align : 'center'
 	        }, {
 				header : '지역/상권',
 				name : 'region',
-				align : 'center'
+				align : 'center',
+				width: 150,
 			},{
 			    header : '리드점수',
 			    name   : 'leadScore',   // leadscore → leadScore 로 수정
 			    align  : 'center',
-			    sortable : 'true'
+			    sortable : 'true',
+			    width: 150,
 			} ]
 		});
 	</script>
