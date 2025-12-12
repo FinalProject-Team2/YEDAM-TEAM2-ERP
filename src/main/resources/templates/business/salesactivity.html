@@ -44,19 +44,21 @@
 							<div class="row mb-2">
 								<div class="col-md-3">
 									<label class="form-label">업종</label> 
-									<input type="text" class="form-control" name="industryType">
-									<!-- <option>코딩</option>
-										<option>분석</option>
-										<option>제과</option>
-										<option>의류</option> -->
+									<input type="text" class="form-control" placeholder="코딩" name="industryType">
 								</div>
 								<div class="col-md-3">
 									<label class="form-label">업체규모</label> 
-									<input type="text" class="form-control" placeholder="Value" name="companySize">
+										<select id="selectSize" class="form-select">
+							                <option value="대기업">대기업</option>
+							                <option value="준대기업">준대기업</option>
+							                <option value="중견기업">중견기업</option>
+							                <option value="강소기업">강소기업</option>
+							                <option value="중소기업">중소기업</option>
+						              	</select>
 								</div>
 								<div class="col-md-3">
 									<label class="form-label">지역/상권</label> <input type="text"
-										class="form-control" placeholder="Value" name="region">
+										class="form-control" placeholder="대구" name="region">
 								</div>
 							</div>
 							<!-- <div class="col-md-6">
@@ -202,28 +204,47 @@
         scrollY: true,
         minBodyHeight: 0,
         autoWidth: true,
-        columns: [
-            { header: '잠재번호', name: 'potentialInfoNo', hidden: true },
-            { header: '거래처ID', name: 'vendId', hidden: true },
-            { header: '순위', name: 'rank', sortable: true, align: 'center' },
-            { header: '업체명', name: 'vendNm', editor: 'text' },
-            { header: '업종', name: 'industryType', sortable: true, align: 'center' },
-            { header: '규모', name: 'companySize', align: 'center' },
-            {
-                header: '설립일',
-                name: 'establishDate',
-                formatter: ({ value }) => {
-                    if (!value) return '';
-                    const d = new Date(value);
-                    if (isNaN(d.getTime())) return '';
-                    return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
-                },
-                align: 'center'
+        columns : [ {
+			header : '순위',
+			name : 'rank',
+			sortable : 'true',
+			align : 'center',
+			width: 150
+		}, {
+			header : '업체명',
+			name : 'vendNm',
+			align  : 'center',
+		}, {
+			header : '업종',
+			name : 'industryType',
+			sortable : 'true',
+		}, {
+			header : '규모',
+			name : 'companySize',
+			align : 'center',
+			width: 150
+		}, {
+            header: '설립일',
+            name: 'establishDate',
+            formatter: ({ value }) => {
+                const d = new Date(value);
+                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
             },
-            { header: '지역/상권', name: 'region', align: 'center' },
-            { header: '리드점수', name: 'leadScore', align: 'center', sortable: true }
-        ]
-    });
+            width: 150,
+            align : 'center'
+        }, {
+			header : '지역/상권',
+			name : 'region',
+			align : 'center',
+			width: 150,
+		},{
+		    header : '리드점수',
+		    name   : 'leadScore',   // leadscore → leadScore 로 수정
+		    align  : 'center',
+		    sortable : 'true',
+		    width: 150,
+		} ]
+	});
     //
     //
     // 접촉 Grid
@@ -250,7 +271,18 @@
                 width: 150
             },
             { header: '담당자', name: 'contactManager', width: 150, align: 'center', editor: 'text' },
-            { header: '방법', name: 'contactWay', width: 150, align: 'center', editor: 'text' },
+            { header: '방법', name: 'contactWay',  
+            	editor: {
+	    	      type: 'select',
+	    	      options: {
+	    	        listItems: [
+	    	          { text: '대면', value: '대면' },
+	    	          { text: '전화', value: '전화' },
+	    	          { text: '이메일', value: '이메일' }
+	    	        ]
+	    	      }
+	    	    },
+	    	    width: 150, align: 'center'},
             { header: '내용', name: 'contactCntn', editor: 'text' }
         ]
     });
@@ -307,8 +339,28 @@
             }, align: 'center', editor: 'text' },
             { header: '담당자', name: 'demoManager', align: 'center', editor: 'text' },
             { header: '설명', name: 'demoDc', editor: 'text' },
-            { header: '고개반응', name: 'custReaction', editor: 'text' },
-            { header: '샘플여부', name: 'samplePrivide', editor: 'text' },
+            { header: '고객반응', name: 'custReaction',editor: {
+	    	      type: 'select',
+	    	      options: {
+	    	        listItems: [
+	    	          { text: '매우 좋음', value: '매우 좋음' },
+	    	          { text: '좋음', value: '좋음' },
+	    	          { text: '보통', value: '보통' },
+	    	          { text: '나쁨', value: '나쁨' },
+	    	          { text: '매우 나쁨', value: '매우 나쁨' }
+	    	        ]
+	    	      }
+	    	    }
+	    	    },
+            { header: '샘플여부', name: 'samplePrivide', editor: {
+	    	      type: 'select',
+	    	      options: {
+	    	        listItems: [
+	    	          { text: 'Y', value: 'Y' },
+	    	          { text: 'N', value: 'N' },
+	    	        ]
+	    	      }
+	    	    } },
             { header: '수량', name: 'custQy', editor: 'text' },
             { header: '할인', name: 'custDiscount', editor: 'text' },
             { header: '납기', name: 'custDelivery', formatter: ({ value }) => {
@@ -328,16 +380,16 @@
         const row = potentialgrid.getRow(ev.rowKey);
         if (!row) return;
 
-        const vendId = row.vendId;
-        if (!vendId) {
-            console.warn('vendId 없음', row);
+        const potentialInfoNo = row.potentialInfoNo;
+        if (!potentialInfoNo) {
+            console.warn('potentialInfoNo 없음', row);
             return;
         }
 
-        console.log('접촉/리드내역 조회, vendId =', vendId);
+        console.log('접촉/리드내역 조회, potentialInfoNo =', potentialInfoNo);
 
         // 접촉내역
-        fetch('/salesActivity/contactByVend?vendId=' + encodeURIComponent(vendId))
+        fetch('/salesActivity/contactByVend?potentialInfoNo=' + encodeURIComponent(potentialInfoNo))
             .then(res => res.json())
             .then(data => {
                 console.log('받은 접촉내역', data);
@@ -346,7 +398,7 @@
             .catch(err => console.error('접촉내역 조회 오류', err));
 
         // 리드내역
-        fetch('/salesActivity/LeadByVend?vendId=' + encodeURIComponent(vendId))
+        fetch('/salesActivity/LeadByVend?potentialInfoNo=' + encodeURIComponent(potentialInfoNo))
             .then(res => res.json())
             .then(data => {
                 console.log('받은 데모내역', data);
@@ -355,7 +407,7 @@
             .catch(err => console.error('리드내역 조회 오류', err));
         
        // 데모내역
-        fetch('/salesActivity/DemoByVend?vendId=' + encodeURIComponent(vendId))
+        fetch('/salesActivity/DemoByVend?potentialInfoNo=' + encodeURIComponent(potentialInfoNo))
             .then(res => res.json())
             .then(data => {
                 console.log('받은 데모내역', data);

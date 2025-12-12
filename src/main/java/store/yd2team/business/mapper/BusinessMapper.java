@@ -38,7 +38,7 @@ public interface BusinessMapper {
 	    // 업데이트
 	    int updatePotentialStdrDetail(PotentialStdrVO vo);
 	    // 잠재고객 기준 상세 삭제
-	    int deletePotentialStdr(String stdrDetailId);
+	    int deletePotentialStdr(PotentialStdrVO vo);
 	//
 	//
 	//
@@ -60,15 +60,15 @@ public interface BusinessMapper {
     //리드분석조회
     List<ContactVO> getLeadGenerar();
     //잠재고객항목 선택시 해당접촉내역 조회
-    List<ContactVO> selectContactListByVend(String vendId);
+    List<ContactVO> selectContactListByVend(ContactVO cond);
 	    int insertContact(ContactVO vo);
 	    int updateContact(ContactVO vo);
     //잠재고객항목 선택시 해당리드내역 조회
-    List<LeadVO> getLeadListByVend(String vendId);
+    List<LeadVO> getLeadListByVend(LeadVO cond);
 	    int insertLead(LeadVO vo);
 	    int updateLead(LeadVO vo);
 	//잠재고객항목 선택시 해당데모내역 조회
-	List<DemoVO> getDemoListByVend(String vendId);
+	List<DemoVO> getDemoListByVend(DemoVO cond);
 		int insertDemo(DemoVO vo);
 	    int updateDemo(DemoVO vo);
 }

@@ -6,139 +6,117 @@
 <head>
 <meta charset="UTF-8">
 <title>churn_risk_list</title>
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 </head>
+
 <style>
 .fixed-photo {
-	width: 150px; /* 원하는 가로 크기 */
-	height: 200px; /* 원하는 세로 크기 */
-	object-fit: cover; /* 비율 유지하며 영역에 맞게 채움 */
+	width: 150px;
+	height: 200px;
+	object-fit: cover;
 }
-
 .form-select {
 	color: #000 !important;
 }
 </style>
+
 <body layout:fragment="content">
 
-	<form th:action="@{/churnRiskList}" method="post">
-    <div class="row">
-        <div class="col-md-12 mb-3">
-            <div class="card">
-                <!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <h5 class="card-title">조회조건</h5>
-                    </div>
-                    <div class="card-header-right">
-                        <button class="btn btn-dark" type="reset">초기화</button>
-                        <button class="btn btn-outline-dark" type="submit">조회</button>
-                    </div>
-                </div>
+	<form th:action="@{/churnRiskList}" method="post" th:object="${cond}">
+		<div class="row">
+			<div class="col-md-12 mb-3">
+				<div class="card">
 
-                <div class="card-body">
-                    <div class="row mb-2">
-                        <div class="col-md-3">
-                            <label class="form-label">업체명</label>
-                            <input type="text" class="form-control" placeholder="Value"
-                                   name="customerId">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">휴면/이탈</label>
-                            <input type="text" class="form-control" placeholder="이탈위험 고객 / 휴먼 고객 ..."
-                                   name="customerStatus">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">거래중단기간점수</label>
-                            <input type="number" class="form-control" placeholder="Value"
-                                   name="trendScore">
-                        </div>
-                    </div>
+					<div class="card-header">
+						<div class="card-header-left">
+							<h5 class="card-title">조회조건</h5>
+						</div>
+						<div class="card-header-right">
+							<button class="btn btn-dark" type="reset">초기화</button>
+							<button class="btn btn-outline-dark" type="submit">조회</button>
+						</div>
+					</div>
 
-                    <div class="row mb-2">
-                        <div class="col-md-3">
-                            <label class="form-label">매출변동점수</label>
-                            <input type="number" class="form-control" placeholder="Value"
-                                   name="recScore">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">평균 구매주기점수</label>
-                            <input type="number" class="form-control" placeholder="Value"
-                                   name="freqScore">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">이탈위험점수</label>
-                            <input type="number" class="form-control" placeholder="Value"
-                                   name="finalScore">
-                        </div>
-                    </div>
-                </div> <!-- card-body -->
-            </div>
-        </div>
-    </div>
-</form>
+					<div class="card-body">
+						<div class="row mb-2">
+							<div class="col-md-3">
+								<label class="form-label">업체명</label>
+								<input type="text" class="form-control" placeholder="Value"
+								       th:field="*{customerId}">
+							</div>
 
+							<div class="col-md-3">
+								<label class="form-label">휴면/이탈</label>
+								<select class="form-select" th:field="*{customerStatus}">
+									<option value="">전체</option>
+									<option value="휴면">휴면</option>
+									<option value="이탈">이탈</option>
+								</select>
+							</div>
 
+							<div class="col-md-3">
+								<label class="form-label">거래중단기간점수</label>
+								<input type="number" class="form-control"
+								       placeholder="입력한 점수 이상의 고객을 조회합니다"
+								       th:field="*{trendScore}">
+							</div>
+						</div>
 
-	<!-- 휴먼고객 -->
+						<div class="row mb-2">
+							<div class="col-md-3">
+								<label class="form-label">매출변동점수</label>
+								<input type="number" class="form-control"
+								       placeholder="입력한 점수 이상의 고객을 조회합니다"
+								       th:field="*{recScore}">
+							</div>
+
+							<div class="col-md-3">
+								<label class="form-label">평균 구매주기점수</label>
+								<input type="number" class="form-control"
+								       placeholder="입력한 점수 이상의 고객을 조회합니다"
+								       th:field="*{freqScore}">
+							</div>
+
+							<div class="col-md-3">
+								<label class="form-label">이탈위험점수</label>
+								<input type="number" class="form-control"
+								       placeholder="입력한 점수 이상의 고객을 조회합니다"
+								       th:field="*{finalScore}">
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</form>
+
 	<div class="card mb-3">
 		<div class="card-header">
 			<div class="card-header-left">
 				<h5 class="card-title">휴먼고객목록</h5>
 			</div>
-			<!-- card-header-left end -->
-			<!-- 	<div class="card-header-right">
-				<button class="btn btn-dark">초기화</button>
-				<button class="btn btn-outline-dark">조회</button>
-			</div> //card-header right end -->
 		</div>
-		<!-- //card-header wihy-actions end -->
 		<div class="card-body">
 			<div id="dormancygrid" style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 		</div>
 	</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	<script th:inline="javascript">
-		// 매출변동 데이터
 		tui.Grid.applyTheme('default', {
 			cell : {
-				normal : { // 일반 셀(본문)
-					border : '#ccc',
-					background : "#fff",
-					showVerticalBorder : true, // 세로 라인 표시
-				},
-				header : { // 헤더 셀
-					border : '#ccc',
-					background : '#E3E6ED',
-					showVerticalBorder : true,
-				},
-				editable : { // ★ 편집 가능한 셀 공통 스타일
-					background : '#FFFDF0', // 연노랑 같은 색으로 표시
-					text : '#000'
-				},
-				selectedHeader : { // 헤더 클릭했을 때 색
-					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-				},
-				selected : { // 선택된 셀 색
-					background : '#ffffff' // 필요하면 여기도 조정
-				}
+				normal : { border : '#ccc', background : "#fff", showVerticalBorder : true },
+				header : { border : '#ccc', background : '#E3E6ED', showVerticalBorder : true },
+				editable : { background : '#FFFDF0', text : '#000' },
+				selectedHeader : { background : '#E3E6ED' },
+				selected : { background : '#ffffff' }
 			}
 		});
-		
+
 		const dormancygridData = /*[[${getMonthlySalesList}]]*/ [];
 		console.log('dormancygridData', dormancygridData);
 
-		// Grid 생성
 		const dormancygrid = new tui.Grid({
 			el : document.getElementById('dormancygrid'),
 			data : dormancygridData,
@@ -148,6 +126,10 @@
 			autoWidth : true,
 			columns : [ {
 				header : '업체명',
+				name : 'custcomName',
+				sortable : 'true'
+			}, {
+				header : '업체코드',
 				name : 'customerId',
 				sortable : 'true'
 			}, {
@@ -173,6 +155,6 @@
 			} ]
 		});
 	</script>
+
 </body>
 </html>
-

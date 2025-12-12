@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +17,6 @@ import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ChurnStdrVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
-import store.yd2team.business.service.churnRiskVO;
 
 @Controller
 public class BusinessController {
@@ -32,7 +32,7 @@ public class BusinessController {
 	//휴면,이탈객 기준등록 페이지열람
 	@GetMapping("/churnRiskStdrRegister")
 	public String insert(Model model, ChurnStdrVO churn) {
-		System.out.println("=== BusinessController.insert() 호출됨 ===");
+		System.out.println("=== BusinessController.getChurnStdrList() 호출됨 ===");
 		List<ChurnStdrVO> getChurnStdrList = businessService.getChurnStdrList(churn);
 		model.addAttribute("getChurnStdrList", getChurnStdrList);
 		return "business/churnRiskStdrRegister"; // /는 빼도 됨
@@ -50,24 +50,26 @@ public class BusinessController {
 	    return cnt; // 업데이트 된 건수
 	}
 	//
-	//휴면,이탈고객 조회페이지열람
 	@GetMapping("/churnRiskList")
 	public String churnRiskListForm(Model model) {
-	    // 페이지 처음 로딩 시 완전히 빈 리스트 제공
 	    model.addAttribute("getMonthlySalesList", Collections.emptyList());
+	    model.addAttribute("cond", new MonthlySalesDTO());
 	    return "business/churnRiskList";
 	}
+
 	// 휴면,이탈고객 검색조회
 	@PostMapping("/churnRiskList")
-	public String selectall(churnRiskVO vo, MonthlySalesDTO cond, Model model) {
-		System.out.println("=== churnRiskList.selectall() 호출됨 ===");
-		  // 휴먼/이탈 조건별 점수화 + 검색조건 적용
+	public String selectall(@ModelAttribute("cond") MonthlySalesDTO cond, Model model) {
+	    System.out.println("=== churnRiskList.selectall() 호출됨 ===");
+	    // 휴면/이탈 조건별 점수화 + 검색조건 적용
 	    List<MonthlySalesDTO> getMonthlySalesList = businessService.getMonthlySalesChange(cond);
 	    model.addAttribute("getMonthlySalesList", getMonthlySalesList);
-	    // 검색조건 다시 화면에 뿌려주고 싶으면
-	    model.addAttribute("cond", cond);
+	    // cond는 @ModelAttribute("cond")라서 이미 모델에 같이 들어감(그래도 명시해도 됨)
+	    // model.addAttribute("cond", cond);
+
 	    return "business/churnRiskList";
 	}
+
 	//
 	//
 	//

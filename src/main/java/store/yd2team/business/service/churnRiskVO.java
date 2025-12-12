@@ -13,5 +13,4 @@ public class churnRiskVO {
 	  private int avgPurcCycle;		//평균구매주기
 	  private Date purcStopDt;		//마지막거래일
 	  
-	  
 }
