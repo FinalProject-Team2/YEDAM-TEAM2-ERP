@@ -62,8 +62,8 @@ public class RciptController {
         Map<String, Object> result = new HashMap<>();
 
         try {
-            int cnt = rciptService.insertRciptDetail(vo);
-            
+            rciptService.insertRciptDetail(vo);
+            int cnt = "SUCCESS".equals(vo.getResultMsg())? 1 : 0;
             System.out.println(">>> CONTROLLER RESULT_MSG = " + vo.getResultMsg());
 
             if (cnt > 0) {
