@@ -84,9 +84,10 @@
 	       SET esti_st     = #{estiSt}
 	         , recall_resn = #{recallResn}
 	         , updt_dt     = SYSDATE
-	         , updt_by     = 'Admin'
+	         , updt_by     = #{updtBy}
 	     WHERE esti_id = #{estiId}
 	       AND version = #{version}
+	       AND vend_id = #{vendId}
 	</update>
 	
 <!-- 견적서 모달 상품 auto complete -->
@@ -139,73 +140,90 @@
 <!-- ======================= 헤더 INSERT (항상 INSERT) ======================= -->
     <insert id="insertEsti" parameterType="store.yd2team.business.service.EstiSoVO">
 
-        <!-- fn_esti_id 로 PK 생성 → vo.estiId 에 세팅 -->
-        <selectKey keyProperty="estiId" resultType="string" order="BEFORE">
-            select fn_esti_id()
-            from dual
-        </selectKey>
+    <!-- fn_esti_id 로 PK 생성 → vo.estiId 에 세팅 -->
+    <selectKey keyProperty="estiId" resultType="string" order="BEFORE">
+        SELECT fn_esti_id()
+        FROM dual
+    </selectKey>
 
-        insert into tb_esti (
-              esti_id
-            , version
-            , custcom_id
-            , cdtln_no
-            , custcom_name
-            , so_dt
-            , due_dt
-            , cdtln_lmt
-            , tt_supply_amt
-            , esti_st
-            , recall_resn
-            , rm
-            , crea_dt
-        ) values (
-              #{estiId}
-            , #{version}
-            , #{custcomId}
-            , #{cdtlnNo}
-            , #{custcomName}      <!-- 입력용 필드 -->
-            , sysdate
-            , #{dueDt}
-            , #{cdtlnLmt}
-            , #{ttSupplyAmt}
-            , #{estiSt}
-            , #{recallResn}
-            , #{rm}
-            , sysdate
-        )
-    </insert>
+	    INSERT INTO tb_esti (
+	          esti_id
+	        , version
+	        , vend_id          -- 회사코드
+	        , custcom_id
+	        , cdtln_no
+	        , custcom_name
+	        , so_dt
+	        , due_dt
+	        , cdtln_lmt
+	        , tt_supply_amt
+	        , esti_st
+	        , recall_resn
+	        , rm
+	        , crea_dt
+	        , crea_by          -- 등록자
+	        , updt_dt
+	        , updt_by
+	    ) VALUES (
+	          #{estiId}
+	        , #{version}
+	        , #{vendId}
+	        , #{custcomId}
+	        , #{cdtlnNo}
+	        , #{custcomName}
+	        , SYSDATE
+	        , #{dueDt}
+	        , #{cdtlnLmt}
+	        , #{ttSupplyAmt}
+	        , #{estiSt}
+	        , #{recallResn}
+	        , #{rm}
+	        , SYSDATE
+	        , #{creaBy}
+	        , SYSDATE
+	        , #{updtBy}
+	    )
+	</insert>
 
     <!-- ======================= 상세 INSERT (항상 INSERT) ======================= -->
     <insert id="insertEstiDetail" parameterType="store.yd2team.business.service.EstiSoDetailVO">
 
-        <selectKey keyProperty="estiDetailNo" resultType="long" order="BEFORE">
-            select seq_esti_detail.nextval
-            from dual
-        </selectKey>
+    <selectKey keyProperty="estiDetailNo" resultType="long" order="BEFORE">
+        SELECT seq_esti_detail.NEXTVAL
+        FROM dual
+    </selectKey>
 
-        insert into tb_esti_detail (
-              esti_detail_no
-            , esti_id
-            , version
-            , product_id
-            , qy
-            , price
-            , supply_amt
-            , rm
-            , crea_dt
-        ) values (
-              #{estiDetailNo}
-            , #{estiId}
-            , #{version}
-            , #{productId}
-            , #{qy}
-            , #{price}
-            , #{supplyAmt}
-            , #{rm}
-            , sysdate
-        )
-    </insert>
+	    INSERT INTO tb_esti_detail (
+	          esti_detail_no
+	        , esti_id
+	        , version
+	        , vend_id          -- 회사코드
+	        , product_id
+	        , qy
+	        , price
+	        , supply_amt
+	        , rm
+	        , crea_dt
+	        , crea_by          -- 등록자
+	        , updt_dt
+	        , updt_by
+	    ) VALUES (
+	          #{estiDetailNo}
+	        , #{estiId}
+	        , #{version}
+	        , #{vendId}
+	        , #{productId}
+	        , #{qy}
+	        , #{price}
+	        , #{supplyAmt}
+	        , #{rm}
+	        , SYSDATE
+	        , #{creaBy}
+	        , SYSDATE
+	        , #{updtBy}
+	    )
+	</insert>
+
 
     <!-- ======================= 현재 버전 조회 ======================= -->
     <select id="selectCurrentVersion"
@@ -280,8 +298,9 @@
 	
 	<!-- 주문 헤더 INSERT -->
 	<insert id="insertSo" parameterType="store.yd2team.business.service.EstiSoVO">
-	    insert into tb_so (
+	    INSERT INTO tb_so (
 	          so_id
+	        , vend_id
 	        , custcom_id
 	        , esti_id
 	        , version
@@ -290,11 +309,15 @@
 	        , tt_surtax_price
 	        , tt_price
 	        , tt_so_qy
-	        , rm
 	        , ship_addr
+	        , rm
+	        , rcipt_appo_dt
+	        , rcipt_appo_amt
+	        , appo_mtd
 	        , crea_dt
-	    ) values (
+	    ) VALUES (
 	          #{soId}
+	        , #{vendId}
 	        , #{custcomId}
 	        , #{estiId}
 	        , #{version}
@@ -303,47 +326,68 @@
 	        , #{ttSurtaxPrice}
 	        , #{ttPrice}
 	        , #{ttSoQy}
-	        , #{rm}
 	        , #{shipAddr}
-	        , sysdate
+	        , #{rm}
+	        , #{rciptAppoDt}
+	        , #{rciptAppoAmt}
+	        , #{appoMtd}
+	        , SYSDATE
 	    )
 	</insert>
+
 	
 	<!-- 주문 상세 INSERT -->
 	<insert id="insertSoDetail" parameterType="store.yd2team.business.service.EstiSoDetailVO">
-	
-	    <selectKey keyProperty="soDetailNo" resultType="long" order="BEFORE">
-	        select seq_so_detail.nextval
-	        from dual
-	    </selectKey>
-	
-	    insert into tb_so_detail (
+
+    <selectKey keyProperty="soDetailNo" resultType="long" order="BEFORE">
+        SELECT seq_so_detail.NEXTVAL
+        FROM dual
+    </selectKey>
+
+	    INSERT INTO tb_so_detail (
 	          so_detail_no
 	        , so_id
+	        , vend_id          -- 회사코드
 	        , product_id
 	        , qy
 	        , price
 	        , supply_price
 	        , rm
 	        , crea_dt
-	    ) values (
+	        , crea_by          -- 등록자
+	        , updt_dt
+	        , updt_by
+	    ) VALUES (
 	          #{soDetailNo}
 	        , #{soId}
+	        , #{vendId}
 	        , #{productId}
 	        , #{qy}
 	        , #{price}
-	        , #{supplyAmt}  <!-- 견적 supply_amt 그대로 사용 -->
+	        , #{supplyAmt}
 	        , #{rm}
-	        , sysdate
+	        , SYSDATE
+	        , #{creaBy}
+	        , SYSDATE
+	        , #{updtBy}
 	    )
 	</insert>
+
 	
 	<!-- 견적 상태를 주문완료(es4)로 변경 -->
-	<update id="updateEstiStatusToOrdered">
+<!-- 	<update id="updateEstiStatusToOrdered">
 	    update tb_esti
 	       set esti_st = 'es4'
 	     where esti_id = #{estiId}
 	       and version = #{version}
+	</update> -->
+	<update id="updateEstiStatusToOrdered">
+	    UPDATE tb_esti
+	       SET esti_st  = 'es4',
+	           updt_dt  = SYSDATE,
+	           updt_by  = #{updtBy}
+	     WHERE esti_id = #{estiId}
+	       AND version = #{version}
 	</update>
 
 
@@ -416,59 +460,78 @@
 
     <!-- 승인 상태 변경 -->
     <update id="updateSoStatusToApproved">
-        UPDATE tb_so
-        SET progrs_st = 'es2',
-            updt_dt = SYSDATE
-        WHERE so_id = #{soId}
-    </update>
+	    UPDATE tb_so
+	       SET progrs_st = 'es2',
+	           updt_dt   = SYSDATE,
+	           updt_by   = #{updtBy}
+	     WHERE so_id   = #{soId}
+	       AND vend_id = #{vendId}
+	</update>
+
     
     
     <!-- 주문 보류 처리 -->
 	<update id="updateRejectStatus">
 	    UPDATE tb_so
 	       SET progrs_st = 'es5',
-	           st_resn = #{reason},
-	           updt_dt = SYSDATE
-	     WHERE so_id = #{soId}
+	           st_resn   = #{reason},
+	           updt_dt   = SYSDATE,
+	           updt_by   = #{updtBy}
+	     WHERE so_id   = #{soId}
+	       AND vend_id = #{vendId}
 	</update>
+
 	
 	<!-- 주문 취소 처리 -->
 	<update id="updateCancelStatus">
 	    UPDATE tb_so
 	       SET progrs_st = 'es9',   -- 취소 상태
-	           st_resn = #{reason},
-	           updt_dt = SYSDATE
-	     WHERE so_id = #{soId}
+	           st_resn   = #{reason},
+	           updt_dt   = SYSDATE,
+	           updt_by   = #{updtBy}
+	     WHERE so_id   = #{soId}
+	       AND vend_id = #{vendId}
 	</update>
+
 	
 	<!-- 출하지시 INSERT -->
-	<insert id="insertOust">
+	<insert id="insertOust" parameterType="store.yd2team.business.service.OustVO">
 	    INSERT INTO tb_oust (
-	        oust_id,
-	        so_id,
-	        oust_plan_dt,
-	        oust_request_dt,
-	        ship_addr,
-	        rm,
-	        crea_dt
+	          oust_id
+	        , so_id
+	        , vend_id          -- 회사코드
+	        , oust_plan_dt
+	        , oust_request_dt
+	        , ship_addr
+	        , rm
+	        , crea_dt
+	        , crea_by          -- 등록자
+	        , updt_dt
+	        , updt_by
 	    ) VALUES (
-	        fn_oust_id(),
-	        #{soId},
-	        #{oustPlanDt},
-	        #{oustRequestDt},
-	        #{shipAddr},
-	        #{rm},
-	        SYSDATE
+	          fn_oust_id()
+	        , #{soId}
+	        , #{vendId}
+	        , #{oustPlanDt}
+	        , #{oustRequestDt}
+	        , #{shipAddr}
+	        , #{rm}
+	        , SYSDATE
+	        , #{creaBy}
+	        , SYSDATE
+	        , #{updtBy}
 	    )
 	</insert>
-	
+
 	
 	<!-- 주문서 상태 수정 -->
 	<update id="updateSoStatus">
 	    UPDATE tb_so
-	    SET progrs_st = #{status},
-	        updt_dt = SYSDATE,
-	        updt_by = 'SYSTEM'
-	    WHERE so_id = #{soId}
+	       SET progrs_st = #{status},
+	           updt_dt   = SYSDATE,
+	           updt_by   = #{updtBy}
+	     WHERE so_id   = #{soId}
+	       AND vend_id = #{vendId}
 	</update>
+
 </mapper>

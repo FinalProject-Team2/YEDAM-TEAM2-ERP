@@ -1,5 +1,7 @@
 package store.yd2team.business.service;
 
+import java.time.LocalDate;
+
 import lombok.Data;
 
 @Data
@@ -9,7 +11,7 @@ public class EstiSoDetailVO {
     private Long estiDetailNo;   // esti_detail_no
     private String estiId;         // esti_id
     private String version;     // version
-    private String vendId;       // vend_id
+    
     private String productId;      // product_id
     private Long qy;          // qy
     private Long price;          // price
@@ -31,7 +33,9 @@ public class EstiSoDetailVO {
     private Long ttSoQy;
     
     // 공통
+    private String vendId;       // vend_id
     private String creaBy;
+    private LocalDate updtDt;
     private String updtBy;
     
 }
