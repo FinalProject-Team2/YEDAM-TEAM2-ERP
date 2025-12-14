@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ChurnStdrVO;
+import store.yd2team.business.service.ContactVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 
@@ -143,8 +144,7 @@ public class BusinessController {
 	//영업활동관리.고객조회
 	@PostMapping("/salesActivity")
 	public String saelesPotential(BusinessVO vo, Model model) {
-		System.out.println("=== salesActivity.saelesAction() 호출됨 ===");
-	
+		System.out.println("=== salesActivity.getBusinessList() 호출됨 ===");
 		List<BusinessVO> potentialstdrList = businessService.getBusinessList(vo);
 	
 		// 위에서 span이 쓰는 list도 채워주기

@@ -230,7 +230,7 @@ ORDER BY finalScore DESC
 	            industry_type      as industryType,
 	            company_size       as companySize,
 	            region             as region,
-	             establish_date AS establishDate
+	            establish_date AS establishDate
       FROM 	tb_potential_cust_list
      ORDER BY potential_info_no desc
   </select>
@@ -325,23 +325,24 @@ ORDER BY finalScore DESC
  
   <!-- 잠재고객검색조회 -->
   <select id="getBusinessList" parameterType="store.yd2team.business.service.BusinessVO">
-  	SELECT
-	        potential_info_no,
-	        potential_cond_no,
-	        vend_id,
-	        rank,
-	        vend_nm,
-	        industry_type,
-	        company_size,
-	        region,
-	        establish_date,
-	        crea_dt,
-	        crea_by,
-	        updt_dt,
-	        updt_by
-	FROM
-    	  	tb_potential_cust_list
-  WHERE 1 = 1
+  		SELECT
+   			p.POTENTIAL_INFO_NO,
+		    p.RANK,
+		    p.VEND_ID,
+		    p.VEND_NM,
+		    p.INDUSTRY_TYPE,
+		    p.COMPANY_SIZE,
+		    p.ESTABLISH_DATE,
+		    p.REGION,
+		    NVL(c.CONTACT_CNT, 0) AS contactCnt
+		FROM TB_POTENTIAL_CUST_LIST p
+		LEFT JOIN (
+		    SELECT POTENTIAL_INFO_NO, COUNT(*) AS CONTACT_CNT
+		    FROM TB_CONTACT
+		    GROUP BY POTENTIAL_INFO_NO
+		) c
+		ON c.POTENTIAL_INFO_NO = p.POTENTIAL_INFO_NO
+		WHERE 1=1
 	    <if test="industryType != null and industryType != ''">
 	        AND industry_type LIKE '%' || #{industryType} || '%'
 	    </if>
@@ -357,7 +358,7 @@ ORDER BY finalScore DESC
 	    <if test="endEstablishDate != null and endEstablishDate != ''">
 	        AND establish_date &lt;= TO_DATE(#{endEstablishDate}, 'YYYY-MM-DD')
 	    </if>
-  ORDER BY rank
+  ORDER BY p.RANK
 	</select>
 	
 	
@@ -450,7 +451,6 @@ ORDER BY finalScore DESC
 	     WHERE CONTACT_NO      = #{contactNo}
 		</update>
 	
-	
 	<!-- 리드내역조회 -->
 	<select id="getLeadListByVend"
         parameterType="store.yd2team.business.service.LeadVO" resultType="store.yd2team.business.service.LeadVO">
@@ -471,6 +471,7 @@ ORDER BY finalScore DESC
 	    WHERE VEND_ID = #{vendId}
 	      AND POTENTIAL_INFO_NO = #{potentialInfoNo}
 	    ORDER BY LEAD_DT DESC
+	
 	</select>
 
   
@@ -478,44 +479,47 @@ ORDER BY finalScore DESC
    <insert id="insertLead"
            parameterType="store.yd2team.business.service.LeadVO">
        INSERT INTO TB_LEAD
-    (
-       LEAD_NO,
-       POTENTIAL_INFO_NO,
-       VEND_ID,
-       LEAD_DT,
-       LEAD_MANAGER,
-       REQUIRED_DT,
-       COMPETITOR_YN,
-       BUDGET_AVAIL_YN,
-       CREA_DT,
-       CREA_BY
-    )
-    VALUES
-    (
-       SEQ_TB_LEAD_NO.NEXTVAL,
-       #{potentialInfoNo},
-       #{vendId},
-       TO_DATE(#{leadDt}, 'YYYY-MM-DD'),
-       #{leadManager},
-       #{requiredDt},
-       SUBSTR(#{competitorYn}, 1, 1),
-       SUBSTR(#{budgetAvailYn}, 1, 1),
-       SYSDATE,
-       #{creaBy}
-    )
+				(
+				    LEAD_NO,
+				    POTENTIAL_INFO_NO,
+				    VEND_ID,
+				    LEAD_DT,
+				    LEAD_MANAGER,
+				    REQUIRED_DT,
+				    COMPETITOR_YN,
+				    BUDGET_AVAIL_YN,
+				    CREA_DT,
+				    CREA_BY
+				)
+				VALUES
+				(
+				    SEQ_TB_LEAD_NO.NEXTVAL,
+				    #{potentialInfoNo},
+				    #{vendId},
+				    TO_DATE(#{leadDt}, 'YYYY-MM-DD'),
+				    #{leadManager},
+				    TO_DATE(#{requiredDt}, 'YYYY-MM-DD'),
+				    SUBSTR(#{competitorYn}, 1, 1),
+				    SUBSTR(#{budgetAvailYn}, 1, 1),
+				    SYSDATE,
+				    #{creaBy}
+				)
    </insert>
   
 	<!-- 리드내역 수정 -->
 	<update id="updateLead"
 		        parameterType="store.yd2team.business.service.LeadVO">
-		 UPDATE TB_LEAD
-	       SET LEAD_MANAGER     = #{leadManager},
-	           REQUIRED_DT      = #{requiredDt},
-	           COMPETITOR_YN    = SUBSTR(#{competitorYn}, 1, 1),
-	           BUDGET_AVAIL_YN  = SUBSTR(#{budgetAvailYn}, 1, 1),
-	           UPDT_DT          = SYSDATE,
-	           UPDT_BY          = #{updtBy}
-	     WHERE LEAD_NO          = #{leadNo}
+			UPDATE 
+				TB_LEAD
+			SET
+			    LEAD_MANAGER    = #{leadManager},
+			    REQUIRED_DT     = TO_DATE(#{requiredDt}, 'YYYY-MM-DD'),
+			    COMPETITOR_YN   = SUBSTR(#{competitorYn}, 1, 1),
+			    BUDGET_AVAIL_YN = SUBSTR(#{budgetAvailYn}, 1, 1),
+			    UPDT_DT         = SYSDATE,
+			    UPDT_BY         = #{updtBy}
+			WHERE 
+				LEAD_NO = #{leadNo}
 	</update>
 	
 	<!-- 데모내역조회 -->

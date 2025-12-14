@@ -17,6 +17,7 @@ public class BusinessVO {
 	    private String establishDate;     	// 설립일ESTABLISH_DATE (YYYY-MM-DD 형식 문자열)
 	    private String startEstablishDate;  // 설립일ESTABLISH_DATE (YYYY-MM-DD 형식 문자열)
 	    private String endEstablishDate;     // 설립일ESTABLISH_DATE (YYYY-MM-DD 형식 문자열)
+	    private Integer contactCnt;
 	
 	    private Date creaDt;             // CREA_DT  (문자열로 받기)
 	    private String creaBy;           // CREA_BY
