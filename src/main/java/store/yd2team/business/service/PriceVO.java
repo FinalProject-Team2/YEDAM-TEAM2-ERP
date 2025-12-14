@@ -24,6 +24,10 @@ public class PriceVO {
     private String rm;
     
     // session
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate creaDt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate updtDt;
     private String vendId;
     private String creaBy;
     private String updtBy;
@@ -44,4 +48,12 @@ public class PriceVO {
     // 고객사모달 저장된 고객사 선택
     private String custcomId;
     private String custcomName;
+    
+    // 최대 할인율
+    private Integer dcRate;
+    private String pricePolicyId;
+    private String policyType;
+    private String productId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate applcDt;
 }

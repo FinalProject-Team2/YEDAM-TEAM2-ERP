@@ -44,4 +44,7 @@ public interface PriceMapper {
 
     // 상품 detail 저장
     int insertPriceProductDetail(Map<String, Object> map);
+    
+    // 최대할인율
+    PriceVO selectMaxDiscount(PriceVO vo);
 }

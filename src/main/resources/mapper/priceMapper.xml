@@ -151,30 +151,6 @@
             #{updtBy}
         )
     </insert>
-    <!-- <insert id="insertPriceDetail">
-        INSERT INTO tb_price_detail (
-            price_detail_no,
-            price_policy_id,
-            custcom_id,
-            product_id,
-            applc_start_dt,
-            applc_end_dt,
-            dc_rate,
-            prior_rank,
-            rm
-        )
-        VALUES (
-            #{detailNo},
-            #{priceId},
-            #{custcomId},
-            NULL,
-            #{applcStartDt},
-            #{applcEndDt},
-            #{dcRate},
-            #{detailNo},
-            NULL
-        )
-    </insert> -->
 
     <!-- detail 조회 (checkbox 자동 체크용) -->
     <select id="selectPricePolicyDetail" parameterType="String" resultType="map">
@@ -239,22 +215,36 @@
             #{updtBy}
         )
     </insert>
-	<!-- <insert id="insertPriceProductDetail" parameterType="map">
-	    INSERT INTO tb_price_detail (
-	        price_policy_id,
-	        price_detail_no,
-	        product_id,
-	        applc_start_dt,
-	        applc_end_dt,
-	        dc_rate
-	    ) VALUES (
-	        #{priceId},
-	        SEQ_PRICE_DETAIL.NEXTVAL,
-	        #{productId},
-	        #{applcStartDt},
-	        #{applcEndDt},
-	        #{dcRate}
+	
+	<!-- 최대 할인율 -->
+	<select id="selectMaxDiscount" parameterType="store.yd2team.business.service.PriceVO" resultType="store.yd2team.business.service.PriceVO">
+	    SELECT *
+	    FROM (
+	        SELECT
+	              d.dc_rate          AS dcRate
+	            , d.price_policy_id  AS pricePolicyId
+	            , CASE
+	                WHEN d.product_id IS NOT NULL THEN 'PRODUCT'
+	                ELSE 'CUSTCOM'
+	              END               AS policyType
+	        FROM tb_price_detail d
+	        JOIN tb_price p
+	          ON p.price_policy_id = d.price_policy_id
+	         AND p.vend_id         = d.vend_id
+	        WHERE p.vend_id = #{vendId}
+	          AND p.yn = 'Y'
+	          AND SYSDATE BETWEEN p.applc_begin_dt AND p.applc_end_dt
+	          AND (
+	                d.product_id = #{productId}
+	             OR d.custcom_id = #{custcomId}
+	          )
+	          AND SYSDATE BETWEEN d.applc_start_dt AND d.applc_end_dt
+	        ORDER BY
+	              d.dc_rate DESC
+	            , NVL(d.prior_rank, 999)
 	    )
-	</insert> -->
+	    WHERE ROWNUM = 1
+	
+	</select>
 
 </mapper>

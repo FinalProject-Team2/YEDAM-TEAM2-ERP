@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import store.yd2team.business.service.CommonCodeVO;
 import store.yd2team.business.service.PriceService;
 import store.yd2team.business.service.PriceVO;
+import store.yd2team.common.util.LoginSession;
 
 
 @Controller
@@ -198,4 +199,27 @@ public class PriceController {
 
 	    return result;
 	}
+	
+	
+	// 할인 조회
+	@PostMapping("/discount")
+    @ResponseBody
+    public Map<String, Object> getDiscount(@RequestBody PriceVO vo) {
+
+        // 세션 정보
+        String vendId = LoginSession.getVendId();
+        vo.setVendId(vendId);
+
+        PriceVO result = priceService.getMaxDiscount(vo);
+
+        if (result == null || result.getDcRate() == null) {
+            return Map.of("dcRate", 0);
+        }
+
+        return Map.of(
+            "dcRate", result.getDcRate(),
+            "pricePolicyId", result.getPricePolicyId(),
+            "policyType", result.getPolicyType()
+        );
+    }
 }

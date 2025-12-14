@@ -172,4 +172,10 @@ public class PriceServiceImpl implements PriceService {
 
         return 1;
     }
+    
+    // 최대 할인율
+    @Override
+    public PriceVO getMaxDiscount(PriceVO vo) {
+        return priceMapper.selectMaxDiscount(vo);
+    }
 }

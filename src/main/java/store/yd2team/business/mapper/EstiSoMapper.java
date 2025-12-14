@@ -27,9 +27,12 @@ public interface EstiSoMapper {
     List<EstiSoVO> searchCustcomId(String keyword);    // 고객사코드(아이디) 검색
     
     
-    // 모달 저장버튼
-    // 헤더 저장 (항상 INSERT)
-    int insertEsti(EstiSoVO vo);
+    // 신규 견적서모달 저장버튼
+    // 신규 견적서
+    int insertNewEsti(EstiSoVO vo);
+
+    // 견적서 수정 (이력)
+    int insertEstiHistory(EstiSoVO vo);
 
     // 상세 저장 (항상 INSERT)
     int insertEstiDetail(EstiSoDetailVO detail);
@@ -40,6 +43,20 @@ public interface EstiSoMapper {
     // 조회용
     EstiSoVO selectEstiHeader(@Param("estiId") String estiId);
     List<EstiSoDetailVO> selectEstiDetailList(@Param("estiId") String estiId);
+    
+    // 이력보기 모달
+    List<EstiSoVO> selectEstiHistory(@Param("estiId") String estiId);
+    
+    //이력보기의 보기 모달
+    EstiSoVO selectEstiHeaderByVersion(
+	    @Param("estiId") String estiId,
+	    @Param("version") String version
+	);
+
+	List<EstiSoDetailVO> selectEstiDetailListByVersion(
+	    @Param("estiId") String estiId,
+	    @Param("version") String version
+	);
     
     
     // === 주문 관련 추가 ===

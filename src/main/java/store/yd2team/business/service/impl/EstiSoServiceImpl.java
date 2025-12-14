@@ -63,103 +63,142 @@ public class EstiSoServiceImpl implements EstiSoService {
     }
     
    
-    
     // 견적서 저장
     @Override
     @Transactional
     public String saveEsti(EstiSoVO vo) {
 
-        // 🔥 세션 정보
+        // 세션 정보
         String vendId = LoginSession.getVendId();
         String empId  = LoginSession.getEmpId();
 
         vo.setVendId(vendId);
         vo.setCreaBy(empId);
-        vo.setUpdtBy(empId);
+        vo.setUpdtBy(empId); // 이력 구조라 실사용은 안 하지만 유지
 
-        // 0) 상태 기본값
-        if (vo.getEstiSt() == null || vo.getEstiSt().isEmpty()) {
-            vo.setEstiSt("es1");
+        // 상세 검증
+        List<EstiSoDetailVO> detailList = vo.getDetailList();
+        if (detailList == null || detailList.isEmpty()) {
+            throw new IllegalArgumentException("견적 상세가 존재하지 않습니다.");
         }
 
-        // 1) 상세 합계
-        long total = 0L;
-        List<EstiSoDetailVO> list = vo.getDetailList();
-        if (list != null) {
-            for (EstiSoDetailVO d : list) {
-                if (d.getSupplyAmt() != null) {
-                    total += d.getSupplyAmt();
-                }
+        // 금액 합계 계산
+        long totalSupplyAmt = 0L;
+        for (EstiSoDetailVO d : detailList) {
+            if (d.getSupplyAmt() != null) {
+                totalSupplyAmt += d.getSupplyAmt();
             }
         }
-        vo.setTtSupplyAmt(total);
+        vo.setTtSupplyAmt(totalSupplyAmt);
 
-        // 2) 헤더 INSERT (이력 방식)
+        // 신규든 수정이든 새로 INSERT 되는 견적은 항상 승인대기(es1)
+        vo.setEstiSt("es1");
+
+        // 헤더 INSERT (이력 방식)
         if (vo.getEstiId() == null || vo.getEstiId().isEmpty()) {
+
+            // 신규 견적서
             vo.setVersion("ver1");
-            estiSoMapper.insertEsti(vo);
+            estiSoMapper.insertNewEsti(vo);
+
         } else {
+
+            // 수정 (기존 estiId + 신규 버전 INSERT)
             String curVerStr = estiSoMapper.selectCurrentVersion(vo.getEstiId());
-            int curVer = curVerStr == null ? 0 : Integer.parseInt(curVerStr.replace("ver", ""));
+
+            int curVer = 0;
+            if (curVerStr != null && curVerStr.startsWith("ver")) {
+                curVer = Integer.parseInt(curVerStr.substring(3));
+            }
+
             vo.setVersion("ver" + (curVer + 1));
-            estiSoMapper.insertEsti(vo);
+            estiSoMapper.insertEstiHistory(vo);
         }
 
-        // 3) 상세 INSERT
-        if (list != null) {
-            for (EstiSoDetailVO d : list) {
+        // 상세 INSERT
+        for (EstiSoDetailVO d : detailList) {
 
-                d.setEstiId(vo.getEstiId());
-                d.setVersion(vo.getVersion());
+            d.setEstiId(vo.getEstiId());
+            d.setVersion(vo.getVersion());
 
-                // 🔥 상세에도 세션 정보
-                d.setVendId(vendId);
-                d.setCreaBy(empId);
-                d.setUpdtBy(empId);
+            // 세션 정보
+            d.setVendId(vendId);
+            d.setCreaBy(empId);
+            d.setUpdtBy(empId);
 
-                estiSoMapper.insertEstiDetail(d);
-            }
+            estiSoMapper.insertEstiDetail(d);
         }
 
         return vo.getEstiId();
     }
+    
+    // 이력보기 모달
+    @Override
+    public List<EstiSoVO> getEstiHistory(String estiId) {
+        return estiSoMapper.selectEstiHistory(estiId);
+    }
+    
+    
+    // 이력보기의 보기 모달
+    @Override
+    public EstiSoVO getEstiByVersion(String estiId, String version) {
+        EstiSoVO header = estiSoMapper.selectEstiHeaderByVersion(estiId, version);
+        if (header != null) {
+            header.setDetailList(estiSoMapper.selectEstiDetailListByVersion(estiId, version));
+        }
+        return header;
+    }
+    
 	/*
 	 * @Override
 	 * 
-	 * @Transactional public String saveEsti(EstiSoVO vo) { // 0) 상태 기본값 (없으면 es1)
-	 * if (vo.getEstiSt() == null || vo.getEstiSt().isEmpty()) {
-	 * vo.setEstiSt("es1"); }
+	 * @Transactional public String saveEsti(EstiSoVO vo) {
 	 * 
-	 * // 1) 상세 합계 Long total = 0L; List<EstiSoDetailVO> list = vo.getDetailList();
-	 * if (list != null) { for (EstiSoDetailVO d : list) { if (d.getSupplyAmt() !=
-	 * null) { total = d.getSupplyAmt(); } } } vo.setTtSupplyAmt(total);
+	 * // 세션 정보 String vendId = LoginSession.getVendId(); String empId =
+	 * LoginSession.getEmpId();
 	 * 
-	 * // 2) version + estiId 처리 if (vo.getEstiId() == null ||
-	 * vo.getEstiId().isEmpty()) { // 신규 vo.setVersion("ver1"); // ★ version 1
-	 * estiSoMapper.insertEsti(vo); // ★ 여기서 selectKey 로 estiId 세팅 } else { // 수정
-	 * (이력 INSERT) String curVerStr =
-	 * estiSoMapper.selectCurrentVersion(vo.getEstiId()); int curVer = 0; if
-	 * (curVerStr != null && !curVerStr.isEmpty()) { if
-	 * (curVerStr.startsWith("ver")) { curVer =
-	 * Integer.parseInt(curVerStr.replace("ver", "")); } else { curVer =
-	 * Integer.parseInt(curVerStr); } } vo.setVersion("ver" + (curVer + 1)); // ★ 다음
-	 * 버전 estiSoMapper.insertEsti(vo); }
+	 * vo.setVendId(vendId); vo.setCreaBy(empId); vo.setUpdtBy(empId); // 이력 구조라
+	 * 실사용은 안 하지만 유지
 	 * 
-	 * // ★ 디버깅용 로그 System.out.println("HEADER AFTER INSERT >>> estiId=" +
-	 * vo.getEstiId() + ", version=" + vo.getVersion());
 	 * 
-	 * // 3) 상세 INSERT if (list != null) { for (EstiSoDetailVO d : list) {
+	 * // 상태 기본값 if (vo.getEstiSt() == null || vo.getEstiSt().isEmpty()) {
+	 * vo.setEstiSt("es1"); // 작성중 }
 	 * 
-	 * // 헤더 정보 복사 d.setEstiId(vo.getEstiId()); // ★ 여기서 estiId 세팅
-	 * d.setVersion(vo.getVersion()); // ★ 여기서 version 세팅
 	 * 
-	 * estiSoMapper.insertEstiDetail(d);
+	 * // 상세 검증 + 합계 계산 List<EstiSoDetailVO> detailList = vo.getDetailList();
 	 * 
-	 * System.out.println("DETAIL AFTER INSERT >>> detailNo=" + d.getEstiDetailNo()
-	 * + ", estiId=" + d.getEstiId() + ", version=" + d.getVersion()); } }
+	 * if (detailList == null || detailList.isEmpty()) { throw new
+	 * IllegalArgumentException("견적 상세가 존재하지 않습니다."); }
+	 * 
+	 * long totalSupplyAmt = 0L; for (EstiSoDetailVO d : detailList) { if
+	 * (d.getSupplyAmt() != null) { totalSupplyAmt += d.getSupplyAmt(); } }
+	 * vo.setTtSupplyAmt(totalSupplyAmt);
+	 * 
+	 * 
+	 * // 헤더 INSERT (이력 방식) if (vo.getEstiId() == null || vo.getEstiId().isEmpty())
+	 * { // ▶ 신규 견적서 vo.setVersion("ver1"); estiSoMapper.insertNewEsti(vo);
+	 * 
+	 * } else { // ▶ 수정 (이력 INSERT) String curVerStr =
+	 * estiSoMapper.selectCurrentVersion(vo.getEstiId());
+	 * 
+	 * int curVer = 0; if (curVerStr != null && curVerStr.startsWith("ver")) {
+	 * curVer = Integer.parseInt(curVerStr.substring(3)); }
+	 * 
+	 * vo.setVersion("ver" + (curVer + 1)); estiSoMapper.insertEstiHistory(vo); }
+	 * 
+	 * 
+	 * // 상세 INSERT for (EstiSoDetailVO d : detailList) {
+	 * 
+	 * d.setEstiId(vo.getEstiId()); d.setVersion(vo.getVersion());
+	 * 
+	 * // 세션 정보 d.setVendId(vendId); d.setCreaBy(empId); d.setUpdtBy(empId);
+	 * 
+	 * estiSoMapper.insertEstiDetail(d); }
 	 * 
 	 * return vo.getEstiId(); }
 	 */
+
+    
     
     @Override
     public EstiSoVO getEsti(String estiId) {
@@ -245,38 +284,6 @@ public class EstiSoServiceImpl implements EstiSoService {
 
         return soId;
     }
-	/*
-	 * @Override public String saveOrderFromEsti(EstiSoVO vo) {
-	 * 
-	 * // 1) 주문번호 생성 String soId = estiSoMapper.createSoId(); vo.setSoId(soId);
-	 * 
-	 * // 2) 합계 계산 Long ttSupply = 0L; Long ttQty = 0L; long ttVat = 0L;
-	 * 
-	 * if (vo.getDetailList() != null) { for (EstiSoDetailVO d : vo.getDetailList())
-	 * { long supply = d.getSupplyAmt() == null ? 0L : d.getSupplyAmt(); long qy =
-	 * d.getQy() == null ? 0L : d.getQy();
-	 * 
-	 * ttSupply += supply; ttQty += qy;
-	 * 
-	 * // 부가세 10% (소수점은 버림 기준 예시) ttVat += supply / 10; // 10% = supply * 0.1 }
-	 * 
-	 * vo.setTtSupplyPrice(ttSupply); vo.setTtSurtaxPrice(ttVat); //
-	 * tb_so.TT_SURTAX_PRICE vo.setTtPrice(ttSupply + ttVat); // tb_so.TT_PRICE
-	 * vo.setTtSoQy(ttQty); }
-	 * 
-	 * vo.setTtSupplyPrice(ttSupply); vo.setTtSoQy(ttQty);
-	 * 
-	 * // 3) 주문 헤더 INSERT estiSoMapper.insertSo(vo);
-	 * 
-	 * // 4) 주문 상세 INSERT if (vo.getDetailList() != null) { for (EstiSoDetailVO d :
-	 * vo.getDetailList()) { d.setSoId(soId); estiSoMapper.insertSoDetail(d); } }
-	 * 
-	 * // 5) 견적 상태 es4(예: 주문완료)로 변경
-	 * estiSoMapper.updateEstiStatusToOrdered(vo.getEstiId(), vo.getVersion());
-	 * 
-	 * 
-	 * return soId; }
-	 */
     
     
     
@@ -310,6 +317,8 @@ public class EstiSoServiceImpl implements EstiSoService {
         return headerList;
     }
     
+    
+    
     // 주문서관리화면 승인버튼
     @Override
     public void approveSo(List<EstiSoVO> list) throws Exception {
@@ -334,20 +343,7 @@ public class EstiSoServiceImpl implements EstiSoService {
             );
         }
     }
-	/*
-	 * @Override public void approveSo(List<EstiSoVO> list) throws Exception {
-	 * 
-	 * for (EstiSoVO vo : list) {
-	 * 
-	 * // 1. 현재 상태 조회 String currStatus = estiSoMapper.selectSoStatus(vo.getSoId());
-	 * 
-	 * // 승인 가능한 상태인지 확인 (es1: 대기, es5: 보류) if (!("es1".equals(currStatus) ||
-	 * "es5".equals(currStatus))) { throw new RuntimeException("주문서 " + vo.getSoId()
-	 * + "는 승인할 수 없는 상태입니다."); }
-	 * 
-	 * // 2. 승인 처리 (상태 = es2) estiSoMapper.updateSoStatusToApproved(vo.getSoId()); }
-	 * }
-	 */ // 주문서 승인버튼 end
+
     
     // 보류버튼 이벤트
     @Transactional
@@ -385,33 +381,6 @@ public class EstiSoServiceImpl implements EstiSoService {
             "message", "보류 처리 완료되었습니다."
         );
     }
-	/*
-	 * @Transactional
-	 * 
-	 * @Override public Map<String, Object> rejectOrder(String soId, String reason)
-	 * {
-	 * 
-	 * Map<String, Object> result = new HashMap<>();
-	 * 
-	 * EstiSoVO header = estiSoMapper.getOrderHeader(soId);
-	 * 
-	 * if (header == null) { result.put("success", false); result.put("message",
-	 * "존재하지 않는 주문서입니다."); return result; }
-	 * 
-	 * String status = header.getProgrsSt();
-	 * 
-	 * // 이미 보류 상태 if ("es5".equals(status)) { result.put("success", false);
-	 * result.put("message", "이미 보류 상태입니다."); return result; }
-	 * 
-	 * // 승인대기(es1), 승인(es2), 반려(es3) 등 → 보류 가능 // 필요 시 조건 조정 가능 if
-	 * (!("es1".equals(status) || "es2".equals(status))) { result.put("success",
-	 * false); result.put("message", "이 상태에서는 보류할 수 없습니다."); return result; }
-	 * 
-	 * estiSoMapper.updateRejectStatus(soId, reason);
-	 * 
-	 * result.put("success", true); result.put("message", "보류 처리 완료되었습니다."); return
-	 * result; }
-	 */
     
     // 주문취소버튼 이벤트
     @Transactional
@@ -453,36 +422,6 @@ public class EstiSoServiceImpl implements EstiSoService {
             "message", "취소 처리 완료되었습니다."
         );
     }
-	/*
-	 * @Transactional
-	 * 
-	 * @Override public Map<String, Object> cancelOrder(String soId, String reason)
-	 * {
-	 * 
-	 * Map<String, Object> result = new HashMap<>();
-	 * 
-	 * EstiSoVO header = estiSoMapper.getOrderHeader(soId);
-	 * 
-	 * if (header == null) { result.put("success", false); result.put("message",
-	 * "존재하지 않는 주문서입니다."); return result; }
-	 * 
-	 * String status = header.getProgrsSt();
-	 * 
-	 * // 이미 취소 상태 if ("es9".equals(status)) { result.put("success", false);
-	 * result.put("message", "이미 취소된 주문서입니다."); return result; }
-	 * 
-	 * // 승인 상태는 취소 불가 if ("es2".equals(status)) { result.put("success", false);
-	 * result.put("message", "승인 상태에서는 취소할 수 없습니다."); return result; }
-	 * 
-	 * // 승인대기(es1), 보류(es5)만 취소 가능 if (!("es1".equals(status) ||
-	 * "es5".equals(status))) { result.put("success", false); result.put("message",
-	 * "취소할 수 없는 상태입니다."); return result; }
-	 * 
-	 * estiSoMapper.updateCancelStatus(soId, reason);
-	 * 
-	 * result.put("success", true); result.put("message", "취소 처리 완료되었습니다."); return
-	 * result; }
-	 */
     
     
     // 출하지시서 작성 저장 버튼
@@ -507,12 +446,5 @@ public class EstiSoServiceImpl implements EstiSoService {
             empId
         );
     }
-	/*
-	 * @Override public void saveOust(OustVO vo) throws Exception {
-	 * 
-	 * // 1) 출하지시서 INSERT estiSoMapper.insertOust(vo);
-	 * 
-	 * // 2) 주문서 상태 es6 로 변경 estiSoMapper.updateSoStatus(vo.getSoId(), "es6"); }
-	 */
     
 }

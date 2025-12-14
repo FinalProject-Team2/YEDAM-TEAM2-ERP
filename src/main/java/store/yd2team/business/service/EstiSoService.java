@@ -27,6 +27,12 @@ public interface EstiSoService {
     /** 최신버전 기준 조회 (필요시 버전별 조회는 추가로 만들면 됨) */
     EstiSoVO getEsti(String estiId);
     
+    // 이력보기 모달
+    List<EstiSoVO> getEstiHistory(String estiId);
+    
+    // 이력보기의 보기 모달
+    EstiSoVO getEstiByVersion(String estiId, String version);
+    
     // 주문서 모달 초기 데이터 (견적 기반)
     EstiSoVO getOrderInitFromEsti(String estiId);
 

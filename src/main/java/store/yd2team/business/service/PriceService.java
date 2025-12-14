@@ -30,4 +30,7 @@ public interface PriceService {
     List<Map<String, Object>> selectPricePolicyProduct(String priceId);
 
     int savePricePolicyProduct(PriceVO vo);
+    
+    // 최대 할인율
+    PriceVO getMaxDiscount(PriceVO vo);
 }
