@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
-import store.yd2team.business.service.CommonCodeVO;
 import store.yd2team.business.service.CustcomService;
 import store.yd2team.business.service.CustcomVO;
 
