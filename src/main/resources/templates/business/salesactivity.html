@@ -5,7 +5,7 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<title>potentialCustList</title>
+<title>salesactivity</title>
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
@@ -167,6 +167,8 @@
 
 
 	<script th:inline="javascript">
+	
+	
     // 공통 테마
     tui.Grid.applyTheme('default', {
         cell: {
@@ -193,9 +195,9 @@
         }
     });
 
-    // 잠재고객 Grid
+     // 잠재고객 Grid
     const potentialData = /*[[${potentialstdrList}]]*/ [];
-    console.log("potentialData", potentialData);
+    console.log("potentialData", potentialData); 
 
     const potentialgrid = new tui.Grid({
         el: document.getElementById('potentialgrid'),
@@ -211,6 +213,12 @@
 			align : 'center',
 			width: 150
 		}, {
+			  header: '접촉건수',
+			  name: 'contactCnt',
+			  align: 'center',
+			  sortable: true,
+			  width: 120
+		},{
 			header : '업체명',
 			name : 'vendNm',
 			align  : 'center',

@@ -3,6 +3,8 @@ import java.util.List;
 public interface BusinessService {
 	
 	List<BusinessVO> getList();
+	
+	//공공데이터 잠개고객 데이터 매핑
 	void fetchAndSaveFromApi();
 	
 	//휴면,이탈 기준조회

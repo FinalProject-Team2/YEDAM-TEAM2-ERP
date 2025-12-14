@@ -29,9 +29,9 @@ public interface BusinessMapper {
 	List<MonthlySalesDTO> getMonthlySalesChange(MonthlySalesDTO vo);
 	//
 	//
-	//잠재고객 전체조회
+	//잠재 전체조회
 	List<BusinessVO> getList();
-	//잠재고객 조건상세목록 조회
+	//잠재 조건상세목록 조회
     List<PotentialStdrVO> getPotentialStdrDetailList(PotentialStdrVO cond);
 	    // 인서트
 	    int insertPotentialStdrDetail(PotentialStdrVO vo);

@@ -124,7 +124,9 @@ public class BusineServiceImpl implements BusinessService {
 	public int existsPotentialInfoNo(Long potentialInfoNo) {
 		return 0;
 	}
-   @Override
+   
+ //공공데이터 잠개고객 데이터 매핑
+  @Override
   public void fetchAndSaveFromApi() {
       try {
           RestTemplate restTemplate = new RestTemplate();
