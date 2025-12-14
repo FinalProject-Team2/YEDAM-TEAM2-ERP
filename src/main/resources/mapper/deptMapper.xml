@@ -40,38 +40,66 @@ where a.vend_id = #{vendId}
 order by a.dept_id desc
 </select>
 
-<insert id="insertDept">
-<selectKey keyProperty="deptId" resultType="String" order="BEFORE">
-SELECT 'dept' || 
-       LPAD(NVL(MAX(SUBSTR(dept_id, LENGTH(dept_id)-2, 3)), 0) + 1, 3, '0') AS dept_id
-FROM tb_dept
-WHERE SUBSTR(dept_id, 5, 4) = TO_CHAR(SYSDATE, 'YYMM')
-</selectKey>
-insert into tb_dept(
- dept_id
- ,emp_id
- ,upr_dept_id
- ,dept_nm
- ,vend_id
- ,crea_by)
-values(
- #{deptId}
- ,#{empId}
- ,#{uprDeptId}
- ,#{deptNm}
- ,#{vendId}
- 'myk'
-)
-</insert>
+<update id="mergeDept">
+MERGE INTO tb_dept t
+	    USING (
+	        SELECT 
+	            #{deptId}   AS dept_id
+		    ,#{empId}   AS emp_id
+		    ,#{uprDeptId}   AS upr_dept_id
+		    ,#{deptNm}   AS dept_nm
+		    ,#{vendId}   AS vend_id	            
+	        FROM dual
+	    ) s
+	    ON (t.dept_id = s.dept_id)
+	
+	    WHEN MATCHED THEN
+	        UPDATE SET
+	           t.emp_id = s.emp_id
+	           ,t.upr_dept_id = s.upr_dept_id
+	           ,t.dept_nm = s.dept_nm
+	           ,t.updt_dt = SYSDATE
+	           ,t.updt_by = 'myk'	            	
+	    WHEN NOT MATCHED THEN
+	        INSERT (
+	            dept_id
+		        ,emp_id
+		        ,upr_dept_id
+		        ,dept_nm
+		        ,vend_id
+		        ,crea_by	
+	        ) VALUES (
+	            fn_dept_id()
+                ,s.emp_id
+                ,s.upr_dept_id
+                ,s.dept_nm
+                ,s.vend_id
+                ,'myk'		            
+	        )
+</update>
+
+<update id="empForMerge">
+update tb_emp
+set
+ dept_id = #{deptId}
+where emp_id = #{empId}
+</update>
 
 <select id="getNonManagerEmployeeIds">
 select
  emp_id
+ ,dept_id
  ,nm
 from tb_emp
 where emp_id not in (select emp_id
                 from tb_dept)
 and vend_id = #{vendId}
 </select>
+
+<delete id="deleteDept">
+delete
+from tb_dept
+where dept_id = #{deptId}
+</delete>
 
 </mapper>

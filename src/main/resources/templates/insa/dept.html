@@ -62,6 +62,8 @@
 
 	let lastAddedRowKey = null;
 	$("#reset").on("click", function () {
+		n = 0;
+		n2 = 0;
 		grid.resetData(deptVOList);
 	});
 	let buseoBtn = $("#buseo");
@@ -140,7 +142,7 @@
 	    	const rowdata = grid.getRow(change.rowKey);	    	
 	        const {rowKey, value, prevValue, columnName } = change;
 	        
-	     // 🔥 상위부서명 변경 처리
+	     // 🔥 상위부서명 변경 처리.
 	        if (columnName === 'uprDeptNm') {
 
 			    // 선택된 uprDeptNm 값(=부서 이름)으로 검색
@@ -188,8 +190,8 @@
 	let registBtn = $("#mlssRegist");
 	let addBtn = $("#mlssAdd");
 	let delBtn = $("#del");
-	let n = grid.getRowCount();
-	let n2 = grid.getRowCount();
+	let n = 0;
+	let n2 = 0;
 	
 	//행 추가 눌렀을 때 실행되는 코드
 	addBtn.on("click", () => {
@@ -227,26 +229,28 @@
 	    // 🔥 2. 선택된 행의 데이터만 배열로 구성
 	    const selectedRows = checkedRowKeys.map(key => grid.getRow(key));
 
+	    console.log("여기까지옴?");
 	    console.log(selectedRows);
 			
 				
 				
 			
-		     /* $.ajax({
-			    url: "/mlssRegist",                // 요청 URL
+		      $.ajax({
+			    url: "/mergeDept",                // 요청 URL
 			    type: "post",                     // GET 방식 (fetch 코드와 동일)
 			    contentType: "application/json",
-			    data: JSON.stringify(rowData),     // 쿼리 파라미터 자동 변환			        
+			    data: JSON.stringify(selectedRows),     // 쿼리 파라미터 자동 변환			        
 			})
 			.done((result) => {
-			    alert(result+"건 등록되었습니다.");			    
+			    alert(result+"건 등록되었습니다.");		
+			    location.reload();
 			})
 			.fail((error) => {
 			    console.error(error);
 			    alert("데이터 요청 중 오류 발생");
-			});  */
+			});  
 			
-		    alert("등록 완료!");
+		    console.log("등록 완료!");
 		  
 	});
 	
@@ -258,9 +262,25 @@
 		const addedRowKey = grid.getCheckedRowKeys();
 		for(let val of addedRowKey) {
 			const rowData = grid.getRow(val);
-			datas.push(rowData.deptId);
+			datas.push({deptId : rowData.deptId});
 		}		
 		console.log(datas);
+		$.ajax({
+		    url: "/deleteDept",                // 요청 URL
+		    type: "post",                     // GET 방식 (fetch 코드와 동일)
+		    contentType: "application/json",
+		    data: JSON.stringify(datas),     // 쿼리 파라미터 자동 변환			        
+		})
+		.done((result) => {
+		    alert(result+"건 등록되었습니다.");		
+		    location.reload();
+		})
+		.fail((error) => {
+		    console.error(error);
+		    alert("데이터 요청 중 오류 발생");
+		});  
+		
+	    console.log("등록 완료!");
 	});
 	
 		
