@@ -300,8 +300,8 @@
         <div class="d-flex justify-content-center gap-2 mt-3" id="loginBtnArea">
           <button type="submit" class="btn btn-dark btn-login" id="loginBtn">로그인</button>
           <button type="button"
-                  class="btn btn-outline-secondary btn-find-pwd"
-                  id="findPwdBtn">비밀번호 찾기</button>
+			      class="btn btn-outline-secondary btn-signup"
+			      id="signUpBtn">회원가입</button>
         </div>
       </form>
 
@@ -391,7 +391,7 @@
     const passwordInput = document.getElementById('password');
 
     const loginBtn      = document.getElementById('loginBtn');
-    const findPwdBtn    = document.getElementById('findPwdBtn');
+    const signUpBtn    = document.getElementById('signUpBtn');
     const loginBtnArea  = document.getElementById('loginBtnArea');
     const errorDiv      = document.getElementById('loginError');
 
@@ -472,7 +472,7 @@
         	  sessionStorage.removeItem('erp_session_expire_at');
         	} catch (e) {}
         	  
-            window.location.href = '/';
+            window.location.href = data.redirectUrl || '/';
             return;
           }
 
@@ -595,6 +595,13 @@
         window.location.reload();
       });
     }
+  
+  if (signUpBtn) {
+	  signUpBtn.addEventListener('click', function () {
+	    window.location.href = '/signUp'; 
+	  });
+	}
+  
   });
   
 </script>

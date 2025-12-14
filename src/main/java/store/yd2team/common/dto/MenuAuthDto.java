@@ -1,5 +1,8 @@
 package store.yd2team.common.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -26,9 +29,13 @@ public class MenuAuthDto {
     private Integer canRead;   // 1 or 0
     private Integer canWrite;  // 1 or 0
     private Integer canDelete; // 1 or 0
+    
+    private List<MenuAuthDto> children = new ArrayList<>();
 
     // 편하게 쓰려고 boolean 헬퍼도 하나 넣어두면 좋음
     public boolean isReadable() { return canRead != null && canRead == 1; }
     public boolean isWritable() { return canWrite != null && canWrite == 1; }
     public boolean isDeletable() { return canDelete != null && canDelete == 1; }
+    
+    public boolean isFolder() { return menuUrl == null || menuUrl.isBlank(); }
 }

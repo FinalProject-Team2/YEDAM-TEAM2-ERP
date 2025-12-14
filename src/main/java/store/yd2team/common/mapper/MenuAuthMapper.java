@@ -12,6 +12,11 @@ public interface MenuAuthMapper {
 	
     List<MenuAuthDto> selectMenuAuthByEmpAcct(
             @Param("empAcctId") String empAcctId,
-            @Param("vendId") String vendId);
-
+            @Param("vendId") String vendIdm,
+            @Param("loginId") String loginId);
+    
+    List<MenuAuthDto> selectAllMenusForOprtr();
+    
+    List<MenuAuthDto> selectMenusForUnpaid(@Param("vendId") String vendId);
+    
 }

@@ -21,6 +21,7 @@ import store.yd2team.common.aop.SysLogConfig;
 import store.yd2team.common.dto.EmpLoginResultDto;
 import store.yd2team.common.dto.SessionDto;
 import store.yd2team.common.mapper.EmpLoginMapper;
+import store.yd2team.common.mapper.SubscriptionMapper;
 import store.yd2team.common.service.EmpAcctVO;
 import store.yd2team.common.service.EmpLoginService;
 import store.yd2team.common.service.SecPolicyService;
@@ -37,6 +38,7 @@ public class EmpLoginServiceImpl implements EmpLoginService {
     private final SecPolicyService secPolicyService;
     private final PasswordEncoder passwordEncoder;
     private final SystemLogService systemLogService;
+    private final SubscriptionMapper subscriptionMapper;
     
     private SessionDto buildPseudoSession(EmpAcctVO acct, String actorEmpId) {
         SessionDto s = new SessionDto();
@@ -78,8 +80,19 @@ public class EmpLoginServiceImpl implements EmpLoginService {
         // 1) 계정 조회
         EmpAcctVO empAcct = empLoginMapper.selectByLogin(vendId, loginId);
         if (empAcct == null) {
-            // 계정이 존재하지 않을 때
-            return EmpLoginResultDto.fail("아이디 또는 비밀번호가 올바르지 않습니다.");
+        	
+        	EmpAcctVO oprtr = empLoginMapper.selectOprtrByLogin(loginId);
+            if (oprtr == null) {
+                return EmpLoginResultDto.fail("아이디 또는 비밀번호가 올바르지 않습니다.");
+            }
+
+            // 비번 검증
+            if (!passwordEncoder.matches(password, oprtr.getLoginPwd())) {
+                return EmpLoginResultDto.fail("아이디 또는 비밀번호가 올바르지 않습니다.");
+            }
+
+            // 운영자 로그인 성공 처리 (구독/OTP/잠금정책은 운영자에겐 보통 스킵)
+            return EmpLoginResultDto.ok(oprtr);
         }
 
         // 2) 보안 정책 조회 (없으면 기본값 사용)
@@ -231,20 +244,34 @@ public class EmpLoginServiceImpl implements EmpLoginService {
         Set<String> authCodes = new HashSet<>();
         // authCodes.addAll(empLoginMapper.selectAuthCodesByEmpAcctId(empAcct.getEmpAcctId()));
         empAcct.setAuthCodes(authCodes);
-
-        boolean otpEnabled = false;
-        if (policy != null && Y.equals(policy.getOtpYn())) {
-            otpEnabled = true;
-        }
-
-        if (otpEnabled) {
-            // OTP 사용: 1차(ID/PW) 성공 상태 → OTP 추가 인증 필요
-            return EmpLoginResultDto.otpStep(empAcct, "OTP 인증이 필요합니다.");
-        }
-
-        // OTP 미사용 → 바로 로그인 최종 성공
-        return EmpLoginResultDto.ok(empAcct);
-    }
+        
+	     // ===========================
+	     // 구독 활성 여부 체크 추가
+	     // ===========================
+	     boolean hasActiveSubsp = subscriptionMapper.countActiveSubsp(empAcct.getVendId()) > 0;
+	
+	     if (!hasActiveSubsp) {
+	         // 활성 구독 없음
+	         if ("e1".equals(empAcct.getMasYn())) {
+	             // 마스터는 로그인은 시키되, r4 플로우로 보내기 위한 플래그
+	             return EmpLoginResultDto.subscriptionRequired(empAcct, "구독 결제가 필요합니다.");
+	         } else {
+	             return EmpLoginResultDto.fail("구독 결제가 필요합니다. 관리자에게 문의하세요.");
+	         }
+	     }
+	
+	     boolean otpEnabled = false;
+	     if (policy != null && Y.equals(policy.getOtpYn())) {
+	         otpEnabled = true;
+	     }
+	
+	     if (otpEnabled) {
+	         return EmpLoginResultDto.otpStep(empAcct, "OTP 인증이 필요합니다.");
+	     }
+	
+	        // OTP 미사용 → 바로 로그인 최종 성공
+	        return EmpLoginResultDto.ok(empAcct);
+	    }
 
     @Override
     public boolean isCaptchaRequired(String vendId, String loginId) {
