@@ -71,6 +71,9 @@ public interface SubscriptionMapper {
 	
 	// 만료인 계정 r4로 변경
 	List<String> selectExpiredVendIds();
+	
+	// 결제 안 한 계정 확인
+	int countActiveSubsp(@Param("vendId") String vendId);
 
 	
 }// end interface

@@ -1,8 +1,5 @@
 package store.yd2team.common.aop;
 
-import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -11,7 +8,14 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.consts.SessionConst;
+import store.yd2team.common.dto.EmpLoginResultDto;
+import store.yd2team.common.service.EmpAcctVO;
+import store.yd2team.common.service.OprtrAcctVO;
 import store.yd2team.common.dto.SessionDto;
 import store.yd2team.common.service.SystemLogService;
 
@@ -24,6 +28,8 @@ public class SysLogAspect {
 
 	private final SystemLogService systemLogService;
 
+	
+	
 	@Around("@annotation(sysLog)")
 	public Object around(ProceedingJoinPoint joinPoint, SysLog sysLog) throws Throwable {
 		
@@ -99,7 +105,21 @@ public class SysLogAspect {
 	            if (sysLog.onFail() != null && !sysLog.onFail().isBlank()) action = sysLog.onFail();
 	        }
 	    }
+	    
+	    if ("e1".equals(session.getOprtrYn())) {
+	        // 운영자 로그
+	        // emp_acct_id는 FK 충돌 나므로 비움
+	        session.setEmpAcctId(null);
 
+	        // oprtr_acct_id는 empAcctId 자리에 들어있던 값 사용
+	        session.setOprtrAcctId(session.getEmpId() != null
+	                ? session.getEmpId()
+	                : session.getLoginId());
+	    } else {
+	        // 사원 로그
+	        session.setOprtrAcctId(null);
+	    }
+	    
 	    // ✅ 5) summary는 최종 action 기준으로 만들기
 	    String summary = sysLog.msg();
 	    if (summary == null || summary.isBlank()) {
@@ -294,19 +314,35 @@ public class SysLogAspect {
 	private SessionDto buildSessionFromResultIfPossible(Object result) {
 	    if (result == null) return null;
 
-	    if (result instanceof store.yd2team.common.dto.EmpLoginResultDto loginResult) {
-	        store.yd2team.common.service.EmpAcctVO acct = loginResult.getEmpAcct();
-	        if (acct == null) return null;
+	    if (result instanceof EmpLoginResultDto loginResult) {
 
-	        SessionDto s = new SessionDto();
-	        s.setEmpAcctId(acct.getEmpAcctId());
-	        s.setVendId(acct.getVendId());
-	        s.setEmpId(acct.getEmpId());
-	        s.setLoginId(acct.getLoginId());
-	        s.setEmpNm(acct.getEmpNm()); // EmpAcctVO에 있으면
-	        return s;
+	        // 1) 사원
+	        if (loginResult.getEmpAcct() != null) {
+	            EmpAcctVO acct = loginResult.getEmpAcct();
+
+	            SessionDto s = new SessionDto();
+	            s.setEmpAcctId(acct.getEmpAcctId());
+	            s.setVendId(acct.getVendId());
+	            s.setEmpId(acct.getEmpId());
+	            s.setLoginId(acct.getLoginId());
+	            s.setEmpNm(acct.getEmpNm());
+	            s.setOprtrYn("e2");
+	            return s;
+	        }
+
+	        // 2) 운영자
+	        if (loginResult.getOprtrAcct() != null) {
+	            OprtrAcctVO oa = loginResult.getOprtrAcct();
+
+	            SessionDto s = new SessionDto();
+	            s.setOprtrAcctId(oa.getOprtrAcctId());
+	            s.setLoginId(oa.getLoginId());
+	            s.setEmpNm("운영자");     // 있으면 그걸로
+	            s.setVendId("SYSTEM");          // 운영자면 고정값 정책이면 OK
+	            s.setOprtrYn("e1");
+	            return s;
+	        }
 	    }
-
 	    return null;
 	}
 }

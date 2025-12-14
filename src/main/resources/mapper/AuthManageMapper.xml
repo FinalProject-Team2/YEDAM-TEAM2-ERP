@@ -59,6 +59,7 @@
 	        AND m.module_id = #{moduleId}
 	      </if>
 	      AND NVL(m.yn, 'e1') = 'e1'
+	      AND m.menu_url IS NOT NULL
 	    ORDER BY m.sort_ord, m.menu_id
 	</select>
     

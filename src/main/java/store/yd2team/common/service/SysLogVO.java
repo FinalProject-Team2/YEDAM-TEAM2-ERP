@@ -26,4 +26,6 @@ public class SysLogVO {
     
     private String modlCodeNm;   
     private String motionTyNm; 
+    
+    private String oprtrAcctId;
 }

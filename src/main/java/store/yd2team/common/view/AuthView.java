@@ -1,22 +1,45 @@
 package store.yd2team.common.view;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.dto.MenuAuthDto;
 import store.yd2team.common.dto.SessionDto;
 import store.yd2team.common.util.LoginSession;
 
+@Slf4j
 @Component("authView")
 public class AuthView {
 	
-	// 공통: 현재 로그인 세션 가져오기
-    private SessionDto getSession() {
-        return LoginSession.getLoginSession();
+
+   private SessionDto getSession() {
+        SessionDto s = LoginSession.getLoginSession();
+        if (s != null) {
+            log.debug("[AuthView] empAcctId={}, empId={}, masYn={}, roleIds={}",
+                    s.getEmpAcctId(), s.getEmpId(), s.getMasYn(), s.getRoleIds());
+        } else {
+            log.debug("[AuthView] session is null");
+        }
+        return s;
     }
 
-    // 공통: 메뉴 권한 1건 가져오기 (없으면 null)
+   private boolean hasRole(List<String> roles, String role) {
+	    if (roles == null) return false;
+	    return roles.contains(role) || roles.contains("ROLE_" + role);
+	}
+
+	private boolean isOperator(SessionDto s) {
+	    if (s == null) return false;
+
+	    List<String> roles = s.getRoleIds();
+	    return hasRole(roles, "OPERATOR")
+	        || hasRole(roles, "ADMIN")
+	        || hasRole(roles, "SYS_ADMIN");
+	}
+
     private MenuAuthDto getMenuAuth(String menuId) {
         SessionDto s = getSession();
         if (s == null) return null;
@@ -27,26 +50,25 @@ public class AuthView {
         return map.get(menuId);
     }
 
-    // ==========================
-    // 메뉴별 권한 체크 메서드들
-    // ==========================
-
-    /** 조회 권한 여부 */
     public boolean canRead(String menuId) {
+        SessionDto s = getSession();
+        if (isOperator(s)) return true;        // ✅ 운영자면 무조건 허용
         MenuAuthDto auth = getMenuAuth(menuId);
         return auth != null && auth.isReadable();
     }
 
-    /** 저장 권한 여부 (등록+수정 포함) */
     public boolean canWrite(String menuId) {
+        SessionDto s = getSession();
+        if (isOperator(s)) return true;        // ✅ 운영자면 무조건 허용
         MenuAuthDto auth = getMenuAuth(menuId);
         return auth != null && auth.isWritable();
     }
 
-    /** 삭제 권한 여부 */
     public boolean canDelete(String menuId) {
+        SessionDto s = getSession();
+        if (isOperator(s)) return true;        // ✅ 운영자면 무조건 허용
         MenuAuthDto auth = getMenuAuth(menuId);
         return auth != null && auth.isDeletable();
     }
-
 }
+

@@ -20,6 +20,7 @@ import store.yd2team.common.dto.RoleSaveResult;
 import store.yd2team.common.dto.SessionDto;
 import store.yd2team.common.service.AuthManageService;
 import store.yd2team.common.service.RoleVO;
+import store.yd2team.common.util.LoginSessionRefresher;
 
 @Slf4j
 @RestController
@@ -28,6 +29,8 @@ import store.yd2team.common.service.RoleVO;
 public class AuthController {
 	
 	private final AuthManageService authManageService;
+	
+	private final LoginSessionRefresher loginSessionRefresher;
 
     /** 세션에서 로그인 사용자(회사 ID 포함) 가져오기 */
     private SessionDto getLoginEmp(HttpSession session) {
@@ -87,6 +90,8 @@ public class AuthController {
                   vendId, roleId, authList.size());
 
         AuthSaveResult result = authManageService.saveMenuAuth(vendId, roleId, authList, updtBy);
+        
+        loginSessionRefresher.refresh(session, login.getEmpAcctId());
 
         java.util.Map<String, Object> res = new java.util.HashMap<>();
         res.put("success", true);

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import lombok.Data;
+import store.yd2team.common.mapper.EmpLoginMapper;
 
 @Data
 public class EmpAcctVO {
@@ -94,4 +95,5 @@ public class EmpAcctVO {
 	public boolean isMaster() {
 		return Y.equals(this.masYn);
 	}
+	
 }

@@ -77,6 +77,30 @@ public class EmpLogInController {
         // 실제 로그인 서비스 호출 (ID/PW + 잠금 + 정책)
         // ==========================
         EmpLoginResultDto result = empAcctService.login(vendId, loginId, password);
+	        
+	    // ✅ 구독 결제 필요(마스터만 들어오는 케이스): 세션 생성 후 구독 페이지로 보내기
+	       if (!result.isSuccess()
+	               && result.isSubscriptionRequired()
+	               && result.getEmpAcct() != null) {
+	
+	            EmpAcctVO empAcct = result.getEmpAcct();
+	
+	            // 세션 생성
+	            SessionDto loginEmp = loginSessionBuilder.build(empAcct);
+	
+	            // ★ 핵심: 정상계정(r1)이어도 "세션에서는 r4로" 만들어서 인터셉터가 구독플로우로 제한하게 함
+	            loginEmp.setAcctSt("r4");
+	
+	            session.setAttribute(SessionConst.LOGIN_EMP, loginEmp);
+	            applySessionPolicy(session, loginEmp.getVendId());
+	
+	            // 프론트는 success=true일 때 redirect 하니까 success=true로 재포장
+	            EmpLoginResultDto ok = EmpLoginResultDto.ok(empAcct);
+	            ok.setSubscriptionRequired(true);
+	            ok.setMessage(result.getMessage());
+	            ok.setRedirectUrl("/SubscriptionChoice");
+	            return ok;
+	        }
 
         // ---------------------------------
         // 최종 로그인 성공 (OTP 미사용)

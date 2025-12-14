@@ -256,5 +256,13 @@
 	    FROM tb_subsp
 	   WHERE end_dt &lt; TRUNC(SYSDATE)
 	</select>
+	
+	<select id="countActiveSubsp" resultType="int">
+	  SELECT COUNT(*)
+	  FROM tb_subsp
+	  WHERE vend_id = #{vendId}
+	    AND start_dt &lt;= TRUNC(SYSDATE)
+	    AND end_dt   &gt;= TRUNC(SYSDATE)
+	</select>
 
 </mapper>

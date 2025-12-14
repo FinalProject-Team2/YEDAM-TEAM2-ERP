@@ -7,12 +7,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import lombok.RequiredArgsConstructor;
 import store.yd2team.common.interceptor.LoginCheckInterceptor;
+import store.yd2team.common.interceptor.MenuAuthInterceptor;
 
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer{
 	
 	private final LoginCheckInterceptor loginCheckInterceptor;
+	private final MenuAuthInterceptor menuAuthInterceptor;
 	
 	@Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -38,20 +40,36 @@ public class WebConfig implements WebMvcConfigurer{
 	}
 	
 	@Override
-    public void addInterceptors(InterceptorRegistry registry) {
+	public void addInterceptors(InterceptorRegistry registry) {
 
-        registry.addInterceptor(loginCheckInterceptor)
-                .order(1)
-                .addPathPatterns("/**")
-                .excludePathPatterns(
-                        "/logIn/**",
-                        "/signUp/**",
-                        "/assets/**",
-                        "/css/**",
-                        "/js/**",
-                        "/images/**",
-                        "/error",
-                        "/favicon.ico"
-                );
-    }
+	    registry.addInterceptor(loginCheckInterceptor)
+	            .order(1)
+	            .addPathPatterns("/**")
+	            .excludePathPatterns(
+	                    "/logIn/**",
+	                    "/signUp/**",
+	                    "/assets/**",
+	                    "/css/**",
+	                    "/js/**",
+	                    "/images/**",
+	                    "/pdf/**",        // ✅ pdf 리소스면 보통 제외하는 게 안전
+	                    "/error",
+	                    "/favicon.ico"
+	            );
+
+	    registry.addInterceptor(menuAuthInterceptor)
+	            .order(2)
+	            .addPathPatterns("/**")
+	            .excludePathPatterns(
+	                    "/logIn/**",
+	                    "/signUp/**",
+	                    "/assets/**",
+	                    "/css/**",
+	                    "/js/**",
+	                    "/images/**",
+	                    "/pdf/**",
+	                    "/error",
+	                    "/favicon.ico"
+	            );
+	}
 }

@@ -208,16 +208,16 @@
 		<nav class="sidebar sidebar-offcanvas" id="sidebar">
 			<ul class="nav">
 				<!-- 대시보드는 그냥 고정으로 노출 -->
-				<li class="nav-item">
+<!-- 				<li class="nav-item">
 				  <a class="nav-link" href="/">
 				    <i class="mdi mdi-grid-large menu-icon"></i>
 				    <span class="menu-title">Dashboard</span>
 				  </a>
 				</li>
 				
-				<!-- ========================= -->
-				<!-- 구독 해지 전용 메뉴 -->
-				<!-- ========================= -->
+				=========================
+				구독 해지 전용 메뉴
+				=========================
 				<th:block th:if="${session.LOGIN_EMP != null and session.LOGIN_EMP.acctSt == 'r4' and session.LOGIN_EMP.masYn == 'e1'}">
 				
 				  <li class="nav-item nav-category">
@@ -240,32 +240,92 @@
 				
 				</th:block>
 
-				<!-- 카테고리 제목 -->
+				카테고리 제목
 				<li class="nav-item nav-category"
 				    th:if="${session.LOGIN_EMP != null and session.LOGIN_EMP.acctSt != 'r4'}">
 				  메뉴
 				</li>
 
-				<!-- 🔥 모듈 루프: menuModules 는 @ControllerAdvice 에서 세팅해준다고 가정 -->
+				🔥 모듈 루프: menuModules 는 @ControllerAdvice 에서 세팅해준다고 가정
 				<li class="nav-item" th:each="module : ${menuModules}"
 					th:if="${session.LOGIN_EMP != null and session.LOGIN_EMP.acctSt != 'r4'}"><a class="nav-link"
 					data-bs-toggle="collapse" th:href="'#module-' + ${module.moduleId}"
 					aria-expanded="false"
 					th:aria-controls="'module-' + ${module.moduleId}"> <i
-						class="menu-icon mdi mdi-card-text-outline"></i> <!-- 모듈 이름: 공통 / 인사 / 영업 ... -->
+						class="menu-icon mdi mdi-card-text-outline"></i> 모듈 이름: 공통 / 인사 / 영업 ...
 						<span class="menu-title" th:text="${module.moduleNm}">모듈명</span> <i
 						class="menu-arrow"></i>
 				</a>
 
 					<div class="collapse" th:id="'module-' + ${module.moduleId}">
 						<ul class="nav flex-column sub-menu">
-							<!-- 모듈 안에 포함된 메뉴들 -->
+							모듈 안에 포함된 메뉴들
 							<li class="nav-item" th:each="menu : ${module.menus}"><a
 								class="nav-link" th:href="${menu.menuUrl}"
 								th:text="${menu.menuNm}"> 메뉴명 </a></li>
 						</ul>
 					</div>
-				</li>
+				</li> -->
+				
+				<li class="nav-item" th:each="root : ${sideMenuRoots}">
+  <a class="nav-link"
+     th:if="${root.folder}"
+     data-bs-toggle="collapse"
+     th:href="'#menu-' + ${root.menuId}">
+    <i class="menu-icon mdi mdi-folder-outline"></i>
+    <span class="menu-title" th:text="${root.menuNm}">폴더</span>
+    <i class="menu-arrow"></i>
+  </a>
+
+  <div class="collapse" th:if="${root.folder}" th:id="'menu-' + ${root.menuId}">
+    <ul class="nav flex-column sub-menu">
+      <li class="nav-item" th:each="c : ${root.children}">
+        <a class="nav-link"
+           th:if="${!c.folder and c.readable}"
+           th:href="@{|${c.menuUrl}|}"
+           th:text="${c.menuNm}">메뉴</a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- root가 폴더가 아니고 바로 페이지인 경우 -->
+  <a class="nav-link"
+     th:if="${!root.folder and root.readable}"
+     th:href="@{|${root.menuUrl}|}">
+    <i class="menu-icon mdi mdi-link-variant"></i>
+    <span class="menu-title" th:text="${root.menuNm}">메뉴</span>
+  </a>
+</li>
+
+<!-- 재귀 fragment: menuTree -->
+<th:block th:fragment="menuTree(nodes)">
+  <th:block th:each="n : ${nodes}">
+    <li class="nav-item" th:if="${!#lists.isEmpty(n.children) or n.readable}">
+      <!-- 폴더 -->
+      <a class="nav-link"
+         th:if="${n.folder}"
+         data-bs-toggle="collapse"
+         th:href="'#menu-' + ${n.menuId}">
+        <span th:text="${n.menuNm}">폴더</span>
+        <i class="menu-arrow"></i>
+      </a>
+
+      <div class="collapse" th:if="${n.folder}" th:id="'menu-' + ${n.menuId}">
+        <ul class="nav flex-column sub-menu"
+            th:insert="~{this :: menuTree(${n.children})}">
+        </ul>
+      </div>
+
+      <!-- 페이지 -->
+      <a class="nav-link"
+         th:if="${!n.folder and n.readable}"
+         th:href="@{|${n.menuUrl}|}"
+         th:text="${n.menuNm}">
+      </a>
+    </li>
+  </th:block>
+</th:block>
+				
 
 			</ul>
 		</nav>

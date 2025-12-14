@@ -42,11 +42,11 @@
     </select>
 
     <select id="selectMenuAuthList">
-        SELECT     m.menu_id                     
-                   m.menu_nm                      
-                   m.module_id                  
-                   NVL(a.sel_yn,  'e2')         
-                   NVL(a.ins_yn,  'e2')        
+        SELECT     m.menu_id,                     
+                   m.menu_nm,                     
+                   m.module_id,                  
+                   NVL(a.sel_yn,  'e2'),         
+                   NVL(a.ins_yn,  'e2'),        
                    NVL(a.del_yn,  'e2')        
         FROM       tb_menu m
         LEFT JOIN  tb_auth a
@@ -56,6 +56,7 @@
         WHERE      m.module_id = #{moduleId}
           AND      m.yn = 'e1'
           AND      (m.vend_id = #{vendId} OR m.vend_id IS NULL)
+          AND      m.menu_url IS NOT NULL
         ORDER BY   m.sort_ord, m.menu_nm
     </select>
     

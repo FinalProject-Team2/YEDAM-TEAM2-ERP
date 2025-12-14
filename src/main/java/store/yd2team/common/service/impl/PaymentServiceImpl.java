@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.mapper.SignUpMapper;
 import store.yd2team.common.mapper.SubscriptionMapper;
 import store.yd2team.common.service.PaymentService;
@@ -16,6 +17,7 @@ import store.yd2team.common.service.SubscriptionVO;
 import store.yd2team.common.service.subscriptionPlanVO;
 import store.yd2team.common.util.LoginSession;
 
+@Slf4j
 @Service
 public class PaymentServiceImpl implements PaymentService {
 	
@@ -105,6 +107,8 @@ public class PaymentServiceImpl implements PaymentService {
 		sttl.setCreaBy(empId);
 		
 		subscriptionMapper.insertSttl(sttl);
+		
+		log.info("[PAYMENT] before role grant vendId={}, empId={}, empAcctId={}", vendId, empId, empAcctId);
 		
 		// ✅ 7) 결제 성공 시점에 마스터 권한(role) 부여
 	    // 중복방지(없으면 insert)

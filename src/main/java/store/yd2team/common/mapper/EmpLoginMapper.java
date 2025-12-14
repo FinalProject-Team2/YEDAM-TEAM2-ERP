@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import store.yd2team.common.dto.MenuAuthDto;
 import store.yd2team.common.service.EmpAcctVO;
 
 @Mapper
@@ -32,4 +33,10 @@ public interface EmpLoginMapper {
 	List<String> selectAuthCodesByEmpAcctId(@Param("empAcctId") String empAcctId);
 	
 	EmpAcctVO selectByEmpAcctId(@Param("empAcctId") String empAcctId);
+	
+	EmpAcctVO selectOprtrByLogin(@Param("loginId") String loginId);
+	
+	List<MenuAuthDto> selectAllActiveMenus();
+	
+	int countByLoginId(@Param("loginId") String loginId);
 }

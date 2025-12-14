@@ -24,7 +24,8 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
             "/logIn",           // 로그인 화면
             "/error",
             "/favicon.ico",
-            "/pdf"
+            "/pdf",
+            "/Payment"
     );
     
     // 구독 해지 계정이 접근 가능한 URL prefix
@@ -33,6 +34,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         "/Payment",                // 결제
         "/subscription/check",    // 내 구독 정보
         "/logIn/logout",       // 로그아웃은 허용
+        "/subscription/payment",
         "/assets/", "/css/", "/js/", "/images/", "/webjars/"
     );
 
@@ -45,7 +47,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
             "/logIn/otp",           // OTP 인증
             "/logIn/otp/resend",    // OTP 재발급
             "/logIn/logout",        // 로그아웃 (세션 없으면 그냥 통과)
-            "/captcha",             // 캡챠 이미지
+            "/logIn/captcha",             // 캡챠 이미지
             "/assets/",             // 정적 리소스 (CSS/JS/이미지 등)
             "/css/",
             "/js/",
@@ -129,7 +131,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 	
 	         // 1) 루트(/) 접근 시 → 무조건 구독 플랜 페이지
 	         if ("/".equals(requestURI)) {
-	             response.sendRedirect("/subscribe/plan");
+	             response.sendRedirect("/SubscriptionChoice");
 	             return false;
 	         }
 	
@@ -138,12 +140,13 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 	                 .anyMatch(requestURI::startsWith);
 	
 	         if (!allowed) {
-	             response.sendRedirect("/subscribe/plan");
+	             response.sendRedirect("/SubscriptionChoice");
 	             return false;
 	         }
 	     }
 
         // 4) 정상 로그인 + tempYn != e1 → 그대로 진행
         return true;
+        
     }
 }

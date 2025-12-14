@@ -33,6 +33,8 @@ public class SessionDto implements Serializable{
     private String tempYn;    // 임시 비밀번호 여부
     private String email;		// 이메일
     private String proofPhoto; // 사진
+    private String oprtrYn;
+    private String oprtrAcctId;
  
     private List<String> roleIds;
     private Set<String> authCodes;
@@ -40,4 +42,6 @@ public class SessionDto implements Serializable{
     private String acctSt;
     
     private Map<String, MenuAuthDto> menuAuthMap = new HashMap<>();
+    private Map<String, MenuAuthDto> menuAuthByUrl = new HashMap<>();
+
 }

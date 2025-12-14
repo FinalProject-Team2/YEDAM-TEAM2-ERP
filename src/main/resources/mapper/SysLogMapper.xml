@@ -37,6 +37,7 @@
         INSERT INTO tb_log (
               log_id
             , emp_acct_id
+            , oprtr_acct_id
             , vend_id
             , err_dttm
             , modl_grp
@@ -51,6 +52,7 @@
         ) VALUES (
               #{logId}
             , #{empAcctId}
+            , #{oprtrAcctId}
             , #{vendId}
             , SYSDATE 	
             , #{modlGrp}

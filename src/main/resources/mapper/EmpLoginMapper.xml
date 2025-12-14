@@ -129,5 +129,47 @@
 	           ON a.VEND_ID = v.VEND_ID
 	    WHERE a.EMP_ACCT_ID = #{empAcctId}
 	</select>
+	
+	<select id="selectOprtrByLogin" resultType="store.yd2team.common.service.EmpAcctVO">
+	  SELECT
+	      oa.oprtr_acct_id AS emp_acct_id,
+	      'SYSTEM'         AS vend_id,      -- 운영자 테이블에 vend_id 없음 :contentReference[oaicite:6]{index=6}
+	      oa.oprtr_acct_id AS emp_id,
+	      oa.login_id      AS login_id,
+	      oa.login_pwd     AS login_pwd,
+	      'r1'             AS st,
+	      0                AS fail_cnt,
+	      NULL             AS lock_dttm,
+	      NULL             AS last_login,
+	      'e1'             AS yn,
+	      'e2'             AS temp_yn,
+	      'e2'             AS mas_yn,
+	      '운영자'           AS empNm
+	  FROM tb_oprtr_acct oa
+	  WHERE oa.login_id = #{loginId}
+	</select>
+	
+	<select id="selectAllActiveMenus"
+        resultType="store.yd2team.common.dto.MenuAuthDto">
+	  SELECT
+	      m.menu_id,
+	      m.menu_nm,
+	      m.menu_url,
+	      m.module_id,
+	      m.prnt_menu_id,
+	      m.sort_ord,
+	      'e1' AS sel_yn,
+	      'e1' AS ins_yn,
+	      'e1' AS updt_yn,
+	      'e1' AS del_yn
+	  FROM tb_menu m
+	  WHERE m.yn = 'e1'
+	</select>
+	
+	<select id="countByLoginId" resultType="int">
+	    SELECT COUNT(*)
+	    FROM tb_oprtr_acct
+	    WHERE login_id = #{loginId}
+	</select>
     	
 </mapper>

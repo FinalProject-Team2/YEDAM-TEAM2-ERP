@@ -13,9 +13,13 @@ import store.yd2team.common.service.PaymentService;
 import store.yd2team.common.service.SubscriptionService;
 import store.yd2team.common.service.subscriptionPlanVO;
 import store.yd2team.common.util.LoginSession;
+import store.yd2team.common.util.LoginSessionRefresher;
 
 @Controller
 public class PaymentController {
+	
+	@Autowired
+	LoginSessionRefresher loginSessionRefresher;
 	
 	@Autowired
 	SubscriptionService subscriptionService;
@@ -114,8 +118,14 @@ public class PaymentController {
 		// 알림 메시지와 함께 /subscription/check 로 이동시키기 위해 Flash Attribute 사용
 		redirectAttributes.addFlashAttribute("paymentSuccessMessage", "결제가 정상적으로 완료됐습니다");
 
+		String empAcctId = LoginSession.getEmpAcctId();
+		if (empAcctId != null) {
+		    loginSessionRefresher.refresh(session, empAcctId);
+		}
+
 		// 최종적으로 /subscription/check로 리다이렉트
 		return "redirect:/subscription/check";
+		
 	}
 	
 	// Toss 결제 실패 콜백
