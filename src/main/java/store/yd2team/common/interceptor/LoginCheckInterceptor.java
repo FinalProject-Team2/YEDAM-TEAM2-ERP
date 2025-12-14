@@ -24,7 +24,8 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
             "/logIn",           // 로그인 화면
             "/error",
             "/favicon.ico",
-            "/pdf"
+            "/pdf",
+            "/Payment"
     );
     
     // 구독 해지 계정이 접근 가능한 URL prefix
@@ -33,6 +34,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         "/Payment",                // 결제
         "/subscription/check",    // 내 구독 정보
         "/logIn/logout",       // 로그아웃은 허용
+        "/subscription/payment",
         "/assets/", "/css/", "/js/", "/images/", "/webjars/"
     );
 
@@ -145,5 +147,6 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 
         // 4) 정상 로그인 + tempYn != e1 → 그대로 진행
         return true;
+        
     }
 }
