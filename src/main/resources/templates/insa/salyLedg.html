@@ -146,6 +146,32 @@
 
 <script>
   /***********************
+   * ✅ 공용: JSON 안전 fetch
+   * - HTTP 에러 시 서버가 준 본문(text/json) 그대로 에러로 올림
+   * - 성공(200)이어도 JSON 아니면 에러
+   ***********************/
+  async function fetchJsonSafe(url, options) {
+    const res = await fetch(url, options);
+
+    const text = await res.text().catch(() => "");
+
+    if (!res.ok) {
+      let msg = text;
+      try {
+        const j = JSON.parse(text);
+        msg = j?.message || j?.error || text;
+      } catch (_) {}
+      throw new Error(`HTTP ${res.status} - ${msg}`);
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      throw new Error("응답이 JSON이 아닙니다: " + text);
+    }
+  }
+
+  /***********************
    * 0. 공통: 부서 셀렉트 로딩 (모달용만 사용)
    ***********************/
   function loadDeptOptions() {
@@ -197,7 +223,6 @@
         name: "선택",
         width: 50,
         align: "center",
-        /* ✅ FIX: rowKey를 라디오에 심어두면 DOM 찾기가 100% 안정적임 */
         formatter: ({ rowKey }) => `<input type="radio" name="salyLedgRadio" data-row-key="${rowKey}" />`
       },
       { header: "귀속연월",     name: "revsMmdd",   align: "center" },
@@ -221,7 +246,7 @@
   });
 
   /*************************
-   * ✅ FIX: 메인 라디오 UI 동기화 (DOM 안정형)
+   * ✅ 메인 라디오 UI 동기화 (DOM 안정형)
    *************************/
   function syncMainRadioUI() {
     const radios = document.querySelectorAll('input[type="radio"][name="salyLedgRadio"]');
@@ -234,7 +259,6 @@
     );
     if (radio) radio.checked = true;
   }
-
 
   /************************
    * 3. DB에서 급여대장 목록 조회
@@ -372,7 +396,6 @@
       currentTabStatus = this.dataset.status || "BEFORE_PAY";
 
       selectedRowKey = null;
-
       applyTabFilter();
     });
   });
@@ -426,27 +449,22 @@
   }
 
   /*************************
-   * ✅ FIX: 메인 그리드 라디오 토글(안정형)
+   * ✅ 메인 그리드 라디오 토글(안정형)
    *************************/
-   grid.on("click", (ev) => {
-	   const { rowKey, nativeEvent } = ev;
-	   if (rowKey == null) return;
+  grid.on("click", (ev) => {
+    const { rowKey, nativeEvent } = ev;
+    if (rowKey == null) return;
 
-	   const target = nativeEvent.target;
-	   if (!(target instanceof HTMLInputElement)) return;
-	   if (target.type !== "radio") return;
+    const target = nativeEvent.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    if (target.type !== "radio") return;
 
-	   // ✅ 브라우저 기본 체크 동작 끝난 뒤 실행
-	   setTimeout(() => {
-	     if (target.checked) {
-	       selectedRowKey = rowKey;
-	     } else {
-	       selectedRowKey = null;
-	     }
-	     updateConfirmButtonLabel();
-	   }, 0);
-	 });
-
+    setTimeout(() => {
+      if (target.checked) selectedRowKey = rowKey;
+      else selectedRowKey = null;
+      updateConfirmButtonLabel();
+    }, 0);
+  });
 
   /*************************
    * 7. 삭제 버튼 (API 연동)
@@ -850,54 +868,45 @@
   btnCalcClose?.addEventListener("click", closeSalyCalcModal);
 
   function loadCalcSpecList(salyLedgId) {
-	  if (!gridCalc) return;
+    if (!gridCalc) return;
 
-	  fetch("/insa/saly/calc/specList?salyLedgId=" + encodeURIComponent(salyLedgId))
-	    .then(async (res) => {
-	      if (!res.ok) {
-	        const text = await res.text().catch(() => "");
-	        throw new Error("HTTP " + res.status + " / " + text);
-	      }
-	      return res.json();
-	    })
-	    .then((data) => {
-	      // ✅ 배열/객체 모두 대응
-	      const list = Array.isArray(data)
-	        ? data
-	        : Array.isArray(data?.list)
-	          ? data.list
-	          : Array.isArray(data?.data)
-	            ? data.data
-	            : null;
+    fetch("/insa/saly/calc/specList?salyLedgId=" + encodeURIComponent(salyLedgId))
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error("HTTP " + res.status + " / " + text);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        const list = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.list)
+            ? data.list
+            : Array.isArray(data?.data)
+              ? data.data
+              : null;
 
-	      if (!list) {
-	        throw new Error("specList 응답이 배열이 아닙니다.");
-	      }
+        if (!list) throw new Error("specList 응답이 배열이 아닙니다.");
 
-	      const rows = list.map(v => ({
-	        salySpecId: v.salySpecId,
-	        empId: v.empId,
-	        empNm: v.empNm,
-	        deptNm: v.deptNm || "",
-	        calcGrpNm: selectedGrpNm ? selectedGrpNm : ""
-	      }));
+        const rows = list.map(v => ({
+          salySpecId: v.salySpecId,
+          empId: v.empId,
+          empNm: v.empNm,
+          deptNm: v.deptNm || "",
+          calcGrpNm: selectedGrpNm ? selectedGrpNm : ""
+        }));
 
-	      gridCalc.setColumns([...baseCalcColumns]);
-	      gridCalc.resetData(rows);
+        gridCalc.setColumns([...baseCalcColumns]);
+        gridCalc.resetData(rows);
 
-	      if (gridCalc.refreshLayout) {
-	        setTimeout(() => gridCalc.refreshLayout(), 0);
-	      }
-	    })
-	    .catch(err => {
-	      console.error("급여계산 사원 로딩 오류", err);
-	      alert(
-	        "급여계산 대상 사원 조회 중 오류가 발생했습니다.\n\n" +
-	        (err?.message || "")
-	      );
-	    });
-	}
-
+        if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
+      })
+      .catch(err => {
+        console.error("급여계산 사원 로딩 오류", err);
+        alert("급여계산 대상 사원 조회 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
+      });
+  }
 
   function buildDynamicColumnsByGroupItems(items) {
     const list = Array.isArray(items) ? [...items] : [];
@@ -926,6 +935,10 @@
     }));
   }
 
+  /********************************************************
+   * ✅ (단일 정의) 계산결과 셀 채우기
+   * - /insa/saly/calc/items 응답이 배열/객체여도 처리
+   ********************************************************/
   async function fillCalculatedAmountsForSelectedSpecs(grpNo, selectedSpecIds) {
     if (!gridCalc) return;
 
@@ -935,12 +948,25 @@
     const tasks = rows.map(async (row) => {
       if (!selectedSet.has(row.salySpecId)) return row;
 
-      const items = await fetch(
+      const url =
         "/insa/saly/calc/items?salySpecId=" + encodeURIComponent(row.salySpecId) +
-        "&grpNo=" + encodeURIComponent(grpNo)
-      ).then(r => r.json());
+        "&grpNo=" + encodeURIComponent(grpNo);
 
-      (items || []).forEach(it => {
+      const data = await fetchJsonSafe(url);
+
+      const items = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.list)
+          ? data.list
+          : Array.isArray(data?.data)
+            ? data.data
+            : [];
+
+      if (!Array.isArray(items)) {
+        throw new Error("items 응답이 배열이 아닙니다: " + JSON.stringify(data));
+      }
+
+      items.forEach(it => {
         row[it.itemId] = it.amt;
       });
 
@@ -990,19 +1016,16 @@
   let grpRowKeySelected = null;
   let editingNewGroup = false;
 
-//✅ FIX: 체크만 변경된 그룹도 updatedRows에 포함시키기 위한 추적용
   let touchedGrpRowKeySet = new Set();
-  
+
   let currentItemTab = "A";
   let allItemRowsCache = [];
 
   const checkedSetByGrpRowKey = new Map();
   let checkedItemIdSet = new Set();
 
-  /* ✅ FIX: 체크 복원/동기화 중 이벤트로 저장이 꼬이는 걸 막는 가드 */
   let isSyncingItemChecks = false;
 
-  /* ✅ FIX(핵심): 체크/해제만으로도 그룹행을 UPDATED로 만들어서 saveAll(updatedRows)에 포함 */
   function markCurrentGroupAsUpdated() {
     if (!gridGrp) return;
     if (grpRowKeySelected == null) return;
@@ -1010,18 +1033,14 @@
     const row = gridGrp.getRow(grpRowKeySelected);
     const grpNo = row?.grpNo;
 
-    // 신규 행은 createdRows로 처리되므로 제외
     if (!grpNo) return;
 
-    // ✅ 체크 변경된 그룹 rowKey 기록
     touchedGrpRowKeySet.add(grpRowKeySelected);
 
-    // 시각적/상태적으로 UPDATED 표시 (지원 안 되면 무시됨)
     if (typeof gridGrp.setRowState === "function") {
       gridGrp.setRowState(grpRowKeySelected, "UPDATED");
     }
   }
-
 
   function setGrpHint(msg) {
     if (!grpHintEl) return;
@@ -1030,7 +1049,6 @@
 
   function ensureItemTabsUI() {
     if (!gridItemEl) return;
-
     if (document.getElementById("salyItemTabs")) return;
 
     const wrap = document.createElement("div");
@@ -1149,7 +1167,6 @@
           name: "선택",
           width: 50,
           align: "center",
-          /* ✅ FIX: 그룹 라디오도 rowKey를 박아둠 */
           formatter: ({ rowKey }) => `<input type="radio" name="payCalcGrpRadio" data-row-key="${rowKey}" />`
         },
         { header: "그룹번호", name: "grpNo", hidden: true },
@@ -1184,25 +1201,23 @@
         applyItemTabFilter();
 
       } else {
-    	  editingNewGroup = false;
-    	  setGrpHint("선택 그룹: " + (row.grpNm || "") + " (grpNo=" + grpNo + ")");
+        editingNewGroup = false;
+        setGrpHint("선택 그룹: " + (row.grpNm || "") + " (grpNo=" + grpNo + ")");
 
-    	  // ✅ FIX: 이미 로컬에서 체크를 만진(=touched) 그룹이면 서버값으로 덮어쓰지 않는다
-    	  const hasLocal = checkedSetByGrpRowKey.has(rowKey);
-    	  const wasTouched = touchedGrpRowKeySet.has(rowKey);
+        const hasLocal = checkedSetByGrpRowKey.has(rowKey);
+        const wasTouched = touchedGrpRowKeySet.has(rowKey);
 
-    	  if (!hasLocal && !wasTouched) {
-    	    // 처음 선택한 기존 그룹만 서버에서 초기값 1번 로딩
-    	    const groupItemIds = await fetchGroupItemIds(grpNo);
-    	    checkedSetByGrpRowKey.set(rowKey, new Set(groupItemIds));
-    	  }
-    	  // 로컬값(or 방금 로딩한 초기값)로 화면 복원
-    	  loadCheckedSetForGroupRowKey(rowKey);
+        if (!hasLocal && !wasTouched) {
+          const groupItemIds = await fetchGroupItemIds(grpNo);
+          checkedSetByGrpRowKey.set(rowKey, new Set(groupItemIds));
+        }
 
-    	  currentItemTab = "A";
-    	  setItemTabsActive("A");
-    	  applyItemTabFilter();
-    	}
+        loadCheckedSetForGroupRowKey(rowKey);
+
+        currentItemTab = "A";
+        setItemTabsActive("A");
+        applyItemTabFilter();
+      }
     });
   }
 
@@ -1230,14 +1245,14 @@
       if (isSyncingItemChecks) return;
       syncCheckedSetFromGridItem();
       persistCurrentGroupCheckedSet();
-      markCurrentGroupAsUpdated();  // ✅ FIX
+      markCurrentGroupAsUpdated();
     });
 
     gridItem.on("uncheck", () => {
       if (isSyncingItemChecks) return;
       removeUncheckedFromCurrentTabRows();
       persistCurrentGroupCheckedSet();
-      markCurrentGroupAsUpdated();  // ✅ FIX
+      markCurrentGroupAsUpdated();
     });
   }
 
@@ -1326,10 +1341,9 @@
 
           await loadAllItemsToCache();
           if (!checkedSetByGrpRowKey.has(found.rowKey) && !touchedGrpRowKeySet.has(found.rowKey)) {
-        	  const groupItemIds = await fetchGroupItemIds(found.grpNo);
-        	  checkedSetByGrpRowKey.set(found.rowKey, new Set(groupItemIds));
-        	}
-          loadCheckedSetForGroupRowKey(found.rowKey);
+            const groupItemIds = await fetchGroupItemIds(found.grpNo);
+            checkedSetByGrpRowKey.set(found.rowKey, new Set(groupItemIds));
+          }
           loadCheckedSetForGroupRowKey(found.rowKey);
 
           currentItemTab = "A";
@@ -1403,7 +1417,6 @@
     }
   }
 
-  // ✅ 행추가
   btnItemAdd?.addEventListener("click", async () => {
     if (!gridGrp) return;
 
@@ -1435,14 +1448,12 @@
     applyItemTabFilter();
   });
 
-  // ✅ 삭제
   btnItemDel?.addEventListener("click", () => {
     if (!gridGrp) return;
     if (grpRowKeySelected == null) {
       alert("삭제할 그룹을 선택해주세요.");
       return;
     }
-
 
     checkedSetByGrpRowKey.delete(grpRowKeySelected);
 
@@ -1457,23 +1468,20 @@
     gridItem?.resetData([]);
   });
 
-  // ✅ 저장(saveAll)
   btnItemSave?.addEventListener("click", async () => {
     if (!gridGrp || !gridItem) return;
 
     persistCurrentGroupCheckedSet();
-
     gridGrp.finishEditing();
 
     const { createdRows, updatedRows, deletedRows } = gridGrp.getModifiedRows();
-    
- // ✅ FIX: 체크만 바뀐 그룹도 updatedRows에 강제로 포함
+
     const createdKeySet = new Set((createdRows || []).map(r => r.rowKey));
     const deletedKeySet = new Set((deletedRows || []).map(r => r.rowKey));
 
     touchedGrpRowKeySet.forEach((rk) => {
-      if (createdKeySet.has(rk)) return; // 신규
-      if (deletedKeySet.has(rk)) return; // 삭제
+      if (createdKeySet.has(rk)) return;
+      if (deletedKeySet.has(rk)) return;
 
       const r = gridGrp.getRow(rk);
       if (!r?.grpNo) return;
@@ -1481,11 +1489,8 @@
       const already = (updatedRows || []).some(
         u => u.rowKey === rk || Number(u.grpNo) === Number(r.grpNo)
       );
-      if (!already) {
-        updatedRows.push({ ...r, rowKey: rk });
-      }
+      if (!already) updatedRows.push({ ...r, rowKey: rk });
     });
-
 
     const invalid = [...createdRows, ...updatedRows].some(r => !(r.grpNm || "").trim());
     if (invalid) {
@@ -1521,11 +1526,11 @@
     };
 
     try {
-      const res = await fetch("/insa/saly/calc/grp/saveAll", {
+      const res = await fetchJsonSafe("/insa/saly/calc/grp/saveAll", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
-      }).then(r => r.json());
+      });
 
       if (res?.result !== "SUCCESS") {
         alert(res?.message || "저장 실패");
@@ -1533,7 +1538,7 @@
       }
 
       alert("저장되었습니다.");
-      
+
       touchedGrpRowKeySet.clear();
 
       grpRowKeySelected = null;
@@ -1546,11 +1551,11 @@
 
     } catch (e) {
       console.error(e);
-      alert("급여계산그룹 저장 오류");
+      alert("급여계산그룹 저장 오류\n\n" + (e?.message || ""));
     }
   });
 
-  // ✅ 확인(그룹 적용 확정)
+  // ✅ 확인(그룹 적용 확정) : run 호출도 fetchJsonSafe로 (에러 본문까지 잡아냄)
   btnItemOk?.addEventListener("click", async () => {
     if (!gridGrp) return;
     if (grpRowKeySelected == null) {
@@ -1572,8 +1577,9 @@
     selectedGrpNm = row.grpNm || "";
 
     try {
-      const items = await fetch("/insa/saly/item/list?grpNo=" + encodeURIComponent(selectedGrpNo))
-        .then(r => r.json());
+      const items = await fetchJsonSafe(
+        "/insa/saly/item/list?grpNo=" + encodeURIComponent(selectedGrpNo)
+      );
 
       selectedGroupItems = (items || []).map(x => ({
         itemTy: x.itemTy,
@@ -1593,13 +1599,61 @@
         if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
       }
 
+      if (!gridCalc) return;
+      if (!currentCalcSalyLedgId) {
+        alert("급여대장이 선택되지 않았습니다.");
+        return;
+      }
+
+      const checked = gridCalc.getCheckedRows() || [];
+      if (checked.length === 0) {
+        alert("급여계산그룹을 적용할 사원을 먼저 체크하세요.");
+        return;
+      }
+
+      const salySpecIdList = checked.map(r => r.salySpecId).filter(Boolean);
+      if (salySpecIdList.length === 0) {
+        alert("선택된 사원 데이터가 올바르지 않습니다.");
+        return;
+      }
+
+      // ✅ 디버그: 실제 payload 확인
+      console.log("RUN payload", {
+        salyLedgId: currentCalcSalyLedgId,
+        grpNo: selectedGrpNo,
+        salySpecIdList
+      });
+
+      const runRes = await fetchJsonSafe("/insa/saly/calc/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          salyLedgId: currentCalcSalyLedgId,
+          grpNo: selectedGrpNo,
+          salySpecIdList
+        })
+      });
+
+      if (runRes?.result !== "SUCCESS") {
+        throw new Error(runRes?.message || "급여계산(run) 실패");
+      }
+
+      const dynamicCols = buildDynamicColumnsByGroupItems(selectedGroupItems);
+      gridCalc.setColumns([...baseCalcColumns, ...dynamicCols]);
+
+      await fillCalculatedAmountsForSelectedSpecs(selectedGrpNo, salySpecIdList);
+
+      if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
+
+      alert("급여계산그룹이 적용되었습니다.");
+
     } catch (err) {
-      console.error("그룹 항목 조회 오류", err);
-      alert("그룹 항목 조회 중 오류가 발생했습니다.");
+      console.error("그룹 적용/계산 오류", err);
+      alert("그룹 적용 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
     }
   });
 
-  // ✅ 급여계산 저장(=선택 사원만 계산)
+  // ✅ 급여계산 저장(=선택 사원만 계산) : run 호출도 fetchJsonSafe로
   btnCalcSave?.addEventListener("click", async () => {
     if (!gridCalc) return;
     if (!currentCalcSalyLedgId) {
@@ -1624,19 +1678,24 @@
     }
 
     try {
-      const runRes = await fetch("/insa/saly/calc/run", {
+      console.log("RUN payload(save)", {
+        salyLedgId: currentCalcSalyLedgId,
+        grpNo: selectedGrpNo,
+        salySpecIdList
+      });
+
+      const runRes = await fetchJsonSafe("/insa/saly/calc/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           salyLedgId: currentCalcSalyLedgId,
           grpNo: selectedGrpNo,
-          salySpecIdList: salySpecIdList
+          salySpecIdList
         })
-      }).then(r => r.json());
+      });
 
       if (runRes?.result !== "SUCCESS") {
-        alert(runRes?.message || "급여계산 중 오류가 발생했습니다.");
-        return;
+        throw new Error(runRes?.message || "급여계산(run) 실패");
       }
 
       const dynamicCols = buildDynamicColumnsByGroupItems(selectedGroupItems);
@@ -1649,7 +1708,7 @@
 
     } catch (err) {
       console.error("급여계산 처리 오류", err);
-      alert("급여계산 처리 중 오류가 발생했습니다.");
+      alert("급여계산 처리 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
     }
   });
 

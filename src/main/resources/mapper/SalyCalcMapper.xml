@@ -5,9 +5,6 @@
 
 <mapper namespace="store.yd2team.insa.mapper.SalyCalcMapper">
 
-  <!-- ============================================================
-       1) 급여계산 모달: 급여대장ID로 명세서(사원) 목록
-       ============================================================ -->
   <select id="selectSalySpecCalcList" resultType="store.yd2team.insa.service.SalySpecCalcViewVO">
     SELECT
         s.saly_spec_id AS salySpecId,
@@ -28,16 +25,12 @@
      ORDER BY e.emp_id
   </select>
 
-  <!-- ✅ (계산용) salySpecId -> empId 조회 -->
   <select id="selectEmpIdBySpecId" resultType="string">
     SELECT emp_id
       FROM tb_saly_spec
      WHERE saly_spec_id = #{salySpecId}
   </select>
 
-  <!-- ============================================================
-       2) 프로시저 호출 (REF CURSOR OUT)
-       ============================================================ -->
   <select id="callPrcCalcSalyItems" statementType="CALLABLE" parameterType="map">
     { CALL prc_calc_saly_items(
         #{p_saly_ledg_id, mode=IN, jdbcType=VARCHAR},
@@ -55,25 +48,25 @@
   </resultMap>
 
   <!-- ============================================================
-       3) 재계산 대비: 해당 명세서 + 그룹번호 항목 삭제
+       ✅ FIX 핵심
+       - PK가 (saly_spec_id, item_id ...) 계열이면
+         grp_no로만 지우면 이전 grp에서 들어간 item이 남아서
+         다음 insert 때 ORA-00001 터짐
+       - 그래서 saly_spec_id 기준으로 "해당 명세서 계산결과 전부 삭제"
        ============================================================ -->
-  <delete id="deleteSpecItemsBySpecAndGrp">
+  <delete id="deleteSpecItemsBySpec">
     DELETE
       FROM tb_saly_spec_item
      WHERE saly_spec_id = #{salySpecId}
-       AND grp_no       = #{grpNo}
   </delete>
 
-  <!-- ============================================================
-       4) tb_saly_spec_item insert (배치)
-       ============================================================ -->
   <insert id="insertSpecItems" parameterType="map">
     INSERT ALL
     <foreach collection="list" item="it">
       INTO tb_saly_spec_item (
-          saly_spec_item_id,
           saly_spec_id,
           grp_no,
+          item_no,
           item_ty,
           item_id,
           item_nm,
@@ -81,9 +74,9 @@
           crea_dt,
           crea_by
       ) VALUES (
-          'SSI_' || TO_CHAR(SYSDATE,'YYYYMMDD') || '_' || LPAD(seq_saly_spec_item.NEXTVAL, 6, '0'),
           #{it.salySpecId},
           #{it.grpNo},
+          SEQ_SALY_SPEC_ITEM.NEXTVAL,
           #{it.itemTy},
           #{it.itemId},
           #{it.itemNm},
@@ -95,9 +88,6 @@
     SELECT 1 FROM dual
   </insert>
 
-  <!-- ============================================================
-       5) 명세서 합계 업데이트
-       ============================================================ -->
   <update id="updateSalySpecTotals">
     UPDATE tb_saly_spec
        SET pay_amt     = #{payAmt},
@@ -108,14 +98,11 @@
      WHERE saly_spec_id = #{salySpecId}
   </update>
 
-  <!-- ============================================================
-       6) 계산 결과 그리드용: 명세서 항목 조회
-       ============================================================ -->
   <select id="selectSalySpecItems" resultType="store.yd2team.insa.service.SalySpecItemVO">
     SELECT
-        saly_spec_item_id AS salySpecItemId,
         saly_spec_id      AS salySpecId,
         grp_no            AS grpNo,
+        item_no           AS itemNo,
         item_ty           AS itemTy,
         item_id           AS itemId,
         item_nm           AS itemNm,
@@ -127,12 +114,9 @@
       FROM tb_saly_spec_item
      WHERE saly_spec_id = #{salySpecId}
        AND grp_no       = #{grpNo}
-     ORDER BY item_ty, item_id
+     ORDER BY item_no
   </select>
 
-  <!-- ============================================================
-       ✅ 급여계산그룹 목록
-       ============================================================ -->
   <select id="selectCalcGroupList" resultType="store.yd2team.insa.service.CalGrpVO">
     SELECT
         grp_no  AS grpNo,
@@ -146,14 +130,6 @@
      WHERE vend_id = #{vendId}
      ORDER BY grp_no
   </select>
-
-  <!-- ============================================================
-       ✅ 그룹-항목 조회(매핑테이블 기반)
-       - grpNo 없으면: 사용중(yn='e1') 전체
-       - grpNo 있으면: 해당 그룹에 매핑된 항목만
-       ※ tb_pay_cal_grp_item에 vend_id가 없다는 전제라서,
-         vend 필터는 tb_pay_cal_grp 조인으로 보장
-       ============================================================ -->
 
   <select id="selectAllowListForCalc" resultType="store.yd2team.insa.service.AllowDucVO">
     SELECT
@@ -217,11 +193,6 @@
      ORDER BY d.disp_no, d.duc_id
   </select>
 
-  <!-- ============================================================
-       ✅ 그룹 저장 시: 매핑테이블 갱신(삭제 후 재삽입)
-       ※ tb_pay_cal_grp_item 에 vend_id 컬럼이 없으므로 제거
-       ============================================================ -->
-
   <delete id="deleteGrpItemsByGrpNo">
     DELETE
       FROM tb_pay_cal_grp_item gi
@@ -246,7 +217,6 @@
     SELECT 1 FROM dual
   </insert>
 
-  <!-- ✅ grp_no 채번 -->
   <select id="selectNextCalcGrpNo" resultType="long" useCache="false" flushCache="true">
     SELECT seq_pay_cal_grp.NEXTVAL FROM dual
   </select>

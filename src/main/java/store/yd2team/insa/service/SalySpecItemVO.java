@@ -12,7 +12,9 @@ import lombok.NoArgsConstructor;
 
 /**
  * tb_saly_spec_item (급여명세서 항목)
- * ※ 지웅님 요구사항: grp_id가 아니라 grp_no (급여계산그룹번호 FK)
+ * ※ 지웅님 요구사항:
+ *  - grp_id가 아니라 grp_no (급여계산그룹번호 FK)
+ *  - 표시번호(disp_no) 기준 정렬을 위해 item_no(항목번호) 사용
  */
 @Data
 @NoArgsConstructor
@@ -23,6 +25,8 @@ public class SalySpecItemVO {
     private String salySpecItemId; // PK (있으면)
     private String salySpecId;     // FK tb_saly_spec
     private Long   grpNo;          // FK tb_pay_cal_grp.grp_no
+
+    private Long   itemNo;         // ✅ 항목번호(표시순서 저장용)
 
     private String itemTy;         // 'A' 수당 / 'D' 공제
     private String itemId;         // allow_id / duc_id
