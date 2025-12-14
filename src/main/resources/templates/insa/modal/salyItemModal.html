@@ -1,0 +1,39 @@
+<!-- /templates/insa/modal/salyItemModal.html -->
+<div th:fragment="salyItemModal">
+  <div class="modal-backdrop" id="salyItemBackdrop" style="display:none;"></div>
+
+  <div class="modal" id="salyItemModal" tabindex="-1" style="display:none;">
+    <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 900px;">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="modal-title mb-0">급여계산그룹</h5>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mb-2">
+            <button class="btn btn-danger" id="btnItemDel">삭제</button>
+            <button class="btn btn-outline-dark" id="btnItemAdd">행추가</button>
+            <button class="btn btn-outline-dark" id="btnItemSave">저장</button>
+            <button class="btn btn-outline-dark" id="btnItemOk">확인</button>
+          </div>
+
+          <!-- ✅ 위: 그룹 목록(라디오 선택) -->
+          <div class="mb-2">
+            <div class="fw-bold mb-1" style="font-size:13px;">계산그룹</div>
+            <div id="gridGrp" style="border:1px solid #d1d5db;"></div>
+          </div>
+
+          <!-- ✅ 아래: 선택 그룹의 수당/공제 항목(체크박스) -->
+          <div>
+            <div class="fw-bold mb-1" style="font-size:13px;">
+              수당/공제 항목(사용중)
+              <span class="ms-2 text-muted" id="grpHint" style="font-weight:500;"></span>
+            </div>
+            <div id="gridItem" style="border:1px solid #d1d5db;"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
