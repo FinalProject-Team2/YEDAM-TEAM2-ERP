@@ -13,7 +13,6 @@
             a.vend_id    AS vendId,
             a.allow_id   AS allowId,
             a.allow_nm   AS allowNm,
-            a.grp_no     AS grpNo,
             a.disp_no    AS dispNo,
             a.cal_fmlt   AS calFmlt,
             a.cal_mthd   AS calMthd,
@@ -28,18 +27,11 @@
     </select>
 
     <!-- 수당 ID 생성 (ALWYYMM001 패턴) -->
-    <select id="selectNewAllowId"
-            parameterType="string"
-            resultType="string">
+    <select id="selectNewAllowId" parameterType="string" resultType="string">
         SELECT 'ALW'
                || TO_CHAR(SYSDATE, 'YYMM')
                || LPAD(
-                      NVL(
-                          MAX(
-                              TO_NUMBER(SUBSTR(allow_id, LENGTH(allow_id) - 2, 3))
-                          ),
-                          0
-                      ) + 1,
+                      NVL(MAX(TO_NUMBER(SUBSTR(allow_id, LENGTH(allow_id) - 2, 3))), 0) + 1,
                       3,
                       '0'
                   ) AS allow_id
@@ -48,11 +40,9 @@
           AND SUBSTR(allow_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
     </select>
 
-    <insert id="insertAllow"
-            parameterType="store.yd2team.insa.service.AllowDucVO">
+    <insert id="insertAllow" parameterType="store.yd2team.insa.service.AllowDucVO">
         INSERT INTO tb_allow (
             allow_id,
-            grp_no,
             allow_nm,
             cal_fmlt,
             cal_mthd,
@@ -63,7 +53,6 @@
             vend_id
         ) VALUES (
             #{allowId},
-            #{grpNo},
             #{allowNm},
             #{calFmlt},
             #{calMthd},
@@ -75,11 +64,9 @@
         )
     </insert>
 
-    <update id="updateAllow"
-            parameterType="store.yd2team.insa.service.AllowDucVO">
+    <update id="updateAllow" parameterType="store.yd2team.insa.service.AllowDucVO">
         UPDATE tb_allow
            SET allow_nm = #{allowNm},
-               grp_no   = #{grpNo},
                cal_fmlt = #{calFmlt},
                cal_mthd = #{calMthd},
                disp_no  = #{dispNo},
@@ -104,7 +91,6 @@
             d.vend_id    AS vendId,
             d.duc_id     AS ducId,
             d.duc_nm     AS ducNm,
-            d.grp_no     AS grpNo,
             d.disp_no    AS dispNo,
             d.cal_fmlt   AS calFmlt,
             d.cal_mthd   AS calMthd,
@@ -119,18 +105,11 @@
     </select>
 
     <!-- 공제 ID 생성 (DUCYYMM001 패턴) -->
-    <select id="selectNewDucId"
-            parameterType="string"
-            resultType="string">
+    <select id="selectNewDucId" parameterType="string" resultType="string">
         SELECT 'DUC'
                || TO_CHAR(SYSDATE, 'YYMM')
                || LPAD(
-                      NVL(
-                          MAX(
-                              TO_NUMBER(SUBSTR(duc_id, LENGTH(duc_id) - 2, 3))
-                          ),
-                          0
-                      ) + 1,
+                      NVL(MAX(TO_NUMBER(SUBSTR(duc_id, LENGTH(duc_id) - 2, 3))), 0) + 1,
                       3,
                       '0'
                   ) AS duc_id
@@ -139,11 +118,9 @@
           AND SUBSTR(duc_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
     </select>
 
-    <insert id="insertDuc"
-            parameterType="store.yd2team.insa.service.AllowDucVO">
+    <insert id="insertDuc" parameterType="store.yd2team.insa.service.AllowDucVO">
         INSERT INTO tb_duc (
             duc_id,
-            grp_no,
             duc_nm,
             cal_fmlt,
             cal_mthd,
@@ -154,7 +131,6 @@
             vend_id
         ) VALUES (
             #{ducId},
-            #{grpNo},
             #{ducNm},
             #{calFmlt},
             #{calMthd},
@@ -166,11 +142,9 @@
         )
     </insert>
 
-    <update id="updateDuc"
-            parameterType="store.yd2team.insa.service.AllowDucVO">
+    <update id="updateDuc" parameterType="store.yd2team.insa.service.AllowDucVO">
         UPDATE tb_duc
-           SET duc_nm  = #{ducNm},
-               grp_no  = #{grpNo},
+           SET duc_nm   = #{ducNm},
                cal_fmlt = #{calFmlt},
                cal_mthd = #{calMthd},
                disp_no  = #{dispNo},

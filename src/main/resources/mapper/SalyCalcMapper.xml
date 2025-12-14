@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="store.yd2team.insa.mapper.SalyCalcMapper">
+
+  <!-- ============================================================
+       1) 급여계산 모달: 급여대장ID로 명세서(사원) 목록
+       ============================================================ -->
+  <select id="selectSalySpecCalcList" resultType="store.yd2team.insa.service.SalySpecCalcViewVO">
+    SELECT
+        s.saly_spec_id AS salySpecId,
+        s.emp_id       AS empId,
+        e.nm           AS empNm,
+        d.dept_nm      AS deptNm,
+        s.pay_amt      AS payAmt,
+        s.tt_duc_amt   AS ttDucAmt,
+        s.act_pay_amt  AS actPayAmt
+      FROM tb_saly_spec s
+      JOIN tb_emp e
+        ON e.emp_id  = s.emp_id
+       AND e.vend_id = #{vendId}
+      LEFT JOIN tb_dept d
+        ON d.dept_id = e.dept_id
+       AND d.vend_id = #{vendId}
+     WHERE s.saly_ledg_id = #{salyLedgId}
+     ORDER BY e.emp_id
+  </select>
+
+  <!-- ✅ (계산용) salySpecId -> empId 조회 -->
+  <select id="selectEmpIdBySpecId" resultType="string">
+    SELECT emp_id
+      FROM tb_saly_spec
+     WHERE saly_spec_id = #{salySpecId}
+  </select>
+
+  <!-- ============================================================
+       2) 프로시저 호출 (REF CURSOR OUT)
+       ============================================================ -->
+  <select id="callPrcCalcSalyItems" statementType="CALLABLE" parameterType="map">
+    { CALL prc_calc_saly_items(
+        #{p_saly_ledg_id, mode=IN, jdbcType=VARCHAR},
+        #{p_emp_id,       mode=IN, jdbcType=VARCHAR},
+        #{p_grp_no,       mode=IN, jdbcType=NUMERIC},
+        #{o_result,       mode=OUT, jdbcType=CURSOR, resultMap=payItemRowMap}
+    ) }
+  </select>
+
+  <resultMap id="payItemRowMap" type="store.yd2team.insa.service.PayItemRowVO">
+    <result property="itemTy" column="ITEM_TY"/>
+    <result property="itemId" column="ITEM_ID"/>
+    <result property="itemNm" column="ITEM_NM"/>
+    <result property="amt"    column="AMT"/>
+  </resultMap>
+
+  <!-- ============================================================
+       3) 재계산 대비: 해당 명세서 + 그룹번호 항목 삭제
+       ============================================================ -->
+  <delete id="deleteSpecItemsBySpecAndGrp">
+    DELETE
+      FROM tb_saly_spec_item
+     WHERE saly_spec_id = #{salySpecId}
+       AND grp_no       = #{grpNo}
+  </delete>
+
+  <!-- ============================================================
+       4) tb_saly_spec_item insert (배치)
+       ============================================================ -->
+  <insert id="insertSpecItems" parameterType="map">
+    INSERT ALL
+    <foreach collection="list" item="it">
+      INTO tb_saly_spec_item (
+          saly_spec_item_id,
+          saly_spec_id,
+          grp_no,
+          item_ty,
+          item_id,
+          item_nm,
+          amt,
+          crea_dt,
+          crea_by
+      ) VALUES (
+          'SSI_' || TO_CHAR(SYSDATE,'YYYYMMDD') || '_' || LPAD(seq_saly_spec_item.NEXTVAL, 6, '0'),
+          #{it.salySpecId},
+          #{it.grpNo},
+          #{it.itemTy},
+          #{it.itemId},
+          #{it.itemNm},
+          #{it.amt},
+          SYSDATE,
+          #{it.creaBy}
+      )
+    </foreach>
+    SELECT 1 FROM dual
+  </insert>
+
+  <!-- ============================================================
+       5) 명세서 합계 업데이트
+       ============================================================ -->
+  <update id="updateSalySpecTotals">
+    UPDATE tb_saly_spec
+       SET pay_amt     = #{payAmt},
+           tt_duc_amt  = #{ttDucAmt},
+           act_pay_amt = #{actPayAmt},
+           updt_dt     = SYSDATE,
+           updt_by     = #{updtBy}
+     WHERE saly_spec_id = #{salySpecId}
+  </update>
+
+  <!-- ============================================================
+       6) 계산 결과 그리드용: 명세서 항목 조회
+       ============================================================ -->
+  <select id="selectSalySpecItems" resultType="store.yd2team.insa.service.SalySpecItemVO">
+    SELECT
+        saly_spec_item_id AS salySpecItemId,
+        saly_spec_id      AS salySpecId,
+        grp_no            AS grpNo,
+        item_ty           AS itemTy,
+        item_id           AS itemId,
+        item_nm           AS itemNm,
+        amt               AS amt,
+        crea_dt           AS creaDt,
+        crea_by           AS creaBy,
+        updt_dt           AS updtDt,
+        updt_by           AS updtBy
+      FROM tb_saly_spec_item
+     WHERE saly_spec_id = #{salySpecId}
+       AND grp_no       = #{grpNo}
+     ORDER BY item_ty, item_id
+  </select>
+
+  <!-- ============================================================
+       ✅ 급여계산그룹 목록
+       ============================================================ -->
+  <select id="selectCalcGroupList" resultType="store.yd2team.insa.service.CalGrpVO">
+    SELECT
+        grp_no  AS grpNo,
+        grp_nm  AS grpNm,
+        crea_dt AS creaDt,
+        crea_by AS creaBy,
+        updt_dt AS updtDt,
+        updt_by AS updtBy,
+        vend_id AS vendId
+      FROM tb_pay_cal_grp
+     WHERE vend_id = #{vendId}
+     ORDER BY grp_no
+  </select>
+
+  <!-- ============================================================
+       ✅ 그룹-항목 조회(매핑테이블 기반)
+       - grpNo 없으면: 사용중(yn='e1') 전체
+       - grpNo 있으면: 해당 그룹에 매핑된 항목만
+       ※ tb_pay_cal_grp_item에 vend_id가 없다는 전제라서,
+         vend 필터는 tb_pay_cal_grp 조인으로 보장
+       ============================================================ -->
+
+  <select id="selectAllowListForCalc" resultType="store.yd2team.insa.service.AllowDucVO">
+    SELECT
+        a.vend_id   AS vendId,
+        CAST(a.disp_no AS NUMBER(19,0)) AS dispNo,
+        a.cal_fmlt  AS calFmlt,
+        a.cal_mthd  AS calMthd,
+        a.yn        AS ynCode,
+        a.allow_id  AS allowId,
+        a.allow_nm  AS allowNm,
+        a.crea_dt   AS creaDt,
+        a.crea_by   AS creaBy,
+        a.updt_dt   AS updtDt,
+        a.updt_by   AS updtBy
+      FROM tb_allow a
+     WHERE a.vend_id = #{vendId}
+       AND a.yn      = 'e1'
+    <if test="grpNo != null">
+       AND EXISTS (
+          SELECT 1
+            FROM tb_pay_cal_grp_item gi
+            JOIN tb_pay_cal_grp g
+              ON g.grp_no = gi.grp_no
+           WHERE gi.grp_no  = #{grpNo}
+             AND gi.item_ty = 'A'
+             AND gi.item_id = a.allow_id
+             AND g.vend_id  = #{vendId}
+       )
+    </if>
+     ORDER BY a.disp_no, a.allow_id
+  </select>
+
+  <select id="selectDucListForCalc" resultType="store.yd2team.insa.service.AllowDucVO">
+    SELECT
+        d.vend_id  AS vendId,
+        CAST(d.disp_no AS NUMBER(19,0)) AS dispNo,
+        d.cal_fmlt AS calFmlt,
+        d.cal_mthd AS calMthd,
+        d.yn       AS ynCode,
+        d.duc_id   AS ducId,
+        d.duc_nm   AS ducNm,
+        d.crea_dt  AS creaDt,
+        d.crea_by  AS creaBy,
+        d.updt_dt  AS updtDt,
+        d.updt_by  AS updtBy
+      FROM tb_duc d
+     WHERE d.vend_id = #{vendId}
+       AND d.yn      = 'e1'
+    <if test="grpNo != null">
+       AND EXISTS (
+          SELECT 1
+            FROM tb_pay_cal_grp_item gi
+            JOIN tb_pay_cal_grp g
+              ON g.grp_no = gi.grp_no
+           WHERE gi.grp_no  = #{grpNo}
+             AND gi.item_ty = 'D'
+             AND gi.item_id = d.duc_id
+             AND g.vend_id  = #{vendId}
+       )
+    </if>
+     ORDER BY d.disp_no, d.duc_id
+  </select>
+
+  <!-- ============================================================
+       ✅ 그룹 저장 시: 매핑테이블 갱신(삭제 후 재삽입)
+       ※ tb_pay_cal_grp_item 에 vend_id 컬럼이 없으므로 제거
+       ============================================================ -->
+
+  <delete id="deleteGrpItemsByGrpNo">
+    DELETE
+      FROM tb_pay_cal_grp_item gi
+     WHERE gi.grp_no = #{grpNo}
+       AND EXISTS (
+         SELECT 1
+           FROM tb_pay_cal_grp g
+          WHERE g.grp_no  = gi.grp_no
+            AND g.vend_id = #{vendId}
+       )
+  </delete>
+
+  <insert id="insertGrpItems" parameterType="map">
+    INSERT ALL
+    <foreach collection="list" item="it">
+      INTO tb_pay_cal_grp_item (
+        grp_no, item_ty, item_id, crea_dt, crea_by
+      ) VALUES (
+        #{it.grpNo}, #{it.itemTy}, #{it.itemId}, SYSDATE, #{it.creaBy}
+      )
+    </foreach>
+    SELECT 1 FROM dual
+  </insert>
+
+  <!-- ✅ grp_no 채번 -->
+  <select id="selectNextCalcGrpNo" resultType="long" useCache="false" flushCache="true">
+    SELECT seq_pay_cal_grp.NEXTVAL FROM dual
+  </select>
+
+  <insert id="insertCalcGroup">
+    INSERT INTO tb_pay_cal_grp (
+        grp_no, vend_id, grp_nm, crea_dt, crea_by
+    ) VALUES (
+        #{grpNo}, #{vendId}, #{grpNm}, SYSDATE, #{creaBy}
+    )
+  </insert>
+
+  <update id="updateCalcGroup">
+    UPDATE tb_pay_cal_grp
+       SET grp_nm  = #{grpNm},
+           updt_dt = SYSDATE,
+           updt_by = #{updtBy}
+     WHERE vend_id = #{vendId}
+       AND grp_no  = #{grpNo}
+  </update>
+
+  <delete id="deleteCalcGroup">
+    DELETE FROM tb_pay_cal_grp
+     WHERE vend_id = #{vendId}
+       AND grp_no  = #{grpNo}
+  </delete>
+
+</mapper>
