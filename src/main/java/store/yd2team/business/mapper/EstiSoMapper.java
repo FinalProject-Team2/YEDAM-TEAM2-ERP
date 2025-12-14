@@ -27,20 +27,36 @@ public interface EstiSoMapper {
     List<EstiSoVO> searchCustcomId(String keyword);    // 고객사코드(아이디) 검색
     
     
-    // 모달 저장버튼
-    // 헤더 저장 (항상 INSERT)
-    int insertEsti(EstiSoVO vo);
+    // 신규 견적서모달 저장버튼
+    // 신규 견적서
+    int insertNewEsti(EstiSoVO vo);
+
+    // 견적서 수정 (이력)
+    int insertEstiHistory(EstiSoVO vo);
 
     // 상세 저장 (항상 INSERT)
     int insertEstiDetail(EstiSoDetailVO detail);
 
     // 현재 버전 조회 (없으면 0)
-    String selectCurrentVersion(String estiId);
+    String selectCurrentVersion(@Param("estiId") String estiId);
 
     // 조회용
-    EstiSoVO selectEstiHeader(String estiId);
+    EstiSoVO selectEstiHeader(@Param("estiId") String estiId);
+    List<EstiSoDetailVO> selectEstiDetailList(@Param("estiId") String estiId);
+    
+    // 이력보기 모달
+    List<EstiSoVO> selectEstiHistory(@Param("estiId") String estiId);
+    
+    //이력보기의 보기 모달
+    EstiSoVO selectEstiHeaderByVersion(
+	    @Param("estiId") String estiId,
+	    @Param("version") String version
+	);
 
-    List<EstiSoDetailVO> selectEstiDetailList(String estiId);
+	List<EstiSoDetailVO> selectEstiDetailListByVersion(
+	    @Param("estiId") String estiId,
+	    @Param("version") String version
+	);
     
     
     // === 주문 관련 추가 ===
@@ -49,31 +65,52 @@ public interface EstiSoMapper {
     int insertSoDetail(EstiSoDetailVO vo);
     
     // 주문서등록 모달 저장버튼 클릭 시 견적 상태 es4 로 변경
-    void updateEstiStatusToOrdered(@Param("estiId") String estiId, @Param("version") String version);
+    void updateEstiStatusToOrdered(
+    	    @Param("estiId") String estiId,
+    	    @Param("version") String version,
+    	    @Param("updtBy") String updtBy
+    	);
     
     // ==================================================== 주문서관리
     // 주문서 조회
     List<EstiSoVO> selectSoHeaderList(EstiSoVO so);
-
     List<EstiSoDetailVO> selectSoDetailList(String soId);
     
     // 주문서관리화면 승인버튼
-    EstiSoVO getOrderHeader(String soId);
+    EstiSoVO getOrderHeader(@Param("soId") String soId);
 
-    String selectSoStatus(String soId);
+    String selectSoStatus(@Param("soId") String soId);
 
-    int updateSoStatusToApproved(String soId);
+    void updateSoStatusToApproved(
+    	    @Param("soId") String soId,
+    	    @Param("vendId") String vendId,
+    	    @Param("updtBy") String updtBy
+    	);
+	/* int updateSoStatusToApproved(String soId); */
     
     // 보류버튼 이벤트
-    void updateRejectStatus(@Param("soId") String soId,
-            @Param("reason") String reason);
+    void updateRejectStatus(
+            @Param("soId") String soId,
+            @Param("reason") String reason,
+            @Param("vendId") String vendId,
+            @Param("updtBy") String updtBy
+        );
     
     // 주문취소버튼 이벤트
-    void updateCancelStatus(@Param("soId") String soId,
-            @Param("reason") String reason);
+    void updateCancelStatus(
+            @Param("soId") String soId,
+            @Param("reason") String reason,
+            @Param("vendId") String vendId,
+            @Param("updtBy") String updtBy
+        );
     
     // 출하지시서 작성 저장 버튼
     void insertOust(OustVO vo);
-    void updateSoStatus(@Param("soId") String soId, @Param("status") String status);
+    void updateSoStatus(
+            @Param("soId") String soId,
+            @Param("status") String status,
+            @Param("vendId") String vendId,
+            @Param("updtBy") String updtBy
+        );
 
 }

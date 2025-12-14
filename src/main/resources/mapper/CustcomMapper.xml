@@ -20,7 +20,7 @@
             bs_ty AS bsTy,
             crea_dt AS creaDt
         FROM tb_custcom
-        WHERE 1 = 1
+        WHERE vend_id = #{vendId}
 
 	 	<if test="custcomId != null and custcomId != ''">
 	        AND CUSTCOM_ID LIKE '%' || #{custcomId} || '%'
@@ -51,36 +51,83 @@
  <!-- 고객사 신규 등록 -->
     <insert id="insertCustcom" parameterType="store.yd2team.business.service.CustcomVO">
 
-        INSERT INTO tb_custcom (
-              custcom_id
-            , custcom_name
-            , biz_no
-            , biz_addr
-            , biz_tel
-            , biz_fax
-            , psch
-            , psch_tel
-            , psch_email
-            , rpstr
-            , rpstr_tel
-            , bs_ty
-            , crea_dt
-        ) VALUES (
-              fn_newcust_id          -- selectKey 에서 만든 값
-            , #{custcomName}
-            , #{bizNo}
-            , #{bizAddr}
-            , #{bizTel}
-            , #{bizFax}
-            , #{psch}
-            , #{pschTel}
-            , #{pschEmail}
-            , #{rpstr}
-            , #{rpstrTel}
-            , #{bsTy}               -- 예: 고객사/업체 구분코드
-            , SYSDATE
-        )
-    </insert>    
+    <!-- 고객사 PK 생성 -->
+    <selectKey keyProperty="custcomId" resultType="string" order="BEFORE">
+        SELECT fn_newcust_id()
+        FROM dual
+    </selectKey>
+	
+	    INSERT INTO tb_custcom (
+	          custcom_id
+	        , vend_id          <!-- 회사코드 -->
+	        , custcom_name
+	        , biz_no
+	        , biz_addr
+	        , biz_tel
+	        , biz_fax
+	        , psch
+	        , psch_tel
+	        , psch_email
+	        , rpstr
+	        , rpstr_tel
+	        , bs_ty
+	        , crea_dt
+	        , crea_by          <!-- 등록자 -->
+	        , updt_by          <!-- 수정자 -->
+	    ) VALUES (
+	          #{custcomId}
+	        , #{vendId}
+	        , #{custcomName}
+	        , #{bizNo}
+	        , #{bizAddr}
+	        , #{bizTel}
+	        , #{bizFax}
+	        , #{psch}
+	        , #{pschTel}
+	        , #{pschEmail}
+	        , #{rpstr}
+	        , #{rpstrTel}
+	        , #{bsTy}
+	        , SYSDATE
+	        , #{creaBy}
+	        , #{updtBy}
+	    )
+	</insert>
+	
+	<update id="updateCustcom" parameterType="store.yd2team.business.service.CustcomVO">
+	    UPDATE tb_custcom
+	       SET custcom_name = #{custcomName}
+	         , biz_no       = #{bizNo}
+	         , biz_addr     = #{bizAddr}
+	         , biz_tel      = #{bizTel}
+	         , biz_fax      = #{bizFax}
+	         , psch         = #{psch}
+	         , psch_tel     = #{pschTel}
+	         , psch_email   = #{pschEmail}
+	         , rpstr        = #{rpstr}
+	         , rpstr_tel    = #{rpstrTel}
+	         , bs_ty        = #{bsTy}
+	         , updt_dt      = SYSDATE
+	         , updt_by      = #{updtBy}
+	     WHERE custcom_id   = #{custcomId}
+	       AND vend_id      = #{vendId}
+	</update>
+	
+	<insert id="insertCreditLimit">
+	    INSERT INTO tb_cdtln_lmt (
+	          cdtln_no
+	        , vend_id
+	        , custcom_id
+	        , crea_dt
+	        , crea_by
+	    ) VALUES (
+	          seq_newcredit.nextval
+	        , #{vendId}
+	        , #{custcomId}
+	        , SYSDATE
+	        , #{vendId}  -- 또는 empId
+	    )
+	</insert>
     
 
 </mapper>

@@ -35,11 +35,11 @@ public class PriceServiceImpl implements PriceService {
     public int savePricePolicy(PriceVO vo) throws Exception {
         System.out.println("### Service savePricePolicy 호출 ###");
 
-        // 🔥 로그인 세션 정보
+        // 로그인 세션 정보
         String vendId = LoginSession.getVendId();
         String empId  = LoginSession.getEmpId();  // 등록자 / 수정자
 
-        // 🔥 MERGE 문에서 사용할 값 세팅
+        // MERGE 문에서 사용할 값 세팅
         vo.setVendId(vendId);
         vo.setCreaBy(empId);
         vo.setUpdtBy(empId);
@@ -76,24 +76,35 @@ public class PriceServiceImpl implements PriceService {
         priceMapper.deletePriceDetail(priceId);
 
         // 2) 새 고객사 detail 저장
-        int idx = 1;
         for (Map<String, Object> d : vo.getDetailList()) {
 
             d.put("priceId", priceId);
-            d.put("detailNo", idx++);  // 고객사 detail 번호
 
-            // 공통 헤더값
+            // 적용 정보
             d.put("applcStartDt", vo.getBeginDt());
             d.put("applcEndDt", vo.getEndDt());
             d.put("dcRate", vo.getPercent());
 
-            // 🔥 세션 기반 컬럼
+            // 🔥 세션 정보
             d.put("vendId", vendId);
             d.put("creaBy", empId);
             d.put("updtBy", empId);
 
             priceMapper.insertPriceDetail(d);
         }
+		/*
+		 * int idx = 1; for (Map<String, Object> d : vo.getDetailList()) {
+		 * 
+		 * d.put("priceId", priceId); d.put("detailNo", idx++); // 고객사 detail 번호
+		 * 
+		 * // 공통 헤더값 d.put("applcStartDt", vo.getBeginDt()); d.put("applcEndDt",
+		 * vo.getEndDt()); d.put("dcRate", vo.getPercent());
+		 * 
+		 * // 🔥 세션 기반 컬럼 d.put("vendId", vendId); d.put("creaBy", empId);
+		 * d.put("updtBy", empId);
+		 * 
+		 * priceMapper.insertPriceDetail(d); }
+		 */
 
         return 1;
     }
@@ -122,6 +133,8 @@ public class PriceServiceImpl implements PriceService {
         return priceMapper.selectPricePolicyProduct(priceId);
     }
 
+    
+    // 상품 디테일 저장
     @Override
     public int savePricePolicyProduct(PriceVO vo) {
 
@@ -158,5 +171,11 @@ public class PriceServiceImpl implements PriceService {
         }
 
         return 1;
+    }
+    
+    // 최대 할인율
+    @Override
+    public PriceVO getMaxDiscount(PriceVO vo) {
+        return priceMapper.selectMaxDiscount(vo);
     }
 }

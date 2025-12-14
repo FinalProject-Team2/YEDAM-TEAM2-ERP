@@ -135,6 +135,7 @@
 							<div th:replace="~{fragments/buttons :: newButton('MENU_SALES_002', 'newEstiBtn')}"></div>
 
 							<button type="button" class="btn btn-outline-dark" id="editEstiBtn">수정</button>
+							<button type="button" class="btn btn-outline-dark" id="openEstiHistoryModal">이력보기</button>
 
 						</div>
 					</div>
@@ -154,6 +155,7 @@
 
 <div th:replace="business/modal/newEstiModal :: newEstiModal"></div>
 <div th:replace="business/modal/newSoModal :: newSoModal"></div>
+<div th:replace="business/modal/estiHistoryModal :: estiHistoryModal"></div>
 
 <script>
 
@@ -184,7 +186,7 @@ function toNumber(val) {
 	    bodyHeight: 400,
 	    scrollX: true,
 	    scrollY: true,  // 세로
-	    /* rowHeaders: ['checkbox'],     // 좌측 체크박스 */
+	    rowHeaders: ['checkbox'],     // 좌측 체크박스
 	    columnOptions: {
 	        minWidth: 80,
 	        resizable: true
@@ -213,7 +215,7 @@ function toNumber(val) {
                }
 			},
 			{ header: '상품명', name: 'productName' },
-			{ header: '주문일', name: 'soDt', align: 'right'  },
+			/* { header: '주문일', name: 'soDt', align: 'right'  }, */
 			{ header: '납기일', name: 'dueDt', align: 'right'  },
 			{
 				  header: '승인 / 반려',
@@ -425,7 +427,7 @@ function toNumber(val) {
         delay: 300,
         preventClose: true,
         mapResponse: item => ({
-            id: item.customId,
+            id: item.custcomId,
             label: item.custcomId,      // 자동완성 목록에 실제로 보이는 값
             value: item.custcomId,      // input에 입력될 기본값
             name: item.custcomName      // 추가 저장된 고객사명
@@ -497,16 +499,76 @@ class ProductAutoComplete {
         });
       },
 
-      // 사용자가 선택했을 때 실행
-      select: function(event, ui) {
-        const grid = window.newEstiGrid;
-        const rowKey = props.rowKey;
-
-        // 현재 행 데이터 변경
-        grid.setValue(rowKey, 'productId', ui.item.productId); // 현재 행 product_id PK세팅
-        grid.setValue(rowKey, 'productName', ui.item.value);
-        grid.setValue(rowKey, 'basisSaleAmt', ui.item.basisSaleAmt);  // 판매단가 자동 세팅
-      }
+	      // 사용자가 선택했을 때 실행
+	      select: function(event, ui) {
+			  const grid = window.newEstiGrid;
+			  const rowKey = props.rowKey;
+			
+			  grid.setValue(rowKey, 'productId', ui.item.productId);
+			  grid.setValue(rowKey, 'productName', ui.item.value);
+			  grid.setValue(rowKey, 'basisSaleAmt', ui.item.basisSaleAmt);
+			
+			  const custcomId = $('#autoCustcomId').val();
+			  if (!custcomId) return;
+			
+			  fetch('/price/discount', {
+			    method: 'POST',
+			    headers: { 'Content-Type': 'application/json' },
+			    body: JSON.stringify({
+			      custcomId,
+			      productId: ui.item.productId
+			    })
+			  })
+			  .then(res => res.json())
+			  .then(data => {
+			    if (!data || !data.dcRate) return;
+			    grid.setValue(rowKey, 'dcRate', data.dcRate);
+			  });
+		}
+	      /* select: function(event, ui) {
+	    	  console.log('🔥 product select fired');
+		    	  
+			  const grid = window.newEstiGrid;
+			  const rowKey = props.rowKey;
+			
+			  const productId = ui.item.productId;
+			  const price     = ui.item.basisSaleAmt;
+			  const custcomId = $('#autoCustcomId').val();
+			
+			  grid.setValue(rowKey, 'productId', productId);
+			  grid.setValue(rowKey, 'productName', ui.item.value);
+			  grid.setValue(rowKey, 'basisSaleAmt', price);
+			
+			  // 고객사 선택 안 되어 있으면 할인 조회 안 함
+			  if (!custcomId) {
+			    return;
+			  }
+			
+			  // 할인 조회 API 호출
+			  fetch('/price/discount', {
+			    method: 'POST',
+			    headers: { 'Content-Type': 'application/json' },
+			    body: JSON.stringify({
+			      productId: productId,
+			      custcomId: custcomId
+			    })
+			  })
+			  .then(res => res.json())
+			  .then(data => {
+			    if (!data || !data.dcRate) return;
+			
+			    const qty = Number(grid.getValue(rowKey, 'qy') || 1);
+			    const dcRate = Number(data.dcRate);
+			
+			    const saleAmt  = Math.floor(price * qty * dcRate / 100);
+			    const finalAmt = (price * qty) - saleAmt;
+			
+			    grid.setValue(rowKey, 'dcRate', dcRate);
+			    grid.setValue(rowKey, 'saleAmt', saleAmt);
+			    grid.setValue(rowKey, 'finalAmt', finalAmt);
+			  })
+			  .catch(err => console.error('할인 조회 실패', err));
+		} */
     });
 
     this.el = el;
@@ -525,6 +587,30 @@ class ProductAutoComplete {
   }
 }
 	
+	
+// 할인율 조회 함수
+function fetchDiscountRate(rowKey, productId) {
+  const custcomId = $('#autoCustcomId').val();
+  if (!custcomId) return;
+
+  fetch(`/price/discount`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      custcomId,
+      productId
+    })
+  })
+  .then(res => res.json())
+  .then(result => {
+    const dcRate = result.dcRate || 0;
+
+    window.newEstiGrid.setValue(rowKey, 'dcRate', dcRate);
+
+    // 수량 있으면 바로 계산
+    recalcRow(rowKey);
+  });
+}
 	
 // ---------------------------- 신규 견적서 모달 스크립트
 	//1. 그리드 생성
@@ -582,23 +668,80 @@ class ProductAutoComplete {
 	    ]
 	  });
 	  
-	  window.newEstiGrid.on('afterChange', (ev) => {
-	      ev.changes.forEach(change => {
-	          const rowKey = change.rowKey;
-
-	          const qty = window.newEstiGrid.getValue(rowKey, 'qy');
-	          const price = window.newEstiGrid.getValue(rowKey, 'basisSaleAmt');
-
-	          if (qty && price) {
-	            const total = qty * price;
-	            window.newEstiGrid.setValue(rowKey, 'finalAmt', total);
-	          }
-	      });
-	  });
 	  
+	  window.newEstiGrid.on('afterChange', (ev) => {
+		  ev.changes.forEach(change => {
+		    const rowKey = change.rowKey;
+
+		    const qty   = Number(window.newEstiGrid.getValue(rowKey, 'qy') || 0);
+		    const price = Number(window.newEstiGrid.getValue(rowKey, 'basisSaleAmt') || 0);
+		    const dcRate = Number(window.newEstiGrid.getValue(rowKey, 'dcRate') || 0);
+
+		    if (!qty || !price) return;
+
+		    const grossAmt = qty * price;
+		    const saleAmt  = Math.floor(grossAmt * dcRate / 100);
+		    const finalAmt = grossAmt - saleAmt;
+
+		    window.newEstiGrid.setValue(rowKey, 'saleAmt', saleAmt);
+		    window.newEstiGrid.setValue(rowKey, 'finalAmt', finalAmt);
+		  });
+		});
+	  /* window.newEstiGrid.on('afterChange', (ev) => {
+		  ev.changes.forEach(change => {
+		    const rowKey = change.rowKey;
+
+		    const qty   = Number(window.newEstiGrid.getValue(rowKey, 'qy') || 0);
+		    const price = Number(window.newEstiGrid.getValue(rowKey, 'basisSaleAmt') || 0);
+		    const dcRate = Number(window.newEstiGrid.getValue(rowKey, 'dcRate') || 0);
+
+		    if (!qty || !price) return;
+
+		    const saleAmt  = Math.floor(price * qty * dcRate / 100);
+		    const finalAmt = (price * qty) - saleAmt;
+
+		    window.newEstiGrid.setValue(rowKey, 'saleAmt', saleAmt);
+		    window.newEstiGrid.setValue(rowKey, 'finalAmt', finalAmt);
+		  });
+		}); */
+	}
+
+	
+	// 행단위 계산 함수
+	function recalcRow(rowKey) {
+	  const grid = window.newEstiGrid;
+	
+	  const qty   = Number(grid.getValue(rowKey, 'qy') || 0);
+	  const price = Number(grid.getValue(rowKey, 'basisSaleAmt') || 0);
+	  const rate  = Number(grid.getValue(rowKey, 'dcRate') || 0);
+	
+	  if (qty === 0 || price === 0) return;
+	
+	  const supplyAmt = qty * price;
+	  const saleAmt   = Math.floor(supplyAmt * rate / 100);
+	  const finalAmt  = supplyAmt - saleAmt;
+	
+	  grid.setValue(rowKey, 'saleAmt', saleAmt);
+	  grid.setValue(rowKey, 'finalAmt', finalAmt);
 	}
 	
-	
+// ================== 할인조회 함수
+	function fetchMaxDiscount({ custcomId, productId }) {
+		  if (!custcomId || !productId) {
+		    return Promise.resolve({ dcRate: 0 });
+		  }
+
+		  return fetch('/price/discount', {
+		    method: 'POST',
+		    headers: { 'Content-Type': 'application/json' },
+		    body: JSON.stringify({ custcomId, productId })
+		  })
+		  .then(res => res.json())
+		  .catch(err => {
+		    console.error('할인 조회 실패', err);
+		    return { dcRate: 0 };
+		  });
+		}
 	
 	
 // -------------------------------- 신규견적서 모달오픈 버튼이벤트
@@ -692,98 +835,301 @@ class ProductAutoComplete {
 	// 4. 모달 저장버튼 이벤트
 	document.getElementById("btnEstiSave").addEventListener("click", function () {
 	
-		// 고객사 입력 체크
-	    const custcomId = document.getElementById("autoCustcomId").value;
-	    if (!custcomId || custcomId.trim() === "") {
-	        alert("고객사가 선택되지 않았습니다.");
-	        return;   // 저장 중단
-	    }
-	    
-	 	// 납기일 입력 체크
-	    const dueDt = document.getElementById("applyDate").value;
-	    if (!dueDt || dueDt.trim() === "") {
-	        alert("납기일이 선택되지 않았습니다.");
-	        return;   // 저장 중단
-	    }
-	    
-	    // 1) 그리드 데이터
-	    const rows = window.newEstiGrid.getData();
-	    
-	    // 상품 입력 체크
-	    if (!rows || rows.length === 0) {
-	        alert("상품이 입력되지 않았습니다.\n상품을 추가해주세요.");
-	        return;
-	    }
+	  // 고객사 체크
+	  const custcomId = document.getElementById("autoCustcomId").value;
+	  if (!custcomId || custcomId.trim() === "") {
+	    alert("고객사가 선택되지 않았습니다.");
+	    return;
+	  }
 	
-	    const detailList = rows.map(row => ({
-	        estiDetailNo: null,                 // 신규이므로 null
-	        estiId: null,                       // 서버에서 vo.estiId 로 세팅
-	        version: null,                      // 서버에서 계산
-	        vendId: row.vendId || null,         // 필요 없으면 null
-	        productId: row.productId,
-	        qy: Number(row.qy || 0),
-	        price: Number(row.basisSaleAmt || 0),
-	        supplyAmt: Number(row.finalAmt || 0),
-	        rm: row.rm || null
-	    }));
+	  // 납기일 체크
+	  const dueDt = document.getElementById("applyDate").value;
+	  if (!dueDt || dueDt.trim() === "") {
+	    alert("납기일이 선택되지 않았습니다.");
+	    return;
+	  }
 	
-	    // 2) 헤더 폼 값
-	    const estiIdVal   = document.getElementById("estiIdHidden").value;           // 신규: "", 수정: 기존값
-	    /* const custcomId   = document.getElementById("autoCustcomId").value; */
-	    const custcomName = document.getElementById("autoCustcomName").value;
-	    /* const dueDt       = document.getElementById("applyDate").value;             // yyyy-MM-dd */
+	  // 그리드 데이터
+	  const rows = window.newEstiGrid.getData();
+	  if (!rows || rows.length === 0) {
+	    alert("상품이 입력되지 않았습니다.\n상품을 추가해주세요.");
+	    return;
+	  }
 	
-	    const payload = {
-	        estiId: estiIdVal ? estiIdVal : null,    // null 이면 신규, 값 있으면 이력 INSERT
-	        custcomId: custcomId,
-	        custcomName: custcomName,
-	        dueDt: dueDt,
-	        soDt: null,            // 필요하면 today 등으로 채우기
-	        cdtlnNo: null,
-	        cdtlnLmt: null,
-	        estiSt: "es1",
-	        recallResn: null,
-	        rm: null,
+	  // 상세 리스트 구성
+	  const detailList = rows.map(row => ({
+	    productId: row.productId,
+	    qy: Number(row.qy || 0),
+	    price: Number(row.basisSaleAmt || 0),
+	    supplyAmt: Number(row.finalAmt || 0),
+	    rm: row.rm || null
+	  }));
 	
-	        detailList: detailList
-	    };
+	  // 수정 / 신규 구분
+	  const estiIdHidden = document.getElementById("estiIdHidden").value;
 	
-	    console.log("esti 저장 payload >>> ", payload);
+	  
+	  console.log("고객사ID:", custcomId);
+	  console.log("고객사명:", custcomName);
+	  
+	  // payload
+	  const payload = {
+	    estiId: estiIdHidden ? estiIdHidden : null, // ✔ 있으면 다음 ver INSERT
+	    custcomId: custcomId,
+	    custcomName: document.getElementById("autoCustcomName").value,
+	    dueDt: dueDt,
+	    estiSt: "es1",          // 서버에서 기본값 처리해도 OK
+	    detailList: detailList
+	  };
 	
-	    fetch("/esti/save", {
-	        method: "POST",
-	        headers: { "Content-Type": "application/json" },
-	        body: JSON.stringify(payload)
+	  console.log("esti save payload >>>", payload);
+	
+	  // 저장 요청
+	  fetch("/esti/save", {
+	    method: "POST",
+	    headers: { "Content-Type": "application/json" },
+	    body: JSON.stringify(payload)
+	  })
+	    .then(res => res.json())
+	    .then(result => {
+	      if (result.success) {
+	        alert("저장 완료\n견적서 번호 : " + result.estiId);
+	
+	        // 다음 저장부터 같은 estiId로 버전업
+	        document.getElementById("estiIdHidden").value = result.estiId;
+	
+	        closeNewEstiModal();
+	
+	        // 메인 그리드 재조회
+	        document.getElementById("btnSearch").click();
+	      } else {
+	        alert(result.message || "저장 실패");
+	      }
 	    })
-	        .then(res => res.json())
-	        .then(result => {
-	            if (result.success) {
-	                alert("저장 완료\nestiId : " + result.estiId);
-	                closeNewEstiModal();
-	                // 신규일 때는 서버에서 생성된 estiId 를 hidden 에 세팅해서
-	                // 다음 저장부터는 같은 estiId 로 새 version 이 쌓이도록 함
-	                document.getElementById("estiIdHidden").value = result.estiId;
-	                
-	             	// 1) 모달 닫기 - Bootstrap API 사용
-	                const modalEl = document.getElementById("estiModal"); // 실제 모달 id로 맞추기
-	                if (modalEl) {
-	                    const estiModal = bootstrap.Modal.getInstance(modalEl) 
-	                                   || new bootstrap.Modal(modalEl);
-	                    estiModal.hide();
-	                }
-
-	                // 2) 그리드 재조회
-	                document.getElementById("btnSearch").click();
-	                
-	            } else {
-	                alert("저장 실패");
-	            }
-	        })
-	        .catch(err => {
-	            console.error(err);
-	            alert("저장 중 오류가 발생했습니다.");
-	        });
+	    .catch(err => {
+	      console.error(err);
+	      alert("저장 중 오류가 발생했습니다.");
+	    });
 	});
+	
+	
+	
+// ============================================================== 견적서 수정버튼
+	// 수정버튼 이벤트
+	$("#editEstiBtn").on("click", function () {
+	
+	  const checked = estiGrid.getCheckedRows();
+	
+	  if (checked.length !== 1) {
+	    alert("수정할 견적서를 1건만 선택하세요.");
+	    return;
+	  }
+	
+	  const row = checked[0];
+	
+	  // 승인 완료 견적은 수정 불가
+	  if (row.estiSt === 'es2' || row.estiSt === 'es4') {
+	  alert("승인 완료되었거나 주문서가 등록된 견적서는 수정할 수 없습니다.");
+	  return;
+	}
+	
+	  openEditEstiModal(row.estiId);
+	});
+	
+	
+	// 수정버튼 모달오픈 이벤트
+	function openEditEstiModal(estiId) {
+	
+	  // 모달 제목 변경
+	  $("#newEstiModal .modal-title").text("견적서 수정 (신규 버전 생성)");
+	
+	  // 수정 모드 플래그
+	  $("#newEstiModal").data("mode", "edit");
+	
+	  // estiId hidden 세팅
+	  $("#estiIdHidden").val(estiId);
+	
+	  // 모달 열기
+	  openNewEstiModal();
+	
+	  // 기존 견적 데이터 조회
+	  fetch(`/esti/${estiId}`)
+	    .then(res => res.json())
+	    .then(data => {
+	      fillEstiModal(data);
+	      openNewEstiModal();
+	    })
+	    .catch(err => {
+	      console.error(err);
+	      alert("견적서 조회 중 오류가 발생했습니다.");
+	    });
+	}
+	
+	// 견적서 모달 채우기 함수
+	function fillEstiModal(data) {
+
+		console.log("견적 header:", data);
+		console.log("견적 detailList:", data.detailList);
+		
+	  // 헤더 세팅
+	  $("#autoCustcomId").val(data.custcomId);
+	  $("#autoCustcomName").val(data.custcomNameResult);
+	  $("#applyDate").val(data.dueDt);
+	  $("#autoRemark").val(data.rm || "");
+
+	  // 🔹 그리드 데이터 변환
+	  const gridData = data.detailList.map(d => ({
+	    productId: d.productId,
+	    productName: d.productName,
+	    qy: d.qy,
+	    basisSaleAmt: d.price,
+	    finalAmt: d.supplyAmt
+	  }));
+
+	  // 그리드 로딩
+	  loadNewEstiGrid(gridData);
+	}
+	
+	// 견적서 모달 닫을때 초기화
+	function resetNewEstiForm() {
+
+	  $('#autoCustcomId').val('');
+	  $('#autoCustcomName').val('');
+	  $('#applyDate').val('');
+	  $('#autoRemark').val('');
+
+	  // estiId 초기화 (안 하면 다음에 꼬임)
+	  $("#estiIdHidden").val('');
+
+	  if (window.newEstiGrid) {
+	    window.newEstiGrid.resetData([]);
+	  }
+	}
+	
+	
+// ==================================================================== 이력보기 모달
+	// 이력보기 버튼 클릭
+	document.getElementById("openEstiHistoryModal").addEventListener("click", function () {
+	
+	  // ✔ Toast Grid에서 선택된 행 가져오기
+	  const checkedRows = estiGrid.getCheckedRows(); 
+	  // 또는 단일 선택이면 getFocusedCell 사용 가능
+	
+	  if (!checkedRows || checkedRows.length === 0) {
+	    alert("이력을 확인할 견적서를 선택해주세요.");
+	    return;
+	  }
+	
+	  if (checkedRows.length > 1) {
+	    alert("이력보기는 하나의 견적서만 선택할 수 있습니다.");
+	    return;
+	  }
+	
+	  const estiId = checkedRows[0].estiId;
+	
+	  // 기존에 만들어둔 함수 재사용
+	  openEstiHistoryModal(estiId);
+	});
+	
+	function renderStatusBadge(statusNm) {
+	  switch (statusNm) {
+	    case '승인':
+	      return '<span class="badge bg-success">승인</span>';
+	    case '반려':
+	      return '<span class="badge bg-danger">반려</span>';
+	    default:
+	      return '<span class="badge bg-secondary">대기</span>';
+	  }
+	}
+	
+	function openEstiHistoryModal(estiId) {
+		  fetch(`/esti/history/${estiId}`)
+		    .then(res => res.json())
+		    .then(list => {
+		      const tbody = document.getElementById("estiHistoryTbody");
+		      tbody.innerHTML = "";
+
+		      list.forEach(row => {
+		        tbody.innerHTML += `
+		          <tr>
+		            <td>${row.version}</td>
+		            <td>${row.creaDt}</td>
+		            <td class="text-end">${Number(row.ttSupplyAmt).toLocaleString()}</td>
+		            <td>${renderStatusBadge(row.estiStNm)}</td>
+		            <td>${row.creaBy}</td>
+		            <td>
+		              <button class="btn btn-sm btn-outline-primary"
+		                onclick="openEstiDetail('${row.estiId}', '${row.version}')">
+		                보기
+		              </button>
+		            </td>
+		          </tr>
+		        `;
+		      });
+
+		      new bootstrap.Modal(document.getElementById("estiHistoryModal")).show();
+		    });
+		}
+	
+	
+	// 이력보기 모달의 "보기" 버튼에서 호출되는 함수
+	function openEstiDetail(estiId, version) {
+		  // 포커스 제거
+		  document.activeElement?.blur();
+
+		  // 이력 모달 닫기
+		  const historyModalEl = document.getElementById("estiHistoryModal");
+		  const historyModal = bootstrap.Modal.getInstance(historyModalEl);
+		  historyModal?.hide();
+		
+	  fetch(`/esti/detail/${estiId}/${version}`)
+	    .then(res => res.json())
+	    .then(data => {
+	      // 1) 기존 신규/수정 모달을 "읽기전용 보기" 모드로 열기
+	      $("#newEstiModal .modal-title").text(`견적서 보기 (${version})`);
+	      $("#newEstiModal").data("mode", "view");
+
+	      // 2) 값 채우기
+	      fillEstiModal(data);
+
+	      // 3) 읽기전용 처리(입력 막기)
+	      setEstiModalReadonly(true);
+
+	      // 4) 모달 열기
+	      openNewEstiModal();
+
+	      // 5) 이력 모달 닫기(원하면)
+	      const hist = bootstrap.Modal.getInstance(document.getElementById("estiHistoryModal"));
+	      if (hist) hist.hide();
+	    })
+	    .catch(err => {
+	      console.error(err);
+	      alert("견적서 상세 조회 중 오류가 발생했습니다.");
+	    });
+	}
+
+	// 입력/그리드 읽기전용 토글
+	function setEstiModalReadonly(readonly) {
+	  $("#autoCustcomId").prop("disabled", readonly);
+	  $("#autoCustcomName").prop("disabled", readonly);
+	  $("#applyDate").prop("disabled", readonly);
+	  $("#autoRemark").prop("disabled", readonly);
+
+	  // 저장 버튼 숨김/비활성
+	  $("#btnEstiSave").prop("disabled", readonly);
+	  // 행추가/삭제 버튼도 막기
+	  $("#addRowBtn, #deleteRowBtn, #maxDcBtn").prop("disabled", readonly);
+
+	  // grid 편집 막기
+	  if (window.newEstiGrid) {
+	    window.newEstiGrid.setColumns(
+	      window.newEstiGrid.getColumns().map(col => ({
+	        ...col,
+	        editor: readonly ? null : col.editor
+	      }))
+	    );
+	  }
+	}
 	
 	
 // ========================================================================== 주문서 등록 버튼 모달
@@ -921,9 +1267,10 @@ class ProductAutoComplete {
 	  const soDt = $("#newSoDt").val();
 	  const shipAddr = $("#newSoShipAddr").val();
 	  const orderRm  = $("#newSoRm").val();
-	  const rciptAppoDt = $("rciptAppoDt").val();
-	  const rciptAppoAmt = $("rciptAppoAmt").val();
-	  const sttlMthd = $("sttlMthd").val();
+	  const rciptAppoDt = $("#rciptAppoDt").val();   // 입금약속일
+	  const rciptAppoAmt = $("#rciptAppoAmt").val(); // 입금약속금액
+	  const appoMtd      = $("#appoMtd").val();      // 결제방법
+
 	
 	  // ▶ grid 객체 이름 newSoGrid 사용
 	  const rows = window.newSoGrid ? window.newSoGrid.getData() : [];
@@ -942,6 +1289,10 @@ class ProductAutoComplete {
 	    dueDt: dueDt,
 	    shipAddr: shipAddr,
 	    rm: orderRm,
+	    rciptAppoDt: rciptAppoDt || null,
+	    rciptAppoAmt: rciptAppoAmt ? Number(rciptAppoAmt) : null,
+	    appoMtd: appoMtd,
+	    
 	    detailList: detailList
 	  };
 	

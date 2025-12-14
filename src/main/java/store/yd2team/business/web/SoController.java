@@ -1,11 +1,9 @@
 package store.yd2team.business.web;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,42 +23,67 @@ import store.yd2team.business.service.OustVO;
 public class SoController {
 
 	 private final EstiSoService estiSoService; 
-
+	 
 	@GetMapping("/soMain")
-	public String selectall(Model model) {
-
-		model.addAttribute("test", "testone");
-		return "business/soManage";
-
+	public String soMain() {
+	    return "business/soManage";
 	}
 	
-	 // 주문 모달 초기 데이터 (견적 → 주문)
-    @GetMapping("/fromEsti/{estiId}")
+	// 주문 모달 초기 데이터 (견적 → 주문)
+	@GetMapping("/fromEsti/{estiId}")
     @ResponseBody
     public Map<String, Object> getOrderFromEsti(@PathVariable("estiId") String estiId) {
 
         EstiSoVO header = estiSoService.getOrderInitFromEsti(estiId);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("header", header);
-        result.put("detailList", header.getDetailList());
-
-        return result;
+        return Map.of(
+            "header", header,
+            "detailList", header.getDetailList()
+        );
     }
 
     // 주문 저장
-    @PostMapping("/fromEsti/save")
+	@PostMapping("/fromEsti/save")
     @ResponseBody
     public Map<String, Object> saveOrderFromEsti(@RequestBody EstiSoVO vo) {
+		// 1) 필수값 검증
+	    if (vo.getEstiId() == null || vo.getEstiId().isBlank()) {
+	        throw new IllegalArgumentException("견적서 ID는 필수입니다.");
+	    }
+
+	    if (vo.getRciptAppoDt() == null) {
+	        throw new IllegalArgumentException("입금약속일은 필수입니다.");
+	    }
+
+	    if (vo.getRciptAppoAmt() == null || vo.getRciptAppoAmt() <= 0) {
+	        throw new IllegalArgumentException("입금약속금액은 0보다 커야 합니다.");
+	    }
+
+	    if (vo.getAppoMtd() == null || vo.getAppoMtd().isBlank()) {
+	        throw new IllegalArgumentException("결제방법은 필수입니다.");
+	    }
+
 
         String soId = estiSoService.saveOrderFromEsti(vo);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("soId", soId);
-
-        return result;
+        return Map.of(
+            "success", true,
+            "soId", soId
+        );
     }
+	/*
+	 * @PostMapping("/fromEsti/save")
+	 * 
+	 * @ResponseBody public Map<String, Object> saveOrderFromEsti(@RequestBody
+	 * EstiSoVO vo) {
+	 * 
+	 * String soId = estiSoService.saveOrderFromEsti(vo);
+	 * 
+	 * Map<String, Object> result = new HashMap<>(); result.put("success", true);
+	 * result.put("soId", soId);
+	 * 
+	 * return result; }
+	 */
     
 	
 	// 주문서 조회 (AJAX)

@@ -1,0 +1,49 @@
+<div th:fragment="estiHistoryModal">
+<div class="modal fade" id="estiHistoryModal">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <!-- header -->
+      <div class="modal-header">
+        <h5 class="modal-title">📜 견적서 이력 (ES2512130032)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- body -->
+      <div class="modal-body">
+
+        <!-- 상단 정보 -->
+        <div class="mb-3">
+          <strong>고객사 :</strong> 논개네
+        </div>
+
+        <!-- 이력 테이블 -->
+        <table class="table table-bordered table-hover text-center">
+          <thead class="table-light">
+            <tr>
+              <th>버전</th>
+              <th>작성일</th>
+              <th>금액합계</th>
+              <th>상태</th>
+              <th>작성자</th>
+              <th>보기</th>
+            </tr>
+          </thead>
+          <tbody id="estiHistoryTbody">
+            <!-- JS로 채움 -->
+          </tbody>
+        </table>
+
+      </div>
+
+      <!-- footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          닫기
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>

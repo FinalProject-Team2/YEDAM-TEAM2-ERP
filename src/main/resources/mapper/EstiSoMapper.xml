@@ -2,80 +2,136 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="store.yd2team.business.mapper.EstiSoMapper">
 <!-- 견적서 조회 -->
-	  <select id="selectEsti" parameterType="store.yd2team.business.service.EstiSoVO"  resultType="store.yd2team.business.service.EstiSoVO">
+	<select id="selectEsti" parameterType="store.yd2team.business.service.EstiSoVO" resultType="store.yd2team.business.service.EstiSoVO">
 		SELECT
-	           x.esti_id AS estiId          <!-- 견적서 코드 -->
-	         , x.version AS version         <!-- 버전 -->
-	         , x.custcom_name AS custcomNameResult     <!-- 고객사명 -->
-	         , x.cdtln_lmt AS cdtlnLmt         <!-- 여신한도 -->
-	         , x.total_amount AS totalAmount     <!-- 금액합계(원) -->
-	         , CASE                                       <!-- 대표상품명 + "외 n건" -->
-	             WHEN x.item_cnt > 1 THEN
-	                  x.main_product_name || ' 외 ' || (x.item_cnt - 1) || '건'
-	             ELSE
-	                  x.main_product_name
-	           END                    AS productName
-	         , x.due_dt               AS dueDt           <!-- 납기일 -->
-	         , x.so_dt                AS soDt
-	         , x.esti_st              AS estiSt          <!-- 상태코드 (승인/반려 버튼에서 사용) -->
-	         , c.code_nm              AS estiStNm        <!-- 공통코드명(대기/승인/반려) -->
-	         , x.recall_resn  AS recallResn
-	    FROM (
-	            SELECT
-	                   e.esti_id                           AS esti_id
-	                 , e.version                           AS version
-	                 , e.custcom_name                      AS custcom_name
-	                 , cd.cdtln_lmt                          AS cdtln_lmt
-	                 , SUM(d.supply_amt)                  AS total_amount      -- 상세 공급가 합계
-	                 , COUNT(DISTINCT d.product_id)       AS item_cnt          -- 상품 종류 수
-	                 , MIN(p.product_name)
-	                     KEEP (DENSE_RANK FIRST ORDER BY d.esti_detail_no)
-	                                                      AS main_product_name -- 대표 상품명(첫 라인 기준)
-	                 , e.due_dt                            AS due_dt
-	                 , e.so_dt                             AS so_dt
-	                 , e.esti_st                           AS esti_st          -- 상태 코드
-	                 , e.recall_resn  AS recall_resn
-	            FROM   tb_esti        e
-	            JOIN   tb_esti_detail d
-	                   ON d.esti_id = e.esti_id
-	                  AND d.version = e.version
-	            LEFT JOIN tb_product  p
-	                   ON p.product_id = d.product_id
-	            LEFT JOIN tb_cdtln_lmt cd
-	                   ON e.custcom_id = cd.custcom_id
-	            
-	            <where>
-	                <!-- 거래처 명(=고객사명) 검색 -->
-	                <if test="custcomName != null and custcomName != ''">
-	                    AND e.custcom_name LIKE '%' || #{custcomName} || '%'
-	                </if>
+		       x.esti_id            AS estiId
+		     , x.version            AS version
+		     , x.custcom_name       AS custcomNameResult
+		     , x.cdtln_lmt          AS cdtlnLmt
+		     , x.total_amount       AS totalAmount
+		     , CASE
+		         WHEN x.item_cnt > 1 THEN
+		              x.main_product_name || ' 외 ' || (x.item_cnt - 1) || '건'
+		         ELSE
+		              x.main_product_name
+		       END                  AS productName
+		     , x.due_dt             AS dueDt
+		     , x.so_dt              AS soDt
+		     , x.esti_st            AS estiSt
+		     , c.code_nm            AS estiStNm
+		     , x.recall_resn        AS recallResn
+		FROM (
+		        SELECT
+		               e.esti_id
+		             , e.version
+		             , e.custcom_name
+		             , cd.cdtln_lmt
+		             , SUM(d.supply_amt) AS total_amount
+		             , COUNT(DISTINCT d.product_id) AS item_cnt
+		             , MIN(p.product_name)
+		                 KEEP (DENSE_RANK FIRST ORDER BY d.esti_detail_no)
+		                 AS main_product_name
+		             , e.due_dt
+		             , e.so_dt
+		             , e.esti_st
+		             , e.recall_resn
+		
+		             -- 🔥 핵심
+		             , ROW_NUMBER() OVER (
+		                   PARTITION BY e.esti_id
+		                   ORDER BY
+		                       TO_NUMBER(REPLACE(e.version, 'ver', '')) DESC
+		               ) AS rn
+		
+		        FROM tb_esti e
+		        JOIN tb_esti_detail d
+		          ON d.esti_id = e.esti_id
+		         AND d.version = e.version
+		        LEFT JOIN tb_product p
+		          ON p.product_id = d.product_id
+		        LEFT JOIN tb_cdtln_lmt cd
+		          ON e.custcom_id = cd.custcom_id
+		
+		        <where>
+		            <if test="custcomName != null and custcomName != ''">
+		                AND e.custcom_name LIKE '%' || #{custcomName} || '%'
+		            </if>
+		            <if test="dueStart != null">
+		                AND e.due_dt &gt;= #{dueStart}
+		            </if>
+		            <if test="dueEnd != null">
+		                AND e.due_dt &lt;= #{dueEnd}
+		            </if>
+		        </where>
+		
+		        GROUP BY
+		               e.esti_id
+		             , e.version
+		             , e.custcom_name
+		             , cd.cdtln_lmt
+		             , e.due_dt
+		             , e.so_dt
+		             , e.esti_st
+		             , e.recall_resn
+		     ) x
+		     LEFT JOIN tb_code c
+		       ON c.grp_id = 'esti'
+		      AND c.code_id = x.esti_st
+		WHERE x.rn = 1        <!-- ✅ 최신 버전만 -->
+		ORDER BY x.esti_id DESC
+	</select>
 	
-	                <!-- 납기일 시작일 : EstiSoVO.dueStart (LocalDate) -->
-	                <if test="dueStart != null">
-	                    AND e.due_dt &gt;= #{dueStart}
-	                </if>
+<!-- 이력보기 모달 -->
+	<select id="selectEstiHistory" resultType="store.yd2team.business.service.EstiSoVO">
+	    SELECT
+	        e.esti_id        AS estiId,
+	        e.version        AS version,
+	        e.tt_supply_amt  AS ttSupplyAmt,
+	        e.esti_st        AS estiSt,
+	        c.code_nm        AS estiStNm,
+	        TO_CHAR(e.crea_dt, 'YYYY-MM-DD') AS creaDt,
+	        e.crea_by        AS creaBy
+	    FROM tb_esti e
+	    LEFT JOIN tb_code c
+	      ON c.grp_id = 'esti'
+	     AND c.code_id = e.esti_st
+	    WHERE e.esti_id = #{estiId}
+	    ORDER BY e.version DESC
+	</select>
+
+<!-- 이력보기의 보기 모달 -->
+	<select id="selectEstiHeaderByVersion" resultType="store.yd2team.business.service.EstiSoVO">
+	    SELECT
+	        e.esti_id       AS estiId,
+	        e.version       AS version,
+	        e.custcom_id    AS custcomId,
+	        e.custcom_name  AS custcomName,
+	        e.due_dt        AS dueDt,
+	        e.tt_supply_amt AS ttSupplyAmt,
+	        e.esti_st       AS estiSt,
+	        e.rm            AS rm
+	    FROM tb_esti e
+	    WHERE e.esti_id = #{estiId}
+	      AND e.version = #{version}
+	</select>
 	
-	                <!-- 납기일 종료일 : EstiSoVO.dueEnd (LocalDate) -->
-	                <if test="dueEnd != null">
-	                    AND e.due_dt &lt;= #{dueEnd}
-	                </if>
-	            </where>
-	            GROUP BY
-	                   e.esti_id
-	                 , e.version
-	                 , e.custcom_name
-	                 , cd.cdtln_lmt
-	                 , e.due_dt
-	                 , e.so_dt
-	                 , e.esti_st
-	                 , e.recall_resn
-	         ) x
-	         LEFT JOIN tb_code c
-	           ON c.grp_id  = 'esti'
-	          AND c.code_id = x.esti_st
-	    ORDER BY
-	           x.esti_id DESC,
-	           x.version DESC
+	<select id="selectEstiDetailListByVersion" resultType="store.yd2team.business.service.EstiSoDetailVO">
+	    SELECT
+	        d.esti_detail_no AS estiDetailNo,
+	        d.esti_id        AS estiId,
+	        d.version        AS version,
+	        d.product_id     AS productId,
+	        p.product_name   AS productName,
+	        d.qy             AS qy,
+	        d.price          AS price,
+	        d.supply_amt     AS supplyAmt,
+	        d.rm             AS rm
+	    FROM tb_esti_detail d
+	    LEFT JOIN tb_product p
+	      ON p.product_id = d.product_id
+	    WHERE d.esti_id = #{estiId}
+	      AND d.version = #{version}
+	    ORDER BY d.esti_detail_no
 	</select>
 
 <!-- 승인 반려 상태값 업데이트 -->
@@ -84,9 +140,10 @@
 	       SET esti_st     = #{estiSt}
 	         , recall_resn = #{recallResn}
 	         , updt_dt     = SYSDATE
-	         , updt_by     = 'Admin'
+	         , updt_by     = #{updtBy}
 	     WHERE esti_id = #{estiId}
 	       AND version = #{version}
+	       AND vend_id = #{vendId}
 	</update>
 	
 <!-- 견적서 모달 상품 auto complete -->
@@ -137,83 +194,115 @@
 
 <!--  신규 견적서 모달 저장버튼 -->
 <!-- ======================= 헤더 INSERT (항상 INSERT) ======================= -->
-    <insert id="insertEsti" parameterType="store.yd2team.business.service.EstiSoVO">
-
-        <!-- fn_esti_id 로 PK 생성 → vo.estiId 에 세팅 -->
-        <selectKey keyProperty="estiId" resultType="string" order="BEFORE">
-            select fn_esti_id()
-            from dual
-        </selectKey>
-
-        insert into tb_esti (
-              esti_id
-            , version
-            , custcom_id
-            , cdtln_no
-            , custcom_name
-            , so_dt
-            , due_dt
-            , cdtln_lmt
-            , tt_supply_amt
-            , esti_st
-            , recall_resn
-            , rm
-            , crea_dt
-        ) values (
-              #{estiId}
-            , #{version}
-            , #{custcomId}
-            , #{cdtlnNo}
-            , #{custcomName}      <!-- 입력용 필드 -->
-            , sysdate
-            , #{dueDt}
-            , #{cdtlnLmt}
-            , #{ttSupplyAmt}
-            , #{estiSt}
-            , #{recallResn}
-            , #{rm}
-            , sysdate
-        )
-    </insert>
+    <insert id="insertNewEsti" parameterType="store.yd2team.business.service.EstiSoVO">
+	
+	    <!-- 신규일 때만 esti_id 생성 -->
+	    <selectKey keyProperty="estiId" resultType="string" order="BEFORE">
+	        SELECT fn_esti_id()
+	        FROM dual
+	    </selectKey>
+	
+	    INSERT INTO tb_esti (
+	          esti_id
+	        , version
+	        , vend_id
+	        , custcom_id
+	        , custcom_name
+	        , due_dt
+	        , tt_supply_amt
+	        , esti_st
+	        , rm
+	        , crea_dt
+	        , crea_by
+	    ) VALUES (
+	          #{estiId}
+	        , #{version}
+	        , #{vendId}
+	        , #{custcomId}
+	        , #{custcomName}
+	        , #{dueDt}
+	        , #{ttSupplyAmt}
+	        , #{estiSt}
+	        , #{rm}
+	        , SYSDATE
+	        , #{creaBy}
+	    )
+	</insert>
+	
+	<!-- 견적서 수정 (이력 INSERT) -->
+	<insert id="insertEstiHistory" parameterType="store.yd2team.business.service.EstiSoVO">
+	
+	    INSERT INTO tb_esti (
+	          esti_id
+	        , version
+	        , vend_id
+	        , custcom_id
+	        , custcom_name
+	        , due_dt
+	        , tt_supply_amt
+	        , esti_st
+	        , rm
+	        , crea_dt
+	        , crea_by
+	    ) VALUES (
+	          #{estiId}        <!-- 기존 esti_id 그대로 -->
+	        , #{version}
+	        , #{vendId}
+	        , #{custcomId}
+	        , #{custcomName}
+	        , #{dueDt}
+	        , #{ttSupplyAmt}
+	        , #{estiSt}
+	        , #{rm}
+	        , SYSDATE
+	        , #{creaBy}
+	    )
+	</insert>
 
     <!-- ======================= 상세 INSERT (항상 INSERT) ======================= -->
     <insert id="insertEstiDetail" parameterType="store.yd2team.business.service.EstiSoDetailVO">
 
-        <selectKey keyProperty="estiDetailNo" resultType="long" order="BEFORE">
-            select seq_esti_detail.nextval
-            from dual
-        </selectKey>
+	    <selectKey keyProperty="estiDetailNo" resultType="long" order="BEFORE">
+	        SELECT seq_esti_detail.nextval
+	        FROM dual
+	    </selectKey>
+	
+	    INSERT INTO tb_esti_detail (
+	          esti_detail_no
+	        , esti_id
+	        , version
+	        , vend_id
+	        , product_id
+	        , qy
+	        , price
+	        , supply_amt
+	        , rm
+	        , crea_dt
+	        , crea_by
+	    ) VALUES (
+	          #{estiDetailNo}
+	        , #{estiId}
+	        , #{version}
+	        , #{vendId}
+	        , #{productId}
+	        , #{qy}
+	        , #{price}
+	        , #{supplyAmt}
+	        , #{rm}
+	        , SYSDATE
+	        , #{creaBy}
+	    )
+	</insert>
 
-        insert into tb_esti_detail (
-              esti_detail_no
-            , esti_id
-            , version
-            , product_id
-            , qy
-            , price
-            , supply_amt
-            , rm
-            , crea_dt
-        ) values (
-              #{estiDetailNo}
-            , #{estiId}
-            , #{version}
-            , #{productId}
-            , #{qy}
-            , #{price}
-            , #{supplyAmt}
-            , #{rm}
-            , sysdate
-        )
-    </insert>
 
     <!-- ======================= 현재 버전 조회 ======================= -->
     <select id="selectCurrentVersion"
             parameterType="string"
             resultType="string">
-        select nvl(max(version), 0)
-        from tb_esti
-        where esti_id = #{estiId}
+        <!-- select nvl(max(version), 0) -->
+        SELECT MAX(version)
+        FROM tb_esti
+        WHERE esti_id = #{estiId}
     </select>
 
      <!-- ======================= 헤더 조회 (최신 버전 1건) ======================= -->
@@ -245,30 +334,28 @@
     </select>
 
     <!-- ======================= 상세 조회 (해당 estiId의 최신버전 상세) ======================= -->
-    <select id="selectEstiDetailList"
-	        parameterType="string"
-	        resultType="store.yd2team.business.service.EstiSoDetailVO">
-	    SELECT
-	          d.esti_detail_no   AS estiDetailNo
-	        , d.esti_id          AS estiId
-	        , d.version          AS version
-	        , d.vend_id          AS vendId
-	        , d.product_id       AS productId
-	        , p.product_name     AS productName   <!-- ▶ 상품명 -->
-	        , d.qy               AS qy
-	        , d.price            AS price
-	        , d.supply_amt       AS supplyAmt
-	        , d.rm               AS rm
-	    FROM tb_esti_detail d
-	         LEFT JOIN tb_product p
-	           ON d.product_id = p.product_id
-	    WHERE d.esti_id = #{estiId}
-	      AND d.version = (
-	            SELECT MAX(version)
-	            FROM tb_esti_detail
-	            WHERE esti_id = #{estiId}
-	      )
-	    ORDER BY d.esti_detail_no
+    <select id="selectEstiDetailList" parameterType="string" resultType="store.yd2team.business.service.EstiSoDetailVO">
+	
+	  SELECT
+	      d.esti_detail_no  AS estiDetailNo,
+	      d.esti_id         AS estiId,
+	      d.version         AS version,
+	      d.product_id      AS productId,
+	      p.product_name    AS productName,
+	      d.qy              AS qy,
+	      d.price           AS price,
+	      d.supply_amt      AS supplyAmt,
+	      d.rm              AS rm
+	  FROM tb_esti_detail d
+	  JOIN tb_product p
+	    ON p.product_id = d.product_id
+	  WHERE d.esti_id = #{estiId}
+	    AND d.version = (
+	        SELECT MAX(version)
+	        FROM tb_esti_detail
+	        WHERE esti_id = #{estiId}
+	    )
+	  ORDER BY d.esti_detail_no
 	</select>
     
     
@@ -280,70 +367,98 @@
 	
 	<!-- 주문 헤더 INSERT -->
 	<insert id="insertSo" parameterType="store.yd2team.business.service.EstiSoVO">
-	    insert into tb_so (
+	    INSERT INTO tb_so (
 	          so_id
+	        , vend_id
 	        , custcom_id
 	        , esti_id
 	        , version
+	        , so_dt
 	        , due_dt
 	        , tt_supply_price
 	        , tt_surtax_price
 	        , tt_price
 	        , tt_so_qy
-	        , rm
 	        , ship_addr
+	        , rm
+	        , rcipt_appo_dt
+	        , rcipt_appo_amt
+	        , appo_mtd
 	        , crea_dt
-	    ) values (
+	    ) VALUES (
 	          #{soId}
+	        , #{vendId}
 	        , #{custcomId}
 	        , #{estiId}
 	        , #{version}
+	        , SYSDATE
 	        , #{dueDt}
 	        , #{ttSupplyPrice}
 	        , #{ttSurtaxPrice}
 	        , #{ttPrice}
 	        , #{ttSoQy}
-	        , #{rm}
 	        , #{shipAddr}
-	        , sysdate
+	        , #{rm}
+	        , #{rciptAppoDt}
+	        , #{rciptAppoAmt}
+	        , #{appoMtd}
+	        , SYSDATE
 	    )
 	</insert>
+
 	
 	<!-- 주문 상세 INSERT -->
 	<insert id="insertSoDetail" parameterType="store.yd2team.business.service.EstiSoDetailVO">
-	
-	    <selectKey keyProperty="soDetailNo" resultType="long" order="BEFORE">
-	        select seq_so_detail.nextval
-	        from dual
-	    </selectKey>
-	
-	    insert into tb_so_detail (
+
+    <selectKey keyProperty="soDetailNo" resultType="long" order="BEFORE">
+        SELECT seq_so_detail.NEXTVAL
+        FROM dual
+    </selectKey>
+
+	    INSERT INTO tb_so_detail (
 	          so_detail_no
 	        , so_id
+	        , vend_id          -- 회사코드
 	        , product_id
 	        , qy
 	        , price
 	        , supply_price
 	        , rm
 	        , crea_dt
-	    ) values (
+	        , crea_by          -- 등록자
+	        , updt_dt
+	        , updt_by
+	    ) VALUES (
 	          #{soDetailNo}
 	        , #{soId}
+	        , #{vendId}
 	        , #{productId}
 	        , #{qy}
 	        , #{price}
-	        , #{supplyAmt}  <!-- 견적 supply_amt 그대로 사용 -->
+	        , #{supplyAmt}
 	        , #{rm}
-	        , sysdate
+	        , SYSDATE
+	        , #{creaBy}
+	        , SYSDATE
+	        , #{updtBy}
 	    )
 	</insert>
+
 	
 	<!-- 견적 상태를 주문완료(es4)로 변경 -->
-	<update id="updateEstiStatusToOrdered">
+<!-- 	<update id="updateEstiStatusToOrdered">
 	    update tb_esti
 	       set esti_st = 'es4'
 	     where esti_id = #{estiId}
 	       and version = #{version}
+	</update> -->
+	<update id="updateEstiStatusToOrdered">
+	    UPDATE tb_esti
+	       SET esti_st  = 'es4',
+	           updt_dt  = SYSDATE,
+	           updt_by  = #{updtBy}
+	     WHERE esti_id = #{estiId}
+	       AND version = #{version}
 	</update>
 
 
@@ -416,59 +531,78 @@
 
     <!-- 승인 상태 변경 -->
     <update id="updateSoStatusToApproved">
-        UPDATE tb_so
-        SET progrs_st = 'es2',
-            updt_dt = SYSDATE
-        WHERE so_id = #{soId}
-    </update>
+	    UPDATE tb_so
+	       SET progrs_st = 'es2',
+	           updt_dt   = SYSDATE,
+	           updt_by   = #{updtBy}
+	     WHERE so_id   = #{soId}
+	       AND vend_id = #{vendId}
+	</update>
+
     
     
     <!-- 주문 보류 처리 -->
 	<update id="updateRejectStatus">
 	    UPDATE tb_so
 	       SET progrs_st = 'es5',
-	           st_resn = #{reason},
-	           updt_dt = SYSDATE
-	     WHERE so_id = #{soId}
+	           st_resn   = #{reason},
+	           updt_dt   = SYSDATE,
+	           updt_by   = #{updtBy}
+	     WHERE so_id   = #{soId}
+	       AND vend_id = #{vendId}
 	</update>
+
 	
 	<!-- 주문 취소 처리 -->
 	<update id="updateCancelStatus">
 	    UPDATE tb_so
 	       SET progrs_st = 'es9',   -- 취소 상태
-	           st_resn = #{reason},
-	           updt_dt = SYSDATE
-	     WHERE so_id = #{soId}
+	           st_resn   = #{reason},
+	           updt_dt   = SYSDATE,
+	           updt_by   = #{updtBy}
+	     WHERE so_id   = #{soId}
+	       AND vend_id = #{vendId}
 	</update>
+
 	
 	<!-- 출하지시 INSERT -->
-	<insert id="insertOust">
+	<insert id="insertOust" parameterType="store.yd2team.business.service.OustVO">
 	    INSERT INTO tb_oust (
-	        oust_id,
-	        so_id,
-	        oust_plan_dt,
-	        oust_request_dt,
-	        ship_addr,
-	        rm,
-	        crea_dt
+	          oust_id
+	        , so_id
+	        , vend_id          -- 회사코드
+	        , oust_plan_dt
+	        , oust_request_dt
+	        , ship_addr
+	        , rm
+	        , crea_dt
+	        , crea_by          -- 등록자
+	        , updt_dt
+	        , updt_by
 	    ) VALUES (
-	        fn_oust_id(),
-	        #{soId},
-	        #{oustPlanDt},
-	        #{oustRequestDt},
-	        #{shipAddr},
-	        #{rm},
-	        SYSDATE
+	          fn_oust_id()
+	        , #{soId}
+	        , #{vendId}
+	        , #{oustPlanDt}
+	        , #{oustRequestDt}
+	        , #{shipAddr}
+	        , #{rm}
+	        , SYSDATE
+	        , #{creaBy}
+	        , SYSDATE
+	        , #{updtBy}
 	    )
 	</insert>
-	
+
 	
 	<!-- 주문서 상태 수정 -->
 	<update id="updateSoStatus">
 	    UPDATE tb_so
-	    SET progrs_st = #{status},
-	        updt_dt = SYSDATE,
-	        updt_by = 'SYSTEM'
-	    WHERE so_id = #{soId}
+	       SET progrs_st = #{status},
+	           updt_dt   = SYSDATE,
+	           updt_by   = #{updtBy}
+	     WHERE so_id   = #{soId}
+	       AND vend_id = #{vendId}
 	</update>
+
 </mapper>

@@ -47,6 +47,8 @@ public class EstiSoVO {
     private String rm;             // rm
 
     // 공통
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate creaDt;
     private String creaBy;         // 등록자
     private String updtBy;         // 수정자
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -76,11 +78,12 @@ public class EstiSoVO {
     
     private String header;
     
-    private String sttlMthd;
+    private List<EstiSoDetailVO> details;
+    
+    // 입금약속
     private Long rciptAppoAmt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate rciptAppoDt;
-    
-    private List<EstiSoDetailVO> details;
+    private String appoMtd;
 }
 

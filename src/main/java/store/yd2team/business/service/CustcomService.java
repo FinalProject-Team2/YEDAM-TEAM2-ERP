@@ -12,4 +12,6 @@ public interface CustcomService {
 
 	//공통코드 조회
 	List<CustcomVO> getBSType();
+	
+	
 }
