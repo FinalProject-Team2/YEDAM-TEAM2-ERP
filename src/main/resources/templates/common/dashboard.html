@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>대시보드</title>
+
+  <style>
+    .dash-wrap { padding: 8px 4px; }
+    .dash-kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .dash-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; background: #fff; }
+    .dash-card .t { font-size: 12px; color: #6b7280; }
+    .dash-card .v { font-size: 22px; font-weight: 800; margin-top: 6px; }
+    .dash-mid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .dash-bot { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .dash-title { font-weight: 800; margin-bottom: 10px; }
+    .chart-box { height: 320px; }
+    .grid-box { height: 360px; }
+  </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="dash-wrap">
+
+    <h3 class="mb-3">계정/권한 · 보안 대시보드</h3>
+
+    <!-- KPI -->
+    <div class="dash-kpi">
+      <div class="dash-card"><div class="t">전체 사원 수</div><div class="v" id="k_totalEmp">-</div></div>
+      <div class="dash-card"><div class="t">활성 계정 수</div><div class="v" id="k_activeAcct">-</div></div>
+      <div class="dash-card"><div class="t">권한 없는 계정 수</div><div class="v" id="k_noRoleAcct">-</div></div>
+      <div class="dash-card"><div class="t">현재 잠김 계정 수</div><div class="v" id="k_lockedNow">-</div></div>
+
+      <div class="dash-card"><div class="t">오늘 로그인 성공</div><div class="v" id="k_loginSuccToday">-</div></div>
+      <div class="dash-card"><div class="t">오늘 로그인 실패</div><div class="v" id="k_loginFailToday">-</div></div>
+      <div class="dash-card"><div class="t">오늘 OTP 실패</div><div class="v" id="k_otpFailToday">-</div></div>
+      <div class="dash-card"><div class="t">오늘 잠금 발생</div><div class="v" id="k_lockedToday">-</div></div>
+    </div>
+
+    <!-- Charts -->
+    <div class="dash-mid">
+      <div class="dash-card">
+        <div class="dash-title">계정 상태 분포 (tb_emp_acct.st)</div>
+        <div id="chartStatus" class="chart-box"></div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-title">역할 분포 (tb_role.role_ty)</div>
+        <div id="chartRole" class="chart-box"></div>
+      </div>
+    </div>
+
+    <!-- Grids -->
+    <div class="dash-bot">
+      <div class="dash-card">
+        <div class="dash-title">최근 로그인 실패 TOP 10</div>
+        <div id="gridFailTop" class="grid-box"></div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-title">최근 권한 변경 내역 (ro1, au1)</div>
+        <div id="gridAuthChg" class="grid-box"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= JS ================= -->
+  <script>
+    /* ========= helpers ========= */
+    function setText(id, v) {
+      document.getElementById(id).textContent = (v ?? 0);
+    }
+
+    /* ========= Chart ========= */
+    let statusChart = null;
+    let roleChart = null;
+
+    function renderPie(elId, rows) {
+      const el = document.getElementById(elId);
+      el.innerHTML = '';
+
+      return toastui.Chart.pieChart({
+        el,
+        data: {
+          series: rows.map(r => ({
+            name: r.label,
+            data: r.cnt
+          }))
+        },
+        options: {
+          chart: { width: el.clientWidth, height: 300 },
+          legend: { visible: true },
+          series: { radiusRange: { inner: '45%', outer: '90%' } }
+        }
+      });
+    }
+
+    /* ========= Grid ========= */
+    let gridFailTop;
+    let gridAuthChg;
+
+    function initGrids() {
+      gridFailTop = new tui.Grid({
+        el: document.getElementById('gridFailTop'),
+        bodyHeight: 320,
+        rowHeaders: ['rowNum'],
+        columns: [
+          { header: '계정ID', name: 'empAcctId', width: 190 },
+          { header: '실패횟수', name: 'failCnt', width: 100, align: 'center' },
+          { header: '최근실패', name: 'lastFailDttm', minWidth: 170 }
+        ]
+      });
+
+      gridAuthChg = new tui.Grid({
+        el: document.getElementById('gridAuthChg'),
+        bodyHeight: 320,
+        rowHeaders: ['rowNum'],
+        columns: [
+          { header: '일시', name: 'errDttm', width: 170 },
+          { header: '계정ID', name: 'empAcctId', width: 170 },
+          { header: '동작', name: 'motionTy', width: 80, align: 'center' },
+          { header: '요약', name: 'smry', minWidth: 240 }
+        ]
+      });
+    }
+
+    /* ========= API ========= */
+    async function loadSummary() {
+      const res = await fetch('/api/dashboard/summary');
+      const data = await res.json();
+      const s = data.summary;
+
+      setText('k_totalEmp', s.totalEmp);
+      setText('k_activeAcct', s.activeAcct);
+      setText('k_noRoleAcct', s.noRoleAcct);
+      setText('k_lockedNow', s.lockedNow);
+      setText('k_loginSuccToday', s.loginSuccToday);
+      setText('k_loginFailToday', s.loginFailToday);
+      setText('k_otpFailToday', s.otpFailToday);
+      setText('k_lockedToday', s.lockedToday);
+
+      if (statusChart) statusChart.destroy();
+      if (roleChart) roleChart.destroy();
+
+      statusChart = renderPie('chartStatus', data.acctStatusDist || []);
+      roleChart = renderPie('chartRole', data.roleTypeCount || []);
+    }
+
+    async function loadRecent() {
+      const res = await fetch('/api/dashboard/recent');
+      const data = await res.json();
+
+      gridFailTop.resetData(data.topLoginFail || []);
+      gridAuthChg.resetData(data.recentAuthChanges || []);
+    }
+
+    /* ========= boot ========= */
+    document.addEventListener('DOMContentLoaded', async () => {
+      initGrids();
+      await loadSummary();
+      await loadRecent();
+
+      window.addEventListener('resize', () => loadSummary());
+    });
+  </script>
+</div>
+</body>
+</html>

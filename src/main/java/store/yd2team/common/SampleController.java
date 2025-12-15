@@ -9,7 +9,7 @@ import store.yd2team.common.util.LoginSession;
 @Controller
 public class SampleController {
 	//test
-		@GetMapping("/")
+		@GetMapping("/sam")
 		public String selectall(Model model) {
 			
 			
