@@ -1,5 +1,7 @@
 package store.yd2team.business.service;
-import java.util.Date;
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 @Data
@@ -10,17 +12,19 @@ public class CreditVO {
    private String vendId;
    private String custcomId;
    private String custcomName;
-   private String credtGrad;
+   private String creditGrad;
    private String cdtlnCheck;
    private Long mrtggLmt;
    private Long creditLmt;
    private Long cdtlnLmt;
    private String lmtoverCheck;
    private String yn;
-   private Date applcBeginDt;
-   private Date applcEndDt;
-   private String creaBy;
-   private Date lastEvalDt;
+   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+   private LocalDate applcBeginDt;
+   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+   private LocalDate applcEndDt;
+   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+   private LocalDate lastEvalDt;
    private int useRate;
    
    // --- 신규 추가 (여신관리 기능 강화용)
@@ -44,7 +48,13 @@ public class CreditVO {
    // 원금잔액
    private Long prinsumBaln;
    
-
+   // 세션
+   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+   private LocalDate creaDt;
+   private String creaBy;
+   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+   private LocalDate updtDt;
+   private String updtBy;
    
    
 }

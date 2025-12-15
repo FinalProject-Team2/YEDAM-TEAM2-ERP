@@ -1,6 +1,9 @@
 package store.yd2team.business.service.impl;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import store.yd2team.business.mapper.CreditMapper;
 import store.yd2team.business.service.AtmptVO;
@@ -71,6 +74,30 @@ public class CreditServiceImpl implements CreditService {
        }
        return updatedCount;
    }
+   
+// 저장버튼이벤트
+   @Override
+   @Transactional
+   public void saveCreditLimit(List<CreditVO> list) {
+
+       for (CreditVO vo : list) {
+
+           // 🔹 null 방어
+           if (vo.getCustcomId() == null) {
+               continue;
+           }
+
+           // 🔹 여신체크가 N이면 한도 0 처리 (실무 룰)
+           if ("N".equals(vo.getCdtlnCheck())) {
+               vo.setMrtggLmt(0L);
+               vo.setCreditLmt(0L);
+               vo.setCdtlnLmt(0L);
+           }
+
+           creditMapper.updateCreditLimit(vo);
+       }
+   }
+   
 @Override
 public int insertCdtlnLmt(CreditVO vo) {
 	// TODO Auto-generated method stub
