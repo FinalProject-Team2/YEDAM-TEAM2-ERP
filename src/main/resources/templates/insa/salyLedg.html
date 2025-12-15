@@ -894,7 +894,7 @@
           empId: v.empId,
           empNm: v.empNm,
           deptNm: v.deptNm || "",
-          calcGrpNm: selectedGrpNm ? selectedGrpNm : ""
+          calcGrpNm: ""
         }));
 
         gridCalc.setColumns([...baseCalcColumns]);
@@ -1593,11 +1593,19 @@
       closeSalyItemModal();
 
       if (gridCalc) {
-        const rows = gridCalc.getData() || [];
-        rows.forEach(r => { r.calcGrpNm = selectedGrpNm; });
-        gridCalc.resetData(rows);
-        if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
-      }
+    	  const rows = gridCalc.getData() || [];
+    	  const checked = gridCalc.getCheckedRows() || [];
+    	  const selectedSet = new Set(checked.map(r => r.salySpecId));
+
+    	  rows.forEach(r => {
+    	    if (selectedSet.has(r.salySpecId)) {
+    	      r.calcGrpNm = selectedGrpNm;
+    	    }
+    	  });
+
+    	  gridCalc.resetData(rows);
+    	  if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
+    	}
 
       if (!gridCalc) return;
       if (!currentCalcSalyLedgId) {

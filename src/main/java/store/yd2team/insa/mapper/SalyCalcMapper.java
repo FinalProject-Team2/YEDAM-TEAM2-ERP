@@ -19,13 +19,14 @@ public interface SalyCalcMapper {
 
     String selectEmpIdBySpecId(@Param("salySpecId") String salySpecId);
 
-    /**
-     * ✅ OUT CURSOR 결과는 Map의 o_result로 꺼내는 방식
-     */
     void callPrcCalcSalyItems(Map<String, Object> p);
 
-    /** ✅ FIX: grpNo 제거 (spec 기준 전체 삭제) */
-    void deleteSpecItemsBySpec(@Param("salySpecId") String salySpecId);
+    void deleteSpecItemsBySpecAndGrp(@Param("salySpecId") String salySpecId,
+                                     @Param("grpNo") Long grpNo);
+
+    void deleteSpecItemsBySpecAndItemIds(Map<String, Object> p);
+
+    Long selectNextSpecItemNo();
 
     void insertSpecItems(Map<String, Object> p);
 
@@ -43,7 +44,7 @@ public interface SalyCalcMapper {
                                           @Param("grpNo") Long grpNo);
 
     void deleteGrpItemsByGrpNo(@Param("vendId") String vendId,
-                              @Param("grpNo") Long grpNo);
+                               @Param("grpNo") Long grpNo);
 
     void insertGrpItems(Map<String, Object> p);
 

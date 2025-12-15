@@ -41,18 +41,6 @@ public class SalyCalcServiceImpl implements SalyCalcService {
         return salyCalcMapper.selectSalySpecItems(salySpecId, grpNo);
     }
 
-    /**
-     * ✅ 급여계산 실행
-     * - salySpecIdList 선택된 것만
-     * - 프로시저 결과를 tb_saly_spec_item 저장
-     * - 저장 순서: 수당(A) disp_no 순 → 공제(D) disp_no 순
-     * - tb_saly_spec 합계(pay_amt/tt_duc_amt/act_pay_amt) 갱신
-     *
-     * ✅ FIX 핵심(이번 ORA-00001):
-     * - 프로시저 결과에 같은 (item_ty + item_id)가 중복으로 내려올 수 있음
-     * - PK가 그 조합을 포함하면 INSERT 때 ORA-00001 발생
-     * - 그래서 insert 전에 (item_ty + item_id) 기준으로 "합산/중복제거" 후 저장
-     */
     @Override
     @Transactional
     public void calculateSalyLedg(String salyLedgId, Long grpNo, List<String> salySpecIdList,
@@ -62,15 +50,13 @@ public class SalyCalcServiceImpl implements SalyCalcService {
         if (grpNo == null) throw new IllegalArgumentException("grpNo is required");
         if (salySpecIdList == null || salySpecIdList.isEmpty()) throw new IllegalArgumentException("salySpecIdList is empty");
 
-        // ✅ 그룹에 매핑된 항목들의 dispNo 맵(정렬 기준)
         Map<String, Long> allowDispMap = new HashMap<>();
         Map<String, Long> ducDispMap = new HashMap<>();
 
         List<AllowDucVO> allowList = salyCalcMapper.selectAllowListForCalc(vendId, grpNo);
         if (allowList != null) {
             for (AllowDucVO vo : allowList) {
-                if (vo == null) continue;
-                if (vo.getAllowId() == null) continue;
+                if (vo == null || vo.getAllowId() == null) continue;
                 allowDispMap.put(vo.getAllowId(), vo.getDispNo() == null ? 999999L : vo.getDispNo());
             }
         }
@@ -78,8 +64,7 @@ public class SalyCalcServiceImpl implements SalyCalcService {
         List<AllowDucVO> ducList = salyCalcMapper.selectDucListForCalc(vendId, grpNo);
         if (ducList != null) {
             for (AllowDucVO vo : ducList) {
-                if (vo == null) continue;
-                if (vo.getDucId() == null) continue;
+                if (vo == null || vo.getDucId() == null) continue;
                 ducDispMap.put(vo.getDucId(), vo.getDispNo() == null ? 999999L : vo.getDispNo());
             }
         }
@@ -87,13 +72,11 @@ public class SalyCalcServiceImpl implements SalyCalcService {
         for (String salySpecId : salySpecIdList) {
             if (salySpecId == null || salySpecId.isBlank()) continue;
 
-            // 1) salySpecId -> empId
             String empId = salyCalcMapper.selectEmpIdBySpecId(salySpecId);
             if (empId == null || empId.isBlank()) {
                 throw new IllegalStateException("empId not found for salySpecId=" + salySpecId);
             }
 
-            // 2) 프로시저 호출 (OUT CURSOR는 p.get("o_result")로 받는다)
             Map<String, Object> p = new HashMap<>();
             p.put("p_saly_ledg_id", salyLedgId);
             p.put("p_emp_id", empId);
@@ -106,47 +89,9 @@ public class SalyCalcServiceImpl implements SalyCalcService {
             List<PayItemRowVO> items = (List<PayItemRowVO>) p.get("o_result");
             if (items == null) items = List.of();
 
-            // ============================================================
-            // ✅ FIX: (itemTy + itemId) 기준으로 중복 제거/합산
-            // - 같은 항목이 2번 나오면 amt를 합쳐서 1건으로 만든다
-            // - 이렇게 하면 PK 중복으로 ORA-00001 안 남
-            // ============================================================
-            LinkedHashMap<String, PayItemRowVO> merged = new LinkedHashMap<>();
-            for (PayItemRowVO it : items) {
-                if (it == null) continue;
-
-                String ty = it.getItemTy() == null ? "" : it.getItemTy().trim().toUpperCase(Locale.ROOT);
-                String id = it.getItemId() == null ? "" : it.getItemId().trim();
-
-                if (ty.isBlank() || id.isBlank()) continue; // PK 구성일 가능성 높아서 빈 값은 저장 제외
-
-                String key = ty + "|" + id;
-
-                PayItemRowVO exist = merged.get(key);
-                if (exist == null) {
-                    PayItemRowVO one = new PayItemRowVO();
-                    one.setItemTy(ty);
-                    one.setItemId(id);
-                    one.setItemNm(it.getItemNm());
-                    one.setAmt(it.getAmt() == null ? 0L : it.getAmt());
-                    merged.put(key, one);
-                } else {
-                    long a = (exist.getAmt() == null ? 0L : exist.getAmt());
-                    long b = (it.getAmt() == null ? 0L : it.getAmt());
-                    exist.setAmt(a + b);
-
-                    // 이름이 비어있던 경우 보정
-                    if ((exist.getItemNm() == null || exist.getItemNm().isBlank())
-                            && it.getItemNm() != null && !it.getItemNm().isBlank()) {
-                        exist.setItemNm(it.getItemNm());
-                    }
-                }
-            }
-
-            List<PayItemRowVO> mergedList = new ArrayList<>(merged.values());
-
-            // ✅ A 먼저 → dispNo 기준 정렬 → 그 다음 D dispNo
-            mergedList.sort((x, y) -> {
+            // ✅ 1) 먼저 정렬
+            List<PayItemRowVO> sorted = new ArrayList<>(items);
+            sorted.sort((x, y) -> {
                 if (x == null && y == null) return 0;
                 if (x == null) return 1;
                 if (y == null) return -1;
@@ -175,27 +120,72 @@ public class SalyCalcServiceImpl implements SalyCalcService {
                 return xid.compareTo(yid);
             });
 
-            // 3) 기존 항목 삭제 (지웅님이 이미 바꾼 spec 기준 삭제 유지)
-            salyCalcMapper.deleteSpecItemsBySpec(salySpecId);
+            // ✅ 2) (핵심) itemTy+itemId 기준 중복 제거(amt 합산)
+            // PK가 item_no가 아니어도 여기서 중복이 사라져서 ORA-00001 방지됨
+            Map<String, PayItemRowVO> dedup = new LinkedHashMap<>();
+            for (PayItemRowVO it : sorted) {
+                if (it == null) continue;
+                String ty = it.getItemTy() == null ? "" : it.getItemTy().toUpperCase(Locale.ROOT);
+                String id = it.getItemId() == null ? "" : it.getItemId();
+                if (id.isBlank()) continue;
 
-            // 4) insert 준비 + 합계 계산
+                String key = ty + "|" + id;
+
+                PayItemRowVO prev = dedup.get(key);
+                if (prev == null) {
+                    PayItemRowVO n = new PayItemRowVO();
+                    n.setItemTy(it.getItemTy());
+                    n.setItemId(it.getItemId());
+                    n.setItemNm(it.getItemNm());
+                    n.setAmt(it.getAmt() == null ? 0L : it.getAmt());
+                    dedup.put(key, n);
+                } else {
+                    long a = prev.getAmt() == null ? 0L : prev.getAmt();
+                    long b = it.getAmt() == null ? 0L : it.getAmt();
+                    prev.setAmt(a + b);
+                    if ((prev.getItemNm() == null || prev.getItemNm().isBlank()) && it.getItemNm() != null) {
+                        prev.setItemNm(it.getItemNm());
+                    }
+                }
+            }
+            List<PayItemRowVO> finalItems = new ArrayList<>(dedup.values());
+
+            // ✅ 3) 기존 spec+grp 삭제는 그대로
+            salyCalcMapper.deleteSpecItemsBySpecAndGrp(salySpecId, grpNo);
+
+            // ✅ 4) (핵심) 이번에 넣을 item_id만 추가 삭제 → 다른 grp에 남아있던 동일 item_id 충돌 제거
+            List<String> itemIdList = finalItems.stream()
+                    .map(PayItemRowVO::getItemId)
+                    .filter(Objects::nonNull)
+                    .filter(s -> !s.isBlank())
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            if (!itemIdList.isEmpty()) {
+                Map<String, Object> del = new HashMap<>();
+                del.put("salySpecId", salySpecId);
+                del.put("itemIdList", itemIdList);
+                salyCalcMapper.deleteSpecItemsBySpecAndItemIds(del);
+            }
+
+            // ✅ 5) insert 준비 + 합계
             List<Map<String, Object>> insertList = new ArrayList<>();
-
             long payAmt = 0L;
             long ttDucAmt = 0L;
 
-            for (PayItemRowVO it : mergedList) {
-                if (it == null) continue;
-
+            for (PayItemRowVO it : finalItems) {
                 String itemTy = it.getItemTy();
                 long amt = (it.getAmt() == null ? 0L : it.getAmt());
 
                 if ("A".equalsIgnoreCase(itemTy)) payAmt += amt;
                 else if ("D".equalsIgnoreCase(itemTy)) ttDucAmt += amt;
 
+                Long itemNo = salyCalcMapper.selectNextSpecItemNo();
+
                 Map<String, Object> row = new HashMap<>();
                 row.put("salySpecId", salySpecId);
                 row.put("grpNo", grpNo);
+                row.put("itemNo", itemNo);
                 row.put("itemTy", it.getItemTy());
                 row.put("itemId", it.getItemId());
                 row.put("itemNm", it.getItemNm());
@@ -211,7 +201,6 @@ public class SalyCalcServiceImpl implements SalyCalcService {
                 salyCalcMapper.insertSpecItems(ins);
             }
 
-            // 5) 합계 갱신
             long actPayAmt = payAmt - ttDucAmt;
 
             Map<String, Object> upd = new HashMap<>();
@@ -322,8 +311,6 @@ public class SalyCalcServiceImpl implements SalyCalcService {
         salyCalcMapper.deleteGrpItemsByGrpNo(vendId, grpNo);
         salyCalcMapper.deleteCalcGroup(vendId, grpNo);
     }
-
-    // ----------------- 내부 유틸 -----------------
 
     private List<Map<String, Object>> buildGrpItemRows(String vendId, Long grpNo, String creaBy, List<String> itemIds) {
         List<Map<String, Object>> rows = new ArrayList<>();
