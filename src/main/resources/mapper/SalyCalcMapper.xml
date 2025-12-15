@@ -47,18 +47,32 @@
     <result property="amt"    column="AMT"/>
   </resultMap>
 
-  <!-- ============================================================
-       ✅ FIX 핵심
-       - PK가 (saly_spec_id, item_id ...) 계열이면
-         grp_no로만 지우면 이전 grp에서 들어간 item이 남아서
-         다음 insert 때 ORA-00001 터짐
-       - 그래서 saly_spec_id 기준으로 "해당 명세서 계산결과 전부 삭제"
-       ============================================================ -->
-  <delete id="deleteSpecItemsBySpec">
+  <delete id="deleteSpecItemsBySpecAndGrp">
     DELETE
       FROM tb_saly_spec_item
      WHERE saly_spec_id = #{salySpecId}
+       AND grp_no       = #{grpNo}
   </delete>
+
+  <delete id="deleteSpecItemsBySpecAndItemIds" parameterType="map">
+    DELETE
+      FROM tb_saly_spec_item
+     WHERE saly_spec_id = #{salySpecId}
+       AND item_id IN
+       <foreach collection="itemIdList" item="id" open="(" close=")" separator=",">
+         #{id}
+       </foreach>
+  </delete>
+
+  <!-- =========================
+       ✅ FIX 핵심: 캐시 OFF
+       - 파라미터 없는 NEXTVAL 조회는 MyBatis 로컬캐시로
+         같은 값이 반복될 수 있음
+       - useCache=false, flushCache=true로 강제
+       ========================= -->
+  <select id="selectNextSpecItemNo" resultType="long" useCache="false" flushCache="true">
+    SELECT SEQ_SALY_SPEC_ITEM.NEXTVAL FROM dual
+  </select>
 
   <insert id="insertSpecItems" parameterType="map">
     INSERT ALL
@@ -76,7 +90,7 @@
       ) VALUES (
           #{it.salySpecId},
           #{it.grpNo},
-          SEQ_SALY_SPEC_ITEM.NEXTVAL,
+          #{it.itemNo},
           #{it.itemTy},
           #{it.itemId},
           #{it.itemNm},

@@ -18,6 +18,9 @@ public class SalySpecCalcViewVO {
     private String empId;
     private String empNm;
     private String deptNm;
+//    private Long grpNo;
+//    private String calcGrpNm;
+
 
     private Long payAmt;      // 지급합
     private Long ttDucAmt;    // 공제합
