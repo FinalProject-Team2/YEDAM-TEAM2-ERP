@@ -649,11 +649,24 @@ function fetchDiscountRate(rowKey, productId) {
 	    	      type: 'text',
 	    	      options: {
 	    	          inputType: 'number'
-	    	      }
-	    	  }},
-	      { header: '판매단가', name: 'basisSaleAmt',  width: 180, align:'right' },
+    	      },
+			  formatter: ({ value }) => {
+                   const num = toNumber(value);
+                   return num ? num.toLocaleString() : '';
+              }
+    	  	}
+    	  },
+	      { header: '판매단가', name: 'basisSaleAmt',  width: 180, align:'right',
+				formatter: ({ value }) => {
+	                   const num = toNumber(value);
+	                   return num ? num.toLocaleString() : '';
+	               } },
 	      { header: '할인율(%)', name: 'dcRate',  width: 90, align:'right' },
-	      { header: '할인금액', name: 'saleAmt',  width: 180, align:'right' },
+	      { header: '할인금액', name: 'saleAmt',  width: 180, align:'right',
+				formatter: ({ value }) => {
+	                   const num = toNumber(value);
+	                   return num ? num.toLocaleString() : '';
+	               } },
 	      { 
 	    	  header: '최종금액', 
 	    	  name: 'finalAmt',  

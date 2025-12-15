@@ -100,9 +100,9 @@
                    </div>
                    <div class="card-header-right">
                        <!-- 여신 평가 버튼 추가 -->
-                       <button type="button" class="btn btn-outline-danger me-2" id="creditEval">여신평가</button>
+                       <!-- <button type="button" class="btn btn-outline-danger me-2" id="creditEval">여신평가</button> -->
                        <!-- <button type="button" class="btn btn-outline-dark" id="newBtn">행추가</button> -->
-                       <div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_006', 'newBtn')}"></div>
+                       <!-- <div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_006', 'newBtn')}"></div> -->
                        <button type="button" class="btn btn-dark" id="limitInit">초기화</button>
                        <!-- <button type="button" class="btn btn-outline-dark" id="saveBtn">저장</button> -->
                        <div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_006', 'saveBtn')}"></div>
@@ -112,7 +112,7 @@
                    <!-- 간단한 범례 -->
                    <div class="mb-2" style="font-size: 12px;">
                        <span class="badge bg-secondary">※ 사용률(%) = 원금잔액 / 여신한도 × 100</span>
-                       <span class="ms-2 bad-credit-badge">악성여신</span>
+                       <!-- <span class="ms-2 bad-credit-badge">악성여신</span> -->
                        <span class="ms-2 ship-hold-badge">출하정지</span>
                    </div>
                    <div class="creditGridWrap">
@@ -135,7 +135,7 @@
    const creditData = [];
    // 2. Grid 공통 옵션
    const businessGridOptions = {
-       bodyHeight: 260,
+       bodyHeight: 400,
        scrollX: true,
        scrollY: true,
        rowHeaders: [],
@@ -181,23 +181,22 @@
            },
            // ✅ 신용등급: 더블클릭 시 셀렉트 박스로 편집
            {
-             header: '신용등급',
-             name: 'credtGrad',
-             width: 90,
-             align: 'center',
-             editor: {
-               type: 'select',
-               options: {
-                 listItems: [
-                   { text: 'A', value: 'A' },
-                   { text: 'B', value: 'B' },
-                   { text: 'C', value: 'C' },
-                   { text: 'D', value: 'D' }
-                 ]
+               header: '신용등급',
+               name: 'creditGrad',
+               width: 90,
+               align: 'center',
+               editor: {
+                 type: 'select',
+                 options: {
+                   listItems: [
+                     { text: 'A', value: 'A' },
+                     { text: 'B', value: 'B' },
+                     { text: 'C', value: 'C' },
+                     { text: 'D', value: 'D' }
+                   ]
+                 }
                }
-             }
-           },
-
+             },
            // ✅ 여신체크: 더블클릭 시 Y/N 선택
            {
              header: '여신체크',
@@ -279,7 +278,7 @@
                width: 110,
                align: 'right'
            },
-           {
+           /* {
                header: '악성여신',
                name: 'badCreditYn',
                width: 80,
@@ -290,11 +289,11 @@
                    }
                    return '';
                }
-           },
+           }, */
            {
                header: '출하정지',
                name: 'shipHoldYn',
-               width: 80,
+               width: 120,
                align: 'center',
                formatter: ({ value }) => {
                    if (value === 'Y') {
@@ -314,7 +313,7 @@
            },
            /* ▲ 여신현황 컬럼 끝 ▲ */
            { header: '한도초과여부', name: 'lmtoverCheck', width: 110, align: 'center' },
-           {
+           /* {
                header: '적용시작일',
                name: 'applcBeginDt',
                width: 130,
@@ -325,7 +324,7 @@
                name: 'applcEndDt',
                width: 130,
                editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' } }
-           }
+           } */
        ]
    });
    
@@ -580,7 +579,42 @@
    
    
 	//9. modalSaveBtn(저장버튼) 이벤트
-	document.getElementById("saveBtn").addEventListener("click", function () {
+	document.getElementById('saveBtn').addEventListener('click', () => {
+	
+	  const { updatedRows } = creditGrid.getModifiedRows();
+	
+	  if (!updatedRows || updatedRows.length === 0) {
+	    alert('저장할 변경사항이 없습니다.');
+	    return;
+	  }
+	
+	  // 👉 서버로 보낼 데이터 가공
+	  const payload = updatedRows.map(row => ({
+	    custcomId: row.custcomId,
+	    creditGrad: row.creditGrad,
+	    cdtlnCheck: row.cdtlnCheck,
+	    mrtggLmt: toNumber(row.mrtggLmt),
+	    creditLmt: toNumber(row.creditLmt),
+	    cdtlnLmt: toNumber(row.cdtlnLmt)
+	  }));
+	
+	  console.log('저장 payload:', payload); // ⭐ 디버깅용
+	
+	  axios.post('/credit/save', payload)
+	    .then(res => {
+	      if (res.data.result === 'success') {
+	        alert('저장 완료');
+	        creditGrid.clearModifiedData(); // ⭐ 변경 상태 초기화
+	      } else {
+	        alert(res.data.message || '저장 실패');
+	      }
+	    })
+	    .catch(err => {
+	      console.error(err);
+	      alert('저장 중 오류 발생');
+	    });
+	});
+	/* document.getElementById("saveBtn").addEventListener("click", function () {
 	
 	    const payload = creditGrid.getModifiedRows().createdRows[0];
 	
@@ -604,7 +638,7 @@
 	            console.error("저장 중 오류:", err);
 	            alert("저장 중 오류가 발생했습니다.");
 	        });
-	});
+	}); */
 
 </script>
 </body>

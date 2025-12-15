@@ -21,6 +21,9 @@ public interface CreditMapper {
 	//
 	int updateCreditEval(CreditVO eval);
 	
+	// 저장버튼 이벤트
+	int updateCreditLimit(CreditVO vo);
+	
 	//여신등록
 	int insertCdtlnLmt(CreditVO vo);
 	

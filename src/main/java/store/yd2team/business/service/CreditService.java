@@ -17,6 +17,9 @@ public interface CreditService {
 	//   - 반환값: 평가·업데이트된 고객사 수 (원하는 대로 int / void 등으로 바꿔도 됨)
 	int evaluateCredit(CreditVO vo) throws Exception;
 	
+	// 저장
+	void saveCreditLimit(List<CreditVO> list);
+	
 	//여신등록
 	int insertCdtlnLmt(CreditVO vo);
 	

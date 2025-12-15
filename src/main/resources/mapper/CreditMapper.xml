@@ -99,6 +99,18 @@
    </select>
    
    
+   <!-- 저장버튼 이벤트 -->
+    <update id="updateCreditLimit" parameterType="store.yd2team.business.service.CreditVO">
+        UPDATE tb_cdtln_lmt
+           SET credit_grad  = #{creditGrad},
+               cdtln_check  = #{cdtlnCheck},
+               mrtgg_lmt    = #{mrtggLmt},
+               credit_lmt   = #{creditLmt},
+               cdtln_lmt    = #{cdtlnLmt},
+               updt_dt      = SYSDATE
+         WHERE custcom_id   = #{custcomId}
+    </update>
+   
    <!-- CreditMapper.xml 예시 -->
 	<insert id="insertCdtlnLmt"
         parameterType="store.yd2team.business.service.CreditVO">

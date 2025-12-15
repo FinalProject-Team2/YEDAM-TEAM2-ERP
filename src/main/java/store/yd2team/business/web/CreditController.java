@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import store.yd2team.business.service.CreditService;
 import store.yd2team.business.service.CreditVO;
 import store.yd2team.business.service.CustcomVO;
+
 @Controller
 @RequestMapping("/credit")
 @RequiredArgsConstructor
@@ -75,28 +76,42 @@ public class CreditController {
    }
    
     // 저장
-    @PostMapping("/save")
-	@ResponseBody
-	public Map<String, Object> saveNewCust(@RequestBody CreditVO vo) {
-	    Map<String, Object> result = new HashMap<>();
+   @PostMapping("/save")
+   @ResponseBody
+   public Map<String, Object> saveCreditLimit(@RequestBody List<CreditVO> list) {
 
-	    try {
-	        System.out.println("### Controller Request VO : " + vo);
+       Map<String, Object> result = new HashMap<>();
 
-	        int saveResult = creditService.insertCdtlnLmt(vo);
+       try {
+           creditService.saveCreditLimit(list);
+           result.put("result", "success");
+       } catch (Exception e) {
+           e.printStackTrace();
+           result.put("result", "fail");
+           result.put("message", "저장 중 오류가 발생했습니다.");
+       }
 
-	        result.put("result", saveResult > 0 ? "success" : "success"); // 무조건 success 처리
-	        result.put("message", "신규 여신 저장 완료");
-
-	    } catch (Exception e) {
-	        System.out.println("### Exception : " + e.getMessage());
-	        result.put("result", "fail");
-	        result.put("message", e.getMessage());
-	    }
-
-	    System.out.println("### Final Response : " + result);
-	    return result;
-	}
+       return result;
+   }
+	/*
+	 * @PostMapping("/save")
+	 * 
+	 * @ResponseBody public Map<String, Object> saveNewCust(@RequestBody CreditVO
+	 * vo) { Map<String, Object> result = new HashMap<>();
+	 * 
+	 * try { System.out.println("### Controller Request VO : " + vo);
+	 * 
+	 * int saveResult = creditService.insertCdtlnLmt(vo);
+	 * 
+	 * result.put("result", saveResult > 0 ? "success" : "success"); // 무조건 success
+	 * 처리 result.put("message", "신규 여신 저장 완료");
+	 * 
+	 * } catch (Exception e) { System.out.println("### Exception : " +
+	 * e.getMessage()); result.put("result", "fail"); result.put("message",
+	 * e.getMessage()); }
+	 * 
+	 * System.out.println("### Final Response : " + result); return result; }
+	 */
    
    // 출하정지
     @PutMapping("/shipmntStop")
