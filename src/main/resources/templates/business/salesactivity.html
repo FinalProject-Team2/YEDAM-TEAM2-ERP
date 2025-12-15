@@ -16,13 +16,11 @@
 	height: 200px; /* 원하는 세로 크기 */
 	object-fit: cover; /* 비율 유지하며 영역에 맞게 채움 */
 }
-
 .form-select {
 	color: #000 !important;
 }
 </style>
 <body layout:fragment="content">
-
 	<form th:action="@{/salesActivity}" method="post">
 		<div class="row">
 			<div class="col-md-12 mb-3">
@@ -43,11 +41,11 @@
 						<div class="row mb-2">
 							<div class="row mb-2">
 								<div class="col-md-3">
-									<label class="form-label">업종</label> 
+									<label class="form-label">업종</label>
 									<input type="text" class="form-control" placeholder="코딩" name="industryType">
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">업체규모</label> 
+									<label class="form-label">업체규모</label>
 										<select id="selectSize" class="form-select">
 							                <option value="대기업">대기업</option>
 							                <option value="준대기업">준대기업</option>
@@ -89,8 +87,6 @@
 			</div>
 		</div>
 	</form>
-
-
 	<form th:action="@{/potentialCustList}" method="post">
 		<div class="card mb-3">
 			<div class="card-header">
@@ -104,8 +100,6 @@
 			</div>
 		</div>
 	</form>
-
-
 	<form th:action="@{/salesActivity/contact}" method="post">
 		<div class="card mb-3" >
 			<div class="card-header">
@@ -127,7 +121,6 @@
 						</li>
 					</ul>
 				</div>
-
 				<!-- 버튼 -->
 				<div class="card-header-right">
 					<!-- <button type="button" class="btn btn-outline-dark"
@@ -137,19 +130,16 @@
 					<div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_014', 'btnContactSave')}"></div>
 				</div>
 			</div>
-
 			<!-- 탭 내용 -->
 			<div class="card-body" style="height: 300px;">
 				<!-- 접촉사항 탭 -->
 				<div id="tabContact" class="tab-pane-custom">
 					<div id="contactGrid" style="height: 280px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 				</div>
-
 				<!-- 리드분석 탭 -->
 				<div id="tabLead" class="tab-pane-custom" style="display: none;">
 					<div id="leadgrid" style="height: 280px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 				</div>
-
 				<!-- 견적 및 데모활동 탭 -->
 				<div id="tabDemo" class="tab-pane-custom" style="display: none;">
 					<div id="demoGrid" style="height: 280px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
@@ -157,56 +147,45 @@
 			</div>
 		</div>
 	</form>
-
-
-
-
-
-
-
-
-
 	<script th:inline="javascript">
 	
 	
-    // 공통 테마
-    tui.Grid.applyTheme('default', {
-        cell: {
-            normal: {
-                border: '#ccc',
-                background: "#fff",
-                showVerticalBorder: true,
-            },
-            header: {
-                border: '#ccc',
-                background: '#E3E6ED',
-                showVerticalBorder: true,
-            },
-            editable: {
-                background: '#FFFDF0',
-                text: '#000'
-            },
-            selectedHeader: {
-                background: '#E3E6ED'
-            },
-            selected: {
-                background: '#ffffff'
-            }
-        }
-    });
-
-     // 잠재고객 Grid
-    const potentialData = /*[[${potentialstdrList}]]*/ [];
-    console.log("potentialData", potentialData); 
-
-    const potentialgrid = new tui.Grid({
-        el: document.getElementById('potentialgrid'),
-        data: potentialData,
-        scrollX: true,
-        scrollY: true,
-        minBodyHeight: 0,
-        autoWidth: true,
-        columns : [ {
+   // 공통 테마
+   tui.Grid.applyTheme('default', {
+       cell: {
+           normal: {
+               border: '#ccc',
+               background: "#fff",
+               showVerticalBorder: true,
+           },
+           header: {
+               border: '#ccc',
+               background: '#E3E6ED',
+               showVerticalBorder: true,
+           },
+           editable: {
+               background: '#FFFDF0',
+               text: '#000'
+           },
+           selectedHeader: {
+               background: '#E3E6ED'
+           },
+           selected: {
+               background: '#ffffff'
+           }
+       }
+   });
+    // 잠재고객 Grid
+   const potentialData = /*[[${potentialstdrList}]]*/ [];
+   console.log("potentialData", potentialData);
+   const potentialgrid = new tui.Grid({
+       el: document.getElementById('potentialgrid'),
+       data: potentialData,
+       scrollX: true,
+       scrollY: true,
+       minBodyHeight: 0,
+       autoWidth: true,
+       columns : [ {
 			header : '순위',
 			name : 'rank',
 			sortable : 'true',
@@ -232,15 +211,15 @@
 			align : 'center',
 			width: 150
 		}, {
-            header: '설립일',
-            name: 'establishDate',
-            formatter: ({ value }) => {
-                const d = new Date(value);
-                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
-            },
-            width: 150,
-            align : 'center'
-        }, {
+           header: '설립일',
+           name: 'establishDate',
+           formatter: ({ value }) => {
+               const d = new Date(value);
+               return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
+           },
+           width: 150,
+           align : 'center'
+       }, {
 			header : '지역/상권',
 			name : 'region',
 			align : 'center',
@@ -253,34 +232,45 @@
 		    width: 150,
 		} ]
 	});
-    //
-    //
-    // 접촉 Grid
-    const contactData = /*[[${contactrList}]]*/ [];
-    console.log("contactData", contactData);
-
-    const contactGrid = new tui.Grid({
-        el: document.getElementById('contactGrid'),
-        data: contactData,
-        scrollX: false,
-        scrollY: true,
-        columns: [
-            {
-                header: '날짜',
-                name: 'contactDt',
-                editor: 'text',
-                formatter: ({ value }) => {
-                    if (!value) return '';
-                    const d = new Date(value);
-                    if (isNaN(d.getTime())) return '';
-                    return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
-                },
-                align: 'center',
-                width: 150
-            },
-            { header: '담당자', name: 'contactManager', width: 150, align: 'center', editor: 'text' },
-            { header: '방법', name: 'contactWay',  
-            	editor: {
+   //
+   //
+   // 접촉 Grid
+   const contactData = /*[[${contactrList}]]*/ [];
+   console.log("contactData", contactData);
+   const contactGrid = new tui.Grid({
+       el: document.getElementById('contactGrid'),
+       data: contactData,
+       scrollX: false,
+       scrollY: true,
+       columns: [
+           {
+               header: '날짜',
+               name: 'contactDt',
+               editor: 'text',
+               formatter: ({ value }) => {
+                   if (!value) return '';
+                   const d = new Date(value);
+                   if (isNaN(d.getTime())) return '';
+                   return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
+               },
+               align: 'center',
+               width: 150
+           },
+           { header: '담당자', name: 'contactManager', width: 150, align: 'center', editor: {
+	    	      type: 'select',
+	    	      options: {
+	    	        listItems: [
+	    	          { text: '홍길동', value: '홍길동' },
+	    	          { text: '정우진', value: '정우진' },
+	    	          { text: '김현우', value: '김현우' },
+	    	          { text: '서우진', value: '서우진' },
+	    	          { text: '최도윤', value: '최도윤' },
+	    	          { text: '이민아', value: '이민아' }
+	    	        ]
+	    	      }
+	    	    }},
+           { header: '방법', name: 'contactWay', 
+           	editor: {
 	    	      type: 'select',
 	    	      options: {
 	    	        listItems: [
@@ -291,63 +281,85 @@
 	    	      }
 	    	    },
 	    	    width: 150, align: 'center'},
-            { header: '내용', name: 'contactCntn', editor: 'text' }
-        ]
-    });
-    //
-    // 리드 Grid
-    const leadData = /*[[${leadList}]]*/ [];
-    console.log("leadData", leadData);
-
-    const leadgrid = new tui.Grid({
-        el: document.getElementById('leadgrid'),
-        data: leadData,
-        scrollX: true,
-        scrollY: true,
-        minBodyHeight: 0,
-        autoWidth: true,
-        columns: [
-            {
-                header: '리드일자',
-                name: 'leadDt',
-                formatter: ({ value }) => {
-                    if (!value) return '';
-                    const d = new Date(value);
-                    if (isNaN(d.getTime())) return '';
-                    return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
-                },
-                align: 'center',
-                sortable: true
-            },
-            { header: '담당자', name: 'leadManager', editor: 'text' },
-            { header: '요청기한', name: 'requiredDt', align: 'center', editor: 'text' },
-            { header: '경쟁사 존재여부', name: 'competitorYn', align: 'center', editor: 'text' },
-            { header: '예산확보 여부', name: 'budgetAvailYn', align: 'center', editor: 'text' },
-            { header: '리드점수', name: 'leadScore', align: 'center' }
-        ]
-    });
-    //
-    // 견적/데모 Grid
-    const demoData = /*[[${demoList}]]*/ [];
-    console.log("demoData", demoData);
-
-    const demoGrid = new tui.Grid({
-        el: document.getElementById('demoGrid'),
-        data: demoData,
-        scrollX: true,
-        scrollY: true,
-        minBodyHeight: 0,
-        autoWidth: true,
-        columns: [
-            { header: '날짜', name: 'demoQuotatioDt', formatter: ({ value }) => {
-                if (!value) return '';
-                const d = new Date(value);
-                if (isNaN(d.getTime())) return '';
-                return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
-            }, align: 'center', editor: 'text' },
-            { header: '담당자', name: 'demoManager', align: 'center', editor: 'text' },
-            { header: '설명', name: 'demoDc', editor: 'text' },
-            { header: '고객반응', name: 'custReaction',editor: {
+           { header: '내용', name: 'contactCntn', editor: 'text' }
+       ]
+   });
+   //
+   // 리드 Grid
+   const leadData = /*[[${leadList}]]*/ [];
+   console.log("leadData", leadData);
+   const leadgrid = new tui.Grid({
+       el: document.getElementById('leadgrid'),
+       data: leadData,
+       scrollX: true,
+       scrollY: true,
+       minBodyHeight: 0,
+       autoWidth: true,
+       columns: [
+           {
+               header: '리드일자',
+               name: 'leadDt',
+               formatter: ({ value }) => {
+                   if (!value) return '';
+                   const d = new Date(value);
+                   if (isNaN(d.getTime())) return '';
+                   return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
+               },
+               align: 'center',
+               sortable: true
+           },
+           { header: '담당자', name: 'leadManager', editor: {
+	    	      type: 'select',
+	    	      options: {
+	    	        listItems: [
+	    	          { text: '홍길동', value: '홍길동' },
+	    	          { text: '정우진', value: '정우진' },
+	    	          { text: '김현우', value: '김현우' },
+	    	          { text: '서우진', value: '서우진' },
+	    	          { text: '최도윤', value: '최도윤' },
+	    	          { text: '이민아', value: '이민아' }
+	    	        ]
+	    	      }
+	    	    }},
+           { header: '요청기한', name: 'requiredDt', align: 'center', editor: 'text' },
+           { header: '경쟁사 존재여부', name: 'competitorYn', align: 'center', editor: 'text' },
+           { header: '예산확보 여부', name: 'budgetAvailYn', align: 'center', editor: 'text' },
+           { header: '리드점수', name: 'leadScore', align: 'center' }
+       ]
+   });
+   //
+   // 견적/데모 Grid
+   const demoData = /*[[${demoList}]]*/ [];
+   console.log("demoData", demoData);
+   const demoGrid = new tui.Grid({
+       el: document.getElementById('demoGrid'),
+       data: demoData,
+       scrollX: true,
+       scrollY: true,
+       minBodyHeight: 0,
+       autoWidth: true,
+       columns: [
+           { header: '날짜', name: 'demoQuotatioDt', formatter: ({ value }) => {
+               if (!value) return '';
+               const d = new Date(value);
+               if (isNaN(d.getTime())) return '';
+               return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
+           }, align: 'center', editor: 'text' },
+           { header: '담당자', name: 'demoManager', align: 'center',editor: {
+	    	      type: 'select',
+	    	      options: {
+	    	        listItems: [
+	    	          { text: '홍길동', value: '홍길동' },
+	    	          { text: '정우진', value: '정우진' },
+	    	          { text: '김현우', value: '김현우' },
+	    	          { text: '서우진', value: '서우진' },
+	    	          { text: '최도윤', value: '최도윤' },
+	    	          { text: '이민아', value: '이민아' }
+	    	        ]
+	    	      }
+	    	    } },
+           { header: '설명', name: 'demoDc', editor: 'text' },
+           { header: '고객반응', name: 'custReaction',editor: {
 	    	      type: 'select',
 	    	      options: {
 	    	        listItems: [
@@ -360,7 +372,7 @@
 	    	      }
 	    	    }
 	    	    },
-            { header: '샘플여부', name: 'samplePrivide', editor: {
+           { header: '샘플여부', name: 'samplePrivide', editor: {
 	    	      type: 'select',
 	    	      options: {
 	    	        listItems: [
@@ -369,190 +381,175 @@
 	    	        ]
 	    	      }
 	    	    } },
-            { header: '수량', name: 'custQy', editor: 'text' },
-            { header: '할인', name: 'custDiscount', editor: 'text' },
-            { header: '납기', name: 'custDelivery', formatter: ({ value }) => {
-                if (!value) return '';
-                const d = new Date(value);
-                if (isNaN(d.getTime())) return '';
-                return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
-            }, editor: 'text' }
-        ]
-    });
-    //
-    //
-    //
-    //
-    // 잠재고객 클릭 시 접촉/리드/데모 조회
-    potentialgrid.on('click', function (ev) {
-        const row = potentialgrid.getRow(ev.rowKey);
-        if (!row) return;
-
-        const potentialInfoNo = row.potentialInfoNo;
-        if (!potentialInfoNo) {
-            console.warn('potentialInfoNo 없음', row);
-            return;
-        }
-
-        console.log('접촉/리드내역 조회, potentialInfoNo =', potentialInfoNo);
-
-        // 접촉내역
-        fetch('/salesActivity/contactByVend?potentialInfoNo=' + encodeURIComponent(potentialInfoNo))
-            .then(res => res.json())
-            .then(data => {
-                console.log('받은 접촉내역', data);
-                contactGrid.resetData(data);
-            })
-            .catch(err => console.error('접촉내역 조회 오류', err));
-
-        // 리드내역
-        fetch('/salesActivity/LeadByVend?potentialInfoNo=' + encodeURIComponent(potentialInfoNo))
-            .then(res => res.json())
-            .then(data => {
-                console.log('받은 데모내역', data);
-                leadgrid.resetData(data);
-            })
-            .catch(err => console.error('리드내역 조회 오류', err));
-        
-       // 데모내역
-        fetch('/salesActivity/DemoByVend?potentialInfoNo=' + encodeURIComponent(potentialInfoNo))
-            .then(res => res.json())
-            .then(data => {
-                console.log('받은 데모내역', data);
-                demoGrid.resetData(data);
-            })
-            .catch(err => console.error('데모내역 조회 오류', err));
-    });
-
-    // 저장 버튼
-    document.getElementById('btnContactSave').addEventListener('click', function () {
-        contactGrid.finishEditing();
-        leadgrid.finishEditing();
-        demoGrid.finishEditing();
-
-        const contactModified = contactGrid.getModifiedRows();
-        const leadModified    = leadgrid.getModifiedRows();
-        const demoModified    = demoGrid.getModifiedRows();
-
-        const contactList = contactModified.updatedRows.concat(contactModified.createdRows);
-        const leadList    = leadModified.updatedRows.concat(leadModified.createdRows);
-        const demoList    = demoModified.updatedRows.concat(demoModified.createdRows);
-
-        // 접촉 유효성 체크
-        for (const contact of contactList) {
-            if (!contact.contactDt || !contact.contactManager || !contact.contactWay || !contact.contactCntn) {
-                alert("접촉 내용을 모두 입력하십시오.");
-                return;
-            }
-        }
-
-        // 리드 유효성 체크
-        for (const lead of leadList) {
-            if (!lead.leadDt || !lead.leadManager || !lead.requiredDt || !lead.competitorYn || !lead.budgetAvailYn) {
-                alert("리드 내용을 모두 입력하십시오.");
-                return;
-            }
-        }
-        
-        // 데모 유효성 체크
-        for (const demo of demoList) {
-            if (!demo.demoQuotatioDt 
-            	|| !demo.demoManager 
-            	|| !demo.demoDc 
-            	|| !demo.custReaction 
-            	|| !demo.samplePrivide
-            	|| !demo.custQy
-            	|| !demo.custDiscount
-            	|| !demo.custDelivery) {
-                alert("데모 내용을 모두 입력하십시오.");
-                return;
-            }
-        }
-
-        // 날짜 포맷 정리
-        contactList.forEach(row => {
-            if (row.contactDt) {
-                row.contactDt = row.contactDt.toString().substring(0, 10);
-            }
-        });
-        leadList.forEach(row => {
-            if (row.leadDt) {
-                row.leadDt = row.leadDt.toString().substring(0, 10);
-            }
-        });
-
-        // 잠재고객 선택 체크
-        const focusedCell = potentialgrid.getFocusedCell();
-        if (!focusedCell) {
-            alert("잠재고객을 먼저 선택해.");
-            return;
-        }
-        const selected = potentialgrid.getRow(focusedCell.rowKey);
-        const vendId = selected.vendId;
-        const potentialInfoNo = selected.potentialInfoNo;
-
-        fetch('/salesActivity/contact/saveAll', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                vendId: vendId,
-                potentialInfoNo: potentialInfoNo,
-                contactList: contactList,
-                leadList: leadList,
-                demoList: demoList
-            })
-        })
-            .then(res => res.text())
-            .then(msg => {
-                alert("저장되었습니다.");
-            })
-            .catch(err => console.error(err));
-    });
-
-    // 행 추가 버튼
-    document.getElementById('btnContactAdd').addEventListener('click', function () {
-    	console.log('typeof contactGrid = ', typeof contactGrid);
-    	console.log('typeof leadGrid = ', typeof leadgrid);
-    	console.log('typeof demoGrid = ', typeof demoGrid);
-    	console.log('>>> 추가 버튼 클릭됨');
-    	
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        const todayStr = `${yyyy}-${mm}-${dd}`;
-
-    	// ★ 이 버튼이 속한 card-header 안에서만 active 탭 찾기
-        const header = this.closest('.card-header');
-        const activeTabBtn = header.querySelector('.nav-link.active');
-        console.log('activeTabBtn = ', activeTabBtn);
-        
-        const target = activeTabBtn ? activeTabBtn.getAttribute('data-target') : '#tabContact';
-        console.log('target = ', target);
-
-        // 1) 접촉사항 탭인 경우 → contactGrid 에 행 추가
-        if (target === '#tabContact') {
-            console.log('contactGrid에 행 추가');
-            contactGrid.prependRow({
-                contactDt: todayStr,
-                contactManager: '',
-                contactWay: '',
-                contactCntn: ''
-            });
-            contactGrid.focus(0, 'contactDt');
-        } else if (target === '#tabLead') {
-        	   console.log('leadgrid에 행 추가');
-            leadgrid.prependRow({
-                leadDt: todayStr,
-                leadManager: '',
-                requiredDt: '',
-                competitorYn: '',
-                budgetAvailYn: '',
-                leadScore: null
-            });
-            leadgrid.focus(0, 'leadDt');
-        } else if (target === '#tabDemo') {
-            demoGrid.prependRow({
+           { header: '수량', name: 'custQy', editor: 'text' },
+           { header: '할인', name: 'custDiscount', editor: 'text' },
+           { header: '납기', name: 'custDelivery', formatter: ({ value }) => {
+               if (!value) return '';
+               const d = new Date(value);
+               if (isNaN(d.getTime())) return '';
+               return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
+           }, editor: 'text' }
+       ]
+   });
+   //
+   //
+   //
+   //
+   // 잠재고객 클릭 시 접촉/리드/데모 조회
+   potentialgrid.on('click', function (ev) {
+       const row = potentialgrid.getRow(ev.rowKey);
+       if (!row) return;
+       const potentialInfoNo = row.potentialInfoNo;
+       if (!potentialInfoNo) {
+           console.warn('potentialInfoNo 없음', row);
+           return;
+       }
+       console.log('접촉/리드내역 조회, potentialInfoNo =', potentialInfoNo);
+       // 접촉내역
+       fetch('/salesActivity/contactByVend?potentialInfoNo=' + encodeURIComponent(potentialInfoNo))
+           .then(res => res.json())
+           .then(data => {
+               console.log('받은 접촉내역', data);
+               contactGrid.resetData(data);
+           })
+           .catch(err => console.error('접촉내역 조회 오류', err));
+       // 리드내역
+       fetch('/salesActivity/LeadByVend?potentialInfoNo=' + encodeURIComponent(potentialInfoNo))
+           .then(res => res.json())
+           .then(data => {
+               console.log('받은 데모내역', data);
+               leadgrid.resetData(data);
+           })
+           .catch(err => console.error('리드내역 조회 오류', err));
+      
+      // 데모내역
+       fetch('/salesActivity/DemoByVend?potentialInfoNo=' + encodeURIComponent(potentialInfoNo))
+           .then(res => res.json())
+           .then(data => {
+               console.log('받은 데모내역', data);
+               demoGrid.resetData(data);
+           })
+           .catch(err => console.error('데모내역 조회 오류', err));
+   });
+   // 저장 버튼
+   document.getElementById('btnContactSave').addEventListener('click', function () {
+       contactGrid.finishEditing();
+       leadgrid.finishEditing();
+       demoGrid.finishEditing();
+       const contactModified = contactGrid.getModifiedRows();
+       const leadModified    = leadgrid.getModifiedRows();
+       const demoModified    = demoGrid.getModifiedRows();
+       const contactList = contactModified.updatedRows.concat(contactModified.createdRows);
+       const leadList    = leadModified.updatedRows.concat(leadModified.createdRows);
+       const demoList    = demoModified.updatedRows.concat(demoModified.createdRows);
+       // 접촉 유효성 체크
+       for (const contact of contactList) {
+           if (!contact.contactDt || !contact.contactManager || !contact.contactWay || !contact.contactCntn) {
+               alert("접촉 내용을 모두 입력하십시오.");
+               return;
+           }
+       }
+       // 리드 유효성 체크
+       for (const lead of leadList) {
+           if (!lead.leadDt || !lead.leadManager || !lead.requiredDt || !lead.competitorYn || !lead.budgetAvailYn) {
+               alert("리드 내용을 모두 입력하십시오.");
+               return;
+           }
+       }
+      
+       // 데모 유효성 체크
+       for (const demo of demoList) {
+           if (!demo.demoQuotatioDt
+           	|| !demo.demoManager
+           	|| !demo.demoDc
+           	|| !demo.custReaction
+           	|| !demo.samplePrivide
+           	|| !demo.custQy
+           	|| !demo.custDiscount
+           	|| !demo.custDelivery) {
+               alert("데모 내용을 모두 입력하십시오.");
+               return;
+           }
+       }
+       // 날짜 포맷 정리
+       contactList.forEach(row => {
+           if (row.contactDt) {
+               row.contactDt = row.contactDt.toString().substring(0, 10);
+           }
+       });
+       leadList.forEach(row => {
+           if (row.leadDt) {
+               row.leadDt = row.leadDt.toString().substring(0, 10);
+           }
+       });
+       // 잠재고객 선택 체크
+       const focusedCell = potentialgrid.getFocusedCell();
+       if (!focusedCell) {
+           alert("잠재고객을 먼저 선택해.");
+           return;
+       }
+       const selected = potentialgrid.getRow(focusedCell.rowKey);
+       const vendId = selected.vendId;
+       const potentialInfoNo = selected.potentialInfoNo;
+       fetch('/salesActivity/contact/saveAll', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({
+               vendId: vendId,
+               potentialInfoNo: potentialInfoNo,
+               contactList: contactList,
+               leadList: leadList,
+               demoList: demoList
+           })
+       })
+           .then(res => res.text())
+           .then(msg => {
+               alert("저장되었습니다.");
+           })
+           .catch(err => console.error(err));
+   });
+   // 행 추가 버튼
+   document.getElementById('btnContactAdd').addEventListener('click', function () {
+   	console.log('typeof contactGrid = ', typeof contactGrid);
+   	console.log('typeof leadGrid = ', typeof leadgrid);
+   	console.log('typeof demoGrid = ', typeof demoGrid);
+   	console.log('>>> 추가 버튼 클릭됨');
+   	
+       const today = new Date();
+       const yyyy = today.getFullYear();
+       const mm = String(today.getMonth() + 1).padStart(2, '0');
+       const dd = String(today.getDate()).padStart(2, '0');
+       const todayStr = `${yyyy}-${mm}-${dd}`;
+   	// ★ 이 버튼이 속한 card-header 안에서만 active 탭 찾기
+       const header = this.closest('.card-header');
+       const activeTabBtn = header.querySelector('.nav-link.active');
+       console.log('activeTabBtn = ', activeTabBtn);
+      
+       const target = activeTabBtn ? activeTabBtn.getAttribute('data-target') : '#tabContact';
+       console.log('target = ', target);
+       // 1) 접촉사항 탭인 경우 → contactGrid 에 행 추가
+       if (target === '#tabContact') {
+           console.log('contactGrid에 행 추가');
+           contactGrid.prependRow({
+               contactDt: todayStr,
+               contactManager: '',
+               contactWay: '',
+               contactCntn: ''
+           });
+           contactGrid.focus(0, 'contactDt');
+       } else if (target === '#tabLead') {
+       	   console.log('leadgrid에 행 추가');
+           leadgrid.prependRow({
+               leadDt: todayStr,
+               leadManager: '',
+               requiredDt: '',
+               competitorYn: '',
+               budgetAvailYn: '',
+               leadScore: null
+           });
+           leadgrid.focus(0, 'leadDt');
+       } else if (target === '#tabDemo') {
+           demoGrid.prependRow({
 	            demoQuotatioDt: todayStr,
 	            demoManager: '',
 	            demoDc: '',
@@ -561,36 +558,32 @@
 	            custQy: '',
 	            custDiscount: '',
 	            custDelivery: ''
-            });
-            demoGrid.focus(0, 'demoQuotatioDt');
-        }
-    });
-
-    // 탭 전환
-    function changeLeadTab(btn) {
-        const header = btn.closest('.card-header');
-
-        header.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-        btn.classList.add('active');
-
-        document.querySelectorAll('.tab-pane-custom').forEach(pane => {
-            pane.style.display = 'none';
-        });
-
-        const targetSelector = btn.getAttribute('data-target');
-        const target = document.querySelector(targetSelector);
-        if (target) {
-            target.style.display = 'block';
-        }
-
-        setTimeout(() => {
-            contactGrid.refreshLayout();
-            leadgrid.refreshLayout();
-            demoGrid.refreshLayout();
-        }, 0);
-    }
+           });
+           demoGrid.focus(0, 'demoQuotatioDt');
+       }
+   });
+   // 탭 전환
+   function changeLeadTab(btn) {
+       const header = btn.closest('.card-header');
+       header.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+       btn.classList.add('active');
+       document.querySelectorAll('.tab-pane-custom').forEach(pane => {
+           pane.style.display = 'none';
+       });
+       const targetSelector = btn.getAttribute('data-target');
+       const target = document.querySelector(targetSelector);
+       if (target) {
+           target.style.display = 'block';
+       }
+       setTimeout(() => {
+           contactGrid.refreshLayout();
+           leadgrid.refreshLayout();
+           demoGrid.refreshLayout();
+       }, 0);
+   }
 </script>
-
 </body>
 </html>
+
+
 
