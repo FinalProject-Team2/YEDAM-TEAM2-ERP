@@ -50,3 +50,4 @@ public interface BusinessService {
 	public void saveAllDemo(String vendId, Integer potentialInfoNo, List<DemoVO> demoList);
 	}
 
+

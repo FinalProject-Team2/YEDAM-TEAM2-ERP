@@ -1,10 +1,7 @@
 package store.yd2team.business.mapper;
-
 import java.util.List;
-
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
-
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ChurnStdrVO;
 import store.yd2team.business.service.ContactVO;
@@ -13,7 +10,6 @@ import store.yd2team.business.service.LeadVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 import store.yd2team.business.service.churnRiskVO;
-
 @Mapper
 public interface BusinessMapper {
 	
@@ -32,7 +28,7 @@ public interface BusinessMapper {
 	//잠재 전체조회
 	List<BusinessVO> getList();
 	//잠재 조건상세목록 조회
-    List<PotentialStdrVO> getPotentialStdrDetailList(PotentialStdrVO cond);
+   List<PotentialStdrVO> getPotentialStdrDetailList(PotentialStdrVO cond);
 	    // 인서트
 	    int insertPotentialStdrDetail(PotentialStdrVO vo);
 	    // 업데이트
@@ -44,27 +40,30 @@ public interface BusinessMapper {
 	//
 	//
 	//공공데이터 한 건 insert
-    int insertPotential(BusinessVO vo);
-    //공공데이터 고객 건수 카운트
-    int existsPotentialInfoNo(@Param("potentialInfoNo") Long potentialInfoNo);
-    
-    //잠재고객검색조회
-    public List<BusinessVO> getBusinessList(BusinessVO vo);
-    
-    //로그인한 거래처의 주소, 업체명 조회
-    public List<BusinessVO> getcustaddrtype(String info);
-    //
-    //
+   int insertPotential(BusinessVO vo);
+   //
+ 
+   //
+   //공공데이터 고객 건수 카운트
+   int existsPotentialInfoNo(@Param("potentialInfoNo") Long potentialInfoNo);
+  
+   //잠재고객검색조회
+   public List<BusinessVO> getBusinessList(BusinessVO vo);
+  
+   //로그인한 거래처의 주소, 업체명 조회
+   public List<BusinessVO> getcustaddrtype(String info);
+   //
+   //
 	//접촉사항조회
-    List<ContactVO> getAction();
-    //리드분석조회
-    List<ContactVO> getLeadGenerar();
-    //잠재고객항목 선택시 해당접촉내역 조회
-    List<ContactVO> selectContactListByVend(ContactVO cond);
+   List<ContactVO> getAction();
+   //리드분석조회
+   List<ContactVO> getLeadGenerar();
+   //잠재고객항목 선택시 해당접촉내역 조회
+   List<ContactVO> selectContactListByVend(ContactVO cond);
 	    int insertContact(ContactVO vo);
 	    int updateContact(ContactVO vo);
-    //잠재고객항목 선택시 해당리드내역 조회
-    List<LeadVO> getLeadListByVend(LeadVO cond);
+   //잠재고객항목 선택시 해당리드내역 조회
+   List<LeadVO> getLeadListByVend(LeadVO cond);
 	    int insertLead(LeadVO vo);
 	    int updateLead(LeadVO vo);
 	//잠재고객항목 선택시 해당데모내역 조회
@@ -72,7 +71,5 @@ public interface BusinessMapper {
 		int insertDemo(DemoVO vo);
 	    int updateDemo(DemoVO vo);
 }
-
-
 
 
