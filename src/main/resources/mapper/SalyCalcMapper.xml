@@ -5,31 +5,35 @@
 
 <mapper namespace="store.yd2team.insa.mapper.SalyCalcMapper">
 
-  <select id="selectSalySpecCalcList" resultType="store.yd2team.insa.service.SalySpecCalcViewVO">
-    SELECT
-        s.saly_spec_id AS salySpecId,
-        s.emp_id       AS empId,
-        e.nm           AS empNm,
-        d.dept_nm      AS deptNm,
-        s.pay_amt      AS payAmt,
-        s.tt_duc_amt   AS ttDucAmt,
-        s.act_pay_amt  AS actPayAmt
-      FROM tb_saly_spec s
-      JOIN tb_emp e
-        ON e.emp_id  = s.emp_id
-       AND e.vend_id = #{vendId}
-      LEFT JOIN tb_dept d
-        ON d.dept_id = e.dept_id
-       AND d.vend_id = #{vendId}
-     WHERE s.saly_ledg_id = #{salyLedgId}
-     ORDER BY e.emp_id
-  </select>
+<select id="selectSalySpecCalcList"
+        resultType="store.yd2team.insa.service.SalySpecCalcViewVO">
+  SELECT
+      sp.saly_spec_id AS salySpecId,
+      e.emp_id        AS empId,
+      e.nm            AS empNm,
+      d.dept_nm       AS deptNm,
 
-  <select id="selectEmpIdBySpecId" resultType="string">
-    SELECT emp_id
-      FROM tb_saly_spec
-     WHERE saly_spec_id = #{salySpecId}
-  </select>
+      c1.code_nm      AS clsfNm,      <!-- ✅ 직급명 -->
+      c2.code_nm      AS rspofcNm,    <!-- ✅ 직책명 -->
+
+      NVL(sp.pay_amt, 0)      AS payAmt,
+      NVL(sp.tt_duc_amt, 0)   AS ttDucAmt,
+      NVL(sp.act_pay_amt, 0)  AS actPayAmt
+  FROM tb_saly_spec sp
+  JOIN tb_emp e
+    ON e.emp_id = sp.emp_id
+   AND e.vend_id = #{vendId}
+  LEFT JOIN tb_dept d
+    ON d.dept_id = e.dept_id
+  LEFT JOIN tb_code c1
+    ON c1.code_id = e.clsf        <!-- 직급 -->
+   AND (c1.vend_id = #{vendId} OR c1.vend_id IS NULL)
+  LEFT JOIN tb_code c2
+    ON c2.code_id = e.rspofc      <!-- 직책 -->
+   AND (c2.vend_id = #{vendId} OR c2.vend_id IS NULL)
+  WHERE sp.saly_ledg_id = #{salyLedgId}
+  ORDER BY e.emp_id
+</select>
 
   <select id="callPrcCalcSalyItems" statementType="CALLABLE" parameterType="map">
     { CALL prc_calc_saly_items(
@@ -257,5 +261,17 @@
      WHERE vend_id = #{vendId}
        AND grp_no  = #{grpNo}
   </delete>
+  <!-- =========================================================
+     salySpecId → empId 조회
+     (급여계산 미리보기/저장 공통)
+     ========================================================= -->
+<select id="selectEmpIdBySpecId"
+        parameterType="string"
+        resultType="string">
+    SELECT emp_id
+      FROM tb_saly_spec
+     WHERE saly_spec_id = #{salySpecId}
+</select>
+  
 
 </mapper>
