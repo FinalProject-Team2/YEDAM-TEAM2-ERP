@@ -24,7 +24,7 @@
 <body layout:fragment="content">
 
 	<form th:action="@{/potentialCustList}" method="post">
-		<div class="row" >
+		<div class="row">
 			<div class="col-md-12 mb-3">
 				<div class="card">
 					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
@@ -33,9 +33,9 @@
 							<h5 class="card-title">조회조건</h5>
 						</div>
 						<div class="card-header-right">
-						<form th:action="@{/potential/sync}" method="post" class="mb-2">
-							<button class="btn btn-primary">공공데이터조회</button>
-						</form>
+							<form th:action="@{/potential/sync}" method="post" class="mb-2">
+								<button class="btn btn-primary">공공데이터조회</button>
+							</form>
 							<!-- <button class="btn btn-dark">초기화</button> -->
 							<button class="btn btn-outline-dark" type="submit">검색조회</button>
 						</div>
@@ -45,17 +45,18 @@
 							<div class="row mb-2">
 								<div class="col-md-3">
 									<label class="form-label">업종</label> <input
-										class="form-control" placeholder="코딩"  name="industryType">
+										class="form-control" placeholder="코딩" name="industryType">
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">업체규모</label>
-										<select id="selectSize" class="form-select">
-							                <option value="대기업">대기업</option>
-							                <option value="준대기업">준대기업</option>
-							                <option value="중견기업">중견기업</option>
-							                <option value="강소기업">강소기업</option>
-							                <option value="중소기업">중소기업</option>
-						              	</select>
+									<label class="form-label">업체규모</label> 
+									<select id="selectSize" name="companySize" class="form-select">
+										<option value="">전체</option>
+										<option value="대기업">대기업</option>
+										<option value="준대기업">준대기업</option>
+										<option value="중견기업">중견기업</option>
+										<option value="강소기업">강소기업</option>
+										<option value="중소기업">중소기업</option>
+									</select>
 								</div>
 								<div class="col-md-3">
 									<label class="form-label">지역/상권</label> <input type="text"
@@ -94,21 +95,22 @@
 			</div>
 		</div>
 	</form>
-	
+
 
 	<!-- 잠재고객 -->
 	<form th:action="@{/potentialCustList}" method="post">
-	<div class="card mb-3">
-		<div class="card-header">
-			<div class="card-header-left">
-				<h5 class="card-title">잠재고객목록</h5>
+		<div class="card mb-3">
+			<div class="card-header">
+				<div class="card-header-left">
+					<h5 class="card-title">잠재고객목록</h5>
+				</div>
+				<!-- card-header-left end  -->
 			</div>
-			<!-- card-header-left end  -->
+			<div class="card-body">
+				<div id="potentialgrid"
+					style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+			</div>
 		</div>
-		<div class="card-body">
-			<div id="potentialgrid" style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
-		</div>
-	</div>
 	</form>
 
 
