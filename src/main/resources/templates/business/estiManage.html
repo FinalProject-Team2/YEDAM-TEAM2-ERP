@@ -525,50 +525,6 @@ class ProductAutoComplete {
 			    grid.setValue(rowKey, 'dcRate', data.dcRate);
 			  });
 		}
-	      /* select: function(event, ui) {
-	    	  console.log('🔥 product select fired');
-		    	  
-			  const grid = window.newEstiGrid;
-			  const rowKey = props.rowKey;
-			
-			  const productId = ui.item.productId;
-			  const price     = ui.item.basisSaleAmt;
-			  const custcomId = $('#autoCustcomId').val();
-			
-			  grid.setValue(rowKey, 'productId', productId);
-			  grid.setValue(rowKey, 'productName', ui.item.value);
-			  grid.setValue(rowKey, 'basisSaleAmt', price);
-			
-			  // 고객사 선택 안 되어 있으면 할인 조회 안 함
-			  if (!custcomId) {
-			    return;
-			  }
-			
-			  // 할인 조회 API 호출
-			  fetch('/price/discount', {
-			    method: 'POST',
-			    headers: { 'Content-Type': 'application/json' },
-			    body: JSON.stringify({
-			      productId: productId,
-			      custcomId: custcomId
-			    })
-			  })
-			  .then(res => res.json())
-			  .then(data => {
-			    if (!data || !data.dcRate) return;
-			
-			    const qty = Number(grid.getValue(rowKey, 'qy') || 1);
-			    const dcRate = Number(data.dcRate);
-			
-			    const saleAmt  = Math.floor(price * qty * dcRate / 100);
-			    const finalAmt = (price * qty) - saleAmt;
-			
-			    grid.setValue(rowKey, 'dcRate', dcRate);
-			    grid.setValue(rowKey, 'saleAmt', saleAmt);
-			    grid.setValue(rowKey, 'finalAmt', finalAmt);
-			  })
-			  .catch(err => console.error('할인 조회 실패', err));
-		} */
     });
 
     this.el = el;
@@ -623,7 +579,7 @@ function fetchDiscountRate(rowKey, productId) {
 	  }
 	
 	  window.newEstiGrid = new tui.Grid({
-	    el: document.getElementById('newEstiGrid'),
+	    el: document.getElementById('newEstiGridDiv'),
 	    scrollX: true,
 	    scrollY: true,
 	    bodyHeight: 350,
@@ -700,23 +656,6 @@ function fetchDiscountRate(rowKey, productId) {
 		    window.newEstiGrid.setValue(rowKey, 'finalAmt', finalAmt);
 		  });
 		});
-	  /* window.newEstiGrid.on('afterChange', (ev) => {
-		  ev.changes.forEach(change => {
-		    const rowKey = change.rowKey;
-
-		    const qty   = Number(window.newEstiGrid.getValue(rowKey, 'qy') || 0);
-		    const price = Number(window.newEstiGrid.getValue(rowKey, 'basisSaleAmt') || 0);
-		    const dcRate = Number(window.newEstiGrid.getValue(rowKey, 'dcRate') || 0);
-
-		    if (!qty || !price) return;
-
-		    const saleAmt  = Math.floor(price * qty * dcRate / 100);
-		    const finalAmt = (price * qty) - saleAmt;
-
-		    window.newEstiGrid.setValue(rowKey, 'saleAmt', saleAmt);
-		    window.newEstiGrid.setValue(rowKey, 'finalAmt', finalAmt);
-		  });
-		}); */
 	}
 
 	
@@ -776,11 +715,19 @@ function fetchDiscountRate(rowKey, productId) {
 		
 		if (!window.newEstiGrid) {
 		  loadNewEstiGrid();
-		} else {
-		  window.newEstiGrid.refreshLayout();
-		}
+	      window.newEstiGrid.refreshLayout();
+		} 
+		
+		
 	} // openNewEstiModal
-	
+
+	// 닫기 함수에 포함할 초기화 함수
+	function resetEstiModalState() {
+		  $("#newEstiModal").data("mode", "new");
+		  setEstiModalReadonly(false);
+		  $("#newEstiModal .modal-title").text("견적서 등록/수정");
+	}
+	// 닫기 함수
 	function closeNewEstiModal() {
 		modal.classList.remove("show");
 		modal.style.display = "none";
@@ -788,6 +735,7 @@ function fetchDiscountRate(rowKey, productId) {
 		
 		// 모달 닫을 때 입력값 초기화
 		resetNewEstiForm();
+		resetEstiModalState();
 	} // closeNewEstiModal
 	
 	function resetNewEstiForm() {
@@ -986,7 +934,7 @@ function fetchDiscountRate(rowKey, productId) {
 		
 	  // 헤더 세팅
 	  $("#autoCustcomId").val(data.custcomId);
-	  $("#autoCustcomName").val(data.custcomNameResult);
+	  $("#autoCustcomName").val(data.custcomName);
 	  $("#applyDate").val(data.dueDt);
 	  $("#autoRemark").val(data.rm || "");
 
@@ -1102,14 +1050,16 @@ function fetchDiscountRate(rowKey, productId) {
 	      $("#newEstiModal .modal-title").text(`견적서 보기 (${version})`);
 	      $("#newEstiModal").data("mode", "view");
 
-	      // 2) 값 채우기
-	      fillEstiModal(data);
+	      
 
 	      // 3) 읽기전용 처리(입력 막기)
 	      setEstiModalReadonly(true);
 
 	      // 4) 모달 열기
 	      openNewEstiModal();
+	      
+	  	  // 2) 값 채우기
+	      fillEstiModal(data);
 
 	      // 5) 이력 모달 닫기(원하면)
 	      const hist = bootstrap.Modal.getInstance(document.getElementById("estiHistoryModal"));
@@ -1129,10 +1079,19 @@ function fetchDiscountRate(rowKey, productId) {
 	  $("#autoRemark").prop("disabled", readonly);
 
 	  // 저장 버튼 숨김/비활성
-	  $("#btnEstiSave").prop("disabled", readonly);
+	  // $("#btnEstiSave").prop("disabled", readonly);
 	  // 행추가/삭제 버튼도 막기
-	  $("#addRowBtn, #deleteRowBtn, #maxDcBtn").prop("disabled", readonly);
+	  // $("#addRowBtn, #deleteRowBtn, #maxDcBtn").prop("disabled", readonly);
 
+	  // 버튼 제어
+	  if (readonly) {
+	    $("#btnEstiSave").hide();
+	    $("#addRowBtn, #deleteRowBtn, #maxDcBtn").hide();
+	  } else {
+	    $("#btnEstiSave").show();
+	    $("#addRowBtn, #deleteRowBtn, #maxDcBtn").show();
+	  }
+	  
 	  // grid 편집 막기
 	  if (window.newEstiGrid) {
 	    window.newEstiGrid.setColumns(

@@ -25,8 +25,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
             "/error",
             "/favicon.ico",
             "/pdf",
-            "/Payment",
-            "/"
+            "/Payment"
     );
     
     // 구독 해지 계정이 접근 가능한 URL prefix
