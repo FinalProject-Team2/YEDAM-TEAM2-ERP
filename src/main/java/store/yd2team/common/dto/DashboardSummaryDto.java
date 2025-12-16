@@ -12,4 +12,5 @@ public class DashboardSummaryDto {
     private int otpFailToday;    // tb_log lg5
     private int lockedToday;     // tb_log lg3 (오늘 잠금발생)
     private int lockedNow;       // tb_emp_acct st='LOCKED' (현재 잠김)
+    private int noAcctEmp;
 }

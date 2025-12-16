@@ -11,12 +11,15 @@
         WHERE e.vend_id = #{vendId}
       ) AS totalEmp,
 
-      /* 활성 계정 수 */
-      (SELECT COUNT(*)
-         FROM tb_emp_acct a
-        WHERE a.vend_id = #{vendId}
-          AND a.st = 'ACTIVE'
-      ) AS activeAcct,
+      /* 계정 미부여 사원 수 (사원은 있으나 tb_emp_acct 없음) */
+	  (SELECT COUNT(*)
+	     FROM tb_emp e
+	     LEFT JOIN tb_emp_acct a
+	       ON a.vend_id = e.vend_id
+	      AND a.emp_id  = e.emp_id 
+	    WHERE e.vend_id = #{vendId}
+	      AND a.emp_id IS NULL
+	  ) AS noAcctEmp,
 
       /* 권한 없는 계정 수(역할 미지정) */
       (SELECT COUNT(*)
@@ -60,11 +63,11 @@
           AND l.motion_ty = 'lg3'
       ) AS lockedToday,
 
-      /* 현재 잠김 계정 수 (tb_emp_acct.st = 'LOCKED') */
+      /* 현재 잠김 계정 수 (tb_emp_acct.st = 'r2') */
       (SELECT COUNT(*)
          FROM tb_emp_acct a
         WHERE a.vend_id = #{vendId}
-          AND a.st = 'LOCKED'
+          AND a.st = 'r2'
       ) AS lockedNow
 
     FROM dual

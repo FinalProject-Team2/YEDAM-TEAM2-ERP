@@ -28,7 +28,7 @@
     <!-- KPI -->
     <div class="dash-kpi">
       <div class="dash-card"><div class="t">전체 사원 수</div><div class="v" id="k_totalEmp">-</div></div>
-      <div class="dash-card"><div class="t">활성 계정 수</div><div class="v" id="k_activeAcct">-</div></div>
+      <div class="dash-card"><div class="t">계정 미부여 사원 수</div><div class="v" id="k_noAcctEmp">-</div></div>
       <div class="dash-card"><div class="t">권한 없는 계정 수</div><div class="v" id="k_noRoleAcct">-</div></div>
       <div class="dash-card"><div class="t">현재 잠김 계정 수</div><div class="v" id="k_lockedNow">-</div></div>
 
@@ -133,7 +133,7 @@
       const s = data.summary;
 
       setText('k_totalEmp', s.totalEmp);
-      setText('k_activeAcct', s.activeAcct);
+      setText('k_noAcctEmp', s.noAcctEmp);
       setText('k_noRoleAcct', s.noRoleAcct);
       setText('k_lockedNow', s.lockedNow);
       setText('k_loginSuccToday', s.loginSuccToday);
