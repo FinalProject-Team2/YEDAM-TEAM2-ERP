@@ -5,9 +5,9 @@
 	layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet"
+<!-- <link rel="stylesheet"
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script> -->
 
 <title>출하관리</title>
 <style>
@@ -24,56 +24,49 @@
 				<div class="card-header">
 					<h5 class="card-title">검색조건</h5>
 					<div class="card-header-right">
-					    <button type="button" class="btn btn-dark">초기화</button>
-						<button class="btn btn-outline-dark">조회</button>
+					    <button type="button" class="btn btn-dark" id="btnReset">초기화</button>
+						<button class="btn btn-outline-dark" id="searchBtn">조회</button>
 					</div>
 				</div>
 				<div class="card-body">
 					<div class="row">
-						<div class="col-md-3">
-							<label class="form-label">고객코드</label> 
-							<input type="text" class="form-control">
+						<div class="col-md-2">
+							<label for="custcomId" class="form-label">고객코드</label> 
+							<input id="custcomId" type="text" class="form-control"  placeholder="고객사코드를 입력해주세요" >
 						
 						</div>
 						<div class="col-md-3">
-							<label class="form-label">고객사</label> <select id="dept"
-								class="form-control">
-								<option>전체</option>
-								<option>무신사</option>
-								<option>29cm</option>
-							</select>
+							<label for="custcomName" class="form-label">고객사명</label>
+							<input id="custcomName" type="text" class="form-control" placeholder="고객사명을 입력해주세요" >
 						</div>
 						<div class="col-md-2">
-							<label class="form-label">담당자</label> <select id="pay_yn"
-								class="form-control">
-								<option>전체</option>
-								<option>논개</option>
-								<option>구론산</option>
-							</select>
+							<label for="nm" class="form-label">작업자</label>
+							<input id="nm" type="text" class="form-control" placeholder="작업자를 입력해주세요" >
 						</div>
 						<div class="col-md-4">
-							<label class="form-label">요청출하일</label>
-							<div class="d-flex align-items-center">
-								<!-- 시작일 -->
-								<div class="input-group date me-2" id="applyDatePickerStart">
-									<input type="text" class="form-control" id="applyDateStart"
-										placeholder="날짜 선택"> <span class="input-group-text"
-										id="icon-calendar-start"> <i class="bi bi-calendar"></i>
-									</span>
-								</div>
+								<label class="form-label">출하요청일</label>
+								<div class="d-flex align-items-center js-date-range">
 
-								<!-- ~ -->
-								<span class="mx-1 fw-bold fs-5">~</span>
+									<!-- 시작일 -->
+									<div class="input-group date">
+										<input type="text" class="form-control datepicker js-date-range-start" placeholder="시작일">
+										<span class="input-group-text js-date-range-icon-start">
+										<i class="bi bi-calendar"></i>
+										</span>
+									</div>
 
-								<!-- 종료일 -->
-								<div class="input-group date ms-2" id="applyDatePickerEnd">
-									<input type="text" class="form-control" id="applyDateEnd"
-										placeholder="날짜 선택"> <span class="input-group-text"
-										id="icon-calendar-end"> <i class="bi bi-calendar"></i>
-									</span>
+									<span class="mx-1 fw-bold fs-5">~</span>
+
+									<!-- 종료일 -->
+									<div class="input-group date ms-2">
+										<input type="text" class="form-control datepicker js-date-range-end" placeholder="종료일">
+										<span class="input-group-text js-date-range-icon-end">
+										<i class="bi bi-calendar"></i>
+										</span>
+									</div>
+
 								</div>
 							</div>
-						</div>
 					</div>
 				</div>
 			</div>
@@ -81,11 +74,11 @@
 			<!-- 사원목록 -->
 			<div class="card">
 				<div class="card-header">
-					<h5 class="card-title">출하완료목록</h5>
+					<h5 class="card-title">출하목록</h5>
 					<div class="card-header-right">
 
 						<!-- <button id="addRowBtn" class="btn btn-outline-dark">행추가</button> -->
-						<div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_009', 'addRowBtn')}"></div>
+						<!-- <div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_009', 'addRowBtn')}"></div> -->
 						<!-- <button type="button" class="btn btn-dark">반려</button> -->
 						<!-- 반려의 id 값 : rejBtn -->
 						<div th:replace="~{fragments/buttons :: rejButton('MENU_SALES_009', 'rejBtn')}"></div>
@@ -102,117 +95,100 @@
 	<!--<div th:replace="business/modal/rciptTretModal :: rciptTretModal"></div>
 	<div th:replace="business/modal/delayModal :: delayModal"></div>
 	-->
-	<script>
-    const oustData = [
-    	  {
-    		oustId: "251126-0001",
-    		custcomName: "무신사",
-    		cttpc: "02-111-2222",
-    		shipmntDt: "2025-11-28",
-    		dmndShipDt: "2025-12-02",
-    		productName: "롱패딩외2종",
-    		ttPrice: "680,000",
-    		ttSoQy: "10",
-    		currStockQy: "100",
-    		empId: "논개"
-    	  },
-    	  {
-    		oustId: "251126-0002",
-    		custcomName: "29cm",
-    		cttpc: "02-777-8888",
-    		shipmntDt: "2025-11-20",
-    		dmndShipDt: "2025-11-28",
-    		productName: "거위털패딩외2종",
-    		ttPrice: "5,000,000",
-    		ttSoQy: "10",
-    		currStockQy: "50",
-    		empId: "구론산"
-    	  },
-    	];
-        // Grid 생성
+	
+	
+<script>
+//숫자 변환 유틸 (기존 그대로 사용)
+function toNumber(val) {
+  if (val === null || val === undefined) return 0;
+  const str = String(val).replace(/,/g, '').trim();
+  if (str === '') return 0;
+  return Number(str) || 0;
+}
+
+// 전역
+const searchForm = {
+    custcomId: "",
+    custcomName: "",
+    nm: "",
+    dueStart: "",
+    dueEnd: ""
+};
+
+// 그리드 데이터
+    const oustData = [];
+    	
+    	
+// Grid 생성
         const oustGrid = new tui.Grid({
             el: document.getElementById('oustGrid'),
             data: oustData,
+            rowHeaders: ['checkbox'],
             scrollX: true,
             scrollY: true,
-            minBodyHeight: 0,
+            bodyHeight: 400,
             autoWidth: true,
             columns: [
-            	  { header: '출고의뢰번호', name: 'oustId', align: 'center' },
+            	  { header: '출하지시ID', name: 'oustId', align: 'center' },
             	  { header: '고객사', name: 'custcomName', align: 'center' },
-            	  { header: '연락처', name: 'cttpc' },
-            	  { header: '출고완료일', name: 'shipmntDt', align: 'right' },
-            	  { header: '요청출하일', name: 'dmndShipDt', editor: 'text' },
-            	  { header: '상품명', name: 'productName', editor: 'text' },
-            	  { header: '금액합계(원)', name: 'ttPrice', align: 'right', editor: 'text' },
-            	  { header: '주문수량(EA)', name: 'ttSoQy', editor: 'text' },
-            	  { header: '재고수량(EA)', name: 'currStockQy' },
-            	  { header: '작업자', name: 'empId' },
+            	  { header: '담당자', name: 'psch', align: 'center'  },
+            	  { header: '담당자연락처', name: 'pschTel', align: 'right'  },
+            	  { header: '출하완료일', name: 'shipmntDt', align: 'right' },
+            	  { header: '출하요청일', name: 'oustRequestDt', align: 'right' },
+            	  { header: '상품명', name: 'productName' },
+            	  { header: '금액합계(원)', name: 'ttPrice', align: 'right',
+      				formatter: ({ value }) => {
+                        const num = toNumber(value);
+                        return num ? num.toLocaleString() : '';
+                    }
+      			  },
+            	  //{ header: '작업자', name: 'empId' },
+             	  //{ header: '주문수량(EA)', name: 'ttSoQy' }, 
+            	  { header: '출하상태', name: 'shipmntSt', width: 120, align: 'center' }, 
             	]
         });
-        
 
-        //행추가버튼
-        const addRowBtn = document.getElementById('addRowBtn');
 
-        addRowBtn.addEventListener('click', () => {
-            // 1) 최상단에 빈 행 추가
-            const { rowKey } = grid.prependRow(
-                {
-                	custcomId: '',
-            		custcomName: '',
-            		trnsDate: '',
-            		saleCtnt: '',
-            		salAmt: '',
-            		borwAmt: '',
-            		prinsumBaln: '',
-            		rciptAppoAmt: '',
-            		rciptAppoDt: '',
-            		ltstRciptDt: ''
-                },
-                { focus: true }      // 새로 추가된 행에 포커스 옵션
-            );
+// =================================== 버튼 이벤트
+	// 1. 초기화버튼 이벤트
+	document.getElementById("btnReset").addEventListener("click", function () {
+	
+	    // 화면 Input 값 초기화
+	    document.querySelector("#custcomId").value = "";
+	    document.querySelector("#custcomName").value = "";
+	    document.querySelector("#nm").value = "";
+	    document.querySelector(".js-date-range-start").value = "";
+	    document.querySelector(".js-date-range-end").value = "";
+	
+	    // datepicker 를 쓰는 경우 UI 리프레시
+	    $('.js-date-range-start').datepicker('update', '');
+	    $('.js-date-range-end').datepicker('update', '');
+	
+    console.log("검색조건 초기화:", searchForm);
+});
 
-            // 2) 특정 컬럼부터 바로 편집하고 싶으면
-            grid.focus(rowKey, 'custcomId');    
-            grid.startEditing(rowKey, 'custcomName');
-        });
+// 2-2. 조회 버튼 이벤트
+document.getElementById("searchBtn").addEventListener("click", function () {
 
-        
-        
-        
-        
-        
-        
-    	// 입금처리 모달창
-        const openRciptTretBtn = document.getElementById("openRciptTretModal");
-        const rciptTretModal = document.getElementById("rciptTretModal");
-        const rciptTretModalClose = document.getElementById("rciptTretModalClose");
-        const rciptTretBackdrop = document.getElementById("rciptTretBackdrop");
+    // 1) 화면 입력값 → searchForm 에 세팅
+    searchForm.custcomId = document.querySelector("#custcomId").value.trim();
+    searchForm.custcomName = document.querySelector("#custcomName").value.trim();
+    searchForm.nm = document.querySelector("#nm").value.trim();
+    searchForm.dueStart = document.querySelector(".js-date-range-start").value;
+    searchForm.dueEnd = document.querySelector(".js-date-range-end").value;
 
-        // 입금처리 열기
-        openRciptTretBtn.addEventListener("click", () => {
-        rciptTretModal.classList.add("show");
-        rciptTretModal.style.display = "block";
-        rciptTretBackdrop.style.display = "block";
-        document.body.classList.add("modal-open");
-        });
-        
-       	// 연체이력관리 모달창
-        const openDelayBtn = document.getElementById("openDelayModal");
-        const DelayModal = document.getElementById("delayModal");
-        const DelayModalClose = document.getElementById("delayModalClose");
-        const DelayModalBackdrop = document.getElementById("delayModalBackdrop");
 
-        // 연체이력관리 열기
-        openDelayBtn.addEventListener("click", () => {
-        delayModal.classList.add("show");
-        delayModal.style.display = "block";
-        delayModalBackdrop.style.display = "block";
-        document.body.classList.add("modal-open");
-        });
-        
-        
+    // 2) 백엔드 조회 요청 
+    axios.post("/shipment/list", searchForm)
+        .then(res => {
+            console.log("조회결과 >>> ", res.data);
+
+            // 3) 그리드 데이터 반영
+            oustGrid.resetData(res.data);
+        })
+        .catch(err => console.error("조회 중 오류:", err));
+});
+       
     </script>
 </body>
 </html>
