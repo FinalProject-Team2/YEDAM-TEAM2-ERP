@@ -7,33 +7,51 @@
 
 <select id="selectSalySpecCalcList"
         resultType="store.yd2team.insa.service.SalySpecCalcViewVO">
-  SELECT
-      sp.saly_spec_id AS salySpecId,
-      e.emp_id        AS empId,
-      e.nm            AS empNm,
-      d.dept_nm       AS deptNm,
+SELECT
+    ss.saly_spec_id AS salySpecId,
+    e.emp_id        AS empId,
+    e.nm            AS empNm,
+    d.dept_nm       AS deptNm,
 
-      c1.code_nm      AS clsfNm,      <!-- ✅ 직급명 -->
-      c2.code_nm      AS rspofcNm,    <!-- ✅ 직책명 -->
+    cc.code_nm      AS clsfNm,
+    rc.code_nm      AS rspofcNm,
 
-      NVL(sp.pay_amt, 0)      AS payAmt,
-      NVL(sp.tt_duc_amt, 0)   AS ttDucAmt,
-      NVL(sp.act_pay_amt, 0)  AS actPayAmt
-  FROM tb_saly_spec sp
-  JOIN tb_emp e
-    ON e.emp_id = sp.emp_id
-   AND e.vend_id = #{vendId}
-  LEFT JOIN tb_dept d
-    ON d.dept_id = e.dept_id
-  LEFT JOIN tb_code c1
-    ON c1.code_id = e.clsf        <!-- 직급 -->
-   AND (c1.vend_id = #{vendId} OR c1.vend_id IS NULL)
-  LEFT JOIN tb_code c2
-    ON c2.code_id = e.rspofc      <!-- 직책 -->
-   AND (c2.vend_id = #{vendId} OR c2.vend_id IS NULL)
-  WHERE sp.saly_ledg_id = #{salyLedgId}
-  ORDER BY e.emp_id
+    si.grp_no       AS grpNo,
+    g.grp_nm        AS calcGrpNm,
+
+    ss.pay_amt      AS payAmt,
+    ss.tt_duc_amt   AS ttDucAmt,
+    ss.act_pay_amt  AS actPayAmt
+FROM tb_saly_spec ss
+JOIN tb_emp e
+  ON e.emp_id = ss.emp_id
+LEFT JOIN tb_dept d
+  ON d.dept_id = e.dept_id
+
+LEFT JOIN tb_code cc
+  ON cc.code_id = e.clsf
+ AND cc.grp_id  = 'k'   <!-- ⚠️ 여기를 "직급" 그룹ID로 바꿔 -->
+
+LEFT JOIN tb_code rc
+  ON rc.code_id = e.rspofc
+ AND rc.grp_id  = 'l'   <!-- ⚠️ 여기를 "직책" 그룹ID로 바꿔 -->
+
+LEFT JOIN (
+    SELECT saly_spec_id,
+           MAX(grp_no) KEEP (DENSE_RANK LAST ORDER BY crea_dt) AS grp_no
+      FROM tb_saly_spec_item
+     GROUP BY saly_spec_id
+) si
+  ON si.saly_spec_id = ss.saly_spec_id
+
+LEFT JOIN tb_pay_cal_grp g
+  ON g.grp_no  = si.grp_no
+ AND g.vend_id = #{vendId}
+
+WHERE ss.saly_ledg_id = #{salyLedgId}
 </select>
+
+
 
   <select id="callPrcCalcSalyItems" statementType="CALLABLE" parameterType="map">
     { CALL prc_calc_saly_items(
@@ -74,37 +92,35 @@
          같은 값이 반복될 수 있음
        - useCache=false, flushCache=true로 강제
        ========================= -->
-  <select id="selectNextSpecItemNo" resultType="long" useCache="false" flushCache="true">
-    SELECT SEQ_SALY_SPEC_ITEM.NEXTVAL FROM dual
-  </select>
 
-  <insert id="insertSpecItems" parameterType="map">
-    INSERT ALL
-    <foreach collection="list" item="it">
-      INTO tb_saly_spec_item (
-          saly_spec_id,
-          grp_no,
-          item_no,
-          item_ty,
-          item_id,
-          item_nm,
-          amt,
-          crea_dt,
-          crea_by
-      ) VALUES (
-          #{it.salySpecId},
-          #{it.grpNo},
-          #{it.itemNo},
-          #{it.itemTy},
-          #{it.itemId},
-          #{it.itemNm},
-          #{it.amt},
-          SYSDATE,
-          #{it.creaBy}
-      )
-    </foreach>
-    SELECT 1 FROM dual
-  </insert>
+<insert id="insertSpecItems" parameterType="map">
+  BEGIN
+  <foreach collection="list" item="it">
+    INSERT INTO tb_saly_spec_item (
+        saly_spec_id,
+        grp_no,
+        item_no,
+        item_ty,
+        item_id,
+        item_nm,
+        amt,
+        crea_dt,
+        crea_by
+    ) VALUES (
+        #{it.salySpecId},
+        #{it.grpNo},
+        SEQ_SALY_SPEC_ITEM.NEXTVAL,
+        #{it.itemTy},
+        #{it.itemId},
+        #{it.itemNm},
+        #{it.amt},
+        SYSDATE,
+        #{it.creaBy}
+    );
+  </foreach>
+  END;
+</insert>
+
 
   <update id="updateSalySpecTotals">
     UPDATE tb_saly_spec
@@ -272,6 +288,71 @@
       FROM tb_saly_spec
      WHERE saly_spec_id = #{salySpecId}
 </select>
-  
+    <!-- ✅ (추가) spec+grp에서 itemIdList에 "없는" 항목 삭제 -->
+  <delete id="deleteSpecItemsBySpecAndItemIdsNotIn" parameterType="map">
+    DELETE FROM tb_saly_spec_item
+     WHERE saly_spec_id = #{salySpecId}
+       AND grp_no       = #{grpNo}
+       AND item_id NOT IN
+       <foreach collection="itemIdList" item="id" open="(" separator="," close=")">
+         #{id}
+       </foreach>
+  </delete>
+
+  <!-- ✅ (추가) spec+grp+itemId 기준 MERGE (있으면 UPDATE, 없으면 INSERT) -->
+<!-- ✅ 단건 upsert: (saly_spec_id, grp_no, item_id) 기준 -->
+<insert id="mergeSpecItem" parameterType="map">
+  MERGE INTO tb_saly_spec_item t
+  USING (
+    SELECT
+      #{salySpecId} AS saly_spec_id,
+      #{grpNo}      AS grp_no,
+      #{itemTy}     AS item_ty,
+      #{itemId}     AS item_id,
+      #{itemNm}     AS item_nm,
+      #{amt}        AS amt
+    FROM dual
+  ) s
+  ON (
+    t.saly_spec_id = s.saly_spec_id
+    AND t.grp_no   = s.grp_no
+    AND t.item_id  = s.item_id
+  )
+  WHEN MATCHED THEN
+    UPDATE SET
+      t.item_ty  = s.item_ty,
+      t.item_nm  = s.item_nm,
+      t.amt      = s.amt,
+      t.updt_dt  = SYSDATE,
+      t.updt_by  = #{updtBy}
+  WHEN NOT MATCHED THEN
+    INSERT (
+      saly_spec_id,
+      grp_no,
+      item_no,
+      item_ty,
+      item_id,
+      item_nm,
+      amt,
+      crea_dt,
+      crea_by,
+      updt_dt,
+      updt_by
+    )
+    VALUES (
+      s.saly_spec_id,
+      s.grp_no,
+      SEQ_SALY_SPEC_ITEM.NEXTVAL,
+      s.item_ty,
+      s.item_id,
+      s.item_nm,
+      s.amt,
+      SYSDATE,
+      #{creaBy},
+      SYSDATE,
+      #{updtBy}
+    )
+</insert>
+
 
 </mapper>

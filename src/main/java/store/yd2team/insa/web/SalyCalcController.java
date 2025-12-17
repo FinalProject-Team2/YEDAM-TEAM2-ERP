@@ -53,9 +53,12 @@ public class SalyCalcController {
 
         return list.stream().map(vo -> {
             Map<String, Object> row = new HashMap<>();
+            row.put("salySpecId", vo.getSalySpecId());   // ✅ 추가
             row.put("empId", vo.getEmpId());
             row.put("empNm", vo.getEmpNm());
             row.put("deptNm", vo.getDeptNm());
+            row.put("clsfNm", vo.getClsfNm());           // ✅ 추가
+            row.put("rspofcNm", vo.getRspofcNm());       // ✅ 추가
             row.put("calcGrpNm", "");
             return row;
         }).toList();
@@ -331,4 +334,33 @@ public class SalyCalcController {
 
         return res;
     }
+    @GetMapping("/insa/saly/calc/groupItems")
+    @ResponseBody
+    public Map<String, Object> getGroupItems(@RequestParam("grpNo") Long grpNo,
+                                            HttpSession session) {
+
+        SessionDto login = getLogin(session);
+        Map<String, Object> res = new HashMap<>();
+
+        if (login == null) {
+            res.put("allowList", List.of());
+            res.put("ducList", List.of());
+            return res;
+        }
+
+        String vendId = login.getVendId();
+
+        // ✅ allowList / ducList를 각각 분리해서 내려주기
+        // (service.getAllowDucList는 수당+공제 합쳐서 주는 메서드라 list가 섞일 수 있음)
+        res.put("allowList", salyCalcService.getAllowDucList(vendId, grpNo).stream()
+                .filter(vo -> vo.getAllowId() != null && !vo.getAllowId().isBlank())
+                .toList());
+
+        res.put("ducList", salyCalcService.getAllowDucList(vendId, grpNo).stream()
+                .filter(vo -> vo.getDucId() != null && !vo.getDucId().isBlank())
+                .toList());
+
+        return res;
+    }
+
 }

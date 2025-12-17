@@ -144,9 +144,13 @@ public class SalyLedgServiceImpl implements SalyLedgService {
             throw new IllegalArgumentException("삭제 권한이 없습니다.");
         }
 
-        // 명세서 먼저 삭제
+     // ✅ 1) 명세서항목 먼저 삭제 (FK 때문에 필수)
+        salyLedgMapper.deleteSalySpecItemByLedgId(salyLedgId);
+
+        // ✅ 2) 명세서 삭제
         salyLedgMapper.deleteSalySpecByLedgId(salyLedgId);
-        // 급여대장 삭제
+
+        // ✅ 3) 급여대장 삭제
         salyLedgMapper.deleteSalyLedg(salyLedgId);
     }
 }

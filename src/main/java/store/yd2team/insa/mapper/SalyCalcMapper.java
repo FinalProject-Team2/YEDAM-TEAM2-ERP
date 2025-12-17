@@ -26,9 +26,15 @@ public interface SalyCalcMapper {
 
     void deleteSpecItemsBySpecAndItemIds(Map<String, Object> p);
 
+    /** ✅ (추가) spec+grp에서 itemIdList에 "없는" 항목 삭제 */
+    void deleteSpecItemsBySpecAndItemIdsNotIn(Map<String, Object> p);
+
     Long selectNextSpecItemNo();
 
     void insertSpecItems(Map<String, Object> p);
+
+    /** ✅ (추가) spec+grp+itemId 기준으로 있으면 UPDATE, 없으면 INSERT */
+    void mergeSpecItem(Map<String, Object> p);
 
     void updateSalySpecTotals(Map<String, Object> p);
 
