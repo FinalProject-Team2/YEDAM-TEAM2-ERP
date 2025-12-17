@@ -906,6 +906,49 @@
 	    });
 	});
 	
+	// 할인율 숫자만 입력
+	const percentInput = document.getElementById('percent');
+
+	// 숫자만 남기는 함수
+	function onlyDigits(v) {
+	  return v.replace(/[^\d]/g, '');
+	}
+
+	// 입력 중: 숫자만 허용
+	percentInput.addEventListener('input', (e) => {
+	  let v = onlyDigits(e.target.value);
+
+	  // 0~100 제한
+	  if (v !== '') {
+	    const n = Number(v);
+	    if (n > 100) v = '100';
+	  }
+
+	  e.target.value = v;
+	});
+
+	// 포커스 들어올 때: 전체선택 (UX 핵심)
+	percentInput.addEventListener('focus', (e) => {
+	  e.target.select();
+	});
+
+	// 포커스 나갈 때: 값 보정
+	percentInput.addEventListener('blur', (e) => {
+	  let v = e.target.value;
+
+	  if (v === '') return; // 비어있으면 그대로
+
+	  let n = Number(v);
+	  if (Number.isNaN(n)) {
+	    e.target.value = '';
+	    return;
+	  }
+
+	  if (n < 0) n = 0;
+	  if (n > 100) n = 100;
+
+	  e.target.value = String(n);
+	});
 	
 </script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
