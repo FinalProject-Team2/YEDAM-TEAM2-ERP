@@ -188,6 +188,29 @@ document.getElementById("searchBtn").addEventListener("click", function () {
         })
         .catch(err => console.error("조회 중 오류:", err));
 });
+
+
+//================================================================== <출하처리 버튼 이벤트>
+
+document.getElementById("openRciptTretModal").addEventListener("click", function () {
+
+    const checkedRows = oustGrid.getCheckedRows();
+
+    if (checkedRows.length === 0) {
+        alert("출하처리할 항목을 선택하세요.");
+        return;
+    }
+
+    // oustId 배열 추출
+    const oustIds = checkedRows.map(row => row.oustId);
+
+    axios.post("/shipment/complete", oustIds, {
+    	  headers: { "Content-Type": "application/json" }
+    	});
+
+
+});
+
        
     </script>
 </body>
