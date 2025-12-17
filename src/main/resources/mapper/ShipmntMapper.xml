@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store.yd2team.business.mapper.ShipmntMapper">
+
+<!-- 출하지시 조회 -->
+	<select id="selectShipmnt" parameterType="store.yd2team.business.service.ShipmntVO" resultType="store.yd2team.business.service.ShipmntVO">
+
+	    SELECT
+	           x.oust_id            AS oustId
+	         , x.custcom_id         AS custcomId
+	         , x.custcom_name       AS custcomName
+	         , x.psch               AS psch
+	         , x.psch_tel           AS pschTel
+	         , x.oust_request_dt    AS oustRequestDt
+	         , CASE
+	             WHEN x.item_cnt > 1 THEN
+	                  x.main_product_name || ' 외 ' || (x.item_cnt - 1) || '건'
+	             ELSE
+	                  x.main_product_name
+	           END                  AS productName
+	         , x.tt_price           AS ttPrice
+	         , NVL(x.shipmnt_st, '대기') AS shipmntSt
+	         , x.shipmnt_dt         AS shipmntDt
+	
+	    FROM (
+	            SELECT
+	                   o.oust_id
+	                 , so.custcom_id
+	                 , cust.custcom_name
+	                 , cust.psch
+	                 , cust.psch_tel
+	                 , o.oust_request_dt
+	
+	                 -- 주문 기준 총 금액
+	                 , so.tt_price                     AS tt_price
+	
+	                 -- 주문 기준 상품 개수
+	                 , COUNT(DISTINCT sod.product_id)  AS item_cnt
+	
+	                 -- 대표 상품명 (주문 기준)
+	                 , MIN(p.product_name)
+	                     KEEP (DENSE_RANK FIRST ORDER BY sod.so_detail_no)
+	                     AS main_product_name
+	
+	                 -- 출하 정보 (없어도 OK)
+	                 , MAX(s.shipmnt_dt)               AS shipmnt_dt
+	                 , MAX(o.shipmnt_st)               AS shipmnt_st
+	
+	            FROM tb_oust o
+	            JOIN tb_so so
+	              ON so.so_id = o.so_id
+	
+	            JOIN tb_so_detail sod
+	              ON sod.so_id = so.so_id  
+	
+	            JOIN tb_custcom cust
+	              ON cust.custcom_id = so.custcom_id
+	
+	            LEFT JOIN tb_shipmnt s
+	              ON s.oust_id = o.oust_id
+	
+	            LEFT JOIN tb_product p
+	              ON p.product_id = sod.product_id
+	
+	            <where>
+	                <if test="custcomName != null and custcomName != ''">
+	                    AND cust.custcom_name LIKE '%' || #{custcomName} || '%'
+	                </if>
+	                <if test="dueStart != null">
+	                    AND o.oust_request_dt &gt;= #{dueStart}
+	                </if>
+	                <if test="dueEnd != null">
+	                    AND o.oust_request_dt &lt;= #{dueEnd}
+	                </if>
+	                <if test="shipmntSt != null and shipmntSt != ''">
+	                    AND s.shipmnt_st = #{shipmntSt}
+	                </if>
+	            </where>
+	
+	            GROUP BY
+	                   o.oust_id
+	                 , so.custcom_id
+	                 , cust.custcom_name
+	                 , cust.psch
+	                 , cust.psch_tel
+	                 , o.oust_request_dt
+	                 , so.tt_price
+	         ) x
+	
+	    ORDER BY x.oust_id DESC
+	
+	</select>
+
+
+	
+
+</mapper>
