@@ -1,15 +1,30 @@
 package store.yd2team.insa.service.impl;
 
-import java.util.*;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import store.yd2team.insa.mapper.SalyCalcMapper;
-import store.yd2team.insa.service.*;
+import store.yd2team.insa.service.AllowDucVO;
+import store.yd2team.insa.service.CalGrpVO;
+import store.yd2team.insa.service.PayItemRowVO;
+import store.yd2team.insa.service.SalyCalcService;
+import store.yd2team.insa.service.SalySpecCalcViewVO;
+import store.yd2team.insa.service.SalySpecItemVO;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SalyCalcServiceImpl implements SalyCalcService {
@@ -39,9 +54,11 @@ public class SalyCalcServiceImpl implements SalyCalcService {
     /**
      * ✅ 미리보기(확인): DB 저장 없이 계산 결과만 반환
      */
-    @Override
-    @Transactional(readOnly = true)
-    public Map<String, Object> previewSalyLedg(String salyLedgId, Long grpNo, List<String> salySpecIdList,
+    @Transactional(
+    	    transactionManager = "mybatisTxManager",
+    	    readOnly = true
+    	)
+    	public Map<String, Object> previewSalyLedg(String salyLedgId, Long grpNo, List<String> salySpecIdList,
                                                String vendId, String loginEmpId) {
 
         if (salyLedgId == null || salyLedgId.isBlank()) throw new IllegalArgumentException("salyLedgId is required");
@@ -76,90 +93,108 @@ public class SalyCalcServiceImpl implements SalyCalcService {
         return result;
     }
 
-    /**
-     * ✅ 저장: 미리보기 결과를 DB에 반영
-     * previewList: [{ salySpecId: "...", items: [ {itemTy,itemId,itemNm,amt}, ... ] }, ...]
-     */
-    @Override
-    @Transactional
-    public void savePreviewResult(String salyLedgId, Long grpNo, List<Map<String, Object>> previewList,
-                                  String vendId, String loginEmpId) {
+	    /**
+	     * ✅ 저장: 미리보기 결과를 DB에 반영
+	     * previewList: [{ salySpecId: "...", items: [ {itemTy,itemId,itemNm,amt}, ... ] }, ...]
+	     */
+		    @Override
+		    @Transactional(
+		        transactionManager = "mybatisTxManager",
+		        propagation = Propagation.REQUIRES_NEW
+		    )
 
-        if (salyLedgId == null || salyLedgId.isBlank()) throw new IllegalArgumentException("salyLedgId is required");
-        if (grpNo == null) throw new IllegalArgumentException("grpNo is required");
-        if (previewList == null || previewList.isEmpty()) throw new IllegalArgumentException("previewList is empty");
+	    public void savePreviewResult(String salyLedgId, Long grpNo, List<Map<String, Object>> previewList,
+	                                  String vendId, String loginEmpId) {
 
-        // 표시번호(정렬용) 맵 (혹시라도 정렬이 깨져서 와도 서버에서 다시 정렬/중복제거)
-        Map<String, Long> allowDispMap = buildAllowDispMap(vendId, grpNo);
-        Map<String, Long> ducDispMap   = buildDucDispMap(vendId, grpNo);
+	        log.info("[SAVE] start salyLedgId={}, grpNo={}, previewCnt={}", salyLedgId, grpNo, previewList.size());
 
-        for (Map<String, Object> one : previewList) {
-            if (one == null) continue;
+	        Map<String, Long> allowDispMap = buildAllowDispMap(vendId, grpNo);
+	        Map<String, Long> ducDispMap   = buildDucDispMap(vendId, grpNo);
 
-            String salySpecId = (String) one.get("salySpecId");
-            if (salySpecId == null || salySpecId.isBlank()) continue;
+	        for (Map<String, Object> one : previewList) {
+	            String salySpecId = (String) one.get("salySpecId");
+	            log.info("[SAVE] spec start {}", salySpecId);
 
-            // ====== [수정] LinkedHashMap(List<Map>)로 들어오는 items를 VO로 변환 ======
-            List<PayItemRowVO> items = coercePayItemRows(one.get("items"));
-            if (items == null) items = List.of();
-            // =====================================================================
+	            List<PayItemRowVO> items = coercePayItemRows(one.get("items"));
+	            CalcResult cr = normalizeItems(items == null ? List.of() : items, allowDispMap, ducDispMap);
 
-            CalcResult cr = normalizeItems(items, allowDispMap, ducDispMap);
+	            // ✅ itemId 기준 중복 제거(마지막 값 유지) + 0원은 제외(저장/집계 불필요)
+	            Map<String, PayItemRowVO> uniqMap = new LinkedHashMap<>();
+	            for (PayItemRowVO it : cr.items) {
+	                if (it == null) continue;
+	                if (it.getItemId() == null || it.getItemId().isBlank()) continue;
 
-            // ✅ 1) 기존 spec+grp 삭제
-            salyCalcMapper.deleteSpecItemsBySpecAndGrp(salySpecId, grpNo);
+	                long amt = (it.getAmt() == null ? 0L : it.getAmt());
+	                if (amt == 0L) continue;
 
-            // ✅ 2) 이번에 넣을 item_id만 추가 삭제 → 다른 grp에 남아있던 동일 item_id 충돌 제거
-            List<String> itemIdList = cr.items.stream()
-                    .map(PayItemRowVO::getItemId)
-                    .filter(Objects::nonNull)
-                    .filter(s -> !s.isBlank())
-                    .distinct()
-                    .collect(Collectors.toList());
+	                uniqMap.put(it.getItemId(), it); // 뒤에 온 값으로 덮어씀
+	            }
+	            List<PayItemRowVO> uniqItems = new ArrayList<>(uniqMap.values());
 
-            if (!itemIdList.isEmpty()) {
-                Map<String, Object> del = new HashMap<>();
-                del.put("salySpecId", salySpecId);
-                del.put("itemIdList", itemIdList);
-                salyCalcMapper.deleteSpecItemsBySpecAndItemIds(del);
-            }
+	            // ✅ (핵심) "그룹 덮어씌우기" 저장 규칙:
+	            // 1) 이번 저장에 포함된 itemId 외에는 (spec+grp)에서 삭제  -> 항목 빠진건 삭제
+	            // 2) 포함된 itemId는 MERGE(있으면 UPDATE, 없으면 INSERT) -> 같은 항목은 값 UPDATE, 새 항목은 INSERT
+	            // 3) 0원은 애초에 저장 대상에서 제외 (위에서 필터링)
+	            List<String> itemIdList = uniqItems.stream()
+	                    .map(PayItemRowVO::getItemId)
+	                    .filter(Objects::nonNull).filter(s -> !s.isBlank())
+	                    .distinct()
+	                    .toList();
 
-            // ✅ 3) insert 준비
-            List<Map<String, Object>> insertList = new ArrayList<>();
-            for (PayItemRowVO it : cr.items) {
-                Long itemNo = salyCalcMapper.selectNextSpecItemNo();
+	            if (itemIdList.isEmpty()) {
+	                // 전부 0원이거나 항목이 없으면: 해당 spec+grp 항목 전체 삭제
+	                salyCalcMapper.deleteSpecItemsBySpecAndGrp(salySpecId, grpNo);
+	            } else {
+	                // 이번 itemIdList에 없는 기존 항목은 삭제
+	                Map<String, Object> delNotIn = new HashMap<>();
+	                delNotIn.put("salySpecId", salySpecId);
+	                delNotIn.put("grpNo", grpNo);
+	                delNotIn.put("itemIdList", itemIdList);
+	                salyCalcMapper.deleteSpecItemsBySpecAndItemIdsNotIn(delNotIn);
 
-                Map<String, Object> row = new HashMap<>();
-                row.put("salySpecId", salySpecId);
-                row.put("grpNo", grpNo);
-                row.put("itemNo", itemNo);
-                row.put("itemTy", it.getItemTy());
-                row.put("itemId", it.getItemId());
-                row.put("itemNm", it.getItemNm());
-                row.put("amt", it.getAmt());
-                row.put("creaBy", loginEmpId);
-                row.put("updtBy", loginEmpId);
+	                // 포함된 항목은 MERGE
+	                for (PayItemRowVO it : uniqItems) {
+	                    Map<String, Object> m = new HashMap<>();
+	                    m.put("salySpecId", salySpecId);
+	                    m.put("grpNo", grpNo);
+	                    m.put("itemTy", it.getItemTy());
+	                    m.put("itemId", it.getItemId());
+	                    m.put("itemNm", it.getItemNm());
+	                    m.put("amt", it.getAmt() == null ? 0L : it.getAmt());
+	                    m.put("loginEmpId", loginEmpId);
+	                    // MERGE의 NOT MATCHED INSERT용 PK 채우기
+	                    m.put("creaBy", loginEmpId);
+	                    m.put("updtBy", loginEmpId);
+	                    salyCalcMapper.mergeSpecItem(m);
+	                }
+	            }
 
-                insertList.add(row);
-            }
+	            // 합계는 화면에 보이는(0 제외) 기준으로 갱신
+	            long payAmt = 0L;
+	            long ttDucAmt = 0L;
+	            for (PayItemRowVO it : uniqItems) {
+	                String itemTy = it.getItemTy();
+	                long amt = (it.getAmt() == null ? 0L : it.getAmt());
+	                if ("A".equalsIgnoreCase(itemTy)) payAmt += amt;
+	                else if ("D".equalsIgnoreCase(itemTy)) ttDucAmt += amt;
+	            }
+	            long actPayAmt = payAmt - ttDucAmt;
 
-            if (!insertList.isEmpty()) {
-                Map<String, Object> ins = new HashMap<>();
-                ins.put("list", insertList);
-                salyCalcMapper.insertSpecItems(ins);
-            }
+	            log.info("[SAVE] updateSalySpecTotals {}", salySpecId);
+	            Map<String, Object> upd = new HashMap<>();
+	            upd.put("salySpecId", salySpecId);
+	            upd.put("payAmt", payAmt);
+	            upd.put("ttDucAmt", ttDucAmt);
+	            upd.put("actPayAmt", actPayAmt);
+	            upd.put("updtBy", loginEmpId);
+	            salyCalcMapper.updateSalySpecTotals(upd);
 
-            // ✅ 4) 합계 업데이트
-            Map<String, Object> upd = new HashMap<>();
-            upd.put("salySpecId", salySpecId);
-            upd.put("payAmt", cr.payAmt);
-            upd.put("ttDucAmt", cr.ttDucAmt);
-            upd.put("actPayAmt", cr.actPayAmt);
-            upd.put("updtBy", loginEmpId);
+	            log.info("[SAVE] spec end {}", salySpecId);
+	        }
 
-            salyCalcMapper.updateSalySpecTotals(upd);
-        }
-    }
+	        log.info("[SAVE] end {}", salyLedgId);
+	    }
+
 
     // =========================
     // 내부 유틸(정렬/중복제거/합계)
@@ -426,12 +461,9 @@ public class SalyCalcServiceImpl implements SalyCalcService {
                 if ("A".equalsIgnoreCase(itemTy)) payAmt += amt;
                 else if ("D".equalsIgnoreCase(itemTy)) ttDucAmt += amt;
 
-                Long itemNo = salyCalcMapper.selectNextSpecItemNo();
-
                 Map<String, Object> row = new HashMap<>();
                 row.put("salySpecId", salySpecId);
                 row.put("grpNo", grpNo);
-                row.put("itemNo", itemNo);
                 row.put("itemTy", it.getItemTy());
                 row.put("itemId", it.getItemId());
                 row.put("itemNm", it.getItemNm());

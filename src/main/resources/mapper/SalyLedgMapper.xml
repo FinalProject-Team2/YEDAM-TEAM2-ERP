@@ -195,5 +195,15 @@
     </foreach>
     SELECT 1 FROM DUAL
   </insert>
+<!-- ✅ 명세서항목(tb_saly_spec_item) 먼저 삭제 -->
+<delete id="deleteSalySpecItemByLedgId">
+  DELETE FROM tb_saly_spec_item
+   WHERE saly_spec_id IN (
+     SELECT saly_spec_id
+       FROM tb_saly_spec
+      WHERE saly_ledg_id = #{salyLedgId}
+   )
+</delete>
+
 
 </mapper>

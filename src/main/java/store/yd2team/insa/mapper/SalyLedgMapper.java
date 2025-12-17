@@ -42,6 +42,9 @@ public interface SalyLedgMapper {
     int updateSalyLedg(SalyLedgVO vo);
 
     int deleteSalyLedg(@Param("salyLedgId") String salyLedgId);
+    
+    int deleteSalySpecItemByLedgId(@Param("salyLedgId") String salyLedgId);
+
 
     // ================= 명세서 =================
     int deleteSalySpecByLedgId(@Param("salyLedgId") String salyLedgId);
