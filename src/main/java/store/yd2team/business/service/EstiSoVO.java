@@ -53,6 +53,7 @@ public class EstiSoVO {
     private String updtBy;         // 수정자
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate updtDt;
+    private String empId;
 
     // 상세 리스트
     private List<EstiSoDetailVO> detailList;

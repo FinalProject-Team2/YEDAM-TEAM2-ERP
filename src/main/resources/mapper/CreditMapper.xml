@@ -49,9 +49,6 @@
 		    cdt.applc_begin_dt,
 		    cdt.applc_end_dt,
 		    /* 필요하면 설계해서 추가할 컬럼들 (없으면 빼고 사용) */
-		    cdt.credit_mm,
-		    cdt.bad_credit_yn,
-		    cdt.ship_hold_yn,
 		    NVL(cdt.turnover_days, 0) AS turnover_days,
 		    /* 미수/연체 현황 */
 		    NVL(r.remain_amt, 0)     AS remain_amt,

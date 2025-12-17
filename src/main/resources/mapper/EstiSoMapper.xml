@@ -105,7 +105,7 @@
 	        e.esti_id       AS estiId,
 	        e.version       AS version,
 	        e.custcom_id    AS custcomId,
-	        e.custcom_name  AS custcomName,
+	        e.custcom_name  AS custcomNameResult,
 	        e.due_dt        AS dueDt,
 	        e.tt_supply_amt AS ttSupplyAmt,
 	        e.esti_st       AS estiSt,
@@ -385,6 +385,7 @@
 	        , rcipt_appo_amt
 	        , appo_mtd
 	        , crea_dt
+	        , crea_by
 	    ) VALUES (
 	          #{soId}
 	        , #{vendId}
@@ -403,6 +404,7 @@
 	        , #{rciptAppoAmt}
 	        , #{appoMtd}
 	        , SYSDATE
+	        , #{creaBy}
 	    )
 	</insert>
 

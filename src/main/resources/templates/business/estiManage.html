@@ -52,6 +52,43 @@
   color: #222;
   font-weight: 700;
 }
+
+/* === Grid 전체 회색 처리 === */
+.grid-readonly .tui-grid-body-area,
+.grid-readonly .tui-grid-cell {
+  background-color: #f5f5f5 !important;
+  color: #777 !important;
+}
+
+/* === 선택된 셀 테두리 제거 === */
+.grid-readonly .tui-grid-cell-selected,
+.grid-readonly .tui-grid-cell-focused {
+  background-color: #f5f5f5 !important;
+  border-color: #ddd !important;
+  box-shadow: none !important;
+}
+
+/* === 편집 셀(주황 테두리) 제거 === */
+.grid-readonly .tui-grid-cell-editing {
+  background-color: #f5f5f5 !important;
+  border: none !important;
+}
+
+/* === 헤더 영역도 회색 === */
+.grid-readonly .tui-grid-header-area {
+  background-color: #f0f0f0;
+}
+
+/* === 체크박스 클릭 차단 + 흐리게 === */
+.grid-readonly .tui-grid-row-header-checkbox {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* === 마우스 커서도 기본값으로 === */
+.grid-readonly .tui-grid-cell {
+  cursor: default !important;
+}
 </style>
 
 </head>
@@ -157,6 +194,8 @@
 <div th:replace="business/modal/estiHistoryModal :: estiHistoryModal"></div>
 
 <script>
+
+let estiGridReadonly = false;
 
 /* 정재민 추가함  */
 	const wrapper = document.querySelector('.esti-manage-wrapper');
@@ -601,15 +640,18 @@ function fetchDiscountRate(rowKey, productId) {
 	    	  name: 'qy',  
 	    	  width: 90,
 	    	  editor: {
-	    	      type: 'text',
-	    	      options: {
-	    	          inputType: 'number'
-    	      },
+    		    type: 'text',
+    		    options: { inputType: 'number' } // 모바일 키패드 유도용(PC에선 완벽 차단 X)
+    		  },
+    		  validation: {
+    		    required: true,
+    		    regExp: /^[0-9]+$/   // 정수만 허용
+    		  },
 			  formatter: ({ value }) => {
                    const num = toNumber(value);
                    return num ? num.toLocaleString() : '';
               }
-    	  	}
+    	  	
     	  },
 	      { header: '판매단가', name: 'basisSaleAmt',  width: 180, align:'right',
 				formatter: ({ value }) => {
@@ -635,6 +677,47 @@ function fetchDiscountRate(rowKey, productId) {
 	      { name: 'soDt', hidden: true },
 	    ]
 	  });
+	  
+	  
+	  // 숫자만 입력
+	  window.newEstiGrid.on('editingStart', (ev) => {
+		  if (estiGridReadonly) {
+			    grid.finishEditing(); // ⭐ 편집 강제 종료
+			    return;
+			  }
+		  
+		    if (ev.columnName !== 'qy') return;
+
+		    const rowKey = ev.rowKey;
+		    const value = window.newEstiGrid.getValue(rowKey, 'qy');
+
+		    if (!/^\d+$/.test(String(value))) {
+		      window.newEstiGrid.setValue(rowKey, 'qy', '');
+		    }
+
+		    // UX 전체선택 (아래 설명 참고)
+		    setTimeout(() => {
+		      const input = document.querySelector('.tui-grid-cell-editor input');
+		      if (input) input.select();
+		    });
+		  });
+	  
+	  newEstiGrid.on('editingFinish', (ev) => {
+		  if (estiGridReadonly) return;
+		  
+		  if (!['mrtggLmt', 'creditLmt'].includes(ev.columnName)) return;
+
+		  const rowKey = ev.rowKey;
+		  const col = ev.columnName;
+		  let value = newEstiGrid.getValue(rowKey, col);
+
+		  // 편집 끝나고 숫자만 남기기
+		  value = String(value ?? '').replace(/[^\d]/g, '');
+
+		  newEstiGrid.setValue(rowKey, col, value);
+		});
+		
+	  
 	  
 	  
 	  window.newEstiGrid.on('afterChange', (ev) => {
@@ -933,11 +1016,11 @@ function fetchDiscountRate(rowKey, productId) {
 		
 	  // 헤더 세팅
 	  $("#autoCustcomId").val(data.custcomId);
-	  $("#autoCustcomName").val(data.custcomName);
+	  $("#autoCustcomName").val(data.custcomNameResult);
 	  $("#applyDate").val(data.dueDt);
 	  $("#autoRemark").val(data.rm || "");
 
-	  // 🔹 그리드 데이터 변환
+	  // 그리드 데이터 변환
 	  const gridData = data.detailList.map(d => ({
 	    productId: d.productId,
 	    productName: d.productName,
@@ -1072,11 +1155,13 @@ function fetchDiscountRate(rowKey, productId) {
 
 	// 입력/그리드 읽기전용 토글
 	function setEstiModalReadonly(readonly) {
+		estiGridReadonly = readonly;
+		
+		
 	  $("#autoCustcomId").prop("disabled", readonly);
 	  $("#autoCustcomName").prop("disabled", readonly);
 	  $("#applyDate").prop("disabled", readonly);
 	  $("#autoRemark").prop("disabled", readonly);
-
 	  // 저장 버튼 숨김/비활성
 	  // $("#btnEstiSave").prop("disabled", readonly);
 	  // 행추가/삭제 버튼도 막기
@@ -1093,13 +1178,20 @@ function fetchDiscountRate(rowKey, productId) {
 	  
 	  // grid 편집 막기
 	  if (window.newEstiGrid) {
+		  window.newEstiGrid.getColumns().forEach(col => {
+		    window.newEstiGrid.setColumnOptions(col.name, {
+		      editable: !readonly
+		    });
+		  });
+		}
+	  /* if (window.newEstiGrid) {
 	    window.newEstiGrid.setColumns(
 	      window.newEstiGrid.getColumns().map(col => ({
 	        ...col,
 	        editor: readonly ? null : col.editor
 	      }))
 	    );
-	  }
+	  } */
 	}
 	
 	
@@ -1178,6 +1270,41 @@ function fetchDiscountRate(rowKey, productId) {
 	      console.error(err);
 	      alert("주문서 정보를 불러오지 못했습니다.");
 	    });
+	});
+	
+	const rciptAppoAmtInput = document.getElementById('rciptAppoAmt');
+
+	// 숫자만 남기기
+	function onlyDigits(value) {
+	  return value.replace(/[^\d]/g, '');
+	}
+
+	// 1️⃣ 입력 중: 숫자만 허용 (콤마 없음)
+	rciptAppoAmtInput.addEventListener('input', (e) => {
+	  e.target.value = onlyDigits(e.target.value);
+	});
+
+	// 2️⃣ 붙여넣기: 숫자만
+	rciptAppoAmtInput.addEventListener('paste', (e) => {
+	  e.preventDefault();
+	  const text = (e.clipboardData || window.clipboardData).getData('text');
+	  e.target.value += onlyDigits(text);
+	});
+
+	// 3️⃣ 포커스 아웃: 천단위 콤마 표시
+	rciptAppoAmtInput.addEventListener('blur', (e) => {
+	  const value = onlyDigits(e.target.value);
+	  if (!value) return;
+
+	  const num = Number(value);
+	  if (Number.isFinite(num)) {
+	    e.target.value = num.toLocaleString();
+	  }
+	});
+
+	// 4️⃣ 다시 클릭(포커스): 콤마 제거하고 편집 가능
+	rciptAppoAmtInput.addEventListener('focus', (e) => {
+	  e.target.value = onlyDigits(e.target.value);
 	});
 	
 	// 2. 모달 열기/닫기

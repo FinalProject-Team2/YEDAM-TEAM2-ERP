@@ -126,12 +126,19 @@
    <div th:replace="business/modal/creditCustModal :: creditModal"></div>
 </div><!-- /.lock-account-wrapper -->
 <script>
+//신용등급에 따라 최대연체개월 바로 보이게
+function getCreditMmByGrad(grade) {
+  if (grade === 'A') return 3;
+  if (grade === 'B') return 2;
+  return 1; // C, D, 기타
+}
    
+ 
    // 1. 데이터 (백엔드에서 내려주는 컬럼 예시)
    const creditData = [];
    
    // 2. Grid 공통 옵션
-   const businessGridOptions = {
+   const creditGridOptions = {
        bodyHeight: 400,
        scrollX: true,
        scrollY: true,
@@ -155,7 +162,7 @@
    const creditGrid = new tui.Grid({
        el: document.getElementById('creditGrid'),
        data: creditData,
-       ...businessGridOptions,
+       ...creditGridOptions,
        columns: [
            { header: '고객코드', name: 'custcomId', width: 120 },
            { header: '고객사',   name: 'custcomName', width: 180 },
@@ -211,118 +218,140 @@
              }
            },
            {
-               header: '담보한도',
-               name: 'mrtggLmt',
-               editor: 'text',
-               width: 110,
-               align: 'right',
-               formatter: ({ value }) => {
-                   const num = toNumber(value);
-                   return num ? num.toLocaleString() : '';
-               }
-           },
-           {
-               header: '신용한도',
-               name: 'creditLmt',
-               editor: 'text',
-               width: 110,
-               align: 'right',
-               formatter: ({ value }) => {
-                   const num = toNumber(value);
-                   return num ? num.toLocaleString() : '';
-               }
-           },
-           {
-               header: '여신한도',
-               name: 'cdtlnLmt',
-               editor: 'text',
-               width: 110,
-               align: 'right',
-               formatter: ({ value }) => {
-                   const num = toNumber(value);
-                   return num ? num.toLocaleString() : '';
-               }
-           },
-           // 현재잔액 (조회 결과 내려오는 값, 필요하면 직접 수정 가능)
-           {
-             header: '원금잔액',
-             name: 'remainAmt',
-             width: 110,
-             align: 'right',
-             editor: 'text',   // 사용자가 직접 수정할 수 있게 하려면 유지, 읽기전용이면 삭제
-             formatter: ({ value }) => {
-               const num = toNumber(value);
-               return num ? num.toLocaleString() : '';
-             }
-           },
+			  header: '담보한도',
+			  name: 'mrtggLmt',
+			  width: 110,
+			  align: 'right',
+			  editor: {
+			    type: 'text',
+			    options: { inputType: 'number' }
+			  },
+			  validation: {
+			    regExp: /^[0-9]+$/   // 정수만
+			  },
+			  formatter: ({ value }) => {
+			    const num = toNumber(value);
+			    return num ? num.toLocaleString() : '';
+			  }
+			},
+			{
+			  header: '신용한도',
+			  name: 'creditLmt',
+			  width: 110,
+			  align: 'right',
+			  editor: {
+			    type: 'text',
+			    options: { inputType: 'number' }
+			  },
+			  validation: {
+			    regExp: /^[0-9]+$/   // 정수만
+			  },
+			  formatter: ({ value }) => {
+			    const num = toNumber(value);
+			    return num ? num.toLocaleString() : '';
+			  }
+			},
+			{
+			    header: '여신한도',
+			    name: 'cdtlnLmt',
+			    width: 110,
+			    align: 'right',
 
-           // 사용률 = 현재잔액 / 여신한도 * 100
-           {
-             header: '사용률(%)',
-             name: 'useRate',
-             width: 90,
-             align: 'right',
-             formatter: ({ value }) => {
-               if (value === null || value === undefined || value === '') return '';
-               const num = Number(value);
-               if (isNaN(num)) return '';
-               return num.toFixed(1); // 소수 1자리
-             }
-           },
-           {
-               header: '최대연체(개월)',
-               name: 'maxOverdueMm',
-               width: 110,
-               align: 'right'
-           },
-           /* {
-               header: '악성여신',
-               name: 'badCreditYn',
-               width: 80,
-               align: 'center',
-               formatter: ({ value }) => {
-                   if (value === 'Y') {
-                       return '<span class="bad-credit-badge">Y</span>';
-                   }
-                   return '';
-               }
-           }, */
-           {
-               header: '출하정지',
-               name: 'shipHoldYn',
-               width: 120,
-               align: 'center',
-               formatter: ({ value }) => {
-                   if (value === 'Y') {
-                	   return `<button class="grid-btn ship-hold-btn" data-value="N">출하해제</button>`;
-                   }
-                   else{                	   
-                   		return `<button class="grid-btn ship-hold-btn" data-value="Y">출하정지</button>`;
-                   }
-               }
-               
-           },
-           {
-               header: '회전일수',
-               name: 'turnoverDays',
-               width: 90,
-               align: 'right'
-           },
-           { header: '한도초과여부', name: 'lmtoverCheck', width: 110, align: 'center' },
-           /* {
-               header: '적용시작일',
-               name: 'applcBeginDt',
-               width: 130,
-               editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' } }
-           },
-           {
-               header: '적용종료일',
-               name: 'applcEndDt',
-               width: 130,
-               editor: { type: 'datePicker', options: { format: 'yyyy-MM-dd', language: 'ko' } }
-           } */
+			    formatter: ({ value }) => {
+			    const num = toNumber(value);
+			    return num ? num.toLocaleString() : '';
+			  }
+			},
+			// 현재잔액 (조회 결과 내려오는 값, 필요하면 직접 수정 가능)
+			{
+			  header: '원금잔액',
+			  name: 'remainAmt',
+			  width: 110,
+			  align: 'right',
+			  formatter: ({ value }) => {
+			    const num = toNumber(value);
+			    return num ? num.toLocaleString() : '';
+			  }
+			},
+			
+			// 사용률 = 현재잔액 / 여신한도 * 100
+			{
+			  header: '사용률(%)',
+			  name: 'useRate',
+			  width: 90,
+			  align: 'right',
+			  formatter: ({ value }) => {
+			    if (value === null || value === undefined || value === '') return '';
+			    const num = Number(value);
+			    if (isNaN(num)) return '';
+			    return num.toFixed(1); // 소수 1자리
+			  }
+			},
+			{
+			    header: '최대연체(개월)',
+			    name: 'creditMm',
+			    width: 110,
+			    align: 'right',
+			    formatter: ({ row }) => getCreditMmByGrad(row.creditGrad)
+			},
+			{
+			    header: '출하정지',
+			    name: 'shipHoldYn',
+			    width: 120,
+			    align: 'center',
+			    formatter: ({ value }) => {
+			        if (value === 'Y') {
+			     	   return `<button class="grid-btn ship-hold-btn" data-value="N">출하해제</button>`;
+			        }
+			        else{                	   
+			        		return `<button class="grid-btn ship-hold-btn" data-value="Y">출하정지</button>`;
+			        }
+			    }
+			    
+			},
+			{
+			    header: '회전일수',
+			    name: 'turnoverDays',
+			    width: 90,
+			    align: 'right'
+			},
+			{ header: '한도초과여부', name: 'lmtoverCheck', width: 110, align: 'center' },
        ]
    });
+   
+// 숫자만 남기는 유틸
+   creditGrid.on('editingStart', (ev) => {
+	  if (!['mrtggLmt', 'creditLmt'].includes(ev.columnName)) return;
+	
+	  const rowKey = ev.rowKey;
+	  const col = ev.columnName;
+	  const value = creditGrid.getValue(rowKey, col);
+	
+	  // 숫자 아닌 값이면 편집 시작 시 비우기
+	  if (!/^\d+$/.test(String(value))) {
+		  creditGrid.setValue(rowKey, col, '');
+	  }
+	
+	  // UX: 전체선택
+	  setTimeout(() => {
+	    const input = document.querySelector('.tui-grid-cell-editor input');
+	    if (input) input.select();
+	  });
+	});
+	
+	   creditGrid.on('editingFinish', (ev) => {
+	  if (!['mrtggLmt', 'creditLmt'].includes(ev.columnName)) return;
+	
+	  const rowKey = ev.rowKey;
+	  const col = ev.columnName;
+	  let value = creditGrid.getValue(rowKey, col);
+	
+	  // 편집 끝나고 숫자만 남기기
+	  value = String(value ?? '').replace(/[^\d]/g, '');
+	
+	  creditGrid.setValue(rowKey, col, value);
+	});
+   
    
    // ================================================================== 그리드 내 자동 계산 함수
    // 숫자 변환 유틸 (기존 그대로 사용)
@@ -355,14 +384,14 @@
        
        
        // 1) 신용등급 변경 시 최대연체(개월) 자동 설정
-       if (columnName === 'credtGrad') {
+       if (columnName === 'creditGrad') {
            let maxMm = 1; // 기본값: C, D 등급은 1개월
            if (value === 'A') {
                maxMm = 3;
            } else if (value === 'B') {
                maxMm = 2;
            }
-           creditGrid.setValue(rowKey, 'maxOverdueMm', maxMm);
+           creditGrid.setValue(rowKey, 'creditMm', maxMm);
        }
 
        // 2) 사용률 계산에 영향을 주는 컬럼이면 rowKey 기록
@@ -373,7 +402,7 @@
          affectedRowKeys.add(rowKey);
        }
      });
-
+     
      
      // 3) 각 행별로 사용률 재계산
      affectedRowKeys.forEach(rowKey => {
@@ -548,38 +577,6 @@
 	   
 	   
    });
-/*    // 7. 여신 평가 버튼 클릭 (악성여신 / 출하정지 등 계산 트리거)
-   $('#creditEval').on('click', function () {
-       const searchForm = {
-           custcomId: $("#autoCustcomId").val().trim(),
-           custcomName: $("#autoCustcomName").val().trim()
-       };
-       if (!confirm('현재 검색조건 기준으로 여신 평가를 실행하시겠습니까?')) {
-           return;
-       }
-       $.ajax({
-           url: '/credit/eval',          // 여신 평가용 API (백엔드 구현 필요)
-           type: 'POST',
-           contentType: 'application/json',
-           data: JSON.stringify(searchForm),
-           success: function (res) {
-               alert('여신 평가가 완료되었습니다.\n(악성여신 / 출하정지 / 회전일수 갱신)');
-               // 평가 후 다시 조회
-               $('#searchCredit').click();
-           },
-           error: function (err) {
-               console.error('여신 평가 중 오류', err);
-               alert('여신 평가 중 오류가 발생했습니다.');
-           }
-       });
-   }); */
-   
-   //8.행추가 버튼
-/*    document.getElementById("newBtn").addEventListener("click", function () {
-	   const custcomId = document.querySelector("#autoCustcomId").value  ;
-	   const custcomName = document.querySelector("#autoCustcomName").value ;
-	   creditGrid.appendRow({custcomId, custcomName});
-   }) */
    
    
 	//9. modalSaveBtn(저장버튼) 이벤트
@@ -618,33 +615,7 @@
 	      alert('저장 중 오류 발생');
 	    });
 	});
-	/* document.getElementById("saveBtn").addEventListener("click", function () {
-	
-	    const payload = creditGrid.getModifiedRows().createdRows[0];
-	
-	    console.log("저장 payload >>> ", payload);
-	
-	    axios.post("/credit/save", payload)
-	        .then(res => {
-	            console.log("저장 결과 >>> ", res.data);
-	
-	            if (res.data.result === "success") {
-	                alert("저장 완료");
-
-	                closeNewCustModal();
-	                $("#searchBtn").click();
-
-	            } else {
-	                alert("저장 실패\n" + (res.data.message || ""));
-	            }
-	        })
-	        .catch(err => {
-	            console.error("저장 중 오류:", err);
-	            alert("저장 중 오류가 발생했습니다.");
-	        });
-	}); */
 
 </script>
 </body>
 </html>
-

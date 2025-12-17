@@ -1,6 +1,5 @@
 package store.yd2team.business.service.impl;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -149,55 +148,6 @@ public class EstiSoServiceImpl implements EstiSoService {
         return header;
     }
     
-	/*
-	 * @Override
-	 * 
-	 * @Transactional public String saveEsti(EstiSoVO vo) {
-	 * 
-	 * // 세션 정보 String vendId = LoginSession.getVendId(); String empId =
-	 * LoginSession.getEmpId();
-	 * 
-	 * vo.setVendId(vendId); vo.setCreaBy(empId); vo.setUpdtBy(empId); // 이력 구조라
-	 * 실사용은 안 하지만 유지
-	 * 
-	 * 
-	 * // 상태 기본값 if (vo.getEstiSt() == null || vo.getEstiSt().isEmpty()) {
-	 * vo.setEstiSt("es1"); // 작성중 }
-	 * 
-	 * 
-	 * // 상세 검증 + 합계 계산 List<EstiSoDetailVO> detailList = vo.getDetailList();
-	 * 
-	 * if (detailList == null || detailList.isEmpty()) { throw new
-	 * IllegalArgumentException("견적 상세가 존재하지 않습니다."); }
-	 * 
-	 * long totalSupplyAmt = 0L; for (EstiSoDetailVO d : detailList) { if
-	 * (d.getSupplyAmt() != null) { totalSupplyAmt += d.getSupplyAmt(); } }
-	 * vo.setTtSupplyAmt(totalSupplyAmt);
-	 * 
-	 * 
-	 * // 헤더 INSERT (이력 방식) if (vo.getEstiId() == null || vo.getEstiId().isEmpty())
-	 * { // ▶ 신규 견적서 vo.setVersion("ver1"); estiSoMapper.insertNewEsti(vo);
-	 * 
-	 * } else { // ▶ 수정 (이력 INSERT) String curVerStr =
-	 * estiSoMapper.selectCurrentVersion(vo.getEstiId());
-	 * 
-	 * int curVer = 0; if (curVerStr != null && curVerStr.startsWith("ver")) {
-	 * curVer = Integer.parseInt(curVerStr.substring(3)); }
-	 * 
-	 * vo.setVersion("ver" + (curVer + 1)); estiSoMapper.insertEstiHistory(vo); }
-	 * 
-	 * 
-	 * // 상세 INSERT for (EstiSoDetailVO d : detailList) {
-	 * 
-	 * d.setEstiId(vo.getEstiId()); d.setVersion(vo.getVersion());
-	 * 
-	 * // 세션 정보 d.setVendId(vendId); d.setCreaBy(empId); d.setUpdtBy(empId);
-	 * 
-	 * estiSoMapper.insertEstiDetail(d); }
-	 * 
-	 * return vo.getEstiId(); }
-	 */
-
     
     
     @Override
@@ -225,7 +175,7 @@ public class EstiSoServiceImpl implements EstiSoService {
     @Override
     public String saveOrderFromEsti(EstiSoVO vo) {
 
-        // 🔥 세션 정보
+        // 세션 정보
         String vendId = LoginSession.getVendId();
         String empId  = LoginSession.getEmpId();
 
@@ -252,7 +202,7 @@ public class EstiSoServiceImpl implements EstiSoService {
                 ttQty    += qy;
                 ttVat    += supply / 10;
 
-                // 🔥 주문 상세에도 세션 정보
+                // 주문 상세에도 세션 정보
                 d.setVendId(vendId);
                 d.setCreaBy(empId);
                 d.setUpdtBy(empId);
