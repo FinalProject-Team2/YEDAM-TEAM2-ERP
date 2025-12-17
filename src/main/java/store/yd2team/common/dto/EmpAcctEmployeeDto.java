@@ -22,7 +22,8 @@ public class EmpAcctEmployeeDto {
     private String loginId;
     private String acctStatus;      // r1, r2, r3
     private String acctStatusName;  // ACTIVE, LOCKED, INACTIVE
-
+    private Integer roleCnt;
+    
     // 공통
     private String vendId;
 }

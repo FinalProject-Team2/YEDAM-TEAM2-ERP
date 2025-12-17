@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 import lombok.Data;
-import store.yd2team.common.mapper.EmpLoginMapper;
 
 @Data
 public class EmpAcctVO {
@@ -48,7 +47,7 @@ public class EmpAcctVO {
 	private String hp;      // 거래처 핸드폰 번호
 	private String email;
 	private String proofPhoto;
-	
+	private String jobNm;
 	
 	private List<String> roleIds;
     private Set<String> authCodes;

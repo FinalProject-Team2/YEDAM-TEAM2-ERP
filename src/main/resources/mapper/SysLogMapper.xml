@@ -83,7 +83,22 @@
 	      l.target_tb_nm,
 	      l.target_pk,
 	      l.motion_ty,
-	      ca.code_nm AS motion_ty_nm,
+	      
+	      CASE l.motion_ty
+	        WHEN 'ro1' THEN '역할 저장'
+	        WHEN 'au1' THEN '메뉴 권한 저장'
+	        WHEN 'lg1' THEN '로그인 성공'
+	        WHEN 'lg2' THEN '로그인 실패'
+	        WHEN 'lg3' THEN '계정 잠금 발생'
+	        WHEN 'lg4' THEN '자동 잠금 해제'
+	        WHEN 'lg5' THEN 'OTP 실패'
+	        WHEN 'lg6' THEN 'OTP 통과/OTP 단계 진입'
+	        WHEN 'ac1' THEN '비밀번호 변경'
+	        WHEN 'co1' THEN '공통코드 등록'
+	        WHEN 'co2' THEN '공통코드 수정'
+	        ELSE l.motion_ty
+          END AS motion_ty_nm,
+	      
 	      l.smry,
 	      l.yn,
 	      TO_CHAR(l.crea_dt, 'YYYY-MM-DD HH24:MI:SS') AS crea_dt,

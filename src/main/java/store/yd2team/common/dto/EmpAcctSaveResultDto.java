@@ -8,4 +8,7 @@ public class EmpAcctSaveResultDto {
     private boolean smsSent;
     private String acctStatus;
     private String empAcctId;
+    
+    private String errorCode;   
+    private String errorMessage;
 }

@@ -31,7 +31,8 @@
                   a.st               AS acct_status,
                   c.code_nm          AS acct_status_name,
                   c.code_nm,  
-                  e.vend_id  
+                  e.vend_id,
+                  NVL(ur.role_cnt, 0) AS role_cnt  
         FROM      tb_emp e
         LEFT JOIN tb_dept d
                ON e.dept_id = d.dept_id
@@ -39,6 +40,12 @@
         LEFT JOIN tb_emp_acct a
                ON e.emp_id  = a.emp_id
               AND e.vend_id = a.vend_id
+        LEFT JOIN (
+			        SELECT emp_acct_id, COUNT(*) AS role_cnt
+			          FROM tb_user_role
+			         GROUP BY emp_acct_id
+			    ) ur
+      		   ON ur.emp_acct_id = a.emp_acct_id
         LEFT JOIN tb_code c
                ON c.grp_id  = 'r'
               AND c.code_id = a.st
@@ -83,6 +90,7 @@
 	      e.emp_id    AS empId,
 	      e.nm        AS nm,
 	      d.dept_nm   AS deptNm,
+	       jc.code_nm  AS jobNm,
 	      a.login_id  AS loginId
 	    FROM tb_emp e
 	    LEFT JOIN tb_emp_acct a
@@ -91,6 +99,9 @@
 	    LEFT JOIN tb_dept d
 	           ON e.vend_id = d.vend_id
 	          AND e.dept_id = d.dept_id
+	    LEFT JOIN tb_code jc
+               ON NVL(jc.vend_id,e.vend_id) = e.vend_id
+              AND jc.code_id = e.clsf      
 	    WHERE e.vend_id = #{vendId}
 	      AND e.nm LIKE '%' || #{keyword} || '%'
 	    ORDER BY e.emp_id
@@ -104,6 +115,7 @@
 	      e.emp_id    AS empId,
 	      e.nm        AS nm,
 	      d.dept_nm   AS deptNm,
+	      jc.code_nm  AS jobNm,
 	      a.login_id  AS loginId
 	    FROM tb_emp_acct a
 	    JOIN tb_emp e
@@ -112,6 +124,9 @@
 	    LEFT JOIN tb_dept d
 	      ON e.vend_id = d.vend_id
 	     AND e.dept_id = d.dept_id
+	    LEFT JOIN tb_code jc
+          ON NVL(jc.vend_id, e.vend_id) = e.vend_id
+         AND jc.code_id = e.clsf
 	    WHERE a.vend_id = #{vendId}
 	      AND a.login_id LIKE '%' || #{keyword} || '%'
 	    ORDER BY a.login_id
@@ -286,6 +301,25 @@
 	    FROM tb_subsp
 	   WHERE end_dt <![CDATA[ < ]]> TRUNC(SYSDATE)
 	</select>
+	
+	<update id="updateAcctStatusToInactive">
+	  UPDATE tb_emp_acct
+	     SET st      = 'r3',
+	         updt_dt = SYSDATE,
+	         updt_by = #{updtBy}
+	   WHERE vend_id = #{vendId}
+	     AND emp_id  = #{empId}
+	</update>
+	
+	<update id="updateAcctStatusToActive">
+	  UPDATE tb_emp_acct
+	     SET st      = 'r1',
+	         updt_dt = SYSDATE,
+	         updt_by = #{updtBy}
+	   WHERE vend_id = #{vendId}
+	     AND emp_id  = #{empId}
+	     AND st      = 'r3'  
+	</update>
 	
 	
 </mapper>

@@ -27,11 +27,16 @@
                 e.cttpc,
                 v.hp,
                 e.email,
-                e.proof_photo     
+                e.proof_photo,
+                jc.code_nm AS jobNm     
         FROM TB_EMP_ACCT a
         LEFT JOIN TB_EMP e
                ON a.EMP_ID = e.EMP_ID
               AND a.VEND_ID = e.VEND_ID
+        LEFT JOIN TB_CODE jc
+		       ON jc.grp_id  = 'k'
+		      AND jc.code_id = e.clsf
+		      AND (jc.vend_id = e.vend_id OR jc.vend_id IS NULL)
         LEFT JOIN TB_DEPT d
                ON e.DEPT_ID = d.DEPT_ID
               AND e.VEND_ID = d.VEND_ID
@@ -117,7 +122,8 @@
 	            e.cttpc,
 	            v.hp,
 	            e.email,
-	            e.proof_photo
+	            e.proof_photo,
+	            jc.code_nm AS jobNm
 	    FROM TB_EMP_ACCT a
 	    LEFT JOIN TB_EMP e
 	           ON a.EMP_ID = e.EMP_ID
@@ -125,6 +131,10 @@
 	    LEFT JOIN TB_DEPT d
 	           ON e.DEPT_ID = d.DEPT_ID
 	          AND e.VEND_ID = d.VEND_ID
+	    LEFT JOIN TB_CODE jc
+               ON jc.grp_id  = 'k'
+              AND jc.code_id = e.clsf
+              AND (jc.vend_id = e.vend_id OR jc.vend_id IS NULL)
 	    LEFT JOIN TB_VEND v
 	           ON a.VEND_ID = v.VEND_ID
 	    WHERE a.EMP_ACCT_ID = #{empAcctId}

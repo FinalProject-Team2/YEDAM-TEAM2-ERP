@@ -78,6 +78,41 @@
 	width: auto;
 }
 
+/* 상단 작은 프로필 */
+.navbar .user-dropdown .img-xs {
+  width: 40px !important;
+  height: 40px !important;
+  object-fit: cover;
+}
+
+/* 드롭다운 큰 프로필 */
+.navbar .user-dropdown .img-md {
+  width: 200px !important;
+  height: 200px !important;
+  object-fit: cover;
+}
+
+/* 프로필 드롭다운 글자 크기 키우기 */
+.navbar .user-dropdown .dropdown-header p{
+  font-size: 14px !important;   /* 기본 라인들 */
+  line-height: 1.35;
+}
+
+/* 이름(정지웅)만 더 크게 */
+.navbar .user-dropdown .dropdown-header .fw-semibold{
+  font-size: 18px !important;
+}
+
+/* 작은 텍스트(small-text)만 따로 */
+.navbar .user-dropdown .dropdown-header .small-text{
+  font-size: 13px !important;
+}
+
+/* "비밀번호 변경" 메뉴 글자도 키우고 싶으면 */
+.navbar .user-dropdown .dropdown-item{
+  font-size: 15px !important;
+}
+
 </style>
 
 </head>
@@ -102,9 +137,10 @@
 			<ul class="navbar-nav">
 				<li class="nav-item fw-semibold d-none d-lg-block ms-0">
 					<h1 class="welcome-text">
-						ERP 데이터 구조 <span class="text-black fw-bold"
-							th:if="${session.LOGIN_EMP != null}"
-							th:text="${session.LOGIN_EMP.empNm}"> 사용자이름 </span>
+						ERP 데이터 구조 
+						<span class="text-black fw-bold"
+						 th:if="${session.LOGIN_EMP != null}"
+						 th:text="${pageTitle}">대시 보드</span>
 
 						<!-- 로그인 안 했을 때: Guest 출력 -->
 						<span class="text-black fw-bold"
@@ -148,18 +184,40 @@
 			             alt="Profile image" />
 				
 				      <!-- 🔹 사원 이름 -->
-				      <p class="mb-1 mt-3 fw-semibold"
-				         th:if="${session.LOGIN_EMP != null}"
-				         th:text="${session.LOGIN_EMP.empNm}">
-				        사용자 이름
-				      </p>
+				      <p class="mb-1 mt-3 fw-semibold d-flex align-items-center justify-content-center gap-2"
+				         th:if="${session.LOGIN_EMP != null}">
+					    <span th:text="${session.LOGIN_EMP.empNm}">정지웅</span>
+					    <span class="text-muted" style="font-size:0.9rem;"
+					          th:text="${session.LOGIN_EMP.jobNm}">대리</span>
+					  </p>
+									      
 				      <p class="mb-1 mt-3 fw-semibold"
 				         th:if="${session.LOGIN_EMP == null}">
 				        게스트
 				      </p>
+						
+					  <p class="fw-light small-text mb-0"
+					     th:if="${session.LOGIN_EMP != null}" align="left">
+					    부서 :
+	 				    <span th:text="${session.LOGIN_EMP.deptNm}">개발팀</span>
+					  </p>
+						
+				      <!-- 🔹 사원 번호 -->
+				      <p class="fw-light small-text mb-0"
+				         th:if="${session.LOGIN_EMP != null}" align="left">
+				        사원 번호 :
+				        <span th:text="${session.LOGIN_EMP.empId}">EMP0001</span>
+				      </p>
 				
+				      <!-- 🔹 계정 ID -->
+				      <p class="fw-light small-text mb-0"
+				         th:if="${session.LOGIN_EMP != null}" align="left">
+				        계정 ID :
+				        <span th:text="${session.LOGIN_EMP.loginId}">loginId</span>
+				      </p>
+				      
 				      <!-- 🔹 이메일 -->
-				      <p class="fw-light text-muted mb-0">
+				      <p class="fw-light text-muted mb-0" align="left">
 				        <span th:if="${session.LOGIN_EMP != null}"
 				              th:text="${session.LOGIN_EMP.email}">
 				          user@example.com
@@ -168,20 +226,7 @@
 				          guest@example.com
 				        </span>
 				      </p>
-				
-				      <!-- 🔹 사원 번호 -->
-				      <p class="fw-light small-text mb-0"
-				         th:if="${session.LOGIN_EMP != null}">
-				        사원 번호 :
-				        <span th:text="${session.LOGIN_EMP.empId}">EMP0001</span>
-				      </p>
-				
-				      <!-- 🔹 계정 ID -->
-				      <p class="fw-light small-text mb-0"
-				         th:if="${session.LOGIN_EMP != null}">
-				        계정 ID :
-				        <span th:text="${session.LOGIN_EMP.loginId}">loginId</span>
-				      </p>
+				      
 				    </div>
 				
 				    <a class="dropdown-item"
