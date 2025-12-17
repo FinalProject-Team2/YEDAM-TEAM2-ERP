@@ -91,6 +91,17 @@
 	
 	</select>
 
+	<update id="callShipmentComplete" statementType="CALLABLE">
+	    { CALL PROC_SHIPMENT_COMPLETE(
+	        #{oustIds, jdbcType=ARRAY, javaType=java.util.List,
+	          typeHandler=org.apache.ibatis.type.ArrayTypeHandler},
+	        #{vendId},
+	        #{empId},
+	        #{loginId}
+	    ) }
+	</update>
+
+
 
 	
 

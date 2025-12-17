@@ -18,18 +18,26 @@ import store.yd2team.business.service.ShipmntVO;
 @RequestMapping("/shipment")
 @RequiredArgsConstructor
 public class ShipmntController {
-	
+
 	private final ShipmntService shipmntService;
 
 	@GetMapping("/shipmentMain")
 	public String selectall(Model model) {
 		return "business/shipment";
 	}
-	
+
 	// 견적서 조회(그리드)
-    @PostMapping("/list")
-    @ResponseBody
-    public List<ShipmntVO> shipmentList(@RequestBody ShipmntVO cond) {
-        return shipmntService.selectShipmntList(cond);
-    }
+	@PostMapping("/list")
+	@ResponseBody
+	public List<ShipmntVO> shipmentList(@RequestBody ShipmntVO cond) {
+		return shipmntService.selectShipmntList(cond);
+	}
+
+	// 출하처리버튼
+	@PostMapping("/complete")
+	@ResponseBody
+	public void completeShipment(@RequestBody List<String> oustIds) {
+		shipmntService.completeShipment(oustIds);
+	}
+
 }
