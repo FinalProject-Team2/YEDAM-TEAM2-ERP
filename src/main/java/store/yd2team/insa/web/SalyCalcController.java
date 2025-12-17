@@ -133,7 +133,7 @@ public class SalyCalcController {
         Long grpNo = grpNoNum.longValue();
 
         try {
-            salyCalcService.calculateSalyLedg(
+            Map<String, Object> data = salyCalcService.previewSalyLedg(
                     salyLedgId,
                     grpNo,
                     salySpecIdList,
@@ -141,6 +141,7 @@ public class SalyCalcController {
                     login.getEmpId()
             );
             res.put("result", "SUCCESS");
+            res.put("data", data);
         } catch (Exception e) {
             log.error("급여 계산 오류", e);
             res.put("result", "FAIL");
@@ -150,7 +151,64 @@ public class SalyCalcController {
         return res;
     }
 
-    @GetMapping("/insa/saly/calc/items")
+    
+    // ✅ 저장: 미리보기 결과를 DB에 반영
+    @PostMapping("/insa/saly/calc/save")
+    public Map<String, Object> save(@RequestBody Map<String, Object> body,
+                                    HttpSession session) {
+
+        Map<String, Object> res = new HashMap<>();
+
+        SessionDto login = getLogin(session);
+        if (login == null) {
+            res.put("result", "FAIL");
+            res.put("message", "세션이 만료되었습니다. 다시 로그인해주세요.");
+            return res;
+        }
+
+        String salyLedgId = (String) body.get("salyLedgId");
+        Number grpNoNum   = (Number) body.get("grpNo");
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> previewList = (List<Map<String, Object>>) body.get("previewList");
+
+        if (salyLedgId == null || salyLedgId.isBlank()) {
+            res.put("result", "FAIL");
+            res.put("message", "급여대장ID가 없습니다.");
+            return res;
+        }
+        if (grpNoNum == null) {
+            res.put("result", "FAIL");
+            res.put("message", "급여계산그룹번호(grpNo)가 없습니다.");
+            return res;
+        }
+        if (previewList == null || previewList.isEmpty()) {
+            res.put("result", "FAIL");
+            res.put("message", "저장할 계산 결과(previewList)가 없습니다.");
+            return res;
+        }
+
+        Long grpNo = grpNoNum.longValue();
+
+        try {
+            salyCalcService.savePreviewResult(
+                    salyLedgId,
+                    grpNo,
+                    previewList,
+                    login.getVendId(),
+                    login.getEmpId()
+            );
+            res.put("result", "SUCCESS");
+        } catch (Exception e) {
+            log.error("급여 계산 저장 오류", e);
+            res.put("result", "FAIL");
+            res.put("message", e.getMessage());
+        }
+
+        return res;
+    }
+
+@GetMapping("/insa/saly/calc/items")
     public List<SalySpecItemVO> items(@RequestParam("salySpecId") String salySpecId,
                                       @RequestParam("grpNo") Long grpNo,
                                       HttpSession session) {

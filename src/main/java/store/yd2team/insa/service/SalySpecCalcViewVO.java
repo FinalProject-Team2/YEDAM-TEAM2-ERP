@@ -20,6 +20,9 @@ public class SalySpecCalcViewVO {
     private String deptNm;
 //    private Long grpNo;
 //    private String calcGrpNm;
+    private String clsfNm;    // 직급명
+    private String rspofcNm;  // 직책명
+
 
 
     private Long payAmt;      // 지급합

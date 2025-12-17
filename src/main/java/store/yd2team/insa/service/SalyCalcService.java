@@ -12,7 +12,22 @@ public interface SalyCalcService {
     // grpNo null이면 전체, 있으면 그 그룹에 매핑된 항목만
     List<AllowDucVO> getAllowDucList(String vendId, Long grpNo);
 
-    // 급여계산 실행 (선택 사원만)
+    /**
+     * ✅ 미리보기(확인 버튼)
+     * - DB에 tb_saly_spec_item을 INSERT 하지 않는다.
+     * - 서버에서 계산한 결과(항목/합계)를 반환만 한다.
+     */
+    Map<String, Object> previewSalyLedg(String salyLedgId, Long grpNo, List<String> salySpecIdList,
+                                        String vendId, String loginEmpId);
+
+    /**
+     * ✅ 저장(급여계산 모달의 저장 버튼)
+     * - 미리보기에서 넘어온 계산 결과를 DB에 반영한다.
+     */
+    void savePreviewResult(String salyLedgId, Long grpNo, List<Map<String, Object>> previewList,
+                           String vendId, String loginEmpId);
+
+    // (기존) 급여계산 실행 (선택 사원만) - 필요 시 유지
     void calculateSalyLedg(String salyLedgId, Long grpNo, List<String> salySpecIdList,
                            String vendId, String loginEmpId);
 

@@ -815,6 +815,11 @@
   let selectedGrpNm = "";
   let selectedGroupItems = [];
 
+  // ✅ (신규) '확인'은 미리보기만: 계산 결과를 메모리에 보관했다가 '저장'에서만 DB 반영
+  let pendingCalcBySpecId = {}; // { [salySpecId]: { items:[], payAmt, ttDucAmt, actPayAmt } }
+  let pendingGrpNo = null;
+
+
   const baseCalcColumns = [
     { header:"사원번호", name:"empId", align:"center", width:140 },
     { header:"사원명",   name:"empNm", align:"center", width:160 },
@@ -909,37 +914,41 @@
   }
 
   function buildDynamicColumnsByGroupItems(items) {
-    const list = Array.isArray(items) ? [...items] : [];
+	  const list = Array.isArray(items) ? [...items] : [];
 
-    const toNum = (v) => {
-      const n = Number(v);
-      return Number.isFinite(n) ? n : 999999;
-    };
+	  const toNum = (v) => {
+	    const n = Number(v);
+	    return Number.isFinite(n) ? n : 999999;
+	  };
 
-    list.sort((a,b) => {
-      const at = a.itemTy === "A" ? 0 : 1;
-      const bt = b.itemTy === "A" ? 0 : 1;
-      if (at !== bt) return at - bt;
-      const an = toNum(a.dispNo);
-      const bn = toNum(b.dispNo);
-      if (an !== bn) return an - bn;
-      return String(a.itemId).localeCompare(String(b.itemId));
-    });
+	  list.sort((a,b) => {
+	    const at = a.itemTy === "A" ? 0 : 1;
+	    const bt = b.itemTy === "A" ? 0 : 1;
+	    if (at !== bt) return at - bt;
+	    const an = toNum(a.dispNo);
+	    const bn = toNum(b.dispNo);
+	    if (an !== bn) return an - bn;
+	    return String(a.itemId).localeCompare(String(b.itemId));
+	  });
 
-    return list.map(it => ({
-      header: it.itemNm,
-      name: it.itemId,
-      align: "right",
-      width: 120,
-      formatter: moneyFmt
-    }));
-  }
+	  return list.map(it => ({
+	    header: it.itemNm,
+	    name: it.itemId,
+	    align: "right",
+	    width: 120,
+
+	    // ✅ 이 한 줄만 추가
+	    editor: 'text',
+
+	    formatter: moneyFmt
+	  }));
+	}
 
   /********************************************************
    * ✅ (단일 정의) 계산결과 셀 채우기
    * - /insa/saly/calc/items 응답이 배열/객체여도 처리
    ********************************************************/
-  async function fillCalculatedAmountsForSelectedSpecs(grpNo, selectedSpecIds) {
+  async function fillCalculatedAmountsForSelectedSpecs(grpNo, selectedSpecIds, previewMap) {
     if (!gridCalc) return;
 
     const rows = gridCalc.getData() || [];
@@ -948,27 +957,40 @@
     const tasks = rows.map(async (row) => {
       if (!selectedSet.has(row.salySpecId)) return row;
 
-      const url =
-        "/insa/saly/calc/items?salySpecId=" + encodeURIComponent(row.salySpecId) +
-        "&grpNo=" + encodeURIComponent(grpNo);
+      // ✅ 1) 우선 미리보기 데이터(확인 버튼에서 받아온 것)가 있으면 그걸 사용
+      let items = null;
+      let totals = null;
 
-      const data = await fetchJsonSafe(url);
+      if (previewMap && previewMap[row.salySpecId]) {
+        const one = previewMap[row.salySpecId];
+        items = Array.isArray(one.items) ? one.items : [];
+        totals = one;
+      } else {
+        // ✅ 2) 없으면(페이지 재진입/새로고침 등) DB 저장된 값 조회(기존 기능 유지)
+        const url =
+          "/insa/saly/calc/items?salySpecId=" + encodeURIComponent(row.salySpecId) +
+          "&grpNo=" + encodeURIComponent(grpNo);
 
-      const items = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.list)
-          ? data.list
-          : Array.isArray(data?.data)
-            ? data.data
-            : [];
+        const data = await fetchJsonSafe(url);
 
-      if (!Array.isArray(items)) {
-        throw new Error("items 응답이 배열이 아닙니다: " + JSON.stringify(data));
+        if (!Array.isArray(data)) {
+          throw new Error("items 응답이 배열이 아닙니다: " + JSON.stringify(data));
+        }
+        items = data;
       }
 
-      items.forEach(it => {
+      // 동적 컬럼에 값 채우기
+      (items || []).forEach(it => {
+        if (!it) return;
         row[it.itemId] = it.amt;
       });
+
+      // 합계도 미리보기에서 같이 갱신(있으면)
+      if (totals) {
+        row.payAmt    = totals.payAmt;
+        row.ttDucAmt  = totals.ttDucAmt;
+        row.actPayAmt = totals.actPayAmt;
+      }
 
       row.calcGrpNm = selectedGrpNm || "";
       return row;
@@ -978,6 +1000,7 @@
     gridCalc.resetData(rows);
     if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
   }
+
 
   btnOpenCalc?.addEventListener("click", () => {
     const selected = getSelectedRow();
@@ -1643,13 +1666,17 @@
       });
 
       if (runRes?.result !== "SUCCESS") {
-        throw new Error(runRes?.message || "급여계산(run) 실패");
+        throw new Error(runRes?.message || "급여계산(미리보기) 실패");
       }
+
+      // ✅ (핵심) '확인'은 DB 저장이 아니라 미리보기 결과만 보관
+      pendingGrpNo = selectedGrpNo;
+      pendingCalcBySpecId = runRes?.data || {};
 
       const dynamicCols = buildDynamicColumnsByGroupItems(selectedGroupItems);
       gridCalc.setColumns([...baseCalcColumns, ...dynamicCols]);
 
-      await fillCalculatedAmountsForSelectedSpecs(selectedGrpNo, salySpecIdList);
+      await fillCalculatedAmountsForSelectedSpecs(selectedGrpNo, salySpecIdList, pendingCalcBySpecId);
 
       if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
 
@@ -1686,30 +1713,39 @@
     }
 
     try {
-      console.log("RUN payload(save)", {
-        salyLedgId: currentCalcSalyLedgId,
-        grpNo: selectedGrpNo,
-        salySpecIdList
+      // ✅ 저장은 DB 반영 단계
+      if (!pendingGrpNo || pendingGrpNo !== selectedGrpNo) {
+        alert("먼저 급여계산그룹에서 '확인'을 눌러 계산(미리보기)을 완료해주세요.");
+        return;
+      }
+
+      const previewList = (salySpecIdList || []).map(specId => {
+        const one = pendingCalcBySpecId[specId] || {};
+        return {
+          salySpecId: specId,
+          items: Array.isArray(one.items) ? one.items : []
+        };
       });
 
-      const runRes = await fetchJsonSafe("/insa/saly/calc/run", {
+      const saveRes = await fetchJsonSafe("/insa/saly/calc/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           salyLedgId: currentCalcSalyLedgId,
           grpNo: selectedGrpNo,
-          salySpecIdList
+          previewList
         })
       });
 
-      if (runRes?.result !== "SUCCESS") {
-        throw new Error(runRes?.message || "급여계산(run) 실패");
+      if (saveRes?.result !== "SUCCESS") {
+        throw new Error(saveRes?.message || "급여계산 저장 실패");
       }
 
+      // 저장 후 화면도 미리보기 값으로 유지
       const dynamicCols = buildDynamicColumnsByGroupItems(selectedGroupItems);
       gridCalc.setColumns([...baseCalcColumns, ...dynamicCols]);
 
-      await fillCalculatedAmountsForSelectedSpecs(selectedGrpNo, salySpecIdList);
+      await fillCalculatedAmountsForSelectedSpecs(selectedGrpNo, salySpecIdList, pendingCalcBySpecId);
 
       if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
       alert("급여계산이 적용되었습니다.");
