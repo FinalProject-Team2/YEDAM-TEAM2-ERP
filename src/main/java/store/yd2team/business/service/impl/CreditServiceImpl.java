@@ -85,17 +85,6 @@ public class CreditServiceImpl implements CreditService {
        }
    }
    
-	/*
-	 * @Override public int insertCdtlnLmt(CreditVO vo) { // TODO Auto-generated
-	 * method stub creditMapper.insertCdtlnLmt(vo);
-	 * 
-	 * AtmptVO avo = new AtmptVO(); avo.setCdtlnNo(vo.getCdtlnNo());
-	 * avo.setCustcomId(vo.getCustcomId()); avo.setVendId(vo.getVendId());
-	 * avo.setAtmptBlce(0l); return creditMapper.insertAtmpt(avo);
-	 * 
-	 * }
-	 */
-   
    
 @Override
 public int insertAtmpt(AtmptVO vo) {

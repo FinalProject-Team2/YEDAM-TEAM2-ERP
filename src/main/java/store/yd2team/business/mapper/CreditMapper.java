@@ -20,9 +20,6 @@ public interface CreditMapper {
 	//단건조회
 	CreditVO selectCreditStatus(CreditVO target);
 	
-	//
-	/* int updateCreditEval(CreditVO eval); */
-	
 	// 저장버튼 이벤트
 	int updateCreditLimit(CreditVO vo);
 	

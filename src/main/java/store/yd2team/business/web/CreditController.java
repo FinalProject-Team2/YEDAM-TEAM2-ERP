@@ -96,25 +96,6 @@ public class CreditController {
 
        return result;
    }
-	/*
-	 * @PostMapping("/save")
-	 * 
-	 * @ResponseBody public Map<String, Object> saveNewCust(@RequestBody CreditVO
-	 * vo) { Map<String, Object> result = new HashMap<>();
-	 * 
-	 * try { System.out.println("### Controller Request VO : " + vo);
-	 * 
-	 * int saveResult = creditService.insertCdtlnLmt(vo);
-	 * 
-	 * result.put("result", saveResult > 0 ? "success" : "success"); // 무조건 success
-	 * 처리 result.put("message", "신규 여신 저장 완료");
-	 * 
-	 * } catch (Exception e) { System.out.println("### Exception : " +
-	 * e.getMessage()); result.put("result", "fail"); result.put("message",
-	 * e.getMessage()); }
-	 * 
-	 * System.out.println("### Final Response : " + result); return result; }
-	 */
    
    // 출하정지
     @PutMapping("/shipmntStop")

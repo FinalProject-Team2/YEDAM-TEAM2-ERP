@@ -191,6 +191,7 @@
 	    )
 	</insert>
 
+
 	<update id="updateShipmnt" parameterType="store.yd2team.business.service.CreditVO">
 		UPDATE tb_cdtln_lmt SET shipmnt_stop = #{shipmntStop} WHERE CDTLN_NO = #{cdtlnNo}
 		

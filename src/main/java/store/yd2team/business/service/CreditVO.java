@@ -56,7 +56,6 @@ public class CreditVO {
    private LocalDate updtDt;
    private String updtBy;
    
-   
 }
 
 
