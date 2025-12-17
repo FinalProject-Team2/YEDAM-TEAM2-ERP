@@ -511,6 +511,34 @@ function setDbAdd(el) {
 
 		}else{
 			console.log("신규사원");
+
+			const inputs = document.querySelectorAll(`[id^='v_']`);  
+  for (const input of inputs) {
+//console.log(input.id);
+// 특정 id는 건너뛰기
+  if (input.id == "v_empId") {
+    continue;   // 다음 input으로 넘어감
+  }
+// 특정 id는 건너뛰기
+  if (input.id == "v_proofPhoto") {
+if(input.src != "http://localhost/images/profil/nonUser.jpeg") {
+console.log(input.src);
+continue;
+}else{
+console.log(input.src);
+alert("사진을 넣어주세요.");
+return;
+}
+  }
+
+
+
+
+if(input.value == null || input.value.trim() == "") {
+alert("입력되지 않은 항목이 있습니다.");
+return;
+}
+}
 			openModal();
 		}		
 	}//end of setDbAdd(el)
