@@ -82,11 +82,11 @@
 	   WHERE m.menu_id IN (SELECT menu_id FROM tree_ids)
 	     AND m.yn = 'e1'
 	     AND (m.vend_id = #{vendId} OR m.vend_id IS NULL)
-	   ORDER BY
-	     m.module_id,
-	     NVL(m.prnt_menu_id, '0'),
-	     m.sort_ord,
-	     m.menu_id
+		ORDER BY
+		  NVL(m.prnt_menu_id, m.menu_id), 
+		  CASE WHEN m.prnt_menu_id IS NULL THEN 0 ELSE 1 END, 
+		  m.sort_ord,
+		  m.menu_id
 	 </select>
   
   	<select id="selectAllMenusForOprtr" resultType="store.yd2team.common.dto.MenuAuthDto">
@@ -126,5 +126,19 @@
 	    )
 	  ORDER BY m.sort_ord, m.menu_id
 	</select>
+	
+	<select id="selectMenuNameByUrl" resultType="string">
+	  SELECT menu_nm
+	  FROM (
+	    SELECT menu_nm
+	      FROM tb_menu
+	     WHERE yn = 'e1'
+	       AND menu_url = #{menuUrl}
+	       AND (vend_id = #{vendId} OR vend_id IS NULL)
+	     ORDER BY CASE WHEN vend_id = #{vendId} THEN 0 ELSE 1 END
+	  )
+	  WHERE ROWNUM = 1
+	</select>
+
 
 </mapper>

@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import lombok.RequiredArgsConstructor;
 import store.yd2team.common.interceptor.LoginCheckInterceptor;
 import store.yd2team.common.interceptor.MenuAuthInterceptor;
+import store.yd2team.common.interceptor.PageTitleInterceptor;
 
 @Configuration
 @RequiredArgsConstructor
@@ -15,10 +16,11 @@ public class WebConfig implements WebMvcConfigurer{
 	
 	private final LoginCheckInterceptor loginCheckInterceptor;
 	private final MenuAuthInterceptor menuAuthInterceptor;
+	 private final PageTitleInterceptor pageTitleInterceptor;
 	
 	@Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		System.out.println(System.getProperty("user.dir"));
+		System.out.println("========================"+System.getProperty("user.dir"));
 		String baseDir = System.getProperty("user.dir") + "\\upload\\";
 		 //String uploadDir = System.getProperty("user.dir") + "\\upload\\images\\";
 			/*
@@ -71,5 +73,8 @@ public class WebConfig implements WebMvcConfigurer{
 	                    "/error",
 	                    "/favicon.ico"
 	            );
+	    
+	    registry.addInterceptor(pageTitleInterceptor)
+        	.addPathPatterns("/**");
 	}
 }

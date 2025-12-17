@@ -68,5 +68,13 @@ public interface EmpAcctMapper {
     int updateAcctStByVendId(@Param("vendId") String vendId,
 				             @Param("st") String st,
 				             @Param("updtBy") String updtBy);
+    
+    int updateAcctStatusToInactive(@Param("vendId") String vendId,
+					               @Param("empId") String empId,
+					               @Param("updtBy") String updtBy);
+    
+    int updateAcctStatusToActive(@Param("vendId") String vendId,
+					             @Param("empId") String empId,
+					             @Param("updtBy") String updtBy);
 
 }

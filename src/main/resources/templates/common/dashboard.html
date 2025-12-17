@@ -7,15 +7,136 @@
 
   <style>
     .dash-wrap { padding: 8px 4px; }
-    .dash-kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-    .dash-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; background: #fff; }
-    .dash-card .t { font-size: 12px; color: #6b7280; }
-    .dash-card .v { font-size: 22px; font-weight: 800; margin-top: 6px; }
-    .dash-mid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-    .dash-bot { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-    .dash-title { font-weight: 800; margin-bottom: 10px; }
-    .chart-box { height: 320px; }
-    .grid-box { height: 360px; }
+
+    /* ===== header ===== */
+    .dash-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+    .dash-title-h3{ margin:0; }
+
+    .dash-controls{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .dash-btn{
+      border:1px solid #e5e7eb;
+      background:#fff;
+      border-radius:10px;
+      padding:8px 10px;
+      font-weight:800;
+      cursor:pointer;
+      line-height:1;
+    }
+    .dash-btn:active{ transform: translateY(1px); }
+
+    .dash-toggle{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid #e5e7eb;
+      background:#fff;
+      border-radius:10px;
+      padding:6px 10px;
+      font-weight:700;
+      user-select:none;
+    }
+    .dash-toggle input{ transform: translateY(1px); }
+
+    /* ===== KPI (고정) ===== */
+    .dash-kpi{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:12px;
+    }
+    .dash-card{
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:12px;
+      background:#fff;
+    }
+    .dash-card .t{ font-size:12px; color:#6b7280; }
+    .dash-card .v{ font-size:22px; font-weight:800; margin-top:6px; }
+
+    /* ===== slider ===== */
+    .dash-slider{
+      position:relative;
+      border-radius:14px;
+      overflow:hidden;
+      margin-top:12px;
+
+      /* ✅ 너무 커지지 않게 clamp로 제한 */
+      height: clamp(360px, calc(100vh - 420px), 490px);
+    }
+    .dash-track{
+      display:flex;
+      height:100%;
+      transition:transform 420ms ease;
+      will-change:transform;
+    }
+    .dash-slide{
+      min-width:100%;
+      height:100%;
+      padding:2px;
+      box-sizing:border-box;
+    }
+
+    .dash-mid, .dash-bot{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      height:100%;
+    }
+
+    .dash-mid .dash-card, .dash-bot .dash-card{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden; /* ✅ 차트 오버 방지(안전장치) */
+    }
+
+    .dash-section-title{ font-weight:900; margin-bottom:10px; }
+
+    /* ✅ chart/grid는 남은 공간을 먹되, 카드 밖으로는 안 나가게 */
+    .chart-box, .grid-box{
+      flex:1;
+      min-height:220px;
+      height:100%;
+      overflow:hidden;
+    }
+
+    /* dots */
+    .dash-dots{
+      display:flex;
+      justify-content:center;
+      gap:6px;
+      margin-top:10px;
+    }
+    .dash-dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      cursor:pointer;
+    }
+    .dash-dot.active{ background:#111827; border-color:#111827; }
+
+    @media (max-width: 992px){
+      .dash-kpi{ grid-template-columns:repeat(2, 1fr); }
+      .dash-mid, .dash-bot{ grid-template-columns:1fr; }
+
+      /* 모바일은 KPI가 세로로 길어지므로 slider 높이 더 줄여서 오버 방지 */
+      .dash-slider{
+        height: clamp(320px, calc(100vh - 520px), 460px);
+      }
+    }
   </style>
 </head>
 
@@ -23,9 +144,21 @@
 <div layout:fragment="content">
   <div class="dash-wrap">
 
-    <h3 class="mb-3">계정/권한 · 보안 대시보드</h3>
+    <div class="dash-head">
+      <h3 class="dash-title-h3">계정/권한 · 보안 대시보드</h3>
 
-    <!-- KPI -->
+      <div class="dash-controls">
+        <button type="button" class="dash-btn" id="btnPrev" aria-label="이전">◀</button>
+        <button type="button" class="dash-btn" id="btnNext" aria-label="다음">▶</button>
+
+        <label class="dash-toggle" title="자동 전환">
+          <input type="checkbox" id="autoRotate" checked />
+          자동 전환
+        </label>
+      </div>
+    </div>
+
+    <!-- KPI (고정) -->
     <div class="dash-kpi">
       <div class="dash-card"><div class="t">전체 사원 수</div><div class="v" id="k_totalEmp">-</div></div>
       <div class="dash-card"><div class="t">계정 미부여 사원 수</div><div class="v" id="k_noAcctEmp">-</div></div>
@@ -38,76 +171,111 @@
       <div class="dash-card"><div class="t">오늘 잠금 발생</div><div class="v" id="k_lockedToday">-</div></div>
     </div>
 
-    <!-- Charts -->
-    <div class="dash-mid">
-      <div class="dash-card">
-        <div class="dash-title">계정 상태 분포 (tb_emp_acct.st)</div>
-        <div id="chartStatus" class="chart-box"></div>
-      </div>
+    <!-- 아래만 슬라이드(2장) -->
+    <div class="dash-slider" id="dashSlider">
+      <div class="dash-track" id="dashTrack">
 
-      <div class="dash-card">
-        <div class="dash-title">역할 분포 (tb_role.role_ty)</div>
-        <div id="chartRole" class="chart-box"></div>
+        <!-- charts -->
+        <section class="dash-slide" data-slide="charts">
+          <div class="dash-mid">
+            <div class="dash-card">
+              <div class="dash-section-title">계정 상태 분포</div>
+              <div id="chartStatus" class="chart-box"></div>
+            </div>
+
+            <div class="dash-card">
+              <div class="dash-section-title">역할 분포</div>
+              <div id="chartRole" class="chart-box"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- grids -->
+        <section class="dash-slide" data-slide="grids">
+          <div class="dash-bot">
+            <div class="dash-card">
+              <div class="dash-section-title">최근 로그인 실패 TOP 10</div>
+              <div id="gridFailTop" class="grid-box"></div>
+            </div>
+
+            <div class="dash-card">
+              <div class="dash-section-title">최근 권한 변경 내역</div>
+              <div id="gridAuthChg" class="grid-box"></div>
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
 
-    <!-- Grids -->
-    <div class="dash-bot">
-      <div class="dash-card">
-        <div class="dash-title">최근 로그인 실패 TOP 10</div>
-        <div id="gridFailTop" class="grid-box"></div>
-      </div>
-
-      <div class="dash-card">
-        <div class="dash-title">최근 권한 변경 내역 (ro1, au1)</div>
-        <div id="gridAuthChg" class="grid-box"></div>
-      </div>
+    <div class="dash-dots" id="dashDots">
+      <button type="button" class="dash-dot active" data-idx="0" aria-label="차트"></button>
+      <button type="button" class="dash-dot" data-idx="1" aria-label="그리드"></button>
     </div>
 
   </div>
 
-  <!-- ================= JS ================= -->
   <script>
-    /* ========= helpers ========= */
     function setText(id, v) {
-      document.getElementById(id).textContent = (v ?? 0);
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = (v ?? 0);
     }
 
-    /* ========= Chart ========= */
+    const ST_NAME = { r1:'활성', r2:'잠금', r3:'비활성' };
+    const ROLE_TY_NAME = { d1:'인사', d2:'공통', d3:'영업' };
+    function mapLabel(label, type) {
+      if (type === 'st') return ST_NAME[label] ?? label;
+      if (type === 'roleTy') return ROLE_TY_NAME[label] ?? label;
+      return label;
+    }
+
+    /* ===== Chart ===== */
     let statusChart = null;
     let roleChart = null;
 
-    function renderPie(elId, rows) {
+    function renderPie(elId, rows, labelType) {
       const el = document.getElementById(elId);
+      if (!el) return null;
       el.innerHTML = '';
+
+      // ✅ 오버 방지: 카드 높이에서 제목 + 여유 + (레전드 예상치) 더 크게 빼기
+      const card = el.closest('.dash-card');
+      const title = card?.querySelector('.dash-section-title');
+
+      const cardH = card ? card.clientHeight : 300;
+      const titleH = title ? title.clientHeight : 0;
+
+      const reserve = 90; // ✅ legend/패딩/여유(오버 방지 핵심)
+      const h = Math.max(220, cardH - titleH - reserve);
 
       return toastui.Chart.pieChart({
         el,
         data: {
-          series: rows.map(r => ({
-            name: r.label,
+          series: (rows || []).map(r => ({
+            name: mapLabel(r.label, labelType),
             data: r.cnt
           }))
         },
         options: {
-          chart: { width: el.clientWidth, height: 300 },
+          chart: { width: el.clientWidth, height: h },
           legend: { visible: true },
           series: { radiusRange: { inner: '45%', outer: '90%' } }
         }
       });
     }
 
-    /* ========= Grid ========= */
+    /* ===== Grid ===== */
     let gridFailTop;
     let gridAuthChg;
 
     function initGrids() {
       gridFailTop = new tui.Grid({
         el: document.getElementById('gridFailTop'),
-        bodyHeight: 320,
+        bodyHeight: 'fitToParent',  // ✅ 부모 높이에 맞춤(오버 방지)
         rowHeaders: ['rowNum'],
         columns: [
-          { header: '계정ID', name: 'empAcctId', width: 190 },
+          { header: '계정ID', name: 'loginId', width: 190 },
           { header: '실패횟수', name: 'failCnt', width: 100, align: 'center' },
           { header: '최근실패', name: 'lastFailDttm', minWidth: 170 }
         ]
@@ -115,22 +283,22 @@
 
       gridAuthChg = new tui.Grid({
         el: document.getElementById('gridAuthChg'),
-        bodyHeight: 320,
+        bodyHeight: 'fitToParent',  // ✅ 부모 높이에 맞춤(오버 방지)
         rowHeaders: ['rowNum'],
         columns: [
-          { header: '일시', name: 'errDttm', width: 170 },
-          { header: '계정ID', name: 'empAcctId', width: 170 },
-          { header: '동작', name: 'motionTy', width: 80, align: 'center' },
+          { header: '일시', name: 'errDttm', width: 200 },
+          { header: '계정ID', name: 'loginId', width: 140 },
+          { header: '동작', name: 'motionTyName', width: 140 },
           { header: '요약', name: 'smry', minWidth: 240 }
         ]
       });
     }
 
-    /* ========= API ========= */
+    /* ===== API ===== */
     async function loadSummary() {
       const res = await fetch('/api/dashboard/summary');
       const data = await res.json();
-      const s = data.summary;
+      const s = data.summary || {};
 
       setText('k_totalEmp', s.totalEmp);
       setText('k_noAcctEmp', s.noAcctEmp);
@@ -144,25 +312,86 @@
       if (statusChart) statusChart.destroy();
       if (roleChart) roleChart.destroy();
 
-      statusChart = renderPie('chartStatus', data.acctStatusDist || []);
-      roleChart = renderPie('chartRole', data.roleTypeCount || []);
+      statusChart = renderPie('chartStatus', data.acctStatusDist || [], 'st');
+      roleChart   = renderPie('chartRole',   data.roleTypeCount || [], 'roleTy');
     }
 
     async function loadRecent() {
       const res = await fetch('/api/dashboard/recent');
       const data = await res.json();
-
-      gridFailTop.resetData(data.topLoginFail || []);
-      gridAuthChg.resetData(data.recentAuthChanges || []);
+      gridFailTop?.resetData(data.topLoginFail || []);
+      gridAuthChg?.resetData(data.recentAuthChanges || []);
     }
 
-    /* ========= boot ========= */
+    /* ===== Slider ===== */
+    const SLIDE_COUNT = 2;
+    let currentIdx = 0;
+    const trackEl = () => document.getElementById('dashTrack');
+
+    function updateDots(idx) {
+      document.querySelectorAll('.dash-dot').forEach(d => d.classList.remove('active'));
+      const active = document.querySelector(`.dash-dot[data-idx="${idx}"]`);
+      if (active) active.classList.add('active');
+    }
+
+    function goTo(idx) {
+      currentIdx = (idx + SLIDE_COUNT) % SLIDE_COUNT;
+      trackEl().style.transform = `translateX(-${currentIdx * 100}%)`;
+      updateDots(currentIdx);
+
+      if (currentIdx === 0) {
+        requestAnimationFrame(() => loadSummary());
+      } else {
+        requestAnimationFrame(() => {
+          gridFailTop?.refreshLayout();
+          gridAuthChg?.refreshLayout();
+        });
+      }
+    }
+
+    function next() { goTo(currentIdx + 1); }
+    function prev() { goTo(currentIdx - 1); }
+
+    /* ===== Auto Rotate ===== */
+    let autoTimer = null;
+    const AUTO_MS = 8000;
+
+    function stopAuto() { if (autoTimer) clearInterval(autoTimer); autoTimer = null; }
+    function startAuto() { stopAuto(); autoTimer = setInterval(() => next(), AUTO_MS); }
+
+    function userAction(fn) {
+      fn();
+      const chk = document.getElementById('autoRotate');
+      if (chk && chk.checked) startAuto();
+      else stopAuto();
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       initGrids();
       await loadSummary();
       await loadRecent();
 
-      window.addEventListener('resize', () => loadSummary());
+      goTo(0);
+
+      document.getElementById('btnPrev').addEventListener('click', () => userAction(() => prev()));
+      document.getElementById('btnNext').addEventListener('click', () => userAction(() => next()));
+
+      document.querySelectorAll('.dash-dot').forEach(d => {
+        d.addEventListener('click', () => userAction(() => goTo(parseInt(d.dataset.idx, 10))));
+      });
+
+      const chk = document.getElementById('autoRotate');
+      chk.addEventListener('change', () => { if (chk.checked) startAuto(); else stopAuto(); });
+
+      startAuto();
+
+      window.addEventListener('resize', () => {
+        if (currentIdx === 0) requestAnimationFrame(() => loadSummary());
+        else requestAnimationFrame(() => {
+          gridFailTop?.refreshLayout();
+          gridAuthChg?.refreshLayout();
+        });
+      });
     });
   </script>
 </div>

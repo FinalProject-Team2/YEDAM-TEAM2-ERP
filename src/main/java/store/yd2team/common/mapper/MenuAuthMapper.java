@@ -19,4 +19,7 @@ public interface MenuAuthMapper {
     
     List<MenuAuthDto> selectMenusForUnpaid(@Param("vendId") String vendId);
     
+    String selectMenuNameByUrl(@Param("vendId") String vendId,
+            				   @Param("menuUrl") String menuUrl);
+    
 }

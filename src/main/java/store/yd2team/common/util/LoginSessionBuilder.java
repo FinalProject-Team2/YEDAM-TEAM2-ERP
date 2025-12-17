@@ -39,6 +39,7 @@ public class LoginSessionBuilder {
         session.setEmail(empAcct.getEmail());
         session.setProofPhoto(empAcct.getProofPhoto());
         session.setAcctSt(empAcct.getSt());
+        session.setJobNm(empAcct.getJobNm());
 
         if (isOperator(empAcct.getLoginId())) {
             buildOperatorSession(session);     // ✅ 여기서 운영자 세션 완성

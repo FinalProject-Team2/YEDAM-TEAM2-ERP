@@ -308,6 +308,38 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {  
+	  
+	
+	  function setSelectByOptionText($select, text) {
+		  if (!text) return;
+
+		  const el = $select && $select[0];
+		  if (!el) return;
+
+		  const opts = Array.from(el.options);
+		  const found = opts.find(o => (o.textContent || '').trim() === text.trim());
+		  if (found) {
+		    $select.val(found.value);
+		  }
+		}
+
+		function applyDeptJobFromItem(item) {
+		  // deptName: value가 deptNm
+		  if (item.deptNm && item.deptNm.trim() !== '') {
+		    $('#deptName').val(item.deptNm);
+		  } else {
+		    $('#deptName').val(''); // ✅ 없으면 전체
+		  }
+
+		  // jobName: value=codeId, text=codeNm(직급명)
+		  if (item.jobNm && item.jobNm.trim() !== '') {
+		    setSelectByOptionText($('#jobName'), item.jobNm);
+		  } else {
+		    $('#jobName').val(''); // ✅ 없으면 전체
+		  }
+		}
+	  
+	
 
     let selectedEmpRow = null;      // 현재 선택된 사원 행 데이터
     let selectedEmpRowKey = null;   // 현재 선택된 그리드 rowKey
@@ -420,12 +452,13 @@
       rowHeaders: [],
       ...empGridOptions,
       columns: [
-        { header: '부서 명',        name: 'deptName',   minWidth: 100 },
-        { header: '직급 명',        name: 'jobName',    minWidth: 100 },
+        { header: '부서 명',        name: 'deptName',   minWidth: 80 },
+        { header: '직급 명',        name: 'jobName',    minWidth: 80 },
         { header: '사번',           name: 'empNo',      minWidth: 100 },
         { header: '사원 명',        name: 'empName',    minWidth: 120 },
         { header: '계정 존재 유무', name: 'hasAccount', width: 110 },
-        { header: '계정 상태',      name: 'status',     minWidth: 100 }
+        { header: '계정 상태',      name: 'status',     minWidth: 100 },
+        { header: '권한(역할) 유무', name: 'hasRole', width: 110 }
       ]
     });
 
@@ -571,12 +604,19 @@
         deptName: $deptName.val()  || '',
         jobName:  $jobName.val()   || '',
         empName:  $empName.val()   || '',
-        loginId:  $accountId.val() || ''
+        loginId:  $empAcctId.val() || ''
       };
 
       $.getJSON(EMP_SEARCH_URL, params, function (list) {
         const rows = (list || []).map(function (emp) {
           const hasLogin = !!emp.loginId;
+          
+          const roleCnt  = emp.roleCnt ?? 0;
+
+          let hasRoleDisp = '-';
+          if (hasLogin) {
+            hasRoleDisp = (roleCnt > 0) ? 'Y' : 'N';
+          }
 
           return {
             deptName:   emp.deptNm,
@@ -584,6 +624,7 @@
             empNo:      emp.empId,
             empName:    emp.nm,
             hasAccount: hasLogin ? 'Y' : 'N',
+            hasRole:    hasRoleDisp, 
             status:     hasLogin ? toStatusLabel(emp.acctStatus) : '-',
 
             empAcctId:  emp.empAcctId || null,
@@ -597,6 +638,9 @@
 
         empGrid.resetData(rows);
         clearEmpDetail();
+        
+        console.log('rows length=', rows.length);
+        setTimeout(()=> console.log('grid data length(after 300ms)=', empGrid.getData().length), 300);
       }).fail(function (xhr) {
         console.error('사원 목록 조회 실패', xhr);
         empGrid.resetData([]);
@@ -861,58 +905,68 @@
         data: JSON.stringify(payload)
       }).done(function (res) {
 
-        if (!res || res.success !== true) {
-          alert('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
-          return;
-        }
+    	  // ✅ 실패 응답 처리 (에러코드/메시지 있으면 그걸 우선 사용)
+    	  if (!res || res.success !== true) {
 
-        const newStatus = res.acctStatus || acctSt;
-        
-        if (res.empAcctId) {
-          $empAcctId.val(res.empAcctId);        // hidden 업데이트
-          selectedEmpRow.empAcctId = res.empAcctId;  // 그리드 row에도 반영
-        }
+    	    // 중복 아이디(=UQ_EMP_ACCT_VEND_LOGIN)일 때 안내 문구
+    	    if (res && res.errorCode === 'DUP_LOGIN_ID') {
+    	      alert(res.errorMessage || '중복된 아이디입니다. 다른 아이디를 입력해주세요.');
+    	      // 신규 생성 모드면 입력칸에 포커스
+    	      $('#empLoginId').focus();
+    	      return;
+    	    }
 
-        // 그리드 갱신
-        if (selectedEmpRowKey != null) {
-          empGrid.setValue(selectedEmpRowKey, 'hasAccount', 'Y');
-          empGrid.setValue(selectedEmpRowKey, 'status', toStatusLabel(newStatus));
-        }
+    	    // 그 외 실패
+    	    alert((res && res.errorMessage) ? res.errorMessage : '저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+    	    return;
+    	  }
 
-        // 선택된 행 데이터 갱신
-        selectedEmpRow.loginId    = loginId;
-        selectedEmpRow.acctStatus = newStatus;
+    	  // ✅ 여기부터는 기존 성공 로직 그대로
+    	  const newStatus = res.acctStatus || acctSt;
 
-        // 기준 스냅샷 갱신
-        selectedEmpSnapshot = {
-          status: newStatus,
-          roleIds: roleIds.slice()
-        };
+    	  if (res.empAcctId) {
+    	    $empAcctId.val(res.empAcctId);
+    	    selectedEmpRow.empAcctId = res.empAcctId;
+    	  }
 
-        // 상세 영역 반영
-        $empAcctStatus.val(newStatus);
-        $empLoginId.prop('readonly', true);
-        $empLoginIdLabel.removeClass('astar');
+    	  if (selectedEmpRowKey != null) {
+    	    empGrid.setValue(selectedEmpRowKey, 'hasAccount', 'Y');
+    	    empGrid.setValue(selectedEmpRowKey, 'status', toStatusLabel(newStatus));
 
-        if (!skipConfirm) {
-          let msg = '계정 정보가 저장되었습니다.\n\n';
+    	    const roleCountNow = (payload.roleIds || []).length;
+    	    empGrid.setValue(selectedEmpRowKey, 'hasRole', roleCountNow > 0 ? 'Y' : 'N');
+    	  }
 
-          if (res.smsSent) {
-            msg += '- 임시 비밀번호 안내 문자(현재는 로그 출력만)가 처리되었습니다.';
-          } else {
-            msg += '- 문자 발송 없이 상태/역할만 변경되었습니다.';
-          }
+    	  selectedEmpRow.loginId    = loginId;
+    	  selectedEmpRow.acctStatus = newStatus;
 
-          alert(msg);
-        } else {
-          // 삭제 등 자동 저장 시에는 조용히 로그만
-          console.log('역할/계정 변경 자동 저장 완료');
-        }
+    	  selectedEmpSnapshot = {
+    	    status: newStatus,
+    	    roleIds: roleIds.slice()
+    	  };
 
-      }).fail(function (xhr) {
-        console.error('계정 저장 중 오류', xhr);
-        alert('계정 저장 중 오류가 발생했습니다.');
-      });
+    	  $empAcctStatus.val(newStatus);
+    	  $empLoginId.prop('readonly', true);
+    	  $empLoginIdLabel.removeClass('astar');
+
+    	  if (!skipConfirm) {
+    	    let msg = '계정 정보가 저장되었습니다.\n\n';
+
+    	    if (res.smsSent) {
+    	      msg += '- 임시 비밀번호 안내 문자(현재는 로그 출력만)가 처리되었습니다.';
+    	    } else {
+    	      msg += '- 문자 발송 없이 상태/역할만 변경되었습니다.';
+    	    }
+
+    	    alert(msg);
+    	  } else {
+    	    console.log('역할/계정 변경 자동 저장 완료');
+    	  }
+
+    	}).fail(function (xhr) {
+    	  console.error('계정 저장 중 오류', xhr);
+    	  alert('계정 저장 중 오류가 발생했습니다.');
+    	});
       
       if (isNew) {
     	setRoleCardEnabled(true);
@@ -1052,19 +1106,24 @@
         minLength:     1,
         delay:         300,
         mapResponse: function (item) {
-          return {
-            id:      item.empId,
-            label:   '[' + item.empId + '] ' + item.nm + ' / ' + (item.deptNm || ''),
-            value:   item.nm,
-            loginId: item.loginId
-          };
+       	  return {
+	       	    nm: item.nm,
+	       	    loginId: item.loginId,
+	       	    deptNm: item.deptNm,
+	       	    jobNm: item.jobNm,
+	       	    clsf: item.clsf,
+       		    label: '[' + item.empId + '] ' + item.nm + ' / ' + (item.deptNm || '') + ' / ' + (item.jobNm || ''),
+       		    value: item.nm,
+       		  };
         },
         onSelect: function (item) {
-          $('#empName').val(item.value);
-          if (item.loginId) {
-            $('#accountId').val(item.loginId);
-          }
-        }
+        	  $('#empName').val(item.nm || '');          // ✅ 이름은 nm
+        	  $('#accountId').val(item.loginId || '');  // ✅ 계정은 loginId
+
+        	  // 부서/직급: 없으면 전체로
+        	  applyDeptJobFromItem(item);
+        	  fetchEmpList();
+        	}
       });
 
       TeamCommon.autocomplete.init({
@@ -1075,19 +1134,21 @@
         minLength:     1,
         delay:         300,
         mapResponse: function (item) {
-          return {
-            id:      item.empId,
-            label:   item.loginId + ' / ' + item.nm + ' / ' + (item.deptNm || ''),
-            value:   item.loginId,
-            empName: item.nm
-          };
+       	  return {
+       		    id: item.empId,
+       		    label: item.loginId + ' / ' + item.nm + ' / ' + (item.deptNm || '') + ' / ' + (item.jobNm || ''),
+       		    value: item.loginId,
+       		    empName: item.nm,
+       		    deptNm: item.deptNm,
+       		    jobNm: item.jobNm
+       		  };
         },
         onSelect: function (item) {
-          $('#accountId').val(item.value);
-          if (item.empName) {
-            $('#empName').val(item.empName);
-          }
-        }
+          $('#accountId').val(item.loginId || '');  // ✅ 계정은 loginId
+          $('#empName').val(item.nm || '');         // ✅ 이름은 nm
+       	  applyDeptJobFromItem(item);
+       	  fetchEmpList();
+       	}
       });
 
     } else {

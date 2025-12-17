@@ -174,4 +174,9 @@ public class LoginSession {
         }
         return false;
     }
+    
+    public static String getJobNm() {
+        SessionDto s = getLoginSession();
+        return (s != null) ? s.getJobNm() : null;
+    }
 }

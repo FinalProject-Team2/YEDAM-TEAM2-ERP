@@ -6,12 +6,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import store.yd2team.common.mapper.EmpAcctMapper;
 import store.yd2team.insa.mapper.DeptMapper;
 import store.yd2team.insa.mapper.EmpMapper;
 import store.yd2team.insa.mapper.VcatnMapper;
-import store.yd2team.insa.service.DeptVO;
 import store.yd2team.insa.service.EmpService;
 import store.yd2team.insa.service.EmpVO;
 import store.yd2team.insa.service.YrycVO;
@@ -23,6 +24,7 @@ public class EmpServiceImpl implements EmpService{
 	private final EmpMapper empMapper;
 	private final VcatnMapper vcatnMapper;
 	private final DeptMapper deptMapper;
+	private final EmpAcctMapper empAcctMapper;
 	
 	@Override
 	public List<EmpVO> getListEmpJohoe(EmpVO emp) {
@@ -31,10 +33,23 @@ public class EmpServiceImpl implements EmpService{
 	}
 
 	@Override
+	@Transactional
 	public int setDbEdit(EmpVO emp) {
 		
-		return empMapper.setDbEdit(emp);
-	}
+        int updated = empMapper.setDbEdit(emp);
+        String updtBy = emp.getUpdtBy();
+
+        String hffcSt = emp.getHffcSt();
+        
+        if ("n2".equals(hffcSt) || "n3".equals(hffcSt)) {
+            // 퇴사/휴직(가정) 등: 계정 비활성
+            empAcctMapper.updateAcctStatusToInactive(emp.getVendId(), emp.getEmpId(), updtBy); 
+        } else {
+            empAcctMapper.updateAcctStatusToActive(emp.getVendId(), emp.getEmpId(), updtBy); 
+        }
+        
+        return updated;
+    }
 
 	@Override
 	public EmpVO setDbAddId() {

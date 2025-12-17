@@ -94,12 +94,17 @@ public class EmpController {
 	        @RequestPart(value = "photo", required = false) MultipartFile photo) throws IOException {
 		System.out.println("환경설정불러온값"+uploadDir);
 		
+		SessionDto session = LoginSession.getLoginSession();
+		empVO.setVendId(session.getVendId());
+		empVO.setUpdtBy(session.getEmpId());
+		
 		// ✅ 파일 업로드 처리
 		handleFileUpload(empVO, photo);
 
 	    // ✅ 사원 정보 DB 저장	      
 	    empService.setDbEdit(empVO);
 	    EmpVO johoeKeyword = new EmpVO();		
+	    johoeKeyword.setVendId(session.getVendId());
 		
 		return empService.getListEmpJohoe(johoeKeyword);
 
