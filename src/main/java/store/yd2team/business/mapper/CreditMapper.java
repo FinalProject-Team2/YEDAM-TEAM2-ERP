@@ -1,9 +1,11 @@
 package store.yd2team.business.mapper;
+
 import java.util.List;
 
 import store.yd2team.business.service.AtmptVO;
 import store.yd2team.business.service.CreditVO;
 import store.yd2team.business.service.CustcomVO;
+
 public interface CreditMapper {
 	//검색조건(조회)
 	List<CreditVO> searchCredit(CreditVO searchVO);
@@ -18,14 +20,11 @@ public interface CreditMapper {
 	//단건조회
 	CreditVO selectCreditStatus(CreditVO target);
 	
-	//
-	int updateCreditEval(CreditVO eval);
-	
 	// 저장버튼 이벤트
 	int updateCreditLimit(CreditVO vo);
 	
 	//여신등록
-	int insertCdtlnLmt(CreditVO vo);
+	/* int insertCdtlnLmt(CreditVO vo); */
 	
 	//미수등록
 	int insertAtmpt(AtmptVO vo);

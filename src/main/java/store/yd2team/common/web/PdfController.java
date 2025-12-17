@@ -1,8 +1,6 @@
 package store.yd2team.common.web;
 
-import java.io.InputStream;
 import java.sql.Connection;
-import java.util.HashMap;
 
 import javax.sql.DataSource;
 
@@ -15,8 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.util.JRLoader;
 
 @Controller
 public class PdfController {

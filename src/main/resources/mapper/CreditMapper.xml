@@ -3,17 +3,18 @@
 <mapper namespace="store.yd2team.business.mapper.CreditMapper">
 <!-- 신규견적서 모달 고객사 auto complete -->
 	<!-- 고객코드 검색 -->
-  <select id="searchCustcomId" parameterType="string" resultType="store.yd2team.business.service.CreditVO">
-	    SELECT
-	        custcom_id AS custcomId,
-	        custcom_name AS custcomName,
-	        vend_id AS vendId
-	    FROM tb_custcom
-	    WHERE custcom_id LIKE '%' || #{keyword} || '%'
-	    ORDER BY custcom_id
+	<select id="searchCustcomId" parameterType="string" resultType="store.yd2team.business.service.CreditVO">
+	   SELECT
+	       custcom_id AS custcomId,
+	       custcom_name AS custcomName,
+	       vend_id AS vendId
+	   FROM tb_custcom
+	   WHERE custcom_id LIKE '%' || #{keyword} || '%'
+	   ORDER BY custcom_id
 	</select>
-  <!-- 고객사명 검색 -->
-  <select id="searchCustcomName" parameterType="string" resultType="store.yd2team.business.service.CreditVO">
+	
+	<!-- 고객사명 검색 -->
+	<select id="searchCustcomName" parameterType="string" resultType="store.yd2team.business.service.CreditVO">
 	    SELECT
 	        custcom_id AS custcomId,
 	        custcom_name AS custcomName,
@@ -23,184 +24,188 @@
 	    ORDER BY custcom_name
 	</select>
 	
-<!-- 여신한도 목록 조회 -->
-<select id="searchCredit" parameterType="store.yd2team.business.service.CreditVO" resultType="store.yd2team.business.service.CreditVO">
-	   SELECT
-	       cdt.cdtln_no,
-	       cdt.custcom_id,
-	       cust.custcom_name,
-	       cdt.credit_grad,
-	       cdt.cdtln_check,
-	       cdt.mrtgg_lmt,
-	       cdt.credit_lmt,
-	       cdt.cdtln_lmt,
-	       
-	        round((cdt.cdtln_lmt - NVL(r.remain_amt, 0)) / cdt.cdtln_lmt * 100) as useRate,
-	       
-	       cdt.lmtover_check,
-	       cdt.yn,
-	       cdt.applc_begin_dt,
-	       cdt.applc_end_dt,
-	       /* 필요하면 설계해서 추가할 컬럼들 (없으면 빼고 사용) */
-	       cdt.credit_mm,
-	       cdt.bad_credit_yn,
-	       cdt.ship_hold_yn,
-	       NVL(cdt.turnover_days, 0) AS turnover_days,
-	       /* 미수/연체 현황 */
-	       NVL(r.remain_amt, 0)     AS remain_amt,
-	       NVL(r.max_overdue_mm, 0) AS max_overdue_mm
-	   FROM tb_cdtln_lmt cdt
-	   LEFT JOIN tb_custcom cust
-	          ON cdt.custcom_id = cust.custcom_id
-	   /* tb_atmpt + tb_atmpt_detail 집계 서브쿼리 */
-	   LEFT JOIN (
-	       SELECT
-	           a.custcom_id,
-	           SUM(NVL(a.atmpt_blce, 0)) AS remain_amt,
-	           MAX(
-	               CASE
-	                   WHEN d.rpay_at IS NULL
-	                    AND d.recpt_expc_dt IS NOT NULL
-	                    AND d.recpt_expc_dt <![CDATA[ < ]]> TRUNC(SYSDATE)
-	                   THEN TRUNC( (TRUNC(SYSDATE) - d.recpt_expc_dt) / 30 )
-	                   ELSE 0
-	               END
-	           ) AS MAX_OVERDUE_MM
-	       FROM tb_atmpt a
-	       LEFT JOIN tb_atmpt_detail d
-	              ON a.CUSTCOM_ID = d.CUSTCOM_ID
-	       GROUP BY a.CUSTCOM_ID
-	   ) r
-	     ON cdt.CUSTCOM_ID = r.CUSTCOM_ID
-	   WHERE 1 = 1
-	   <if test="custcomId != null and custcomId != ''">
-	       AND cdt.CUSTCOM_ID = #{custcomId}
-	   </if>
-	   <if test="custcomName != null and custcomName != ''">
-	       AND cust.CUSTCOM_NAME LIKE '%' || #{custcomName} || '%'
-	   </if>
-	   ORDER BY cdt.CUSTCOM_ID
+	<!-- 여신한도 목록 조회 -->
+	<select id="searchCredit" parameterType="store.yd2team.business.service.CreditVO" resultType="store.yd2team.business.service.CreditVO">
+		SELECT
+		    cdt.cdtln_no,
+		    cdt.custcom_id,
+		    cust.custcom_name,
+		    cdt.credit_grad,
+		    cdt.cdtln_check,
+		    cdt.mrtgg_lmt,
+		    cdt.credit_lmt,
+		    cdt.cdtln_lmt,
+		    
+		    CASE
+			    WHEN NVL(cdt.cdtln_lmt, 0) = 0 THEN 0
+			    ELSE ROUND(
+			        (cdt.cdtln_lmt - NVL(r.remain_amt, 0))
+			        / cdt.cdtln_lmt * 100
+			    )
+			END AS useRate,
+		    
+		    cdt.lmtover_check,
+		    cdt.yn,
+		    cdt.applc_begin_dt,
+		    cdt.applc_end_dt,
+		    /* 필요하면 설계해서 추가할 컬럼들 (없으면 빼고 사용) */
+		    cdt.credit_mm,
+		    cdt.bad_credit_yn,
+		    cdt.ship_hold_yn,
+		    NVL(cdt.turnover_days, 0) AS turnover_days,
+		    /* 미수/연체 현황 */
+		    NVL(r.remain_amt, 0)     AS remain_amt,
+		    NVL(r.max_overdue_mm, 0) AS max_overdue_mm
+		FROM tb_cdtln_lmt cdt
+		LEFT JOIN tb_custcom cust
+		       ON cdt.custcom_id = cust.custcom_id
+		/* tb_atmpt + tb_atmpt_detail 집계 서브쿼리 */
+		LEFT JOIN (
+		    SELECT
+		        a.custcom_id,
+		        SUM(NVL(a.atmpt_blce, 0)) AS remain_amt,
+		        MAX(
+		            CASE
+		                WHEN d.rpay_at IS NULL
+		                 AND d.recpt_expc_dt IS NOT NULL
+		                 AND d.recpt_expc_dt <![CDATA[ < ]]> TRUNC(SYSDATE)
+		                THEN TRUNC( (TRUNC(SYSDATE) - d.recpt_expc_dt) / 30 )
+		                ELSE 0
+		            END
+		        ) AS MAX_OVERDUE_MM
+		    FROM tb_atmpt a
+		    LEFT JOIN tb_atmpt_detail d
+		           ON a.CUSTCOM_ID = d.CUSTCOM_ID
+		    GROUP BY a.CUSTCOM_ID
+		) r
+		  ON cdt.CUSTCOM_ID = r.CUSTCOM_ID
+		WHERE 1 = 1
+		<if test="custcomId != null and custcomId != ''">
+		    AND cdt.CUSTCOM_ID = #{custcomId}
+		</if>
+		<if test="custcomName != null and custcomName != ''">
+		    AND cust.CUSTCOM_NAME LIKE '%' || #{custcomName} || '%'
+		</if>
+		ORDER BY cdt.CUSTCOM_ID
 	</select>
 	
-<!-- 업체정보 모달창 -->	
-	 <select id="selectCustcomDetail"
-           parameterType="string"
-           resultType="store.yd2team.business.service.CustcomVO">
-       SELECT
-           custcom_id,
-           biz_addr,
-           biz_tel,
-           biz_fax,
-           psch,
-           psch_tel,
-           psch_email
-       FROM tb_custcom
-       WHERE custcom_id = #{custcomId}
-   </select>
+	<!-- 업체정보 모달창 -->	
+	<select id="selectCustcomDetail" parameterType="string" resultType="store.yd2team.business.service.CustcomVO">
+	    SELECT
+	        custcom_id,
+	        biz_addr,
+	        biz_tel,
+	        biz_fax,
+	        psch,
+	        psch_tel,
+	        psch_email
+	    FROM tb_custcom
+	    WHERE custcom_id = #{custcomId}
+	</select>
    
    
-   <!-- 저장버튼 이벤트 -->
-    <update id="updateCreditLimit" parameterType="store.yd2team.business.service.CreditVO">
-        UPDATE tb_cdtln_lmt
-           SET credit_grad  = #{creditGrad},
-               cdtln_check  = #{cdtlnCheck},
-               mrtgg_lmt    = #{mrtggLmt},
-               credit_lmt   = #{creditLmt},
-               cdtln_lmt    = #{cdtlnLmt},
-               updt_dt      = SYSDATE
-         WHERE custcom_id   = #{custcomId}
-    </update>
+	<!-- 저장버튼 이벤트 -->
+	<update id="updateCreditLimit" parameterType="store.yd2team.business.service.CreditVO">
+		UPDATE tb_cdtln_lmt
+		   SET credit_grad  = #{creditGrad},
+		       cdtln_check  = #{cdtlnCheck},
+		       mrtgg_lmt    = #{mrtggLmt},
+		       credit_lmt   = #{creditLmt},
+		       cdtln_lmt    = #{cdtlnLmt},
+		       updt_dt      = SYSDATE
+		 WHERE custcom_id   = #{custcomId}
+	</update>
    
-   <!-- CreditMapper.xml 예시 -->
-	<insert id="insertCdtlnLmt"
-        parameterType="store.yd2team.business.service.CreditVO">
+	<!-- CreditMapper.xml 예시 -->
+	<insert id="insertCdtlnLmt" parameterType="store.yd2team.business.service.CreditVO">
 
-    <!-- PK 생성용 시퀀스 (필요 시 이름 변경) -->
-    <selectKey keyProperty="cdtlnNo" resultType="string" order="BEFORE">
-        SELECT seq_newcredit.NEXTVAL FROM DUAL
-    </selectKey>
-
-    INSERT INTO tb_cdtln_lmt (
-          CDTLN_NO
-        , VEND_ID
-        , CUSTCOM_ID
-        , CREDIT_GRAD
-        , CDTLN_CHECK
-        , MRTGG_LMT
-        , CREDIT_LMT
-        , CDTLN_LMT
-        , APPLC_BEGIN_DT
-        , APPLC_END_DT
-        , CREA_DT
-        , CREA_BY
-        , UPDT_DT
-        , CREDIT_MM
-        , BAD_CREDIT_YN
-        , SHIP_HOLD_YN
-        , TURNOVER_DAYS
-        , LAST_EVAL_DT
-    ) VALUES (
-          #{cdtlnNo}    
-        , #{vendId}
-        , #{custcomId}
-        , #{creditGrad}
-        , #{cdtlnCheck}
-        , #{mrtggLmt}
-        , #{creditLmt}
-        , #{cdtlnLmt}
-        , #{applcBeginDt}
-        , #{applcEndDt}
-        , SYSDATE
-        , #{creaBy}
-        , SYSDATE
-        , #{creditMm}
-        , #{badCreditYn}
-        , #{shipHoldYn}
-        , #{turnoverDays}
-        , #{lastEvalDt}
-    )
-</insert>
-
-
-<insert id="insertAtmpt" parameterType="store.yd2team.business.service.AtmptVO">
-
-    INSERT INTO tb_atmpt (
-          ATMPT_NO
-        , CDTLN_NO
-        , VEND_ID
-        , CUSTCOM_ID
-        , BASIS_ATMPT_BLCE
-        , ATMPT_BLCE
-        , CREA_DT
-        , CREA_BY
-        , UPDT_DT
-    ) VALUES (
-          seq_atmpt.nextval         
-        , #{cdtlnNo}            
-        , #{vendId}
-        , #{custcomId}
-        , #{basisAtmptBlce}
-        , #{atmptBlce}
-        , SYSDATE
-        , #{creaBy}
-        , SYSDATE
-    )
-</insert>
-
-<update id="updateShipmnt" parameterType="store.yd2team.business.service.CreditVO">
-	UPDATE tb_cdtln_lmt SET shipmnt_stop = #{shipmntStop} WHERE CDTLN_NO = #{cdtlnNo}
+	    <!-- PK 생성용 시퀀스 (필요 시 이름 변경) -->
+	    <selectKey keyProperty="cdtlnNo" resultType="string" order="BEFORE">
+	        SELECT seq_newcredit.NEXTVAL FROM DUAL
+	    </selectKey>
 	
-</update>
+	    INSERT INTO tb_cdtln_lmt (
+	          CDTLN_NO
+	        , VEND_ID
+	        , CUSTCOM_ID
+	        , CREDIT_GRAD
+	        , CDTLN_CHECK
+	        , MRTGG_LMT
+	        , CREDIT_LMT
+	        , CDTLN_LMT
+	        , APPLC_BEGIN_DT
+	        , APPLC_END_DT
+	        , CREA_DT
+	        , CREA_BY
+	        , UPDT_DT
+	        , CREDIT_MM
+	        , BAD_CREDIT_YN
+	        , SHIP_HOLD_YN
+	        , TURNOVER_DAYS
+	        , LAST_EVAL_DT
+	    ) VALUES (
+	          #{cdtlnNo}    
+	        , #{vendId}
+	        , #{custcomId}
+	        , #{creditGrad}
+	        , #{cdtlnCheck}
+	        , #{mrtggLmt}
+	        , #{creditLmt}
+	        , #{cdtlnLmt}
+	        , #{applcBeginDt}
+	        , #{applcEndDt}
+	        , SYSDATE
+	        , #{creaBy}
+	        , SYSDATE
+	        , #{creditMm}
+	        , #{badCreditYn}
+	        , #{shipHoldYn}
+	        , #{turnoverDays}
+	        , #{lastEvalDt}
+	    )
+	</insert>
+
+
+	<insert id="insertAtmpt" parameterType="store.yd2team.business.service.AtmptVO">
+	
+	    INSERT INTO tb_atmpt (
+	          ATMPT_NO
+	        , CDTLN_NO
+	        , VEND_ID
+	        , CUSTCOM_ID
+	        , BASIS_ATMPT_BLCE
+	        , ATMPT_BLCE
+	        , CREA_DT
+	        , CREA_BY
+	        , UPDT_DT
+	    ) VALUES (
+	          seq_atmpt.nextval         
+	        , #{cdtlnNo}            
+	        , #{vendId}
+	        , #{custcomId}
+	        , #{basisAtmptBlce}
+	        , #{atmptBlce}
+	        , SYSDATE
+	        , #{creaBy}
+	        , SYSDATE
+	    )
+	</insert>
+
+
+	<update id="updateShipmnt" parameterType="store.yd2team.business.service.CreditVO">
+		UPDATE tb_cdtln_lmt SET shipmnt_stop = #{shipmntStop} WHERE CDTLN_NO = #{cdtlnNo}
+		
+	</update>
    
-<update id="updateCreditEval">
-UPDATE tb_cdtln_lmt SET 
-       shipmnt_stop = #{shipmntStop}
-       ,turnover_days = #{turnoverDays}
-WHERE CDTLN_NO = #{cdtlnNo}
-</update>   
+	<update id="updateCreditEval">
+		UPDATE tb_cdtln_lmt SET 
+		       shipmnt_stop = #{shipmntStop}
+		       ,turnover_days = #{turnoverDays}
+		WHERE CDTLN_NO = #{cdtlnNo}
+	</update>   
 
-<select id="selectCreditStatus">
-
-
-</select>
+	<select id="selectCreditStatus">
+	
+	
+	</select>
 </mapper>

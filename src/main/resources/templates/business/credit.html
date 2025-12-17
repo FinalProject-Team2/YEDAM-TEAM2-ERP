@@ -5,7 +5,7 @@
      layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<script src="/assets/js/teamUtil.js"></script>
+<!-- <script src="/assets/js/teamUtil.js"></script> -->
 <title>여신 관리</title>
 <style type="text/css">
 /* 그리드 버튼 스타일 */
@@ -104,8 +104,8 @@
                        <!-- <button type="button" class="btn btn-outline-dark" id="newBtn">행추가</button> -->
                        <!-- <div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_006', 'newBtn')}"></div> -->
                        <button type="button" class="btn btn-dark" id="limitInit">초기화</button>
-                       <!-- <button type="button" class="btn btn-outline-dark" id="saveBtn">저장</button> -->
-                       <div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_006', 'saveBtn')}"></div>
+                       <button type="button" class="btn btn-outline-dark" id="saveBtn">저장</button>
+                       <!-- <div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_006', 'saveBtn')}"></div> -->
                    </div>
                </div>
                <div class="card-body">
@@ -127,12 +127,9 @@
 </div><!-- /.lock-account-wrapper -->
 <script>
    
-   // 1. 더미 데이터 (백엔드에서 내려주는 컬럼 예시)
-   // custcomId, custcomName, creditGrad, cdtlnCheck,
-   // mrtggLmt, creditLmt, cdtlnLmt, lmtoverCheck,
-   // applcBeginDt, applcEndDt,
-   // remainAmt, maxOverdueMm, badCreditYn, shipHoldYn, turnoverDays
+   // 1. 데이터 (백엔드에서 내려주는 컬럼 예시)
    const creditData = [];
+   
    // 2. Grid 공통 옵션
    const businessGridOptions = {
        bodyHeight: 400,
@@ -144,7 +141,7 @@
            minWidth: 80,
            resizable: true
        },
-       // ✅ 셀 더블클릭 시 편집 시작
+       // 셀 더블클릭 시 편집 시작
        editingEvent: 'dblclick'
    };
    // 숫자 변환 유틸 (빈값/콤마 처리)
@@ -179,7 +176,7 @@
                    `;
                }
            },
-           // ✅ 신용등급: 더블클릭 시 셀렉트 박스로 편집
+           // 신용등급: 더블클릭 시 셀렉트 박스로 편집
            {
                header: '신용등급',
                name: 'creditGrad',
@@ -197,7 +194,7 @@
                  }
                }
              },
-           // ✅ 여신체크: 더블클릭 시 Y/N 선택
+           // 여신체크: 더블클릭 시 Y/N 선택
            {
              header: '여신체크',
              name: 'cdtlnCheck',
@@ -311,7 +308,6 @@
                width: 90,
                align: 'right'
            },
-           /* ▲ 여신현황 컬럼 끝 ▲ */
            { header: '한도초과여부', name: 'lmtoverCheck', width: 110, align: 'center' },
            /* {
                header: '적용시작일',
@@ -406,6 +402,8 @@
        document.querySelector("#autoCustcomName").value = "";
        console.log("검색조건 초기화:", searchForm);
    });
+   
+   
    // 5-2 조회버튼
    $(document).on("click", "#searchCredit", function () {
        let searchForm = {
@@ -427,6 +425,8 @@
            }
        });
    });
+   
+   
    // 5-3 고객코드 자동완성
    if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
        TeamCommon.autocomplete.init({
@@ -451,6 +451,8 @@
    } else {
        console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
    }
+   
+   
    // 5-4 고객사명 자동완성
    if (window.TeamCommon && TeamCommon.autocomplete && typeof TeamCommon.autocomplete.init === 'function') {
        TeamCommon.autocomplete.init({
@@ -474,6 +476,8 @@
    } else {
        console.warn('TeamCommon.autocomplete.init 을 찾을 수 없습니다. teamUtil.js / autocomplete 유틸 로딩 확인');
    }
+   
+   
    // 6. 고객사정보 모달
    const modal = document.getElementById("creditModal");
    const back  = document.getElementById("creditBackdrop");
@@ -544,7 +548,7 @@
 	   
 	   
    });
-   // 7. 여신 평가 버튼 클릭 (악성여신 / 출하정지 등 계산 트리거)
+/*    // 7. 여신 평가 버튼 클릭 (악성여신 / 출하정지 등 계산 트리거)
    $('#creditEval').on('click', function () {
        const searchForm = {
            custcomId: $("#autoCustcomId").val().trim(),
@@ -568,19 +572,19 @@
                alert('여신 평가 중 오류가 발생했습니다.');
            }
        });
-   });
+   }); */
    
    //8.행추가 버튼
-   document.getElementById("newBtn").addEventListener("click", function () {
+/*    document.getElementById("newBtn").addEventListener("click", function () {
 	   const custcomId = document.querySelector("#autoCustcomId").value  ;
 	   const custcomName = document.querySelector("#autoCustcomName").value ;
 	   creditGrid.appendRow({custcomId, custcomName});
-   })
+   }) */
    
    
 	//9. modalSaveBtn(저장버튼) 이벤트
 	document.getElementById('saveBtn').addEventListener('click', () => {
-	
+		console.log(document.getElementById('saveBtn'));
 	  const { updatedRows } = creditGrid.getModifiedRows();
 	
 	  if (!updatedRows || updatedRows.length === 0) {
@@ -588,7 +592,7 @@
 	    return;
 	  }
 	
-	  // 👉 서버로 보낼 데이터 가공
+	  // 서버로 보낼 데이터
 	  const payload = updatedRows.map(row => ({
 	    custcomId: row.custcomId,
 	    creditGrad: row.creditGrad,
