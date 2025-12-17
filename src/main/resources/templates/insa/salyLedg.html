@@ -1858,6 +1858,7 @@ gridCalc.on('afterChange', (ev) => {
       alert("급여대장이 선택되지 않았습니다.");
       return;
     }
+    gridCalc.finishEditing();
 
     const rows = gridCalc.getData() || [];
 
@@ -1915,7 +1916,7 @@ gridCalc.on('afterChange', (ev) => {
         pendingGrpNo = null;
 
         if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
-        alert("급여계산이 적용되었습니다.");
+        loadSalyList();
         return;
 
       } catch (err) {
@@ -2084,6 +2085,7 @@ gridCalc.on('afterChange', (ev) => {
 
       if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
       alert("저장되었습니다.");
+      loadSalyList(); // ✅ 추가
 
     } catch (err) {
       console.error("급여계산 처리 오류(manual edit save)", err);
