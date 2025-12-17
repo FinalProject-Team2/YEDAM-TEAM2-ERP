@@ -119,8 +119,6 @@ public class BusinessController {
 		
 		System.out.println("=== BusinessController.stdrlist() 호출됨 ===");
 		List<BusinessVO> potentialstdrList = businessService.getBusinessList(vo);
-		// 위에서 span이 쓰는 list도 채워주기
-//		model.addAttribute("list", potentialstdrList);
 		model.addAttribute("potentialstdrList", potentialstdrList);
 		model.addAttribute("stdrvo", vo);
 		

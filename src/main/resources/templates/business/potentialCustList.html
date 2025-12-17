@@ -44,23 +44,23 @@
 						<div class="row mb-2">
 							<div class="row mb-2">
 								<div class="col-md-3">
-									<label class="form-label">업종</label> <input
-										class="form-control" placeholder="코딩" name="industryType">
+									<label class="form-label">업종</label> <input name="industryType" class="form-control"
+       th:value="${stdrvo != null ? stdrvo.industryType : ''}">
 								</div>
 								<div class="col-md-3">
 									<label class="form-label">업체규모</label> 
-									<select id="selectSize" name="companySize" class="form-select">
-										<option value="">전체</option>
-										<option value="대기업">대기업</option>
-										<option value="준대기업">준대기업</option>
-										<option value="중견기업">중견기업</option>
-										<option value="강소기업">강소기업</option>
-										<option value="중소기업">중소기업</option>
-									</select>
+									<select name="companySize" class="form-select">
+  <option value="" th:selected="${stdrvo == null || stdrvo.companySize == null || stdrvo.companySize == ''}"></option>
+  <option value="대기업" th:selected="${stdrvo != null && stdrvo.companySize == '대기업'}">대기업</option>
+  <option value="준대기업" th:selected="${stdrvo != null && stdrvo.companySize == '준대기업'}">준대기업</option>
+  <option value="중견기업" th:selected="${stdrvo != null && stdrvo.companySize == '중견기업'}">중견기업</option>
+  <option value="강소기업" th:selected="${stdrvo != null && stdrvo.companySize == '강소기업'}">강소기업</option>
+  <option value="중소기업" th:selected="${stdrvo != null && stdrvo.companySize == '중소기업'}">중소기업</option>
+</select>
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">지역/상권</label> <input type="text"
-										class="form-control" placeholder="대구" name="region">
+									<label class="form-label">지역/상권</label><input name="region" class="form-control"
+       th:value="${stdrvo != null ? stdrvo.region : ''}">
 								</div>
 							</div>
 							<div class="col-md-6">
@@ -68,11 +68,9 @@
 								<div class="d-flex align-items-center js-date-range">
 									<!-- 시작일 -->
 									<div class="input-group date">
-										<input type="text"
-											class="form-control datepicker js-date-range-start"
-											placeholder="시작일" name="startEstablishDate"> <span
-											class="input-group-text js-date-range-icon-start"> <i
-											class="bi bi-calendar"></i>
+										<input type="text" class="form-control datepicker js-date-range-start" placeholder="시작일" name="startEstablishDate" th:value="${stdrvo != null ? stdrvo.startEstablishDate : ''}"> 
+										<span class="input-group-text js-date-range-icon-start"> 
+										<i class="bi bi-calendar"></i>
 										</span>
 									</div>
 
@@ -80,11 +78,9 @@
 
 									<!-- 종료일 -->
 									<div class="input-group date ms-2">
-										<input type="text"
-											class="form-control datepicker js-date-range-end"
-											placeholder="종료일" name="endEstablishDate"> <span
-											class="input-group-text js-date-range-icon-end"> <i
-											class="bi bi-calendar"></i>
+										<input type="text" class="form-control datepicker js-date-range-end" placeholder="종료일" name="endEstablishDate"  th:value="${stdrvo != null ? stdrvo.endEstablishDate : ''}"> 
+										<span class="input-group-text js-date-range-icon-end"> 
+										<i class="bi bi-calendar"></i>
 										</span>
 									</div>
 								</div>
@@ -207,4 +203,3 @@
 	</script>
 </body>
 </html>
-
