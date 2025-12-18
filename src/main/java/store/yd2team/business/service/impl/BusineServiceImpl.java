@@ -65,11 +65,9 @@ public class BusineServiceImpl implements BusinessService {
          String vendId,
          String empId
  ) {
-     if (empId == null) {
-         throw new IllegalStateException("로그인 사원 ID가 없습니다.");
-     }
+     if (vendId == null || vendId.isEmpty()) vendId = getLoginVendId();
+     if (empId  == null || empId.isEmpty())  empId  = getLoginEmpId();
 
-     // 최초 1회: 전체 복사
      businessMapper.initChurnStdrByVend(vendId, empId);
 
      int cnt = 0;
@@ -89,8 +87,10 @@ public class BusineServiceImpl implements BusinessService {
              cnt += businessMapper.updateChurnStdrByBizKey(vo);
          }
      }
+
      return cnt;
  }
+
 
 
 
