@@ -757,7 +757,7 @@
 
         if (newStatus === STATUS_ACTIVE) {
           msg += '→ 임시 비밀번호가 생성되며,\n';
-          msg += '  사원의 연락처(' + phoneDisp + ')로 문자(현재는 로그만) 발송됩니다.\n\n';
+          msg += '  사원의 연락처(' + phoneDisp + ')로 문자 발송됩니다.\n\n';
         } else {
           msg += '→ 문자 발송 없이 계정만 생성됩니다.\n\n';
         }
@@ -770,7 +770,7 @@
 
         if (prevStatus !== STATUS_ACTIVE && newStatus === STATUS_ACTIVE) {
           msg += '→ 임시 비밀번호가 새로 생성되고,\n';
-          msg += '  사원의 연락처(' + phoneDisp + ')로 문자(현재는 로그만) 발송됩니다.\n\n';
+          msg += '  사원의 연락처(' + phoneDisp + ')로 문자 발송됩니다.\n\n';
         } else if (prevStatus === STATUS_ACTIVE && newStatus === STATUS_ACTIVE) {
           msg += '→ 상태는 이미 "사용"입니다. 비밀번호는 변경되지 않고,\n';
           msg += '  역할 정보만 변경됩니다.\n\n';
@@ -953,7 +953,7 @@
     	    let msg = '계정 정보가 저장되었습니다.\n\n';
 
     	    if (res.smsSent) {
-    	      msg += '- 임시 비밀번호 안내 문자(현재는 로그 출력만)가 처리되었습니다.';
+    	      msg += '- 임시 비밀번호 안내 문자가 처리되었습니다.';
     	    } else {
     	      msg += '- 문자 발송 없이 상태/역할만 변경되었습니다.';
     	    }
