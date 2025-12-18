@@ -30528,6 +30528,18 @@ label.astar::after,
   pointer-events: auto;
   cursor: not-allowed;
 }
+/* =========================================================
+   Toast UI Grid - 공통 스타일
+   ========================================================= */
+
+.tui-grid-cell-current-row > td {
+  background-color: #e3f2fd !important; /* 원하는 색 */
+}
+
+ .col-emphasize {
+   font-weight: bold;
+   color:blue !important
+ }
 
 
 /* 전체 스크롤 잠금 */
