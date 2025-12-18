@@ -46,22 +46,22 @@
 							<div class="row mb-2">
 								<div class="col-md-3">
 									<label class="form-label">업종</label> <input type="text"
-										class="form-control" placeholder="코딩" name="industryType">
+										class="form-control" placeholder="코딩" name="industryType" th:value="${stdrvo != null ? stdrvo.industryType : ''}">
 								</div>
 								<div class="col-md-3">
 									<label class="form-label">업체규모</label> 
-									<select id="selectSize" name="companySize" class="form-select">
-										<option value="">전체</option>
-										<option value="대기업">대기업</option>
-										<option value="준대기업">준대기업</option>
-										<option value="중견기업">중견기업</option>
-										<option value="강소기업">강소기업</option>
-										<option value="중소기업">중소기업</option>
-									</select>
+									<select name="companySize" class="form-select">
+  <option value="" th:selected="${stdrvo == null || stdrvo.companySize == null || stdrvo.companySize == ''}"></option>
+  <option value="대기업" th:selected="${stdrvo != null && stdrvo.companySize == '대기업'}">대기업</option>
+  <option value="준대기업" th:selected="${stdrvo != null && stdrvo.companySize == '준대기업'}">준대기업</option>
+  <option value="중견기업" th:selected="${stdrvo != null && stdrvo.companySize == '중견기업'}">중견기업</option>
+  <option value="강소기업" th:selected="${stdrvo != null && stdrvo.companySize == '강소기업'}">강소기업</option>
+  <option value="중소기업" th:selected="${stdrvo != null && stdrvo.companySize == '중소기업'}">중소기업</option>
+</select>
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">지역/상권</label> <input type="text"
-										class="form-control" placeholder="대구" name="region">
+									<label class="form-label">지역/상권</label><input name="region" class="form-control"
+       th:value="${stdrvo != null ? stdrvo.region : ''}">
 								</div>
 							</div>
 							<!-- <div class="col-md-6">
