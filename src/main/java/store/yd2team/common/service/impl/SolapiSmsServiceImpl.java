@@ -41,12 +41,11 @@ public class SolapiSmsServiceImpl implements SmsService {
                         + validMin + "분)");
         
         log.info("[SMS-DRY-RUN][OTP] to={}, text={}", cleanTo, message);
-		/* 정재민 나중에 주석해제 할 거임
-		 * try { messageService.send(message); // 실제 문자 발송
-		 * log.info("SOLAPI OTP 전송 성공: to={}", cleanTo); } catch (Exception e) { // 여기서
-		 * 예외를 바로 던지면 로그인 전체가 깨질 수 있으니, 일단 로그만 찍는 패턴 추천
-		 * log.error("SOLAPI OTP 전송 실패: to={}, err={}", cleanTo, e.getMessage(), e); }
-		 */
+		/* 정재민 나중에 주석해제 할 거임 */
+		  try { messageService.send(message); // 실제 문자 발송
+		  log.info("SOLAPI OTP 전송 성공: to={}", cleanTo); } catch (Exception e) { 
+		  log.error("SOLAPI OTP 전송 실패: to={}, err={}", cleanTo, e.getMessage(), e); }
+		 
     }
 
     @Override
@@ -67,12 +66,12 @@ public class SolapiSmsServiceImpl implements SmsService {
         );
 
         log.info("[SMS-DRY-RUN][OTP] to={}, text={}", cleanTo, message);
-		/*
-		 * try { // 정재민 나중에 주석 해제할 거임 messageService.send(message);
-		 * log.info("SOLAPI 임시 비밀번호 전송 성공: to={}", cleanTo); } catch (Exception e) {
-		 * log.error("SOLAPI 임시 비밀번호 전송 실패: to={}, err={}", cleanTo, e.getMessage(), e);
-		 * }
-		 */
+		  /* 정재민 나중에 주석 해제할 거임 */
+		  try { messageService.send(message);
+		  log.info("SOLAPI 임시 비밀번호 전송 성공: to={}", cleanTo); } catch (Exception e) {
+		  log.error("SOLAPI 임시 비밀번호 전송 실패: to={}, err={}", cleanTo, e.getMessage(), e);
+		  }
+		 
     }
 	
 }
