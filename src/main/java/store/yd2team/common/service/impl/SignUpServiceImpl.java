@@ -13,6 +13,7 @@ import store.yd2team.common.mapper.SignUpMapper;
 import store.yd2team.common.service.SignUpService;
 import store.yd2team.common.service.VendVO;
 import store.yd2team.common.service.EmpAcctVO;
+import store.yd2team.insa.service.EmpVO;
 
 @Service
 public class SignUpServiceImpl implements SignUpService {
@@ -81,19 +82,19 @@ public class SignUpServiceImpl implements SignUpService {
 		}
 		String empAcctId = empAcctPrefix + String.format("%03d", empAcctNext);
 		
-		// 2. tb_vend 데이터 매핑 (상호명, 대표자, 사업자등록번호, 휴대폰, 대표전화, 이메일, 주소, 업태/업종)
+		// tb_emp용 emp_id는 EmpMapper.setDbAddId와 동일한 규칙(getNextEmpId)으로 생성 (예: emp2512001)
+		String empId = signUpMapper.getNextEmpId();
+		
+		// 2. tb_vend 데이터 매핑 및 저장
 		VendVO vend = new VendVO();
 		vend.setVendId(vendId);
 		vend.setVendNm(dto.getBizName());
 		vend.setRpstrNm(dto.getOwnerName());
-		
-		// 숫자형 컬럼(Long)으로 매핑 - 숫자만 들어온다는 가정하에 파싱, 실패 시 null
 		vend.setBizno(parseLongSafe(dto.getBizRegNo()));
 		vend.setHp(parseLongSafe(dto.getMobileNo()));
 		vend.setTel(parseLongSafe(dto.getTelNo()));
-		
 		vend.setEmail(dto.getEmail());
-		vend.setAddr(dto.getAddr()); // 화면에서 도로명+상세로 조합된 값
+		vend.setAddr(dto.getAddr());
 		vend.setBizcnd(dto.getBizType());
 		
 		int vendInsertCount = signUpMapper.insertVend(vend);
@@ -101,20 +102,34 @@ public class SignUpServiceImpl implements SignUpService {
 			throw new IllegalStateException("Failed to insert tb_vend record");
 		}
 		
-		// 3. tb_emp_acct 데이터 매핑 (아이디, 비밀번호, vend_id 등)
+		// 3. tb_emp(마스터 사원) 먼저 저장하여 FK(parent) 만족
+		EmpVO emp = new EmpVO();
+		emp.setEmpId(empId);
+		emp.setVendId(vendId);
+		emp.setNm(dto.getOwnerName());
+		emp.setCttpc(formatMobile(dto.getMobileNo()));
+		emp.setEmail(dto.getEmail());
+		emp.setDty("master");
+		emp.setClsf("k6");
+		emp.setRspofc("l5");
+		emp.setEmplymTy("m4");
+		emp.setHffcSt("n1");
+		emp.setCreaBy(empId);
+		int empInsertCount = signUpMapper.insertMasterEmp(emp);
+		if (empInsertCount != 1) {
+			throw new IllegalStateException("Failed to insert tb_emp master record");
+		}
+		
+		// 4. tb_emp_acct insert - FK(tb_emp.emp_id) 존재 보장
 		EmpAcctVO empAcct = new EmpAcctVO();
 		empAcct.setEmpAcctId(empAcctId);
 		empAcct.setVendId(vendId);
-		// 최초 가입 계정이므로 empId는 별도 발번 전까지 null 허용 (DB 기본값 사용 또는 추후 업데이트)
-		empAcct.setEmpId(null);
+		empAcct.setEmpId(empId);
 		empAcct.setLoginId(dto.getUserId());
-		// 평문 비밀번호를 BCrypt로 암호화하여 저장
 		String rawPassword = dto.getPassword();
 		String encodedPassword = passwordEncoder.encode(rawPassword);
 		empAcct.setLoginPwd(encodedPassword);
-		// 관리자 여부 mas_yn = 'e1' 고정
 		empAcct.setMasYn("e1");
-		
 		int empAcctInsertCount = signUpMapper.insertVendAcct(empAcct);
 		if (empAcctInsertCount != 1) {
 			throw new IllegalStateException("Failed to insert tb_emp_acct record");
@@ -132,6 +147,19 @@ public class SignUpServiceImpl implements SignUpService {
 		} catch (NumberFormatException e) {
 			return null;
 		}
+	}
+	
+	// 휴대폰 번호를 010-1234-1234 형식으로 변환
+	private String formatMobile(String mobileNo) {
+		if (mobileNo == null) return null;
+		String digits = mobileNo.replaceAll("[^0-9]", "");
+		if (digits.length() == 11) {
+			return digits.substring(0, 3) + "-" + digits.substring(3, 7) + "-" + digits.substring(7);
+		} else if (digits.length() == 10) {
+			return digits.substring(0, 3) + "-" + digits.substring(3, 6) + "-" + digits.substring(6);
+		}
+		// 예상치 못한 길이면 원본 반환
+		return mobileNo;
 	}
 
 }// end class
