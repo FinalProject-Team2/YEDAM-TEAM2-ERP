@@ -7,6 +7,11 @@
 <meta charset="UTF-8">
 <title>주문서 관리</title>
 <style>
+.so-link {
+  color: #0d6efd;
+  cursor: pointer;
+  text-decoration: underline;
+}
 </style>
 </head>
 <body layout:fragment="content">
@@ -110,6 +115,7 @@
 	<!-- end so-manage-wrapper -->
 
 <div th:replace="business/modal/addOustModal :: addOustModal"></div>
+<div th:replace="business/modal/jumunseoModal :: jumunseoModal"></div>
 
 <script>
 //숫자 변환 유틸
@@ -151,7 +157,18 @@ function toNumber(val) {
 		  indentWidth: 20 // 들여쓰기 간격인데 확인하고 수정
 		},
 		columns: [
-			{ header: '주문서코드', name: 'soId' },
+			{ header: '주문서코드', name: 'soId',
+				formatter: ({ value }) => {
+				    if (!value) return '';
+				    return `
+				      <a href="javascript:void(0)" 
+				         class="so-link" 
+				         data-so-id="${value}">
+				         ${value}
+				      </a>
+				    `;
+				  }
+			},
 			{ header: '고객사명', name: 'custcomName' },
 			{ header: '담당자', name: 'psch' },
 			{ header: '연락처', name: 'pschTel', align: 'right'  },
@@ -197,14 +214,41 @@ function toNumber(val) {
 		]	
 	}); // 1-2. 주문서목록 그리드 생성 끝
 	
+	// 주문서 번호 PdfController로 넘기기
+	document.getElementById('soGrid').addEventListener('click', function (e) {
+	  const target = e.target;
+	
+	  if (target.classList.contains('so-link')) {
+	    const soId = target.dataset.soId;
+	
+	    const iframe = document.getElementById('jumunseoFrame');
+	    iframe.src = `/jumunseo?soId=${soId}`;
+	
+	    const modalEl = document.getElementById('jumunseoModal');
+	    const modal = new bootstrap.Modal(modalEl);
+	
+	    modal.show();
+	  }
+	});
+	
+	// 모달 iframe 초기화
+	document.getElementById('jumunseoModal')
+	  .addEventListener('hidden.bs.modal', function () {
+	    document.getElementById('jumunseoFrame').src = '';
+	  });
+	/* document.getElementById('soGrid').addEventListener('click', function (e) {
+	  const target = e.target;
+	
+	  if (target.classList.contains('so-link')) {
+	    const soId = target.dataset.soId;
+	
+	    // 새 창으로 PDF 열기
+	    window.open(`/jumunseo?soId=${soId}`, '_blank');
+	  }
+	}); */
+	
 	
 	// ===================================  1-3. 출하지시서등록 모달
-	// 1-1. 출하지시서 작성 버튼 모달
-/* 	$(document).on("click", "#addOustBtn", function () {
-	  openAddOustModal();
-	});
- */
-
     // 1-1 출하지시서 모달
 	const openBtn = document.getElementById("addOustBtn");
 	const modal   = document.getElementById("addOustModal");
