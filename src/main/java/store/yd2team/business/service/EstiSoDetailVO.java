@@ -37,6 +37,7 @@ public class EstiSoDetailVO {
     private String creaBy;
     private LocalDate updtDt;
     private String updtBy;
+    private String empId;
     
 }
 
