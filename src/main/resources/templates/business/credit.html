@@ -164,7 +164,7 @@ function getCreditMmByGrad(grade) {
        data: creditData,
        ...creditGridOptions,
        columns: [
-           { header: '고객코드', name: 'custcomId', width: 120 },
+           { header: '고객코드', name: 'custcomId', width: 120, align: 'center' },
            { header: '고객사',   name: 'custcomName', width: 180 },
            {
                header: '고객사상세조회',
@@ -279,7 +279,7 @@ function getCreditMmByGrad(grade) {
 			  header: '사용률(%)',
 			  name: 'useRate',
 			  width: 90,
-			  align: 'right',
+			  align: 'center',
 			  formatter: ({ value }) => {
 			    if (value === null || value === undefined || value === '') return '';
 			    const num = Number(value);
@@ -291,7 +291,7 @@ function getCreditMmByGrad(grade) {
 			    header: '최대연체(개월)',
 			    name: 'creditMm',
 			    width: 110,
-			    align: 'right',
+			    align: 'center',
 			    formatter: ({ row }) => getCreditMmByGrad(row.creditGrad)
 			},
 			{
@@ -313,7 +313,7 @@ function getCreditMmByGrad(grade) {
 			    header: '회전일수',
 			    name: 'turnoverDays',
 			    width: 90,
-			    align: 'right'
+			    align: 'center'
 			},
 			{ header: '한도초과여부', name: 'lmtoverCheck', width: 110, align: 'center' },
        ]

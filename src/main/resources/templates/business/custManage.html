@@ -199,15 +199,15 @@
 	    ...custGridOptions,
 	    columns: [
 	        { header: '고객코드', name: 'custcomId', width: 120, align: 'center' },
-	        { header: '고객사', name: 'custcomName', width: 150, align: 'center' },
+	        { header: '고객사명', name: 'custcomName', width: 150, align: 'left' },
 	        { header: '거래구분', name: 'bsTy', width: 100, align: 'center',
 	        	formatter: ({ value }) => bsTypeMap[value] || value
 	        },
-	        { header: '대표자', name: 'rpstr', width: 120, align: 'center' },
+	        { header: '대표자', name: 'rpstr', width: 100, align: 'center' },
 	        { header: '사업자번호', name: 'bizNo', width: 140, align: 'center' },
 	        { header: '담당자', name: 'psch', width: 100, align: 'center' },
 	        { header: '담당자연락처', name: 'pschTel', width: 120, align: 'center' },
-	        { header: '이메일', name: 'pschEmail', width: 200, align: 'center' },
+	        { header: '이메일', name: 'pschEmail', width: 200, align: 'left' },
 	        { header: '사업장주소', name: 'bizAddr', minWidth: 350 },
 	    ]
 	}); // 3. 끝

@@ -157,7 +157,7 @@ function toNumber(val) {
 		  indentWidth: 20 // 들여쓰기 간격인데 확인하고 수정
 		},
 		columns: [
-			{ header: '주문서코드', name: 'soId',
+			{ header: '주문서코드', name: 'soId', align: 'center',
 				formatter: ({ value }) => {
 				    if (!value) return '';
 				    return `
@@ -170,10 +170,10 @@ function toNumber(val) {
 				  }
 			},
 			{ header: '고객사명', name: 'custcomName' },
-			{ header: '담당자', name: 'psch' },
-			{ header: '연락처', name: 'pschTel', align: 'right'  },
-			{ header: '주문일', name: 'soDt', align: 'right' },
-			{ header: '납기일', name: 'dueDt', align: 'right' },
+			{ header: '담당자', name: 'psch', width: 100, align: 'center' },
+			{ header: '연락처', name: 'pschTel', align: 'center'  },
+			{ header: '주문일', name: 'soDt', align: 'center' },
+			{ header: '납기일', name: 'dueDt', align: 'center' },
 			{ header: '상품명', name: 'productName', width: 250 },
 			{ header: '금액합계(원)', name: 'ttSupplyAmt', align: 'right',
 				formatter: ({ value }) => {
@@ -181,13 +181,13 @@ function toNumber(val) {
 	                   return num ? num.toLocaleString() : '';
 	               }
 			},
-			{ header: '총주문수량', name: 'ttSoQy', align: 'right', align: 'right',
+			{ header: '총주문수량', name: 'ttSoQy', width: 120, align: 'right',
 				formatter: ({ value }) => {
 	                   const num = toNumber(value);
 	                   return num ? num.toLocaleString() : '';
 	               } 
 			},
-			{ header: '재고수량', name: 'currStockQy', align: 'right', align: 'right',
+			{ header: '재고수량', name: 'currStockQy', width: 120, align: 'right',
 	   				formatter: ({ value }) => {
 		                   const num = toNumber(value);
 		                   return num ? num.toLocaleString() : '';
