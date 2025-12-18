@@ -26,7 +26,7 @@ public class AttdController {
         boolean isHrAdmin = attdStatusService.isHrAdminCurrentUser();
         model.addAttribute("isHrAdmin", isHrAdmin);
 
-        return "/insa/attd";
+        return "insa/attd";
     }
 
     // ✅ 근태 조회 Ajax

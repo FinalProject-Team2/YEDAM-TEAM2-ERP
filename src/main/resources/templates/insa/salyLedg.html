@@ -1,156 +1,191 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
 <head>
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <!-- Toast UI Grid -->
-  <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-  <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<!-- Toast UI Grid -->
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
-  <title>salyLedg</title>
+<title>salyLedg</title>
 
-  <style>
-    .saly-tab-wrapper { margin-bottom: 0; }
-    .saly-tab-wrapper .nav-tabs {
-      display: flex; gap: 0; margin-bottom: 0; border-bottom: none !important;
-    }
-    .saly-tab-wrapper .nav-item { margin-bottom: -1px; }
-    .saly-tab-wrapper .nav-link {
-      border-radius: 10px 10px 0 0;
-      padding: 8px 20px;
-      background-color: #f7f8fa;
-      color: #a1a6ad;
-      font-weight: 500;
-      border: 1px solid #d1d5db;
-      border-bottom-color: #d1d5db;
-      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.03);
-      transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-    }
-    .saly-tab-wrapper .nav-item + .nav-item .nav-link { margin-left: -1px; }
-    .saly-tab-wrapper .nav-link:not(.active):hover {
-      background-color: #eff1f4; color: #7a7f87;
-    }
-    .saly-tab-wrapper .nav-link.active {
-      background-color: #ffffff;
-      color: #111111;
-      font-weight: 600;
-      border-color: #d1d5db;
-      border-bottom-color: #ffffff;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-      z-index: 2;
-    }
-    .saly-card-body > .mt-2 { margin-top: 0 !important; }
+<style>
+.saly-tab-wrapper {
+	margin-bottom: 0;
+}
 
-    /* ====== 급여계산 모달 버튼 라인(지웅님 설계 느낌) ====== */
-    .saly-calc-top-actions{
-      display:flex;
-      justify-content:flex-end;
-      align-items:flex-end;
-      gap:12px;
-      margin-bottom:10px;
-    }
-    .saly-calc-top-actions .mini-box{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      align-items:flex-end;
-    }
-    .saly-calc-top-actions label{
-      font-size:12px;
-      color:#666;
-      margin:0;
-    }
+.saly-tab-wrapper .nav-tabs {
+	display: flex;
+	gap: 0;
+	margin-bottom: 0;
+	border-bottom: none !important;
+}
 
-    /* ✅ FIX: 라디오 체크 표시(파란불) 확실히 보이게 */
-    input[type="radio"] { accent-color: #2563eb; }
-    
-    /* ✅ 급여계산: 계산그룹 미적용(grpNo 없음/0) 행의 동적항목 셀은 일반셀처럼(하얀 배경) */
-	.tui-grid-cell.calc-readonly-cell,
-	.tui-grid-cell.calc-readonly-cell .tui-grid-cell-content {
- 	 background-color: #fff !important;
-	}
-  </style>
+.saly-tab-wrapper .nav-item {
+	margin-bottom: -1px;
+}
+
+.saly-tab-wrapper .nav-link {
+	border-radius: 10px 10px 0 0;
+	padding: 8px 20px;
+	background-color: #f7f8fa;
+	color: #a1a6ad;
+	font-weight: 500;
+	border: 1px solid #d1d5db;
+	border-bottom-color: #d1d5db;
+	box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.03);
+	transition: background-color 0.15s ease, color 0.15s ease, box-shadow
+		0.15s ease;
+}
+
+.saly-tab-wrapper .nav-item+.nav-item .nav-link {
+	margin-left: -1px;
+}
+
+.saly-tab-wrapper .nav-link:not(.active):hover {
+	background-color: #eff1f4;
+	color: #7a7f87;
+}
+
+.saly-tab-wrapper .nav-link.active {
+	background-color: #ffffff;
+	color: #111111;
+	font-weight: 600;
+	border-color: #d1d5db;
+	border-bottom-color: #ffffff;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+	z-index: 2;
+}
+
+.saly-card-body>.mt-2 {
+	margin-top: 0 !important;
+}
+
+/* ====== 급여계산 모달 버튼 라인(지웅님 설계 느낌) ====== */
+.saly-calc-top-actions {
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-end;
+	gap: 12px;
+	margin-bottom: 10px;
+}
+
+.saly-calc-top-actions .mini-box {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: flex-end;
+}
+
+.saly-calc-top-actions label {
+	font-size: 12px;
+	color: #666;
+	margin: 0;
+}
+
+/* ✅ FIX: 라디오 체크 표시(파란불) 확실히 보이게 */
+input[type="radio"] {
+	accent-color: #2563eb;
+}
+
+/* ✅ 급여계산: 계산그룹 미적용(grpNo 없음/0) 행의 동적항목 셀은 일반셀처럼(하얀 배경) */
+.tui-grid-cell.calc-readonly-cell, .tui-grid-cell.calc-readonly-cell .tui-grid-cell-content
+	{
+	background-color: #fff !important;
+}
+</style>
 </head>
 
 <body layout:fragment="content">
-<div class="row">
-  <!-- 검색조건 -->
-  <div class="col-md-12">
-    <div class="card mb-3">
-      <div class="card-header">
-        <h5 class="card-title">검색조건</h5>
-        <div class="card-header-right">
-          <button class="btn btn-outline-dark" id="btnSearch">조회</button>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-2">
-            <label class="form-label">급여대장명칭</label>
-            <input type="text" id="srchSalyNm" class="form-control">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">지급일자</label>
-            <div class="d-flex align-items-center js-date-range">
-              <div class="input-group date me-2">
-                <input type="text" class="form-control js-date-range-start" id="payDtStart" placeholder="날짜 선택">
-                <span class="input-group-text js-date-range-icon-start"><i class="bi bi-calendar"></i></span>
-              </div>
-              <span class="mx-1 fw-bold fs-5">~</span>
-              <div class="input-group date ms-2">
-                <input type="text" class="form-control js-date-range-end" id="payDtEnd" placeholder="날짜 선택">
-                <span class="input-group-text js-date-range-icon-end"><i class="bi bi-calendar"></i></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+	<div class="row">
+		<!-- 검색조건 -->
+		<div class="col-md-12">
+			<div class="card mb-3">
+				<div class="card-header">
+					<h5 class="card-title">검색조건</h5>
+					<div class="card-header-right">
+						<button class="btn btn-outline-dark" id="btnSearch">조회</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-2">
+							<label class="form-label">급여대장명칭</label> <input type="text"
+								id="srchSalyNm" class="form-control">
+						</div>
+						<div class="col-md-4">
+							<label class="form-label">지급일자</label>
+							<div class="d-flex align-items-center js-date-range">
+								<div class="input-group date me-2">
+									<input type="text" class="form-control js-date-range-start"
+										id="payDtStart" placeholder="날짜 선택"> <span
+										class="input-group-text js-date-range-icon-start"><i
+										class="bi bi-calendar"></i></span>
+								</div>
+								<span class="mx-1 fw-bold fs-5">~</span>
+								<div class="input-group date ms-2">
+									<input type="text" class="form-control js-date-range-end"
+										id="payDtEnd" placeholder="날짜 선택"> <span
+										class="input-group-text js-date-range-icon-end"><i
+										class="bi bi-calendar"></i></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-    <!-- 급여목록 -->
-    <div class="card">
-      <div class="card-header">
-        <h5 class="card-title mb-0">급여목록</h5>
-        <div class="card-header-right d-flex gap-2">
-          <div th:replace="~{fragments/buttons :: calcButton('MENU_HR_008', 'btnSalyCalc')}"></div>
-          <button class="btn btn-outline-dark" id="btnSalySpec">명세서 조회</button>
-          <div th:replace="~{fragments/buttons :: regButton('MENU_HR_008', 'openSalyRegistModal')}"></div>
-          <div th:replace="~{fragments/buttons :: confirmButton('MENU_HR_008', 'btnToggleConfirm')}"></div>
-          <div th:replace="~{fragments/buttons :: deleteButton('MENU_HR_008', 'btnSalyDelete')}"></div>
-        </div>
-      </div>
+			<!-- 급여목록 -->
+			<div class="card">
+				<div class="card-header">
+					<h5 class="card-title mb-0">급여목록</h5>
+					<div class="card-header-right d-flex gap-2">
+						<div
+							th:replace="~{fragments/buttons :: calcButton('MENU_HR_008', 'btnSalyCalc')}"></div>
+						<button class="btn btn-outline-dark" id="btnSalySpec">명세서
+							조회</button>
+						<div
+							th:replace="~{fragments/buttons :: regButton('MENU_HR_008', 'openSalyRegistModal')}"></div>
+						<div
+							th:replace="~{fragments/buttons :: confirmButton('MENU_HR_008', 'btnToggleConfirm')}"></div>
+						<div
+							th:replace="~{fragments/buttons :: deleteButton('MENU_HR_008', 'btnSalyDelete')}"></div>
+					</div>
+				</div>
 
-      <div class="card-body saly-card-body">
-        <div class="saly-tab-wrapper">
-          <ul class="nav nav-tabs" id="salyStatusTabs">
-            <li class="nav-item">
-              <button class="nav-link active" type="button" data-status="BEFORE_PAY">지급전</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link" type="button" data-status="PAID">지급완료</button>
-            </li>
-          </ul>
-        </div>
+				<div class="card-body saly-card-body">
+					<div class="saly-tab-wrapper">
+						<ul class="nav nav-tabs" id="salyStatusTabs">
+							<li class="nav-item">
+								<button class="nav-link active" type="button"
+									data-status="BEFORE_PAY">지급전</button>
+							</li>
+							<li class="nav-item">
+								<button class="nav-link" type="button" data-status="PAID">지급완료</button>
+							</li>
+						</ul>
+					</div>
 
-        <div id="grid" class="mt-2"></div>
-      </div>
-    </div>
-  </div>
-</div>
+					<div id="grid" class="mt-2"></div>
+				</div>
+			</div>
+		</div>
+	</div>
 
-<!-- ✅ 기존 모달 include (그대로 유지) -->
-<div th:replace="insa/modal/salyRegistModal :: salyRegistModal"></div>
+	<!-- ✅ 기존 모달 include (그대로 유지) -->
+	<div th:replace="insa/modal/salyRegistModal :: salyRegistModal"></div>
 
-<!-- ✅ 급여계산 모달 include -->
-<div th:replace="insa/modal/salyCalcModal :: salyCalcModal"></div>
+	<!-- ✅ 급여계산 모달 include -->
+	<div th:replace="insa/modal/salyCalcModal :: salyCalcModal"></div>
 
-<!-- ✅ 급여계산그룹 모달 include -->
-<div th:replace="insa/modal/salyItemModal :: salyItemModal"></div>
+	<!-- ✅ 급여계산그룹 모달 include -->
+	<div th:replace="insa/modal/salyItemModal :: salyItemModal"></div>
 
-<script>
+	<script>
   /***********************
    * ✅ 공용: JSON 안전 fetch
    ***********************/
@@ -345,6 +380,7 @@
     selectedRowKey = null;
     syncMainRadioUI();
     updateConfirmButtonLabel();
+    updateRegButtonLabel();
   }
 
   /*************************
@@ -390,6 +426,7 @@
 
     syncMainRadioUI();
     updateConfirmButtonLabel();
+    updateRegButtonLabel();
   }
 
   statusTabs.forEach(tab => {
@@ -411,7 +448,7 @@
 
     const selected = getSelectedRow();
     if (!selected) {
-      btnToggleConfirm.textContent = "확정/취소";
+      btnToggleConfirm.textContent = "확정";
       return;
     }
 
@@ -450,24 +487,47 @@
       updateConfirmButtonLabel();
     });
   }
+  /*************************
+   * 6-1. 등록/수정 토글 버튼 라벨
+   *************************/
+  function updateRegButtonLabel() {
+    if (!openSalyRegistBtn) return;
 
+    const selected = getSelectedRow();
+
+    // ✅ 라디오 미선택 = 등록
+    if (!selected) {
+      openSalyRegistBtn.textContent = "등록";
+      return;
+    }
+
+    // ✅ 라디오 선택 = 수정
+    openSalyRegistBtn.textContent = "수정";
+  }
   /*************************
    * ✅ 메인 그리드 라디오 토글(안정형)
    *************************/
-  grid.on("click", (ev) => {
-    const { rowKey, nativeEvent } = ev;
-    if (rowKey == null) return;
+   grid.on("click", (ev) => {
 
-    const target = nativeEvent.target;
-    if (!(target instanceof HTMLInputElement)) return;
-    if (target.type !== "radio") return;
+	    const { rowKey, nativeEvent } = ev;
+	    if (rowKey == null) return;
+	    const target = nativeEvent.target;
+	    //if (!(target instanceof HTMLInputElement)) return;
+	    //if (target.type !== "radio") return;
 
-    setTimeout(() => {
-      if (target.checked) selectedRowKey = rowKey;
-      else selectedRowKey = null;
-      updateConfirmButtonLabel();
-    }, 0);
-  });
+	      if (target.tagName === "INPUT") {
+	          console.log("input태그임");
+	          if(target.checked) {
+	              selectedRowKey = rowKey;
+	          }
+	      } else {
+	          console.log("else로 옴");
+	          target.children[0].checked = false;
+	          selectedRowKey = null;
+	      }
+	      updateConfirmButtonLabel();
+	      
+	  });
 
   /*************************
    * 7. 삭제 버튼 (API 연동)
