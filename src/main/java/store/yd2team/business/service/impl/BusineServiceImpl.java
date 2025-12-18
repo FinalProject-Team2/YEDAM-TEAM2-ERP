@@ -196,7 +196,7 @@ public class BusineServiceImpl implements BusinessService {
 	    }
 	    return list;
  }
-  // 임시 구현: 나중에는 로그인한 회사 정보(세션/DB)에서 업종을 가져오도록 수정
+ // 임시 구현: 나중에는 로그인한 회사 정보(세션/DB)에서 업종을 가져오도록 수정
  private String getLoginCompanyIndustry() {
  	String biz = LoginSession.getBizcnd();
      return biz;
