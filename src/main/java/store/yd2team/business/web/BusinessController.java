@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ChurnStdrVO;
-import store.yd2team.business.service.ContactVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
 
@@ -119,6 +118,8 @@ public class BusinessController {
 		
 		System.out.println("=== BusinessController.stdrlist() 호출됨 ===");
 		List<BusinessVO> potentialstdrList = businessService.getBusinessList(vo);
+		// 위에서 span이 쓰는 list도 채워주기
+//		model.addAttribute("list", potentialstdrList);
 		model.addAttribute("potentialstdrList", potentialstdrList);
 		model.addAttribute("stdrvo", vo);
 		
