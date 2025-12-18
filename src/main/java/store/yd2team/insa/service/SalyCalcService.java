@@ -43,4 +43,12 @@ public interface SalyCalcService {
                           List<Map<String, Object>> deletedRows);
 
     void deleteCalcGroup(String vendId, Long grpNo);
+
+    int deleteSpecItemsByLedgId(String salyLedgId, String vendId);
+
+    int resetSalySpecTotalsByLedgId(String salyLedgId, String vendId, String updtBy);
+
+    void resetSalyCalc(String salyLedgId, String vendId, String empId);
+
+    Map<String, Object> getSavedCalcItems(String salyLedgId, Long grpNo, String vendId);
 }

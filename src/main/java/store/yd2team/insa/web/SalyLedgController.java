@@ -34,7 +34,7 @@ public class SalyLedgController {
     @GetMapping("/salyLedg")
     public String selectall(Model model) {
         model.addAttribute("test", "testone");
-        return "/insa/salyLedg";
+        return "insa/salyLedg";
     }
 
     /* ===========================
