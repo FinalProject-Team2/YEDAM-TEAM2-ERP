@@ -911,18 +911,30 @@ input[type="radio"] {
     // ✅ FIX: 계산그룹을 한 번도 적용하지 않은 행은 editor 진입 자체를 막는다.
     // - 시각적 구분은 하지 않되, 편집만 차단.
     // - 적용된 행은 기존처럼 editor로 수정 가능.
-    gridCalc.on('editingStart', (ev) => {
-      try {
-        const row = gridCalc.getRow(ev.rowKey);
-        const grpNo = row ? row.grpNo : null;
-        if (grpNo == null || grpNo === "" || Number(grpNo) === 0) {
-          ev.stop(); // 편집 시작 자체를 취소
-        }
-      } catch (e) {
-        // 방어: 에러나면 안전하게 편집 취소
-        ev.stop();
-      }
-    });
+gridCalc.on('editingStart', (ev) => {
+  try {
+    const row = gridCalc.getRow(ev.rowKey);
+    const grpNo = row ? row.grpNo : null;
+
+    // 1) 그룹 미적용이면 편집 막기 (기존 그대로)
+    if (grpNo == null || grpNo === "" || Number(grpNo) === 0) {
+      ev.stop();
+      return;
+    }
+
+    // ✅ 2) 그룹 적용됐어도, "동적항목 컬럼"에서 값이 비어있으면 편집 막기
+    const v = row ? row[ev.columnName] : null;
+    const isEmpty = (v == null || String(v).trim() === "");
+    if (isEmpty) {
+      ev.stop();
+      return;
+    }
+
+  } catch (e) {
+    ev.stop();
+  }
+});
+
 
 
 
@@ -1058,7 +1070,7 @@ gridCalc.on('afterChange', (ev) => {
           .filter(Boolean);
 
         await fillCalculatedAmountsForSelectedSpecs(savedGrpNo, appliedSpecIds, null);
-
+        applyReadonlyCellBgForNoGroup(dynamicCols);
         // ✅ 재진입 시: 실제 값(0 제외) 있는 컬럼만 남김
         const prunedCols = pruneEmptyDynamicColumns(dynamicCols);
         if (prunedCols.length !== dynamicCols.length) {
@@ -2168,7 +2180,6 @@ gridCalc.on('afterChange', (ev) => {
 	  const cols = (dynamicCols || []).map(c => c?.name).filter(Boolean);
 	  if (!cols.length) return;
 
-	  // rowKey는 resetData 이후 보통 0..N-1
 	  const rowCount = typeof gridCalc.getRowCount === "function"
 	    ? gridCalc.getRowCount()
 	    : (gridCalc.getData() || []).length;
@@ -2179,16 +2190,22 @@ gridCalc.on('afterChange', (ev) => {
 	    const isNoGroup = (grpNo == null || grpNo === "" || Number(grpNo) === 0);
 
 	    cols.forEach((colName) => {
-	      // 혹시 이전에 붙어있으면 제거(재진입/재계산 반복 대비)
+	      // 매번 초기화(재진입/재계산 반복 대비)
 	      if (typeof gridCalc.removeCellClassName === "function") {
 	        gridCalc.removeCellClassName(rowKey, colName, "calc-readonly-cell");
 	      }
-	      if (isNoGroup && typeof gridCalc.addCellClassName === "function") {
+
+	      const v = row ? row[colName] : null;
+	      const isEmpty = (v == null || String(v).trim() === ""); // ✅ 값 비어있음
+
+	      // ✅ 1) 그룹 미적용 행 OR 2) 그룹 적용됐지만 해당 셀이 비어있음
+	      if ((isNoGroup || isEmpty) && typeof gridCalc.addCellClassName === "function") {
 	        gridCalc.addCellClassName(rowKey, colName, "calc-readonly-cell");
 	      }
 	    });
 	  }
 	}
+
 </script>
 </body>
 </html>
