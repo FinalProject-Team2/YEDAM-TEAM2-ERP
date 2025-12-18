@@ -10,7 +10,7 @@ public interface BusinessService {
 	//휴면,이탈 기준조회
 	List<ChurnStdrVO> getChurnStdrList(ChurnStdrVO churn);
 	//휴면,이탈 수정
-	int updateChurnStdrList(List<ChurnStdrVO> dormancyList, List<ChurnStdrVO> churnList);
+	int updateChurnStdrList(List<ChurnStdrVO> dormancyList, List<ChurnStdrVO> churnList, String vendId, String empId);
 	//검색조건조회
 	List<BusinessVO> getBusinessList(BusinessVO vo);
 	//번호조회
@@ -48,6 +48,6 @@ public interface BusinessService {
 	//잠재고객항목 선택시 해당 데모내역 조회 및 저장
 	public List<DemoVO> getDemoListByVend(Integer potentialInfoNo);
 	public void saveAllDemo(String vendId, Integer potentialInfoNo, List<DemoVO> demoList);
-	}
 
+}
 

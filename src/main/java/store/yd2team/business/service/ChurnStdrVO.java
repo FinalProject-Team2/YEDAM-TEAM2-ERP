@@ -11,7 +11,7 @@ public class ChurnStdrVO {
 		private String  custAggregateNo;
 		private String  vendId;
 		private String  salesChange;
-		private String  TY;
+		private String  ty;
 		private String  stdrValue;
 		private String  stdrDc;
 		private String  yn;

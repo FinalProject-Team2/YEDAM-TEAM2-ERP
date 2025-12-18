@@ -15,8 +15,9 @@ public interface BusinessMapper {
 	
 	//휴면,이탈 기준조회
 	List<ChurnStdrVO> getChurnStdrList(ChurnStdrVO churn);
-	//휴면,이탈 수정
-	int updateChurnStdr(ChurnStdrVO vo);
+	//휴면,이탈 등록 및 수정
+	int initChurnStdrByVend(@Param("vendId") String vendId, @Param("empId") String empId);
+	int updateChurnStdrByBizKey(ChurnStdrVO vo);
 	//휴면,이탈고객 검색조회
 	List<churnRiskVO> getchurnRiskList(churnRiskVO vo);
 	//휴면, 이탈고객 평균
