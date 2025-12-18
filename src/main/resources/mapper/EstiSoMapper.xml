@@ -448,12 +448,6 @@
 
 	
 	<!-- 견적 상태를 주문완료(es4)로 변경 -->
-<!-- 	<update id="updateEstiStatusToOrdered">
-	    update tb_esti
-	       set esti_st = 'es4'
-	     where esti_id = #{estiId}
-	       and version = #{version}
-	</update> -->
 	<update id="updateEstiStatusToOrdered">
 	    UPDATE tb_esti
 	       SET esti_st  = 'es4',
@@ -461,6 +455,16 @@
 	           updt_by  = #{updtBy}
 	     WHERE esti_id = #{estiId}
 	       AND version = #{version}
+	</update>
+	
+	<!-- 출하예약수량 추가 -->
+	<update id="increaseOustReserveQty">
+	    UPDATE tb_stock
+	       SET oust_reserv_qy = NVL(oust_reserv_qy, 0) + #{qty},
+	           updt_dt = SYSDATE,
+	           updt_by = #{updtBy}
+	     WHERE vend_id   = #{vendId}
+	       AND product_id = #{productId}
 	</update>
 
 

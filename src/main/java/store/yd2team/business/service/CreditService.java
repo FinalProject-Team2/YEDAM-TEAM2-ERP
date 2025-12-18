@@ -18,6 +18,9 @@ public interface CreditService {
 	// 저장
 	void saveCreditLimit(List<CreditVO> list);
 	
+	// 여신 회전일수 배치(batch) 실행
+	void runTurnoverBatch();
+	
 	//여신등록
 	/* int insertCdtlnLmt(CreditVO vo); */
 	

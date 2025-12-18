@@ -71,6 +71,16 @@ public interface EstiSoMapper {
     	    @Param("updtBy") String updtBy
     	);
     
+    // 출하예약수량 증가
+    int increaseOustReserveQty(
+        @Param("vendId") String vendId,
+        @Param("productId") String productId,
+        @Param("qty") long qty,
+        @Param("updtBy") String updtBy
+    );
+    
+    
+    
     // ==================================================== 주문서관리
     // 주문서 조회
     List<EstiSoVO> selectSoHeaderList(EstiSoVO so);
