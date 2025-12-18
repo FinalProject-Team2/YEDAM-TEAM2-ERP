@@ -201,6 +201,14 @@ public class EstiSoServiceImpl implements EstiSoService {
                 ttSupply += supply;
                 ttQty    += qy;
                 ttVat    += supply / 10;
+                
+             // 출하예약수량 증가
+                estiSoMapper.increaseOustReserveQty(
+                    vendId,
+                    d.getProductId(),
+                    qy,
+                    empId
+                );
 
                 // 주문 상세에도 세션 정보
                 d.setVendId(vendId);

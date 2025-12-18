@@ -36,30 +36,23 @@ public class CreditServiceImpl implements CreditService {
    public CustcomVO getCustcomDetail(String custcomId) {
        return creditMapper.selectCustcomDetail(custcomId);
    }
+
    
-   // 여신 평가 기능 추가
-	/*
-	 * @Override public int evaluateCredit(CreditVO vo) throws Exception { // 1) 평가
-	 * 대상 고객 목록 조회 (조건: custcomId, custcomName) List<CreditVO> targetList =
-	 * creditMapper.searchCredit(vo); if (targetList == null ||
-	 * targetList.isEmpty()) { return 0; } int updatedCount = 0; // 2) 각 고객별 평가 for
-	 * (CreditVO target : targetList) { // 2-1) 고객별 여신 상태 조회 (연체개월수, 여신개월, 잔액, 한도 등)
-	 * CreditVO eval = creditMapper.selectCreditStatus(target); if (eval == null)
-	 * continue;
-	 * 
-	 * // =========================================== // 2-2) 악성여신(출하정지) 판정 로직 // -
-	 * maxOverdueMm > creditMm → 악성여신 Y //
-	 * =========================================== String shipHoldYn = "N"; if
-	 * (eval.getMaxOverdueMm() > eval.getCreditMm()) { shipHoldYn = "Y"; }
-	 * 
-	 * // =========================================== // 2-4) 회전일수 계산 //
-	 * turnoverDays = remainAmt / (최근 3개월 평균매출/일수) // 여기서는 Mapper에서 계산된 값만 사용한다고 가정
-	 * // =========================================== int turnoverDays =
-	 * eval.getTurnoverDays(); // Mapper에서 계산된 값을 사용 // 2-5) 결과 업데이트
-	 * eval.setShipmntStop(shipHoldYn); eval.setTurnoverDays(turnoverDays); int
-	 * update = creditMapper.updateCreditEval(eval); updatedCount += update; }
-	 * return updatedCount; }
-	 */
+   // 여신 회전일수 배치(batch)실행
+   @Override
+   @Transactional
+   public void runTurnoverBatch() {
+
+       String updtBy = "batch";
+
+       System.out.println(">>> [SERVICE] runTurnoverBatch start");
+
+       int updatedRows =
+               creditMapper.updateTurnoverAndPolicyBatch(updtBy);
+
+       System.out.println(">>> [SERVICE] updated rows = " + updatedRows);
+       System.out.println(">>> [SERVICE] runTurnoverBatch end");
+   }
    
    
    // 저장버튼이벤트

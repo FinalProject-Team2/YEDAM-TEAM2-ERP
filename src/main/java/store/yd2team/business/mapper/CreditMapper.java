@@ -2,6 +2,8 @@ package store.yd2team.business.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import store.yd2team.business.service.AtmptVO;
 import store.yd2team.business.service.CreditVO;
 import store.yd2team.business.service.CustcomVO;
@@ -23,8 +25,9 @@ public interface CreditMapper {
 	// 저장버튼 이벤트
 	int updateCreditLimit(CreditVO vo);
 	
-	//여신등록
-	/* int insertCdtlnLmt(CreditVO vo); */
+	// 여신 회전일수 배치(batch) 실행
+	int updateTurnoverAndPolicyBatch(@Param("updtBy") String updtBy);
+	
 	
 	//미수등록
 	int insertAtmpt(AtmptVO vo);
