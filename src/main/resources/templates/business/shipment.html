@@ -129,14 +129,14 @@ const searchForm = {
             bodyHeight: 400,
             autoWidth: true,
             columns: [
-            	  { header: '출하지시ID', name: 'oustId', align: 'center' },
-            	  { header: '고객사', name: 'custcomName', align: 'center' },
-            	  { header: '담당자', name: 'psch', align: 'center'  },
-            	  { header: '담당자연락처', name: 'pschTel', align: 'right'  },
-            	  { header: '출하완료일', name: 'shipmntDt', align: 'right' },
-            	  { header: '출하요청일', name: 'oustRequestDt', align: 'right' },
+            	  { header: '출하지시ID', name: 'oustId', width: 130, align: 'center' },
+            	  { header: '고객사', name: 'custcomName', align: 'left' },
+            	  { header: '담당자', name: 'psch', width: 120, align: 'center'  },
+            	  { header: '담당자연락처', name: 'pschTel', width: 130, align: 'center'  },
+            	  { header: '출하완료일', name: 'shipmntDt', width: 130, align: 'center' },
+            	  { header: '출하요청일', name: 'oustRequestDt', width: 130, align: 'center' },
             	  { header: '상품명', name: 'productName' },
-            	  { header: '금액합계(원)', name: 'ttPrice', align: 'right',
+            	  { header: '금액합계(원)', name: 'ttPrice', width: 150, align: 'right',
       				formatter: ({ value }) => {
                         const num = toNumber(value);
                         return num ? num.toLocaleString() : '';

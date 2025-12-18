@@ -309,9 +309,9 @@
            	    return `<button class="grid-btn open-product-modal-btn" ${disabled}>품목선택</button>`;
            	  }
            	},
-            { header: '할인율(%)', name: 'percent', width: 80, align: 'right' },
-            { header: '적용시작일', name: 'beginDt', width: 120, align: 'right' },
-            { header: '적용종료일', name: 'endDt', width: 120, align: 'right' },
+            { header: '할인율(%)', name: 'percent', width: 80, align: 'center' },
+            { header: '적용시작일', name: 'beginDt', width: 120, align: 'center' },
+            { header: '적용종료일', name: 'endDt', width: 120, align: 'center' },
             { header: '비고', name: 'rm', width: 'auto', minWidth: 250 },
         ]
     }); // 4. 끝
@@ -375,7 +375,7 @@
 	 * 🔹 priceId 를 받아서
 	 *   1) 모달 열고
 	 *   2) 고객사 리스트 조회 후 그리드에 뿌리고
-	 *   3) 해당 priceId 로 저장된 거래처 목록을 조회해서 체크
+	 *   3) 해당 priceId 로 저장된 고객사 목록을 조회해서 체크
 	 */
 	async function openCustcomModal(priceId) {
 	  // 모달 표시
@@ -396,7 +396,7 @@
 	    const custData = await fetchCustcomList(keyword);
 	    loadCustcomGrid(custData);
 	
-	    // 2) priceId 가 있으면 저장된 거래처 detail 조회 후 자동 체크
+	    // 2) priceId 가 있으면 저장된 고객사 detail 조회 후 자동 체크
 	    if (priceId) {
 	      const res = await axios.get('/price/policy/detail', {
 	        params: { priceId }
@@ -408,7 +408,7 @@
 	        const savedIds = detailList.map(d => d.custcomId);
 	        setCheckedCustomers(savedIds);
 	      } else {
-	        console.warn(res.data.message || '단가정책 거래처 조회 실패');
+	        console.warn(res.data.message || '단가정책 고객사 조회 실패');
 	      }
 	    }
 	
@@ -437,7 +437,7 @@
 		    const row = cell ? priceGrid.getRow(cell.rowKey) : null;
 		    if (!row) return;
 
-		    // 유형이 p1일 때만 오픈 (거래처별)
+		    // 유형이 p1일 때만 오픈 (고객사별)
 		    if (row.priceType !== 'p1') return;
 
 		    // 🔹 이 단가정책의 priceId 를 모달에 넘겨줌
@@ -742,7 +742,7 @@
 	    .catch(err => console.error('고객사 조회 오류:', err));
 	});
 	
-	 // 저장된 거래처 ID 들을 받아서 그리드에서 해당 행의 체크박스를 체크해주는 함수
+	 // 저장된 고객사 ID 들을 받아서 그리드에서 해당 행의 체크박스를 체크해주는 함수
 	function setCheckedCustomers(savedIds = []) {
 	  if (!window.custcomGrid) return;
 
