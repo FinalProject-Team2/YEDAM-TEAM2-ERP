@@ -1,7 +1,7 @@
 package store.yd2team.business.mapper;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.data.repository.query.Param;
+import org.apache.ibatis.annotations.Param;
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ChurnStdrVO;
 import store.yd2team.business.service.ContactVO;

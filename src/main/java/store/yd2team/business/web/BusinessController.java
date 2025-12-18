@@ -47,20 +47,15 @@ public class BusinessController {
 	//휴면,이탈 기준 수정
 	@PostMapping("/churnRiskStdrRegister/update")
 	@ResponseBody
-	public int updateChurnStdrList(
-	        @RequestBody ChurnStdrVO req,
-	        HttpSession session
-	) {
-	    String vendId = (String) session.getAttribute("vendId");
-	    String empId  = (String) session.getAttribute("empId");
-
+	public int updateChurnStdrList(@RequestBody ChurnStdrVO req) {
 	    return businessService.updateChurnStdrList(
-	            req.getDormancyList(),
-	            req.getChurnList(),
-	            vendId,
-	            empId
+	        req.getDormancyList(),
+	        req.getChurnList(),
+	        LoginSession.getVendId(),
+	        LoginSession.getEmpId()
 	    );
 	}
+
 
 	//
 	@GetMapping("/churnRiskList")
