@@ -2,11 +2,13 @@ package store.yd2team.business.service.impl;
 import java.net.URI;
 import java.util.List;
 import java.util.Random;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import lombok.RequiredArgsConstructor;
 import store.yd2team.AiService;
 import store.yd2team.business.mapper.BusinessMapper;
@@ -56,27 +58,43 @@ public class BusineServiceImpl implements BusinessService {
 	}
  //휴면,이탈 기준 수정(완)
  @Override
- public int updateChurnStdrList(List<ChurnStdrVO> dormancyList, List<ChurnStdrVO> churnList) {
+ @Transactional
+ public int updateChurnStdrList(
+         List<ChurnStdrVO> dormancyList,
+         List<ChurnStdrVO> churnList,
+         String vendId,
+         String empId
+ ) {
+     if (empId == null) {
+         throw new IllegalStateException("로그인 사원 ID가 없습니다.");
+     }
+
+     // 최초 1회: 전체 복사
+     businessMapper.initChurnStdrByVend(vendId, empId);
+
      int cnt = 0;
-    
-     String vendId = getLoginVendId();  // 세션 회사 코드
-     String empId  = getLoginEmpId();   // 세션 사원 ID
+
      if (dormancyList != null) {
          for (ChurnStdrVO vo : dormancyList) {
-       	  vo.setVendId(vendId);   // 어느 기준이든 내 회사 기준
-             vo.setUpdtBy(empId);   // 수정자
-             cnt += businessMapper.updateChurnStdr(vo);
+             vo.setVendId(vendId);
+             vo.setUpdtBy(empId);
+             cnt += businessMapper.updateChurnStdrByBizKey(vo);
          }
      }
+
      if (churnList != null) {
          for (ChurnStdrVO vo : churnList) {
-       	  vo.setVendId(vendId);
+             vo.setVendId(vendId);
              vo.setUpdtBy(empId);
-             cnt += businessMapper.updateChurnStdr(vo);
+             cnt += businessMapper.updateChurnStdrByBizKey(vo);
          }
      }
      return cnt;
  }
+
+
+
+
 	//휴면,이탈검색조회
 	@Override
 	public List<churnRiskVO> getchurnRiskList(churnRiskVO vo) {

@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import jakarta.servlet.http.HttpSession;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ChurnStdrVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
+import store.yd2team.common.util.LoginSession;
 
 @Controller
 public class BusinessController {
@@ -29,6 +31,11 @@ public class BusinessController {
 		model.addAttribute("test", "testone");
 		return "business/samplepage"; // /는 빼도 됨
 	}
+	@GetMapping("/debug/session")
+	@ResponseBody
+	public String debugSession() {
+	    return "vendId=" + LoginSession.getVendId() + ", empId=" + LoginSession.getEmpId();
+	}
 	//휴면,이탈객 기준등록 페이지열람
 	@GetMapping("/churnRiskStdrRegister")
 	public String insert(Model model, ChurnStdrVO churn) {
@@ -40,15 +47,21 @@ public class BusinessController {
 	//휴면,이탈 기준 수정
 	@PostMapping("/churnRiskStdrRegister/update")
 	@ResponseBody
-	public int updateChurnStdrList(@RequestBody ChurnStdrVO req) {
-	    System.out.println("=== BusinessController.updateChurnStdrList() 호출됨 ===");
-	    int cnt = businessService.updateChurnStdrList(
-		        req.getDormancyList(),
-		        req.getChurnList()
-	    );
+	public int updateChurnStdrList(
+	        @RequestBody ChurnStdrVO req,
+	        HttpSession session
+	) {
+	    String vendId = (String) session.getAttribute("vendId");
+	    String empId  = (String) session.getAttribute("empId");
 
-	    return cnt; // 업데이트 된 건수
+	    return businessService.updateChurnStdrList(
+	            req.getDormancyList(),
+	            req.getChurnList(),
+	            vendId,
+	            empId
+	    );
 	}
+
 	//
 	@GetMapping("/churnRiskList")
 	public String churnRiskListForm(Model model) {

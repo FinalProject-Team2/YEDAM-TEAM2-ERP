@@ -2,40 +2,90 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="store.yd2team.business.mapper.BusinessMapper">
 	<!-- 휴면,이탈 기준조회 -->
-	<select id="getChurnStdrList" parameterType="store.yd2team.business.service.ChurnStdrVO">
-			   SELECT
-			        churn_risk_id      AS churnRiskId,
-			        cust_aggregate_no  AS custAggregateNo,
-			        vend_id            AS vendId,
-			        TRIM(sales_change) AS salesChange,
-			        ty                 AS TY,           
-			        stdr_value         AS stdrValue,
-			        stdr_dc            AS stdrDc,
-			        yn                 AS YN,
-			        crea_dt            AS creaDt,
-			        crea_by            AS creaBy,
-			        updt_dt            AS updtDt,
-			        updt_by            AS updtBy
-			    FROM 
-			        tb_churn_risk_stdr
-			    WHERE
-			        vend_id = #{vendId}     
-			    ORDER BY churn_risk_id
-	</select>
+	<select id="getChurnStdrList"
+        parameterType="store.yd2team.business.service.ChurnStdrVO"
+        resultType="store.yd2team.business.service.ChurnStdrVO">
+  SELECT
+      churn_risk_id      AS churnRiskId,
+      cust_aggregate_no  AS custAggregateNo,
+      vend_id            AS vendId,
+      TRIM(sales_change) AS salesChange,
+      ty                 AS ty,
+      stdr_value         AS stdrValue,
+      stdr_dc            AS stdrDc,
+      yn                 AS yn,
+      crea_dt            AS creaDt,
+      crea_by            AS creaBy,
+      updt_dt            AS updtDt,
+      updt_by            AS updtBy
+  FROM tb_churn_risk_stdr
+  WHERE
+    (
+      vend_id = #{vendId}
+      OR (
+        (vend_id IS NULL OR vend_id = '')
+        AND NOT EXISTS (
+          SELECT 1
+          FROM tb_churn_risk_stdr x
+          WHERE x.vend_id = #{vendId}
+        )
+      )
+    )
+  ORDER BY crea_dt DESC, churn_risk_id
+</select>
+
+
+<!-- 휴면기준 등록 -->
+<insert id="initChurnStdrByVend" parameterType="map">
+  INSERT INTO tb_churn_risk_stdr (
+      churn_risk_id,
+      cust_aggregate_no,
+      vend_id,
+      sales_change,
+      ty,
+      stdr_value,
+      stdr_dc,
+      yn,
+      crea_dt,
+      crea_by
+  )
+  SELECT
+      SEQ_TB_CHURN_RISK_STDR.NEXTVAL,
+      c.cust_aggregate_no,
+      #{vendId},
+      c.sales_change,
+      c.ty,
+      c.stdr_value,
+      c.stdr_dc,
+      c.yn,
+      SYSDATE,
+      #{empId}
+  FROM tb_churn_risk_stdr c
+  WHERE (c.vend_id IS NULL OR c.vend_id = '')
+    AND NOT EXISTS (
+      SELECT 1
+      FROM tb_churn_risk_stdr v
+      WHERE v.vend_id = #{vendId}
+    )
+</insert>
+
 	
 	<!-- 휴면,이탈 기준 수정 -->
-	<update id="updateChurnStdr" parameterType="store.yd2team.business.service.ChurnStdrVO">
-	    UPDATE tb_churn_risk_stdr
-	    SET
-	        stdr_value = #{stdrValue},
-	        stdr_dc    = #{stdrDc},
-	        yn         = #{yn},
-	        updt_dt    = SYSDATE,
-	        updt_by    = #{updtBy}
-	    WHERE
-	        churn_risk_id = #{churnRiskId}
-	    AND vend_id   = #{vendId}   <!-- 내 회사 것만 수정 -->
-	</update>
+	<update id="updateChurnStdrByBizKey" parameterType="store.yd2team.business.service.ChurnStdrVO">
+  UPDATE tb_churn_risk_stdr
+  SET
+      stdr_value = #{stdrValue},
+      stdr_dc    = #{stdrDc},
+      yn         = #{yn},
+      updt_dt    = SYSDATE,
+      updt_by    = #{updtBy}
+  WHERE vend_id = #{vendId}
+    AND sales_change = #{salesChange}
+    AND ty = #{ty}
+    AND cust_aggregate_no = #{custAggregateNo}
+</update>
+
+
 	
 	<!-- 휴면,이탈고객 검색조회 -->
 	<select id="getchurnRiskList" parameterType="store.yd2team.business.service.churnRiskVO">
