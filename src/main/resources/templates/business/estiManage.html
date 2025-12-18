@@ -1177,21 +1177,21 @@ function fetchDiscountRate(rowKey, productId) {
 	  }
 	  
 	  // grid 편집 막기
-	  if (window.newEstiGrid) {
+/* 	  if (window.newEstiGrid) {
 		  window.newEstiGrid.getColumns().forEach(col => {
 		    window.newEstiGrid.setColumnOptions(col.name, {
 		      editable: !readonly
 		    });
 		  });
-		}
-	  /* if (window.newEstiGrid) {
+		} */
+	  if (window.newEstiGrid) {
 	    window.newEstiGrid.setColumns(
 	      window.newEstiGrid.getColumns().map(col => ({
 	        ...col,
 	        editor: readonly ? null : col.editor
 	      }))
 	    );
-	  } */
+	  }
 	}
 	
 	
@@ -1279,19 +1279,19 @@ function fetchDiscountRate(rowKey, productId) {
 	  return value.replace(/[^\d]/g, '');
 	}
 
-	// 1️⃣ 입력 중: 숫자만 허용 (콤마 없음)
+	// 입력 중: 숫자만 허용 (콤마 없음)
 	rciptAppoAmtInput.addEventListener('input', (e) => {
 	  e.target.value = onlyDigits(e.target.value);
 	});
 
-	// 2️⃣ 붙여넣기: 숫자만
+	// 붙여넣기: 숫자만
 	rciptAppoAmtInput.addEventListener('paste', (e) => {
 	  e.preventDefault();
 	  const text = (e.clipboardData || window.clipboardData).getData('text');
 	  e.target.value += onlyDigits(text);
 	});
 
-	// 3️⃣ 포커스 아웃: 천단위 콤마 표시
+	// 포커스 아웃: 천단위 콤마 표시
 	rciptAppoAmtInput.addEventListener('blur', (e) => {
 	  const value = onlyDigits(e.target.value);
 	  if (!value) return;
@@ -1302,11 +1302,13 @@ function fetchDiscountRate(rowKey, productId) {
 	  }
 	});
 
-	// 4️⃣ 다시 클릭(포커스): 콤마 제거하고 편집 가능
+	// 다시 클릭(포커스): 콤마 제거하고 편집 가능
 	rciptAppoAmtInput.addEventListener('focus', (e) => {
 	  e.target.value = onlyDigits(e.target.value);
 	});
 	
+	
+	  
 	// 2. 모달 열기/닫기
 	function openNewSoModal() {
 	  const modal = document.getElementById("newSoModal");
@@ -1357,6 +1359,16 @@ function fetchDiscountRate(rowKey, productId) {
 	
 	// 4. 모달 저장 버튼
 	$("#newSoModalSaveBtn").on("click", function () {
+		
+		// 숫지에 다시 콤마 제거
+		const rciptAppoAmtRaw = $("#rciptAppoAmt").val();
+
+		const rciptAppoAmt = rciptAppoAmtRaw
+		  ? Number(rciptAppoAmtRaw.replace(/,/g, ''))
+		  : null;
+		
+		  
+		
 	  // ▶ id 이름 newSoXXX 로 맞추기
 	  const estiId   = $("#newSoEstiId").val();
 	  const version  = $("#newSoVersion").val();  // 견적 버전
@@ -1366,9 +1378,12 @@ function fetchDiscountRate(rowKey, productId) {
 	  const shipAddr = $("#newSoShipAddr").val();
 	  const orderRm  = $("#newSoRm").val();
 	  const rciptAppoDt = $("#rciptAppoDt").val();   // 입금약속일
-	  const rciptAppoAmt = $("#rciptAppoAmt").val(); // 입금약속금액
+	  //const rciptAppoAmt = $("#rciptAppoAmt").val(); // 입금약속금액
 	  const appoMtd      = $("#appoMtd").val();      // 결제방법
 
+	  
+	  console.log("입금약속금액 raw =", $("#rciptAppoAmt").val());
+	  console.log("입금약속금액 payload =", rciptAppoAmt);
 	
 	  // ▶ grid 객체 이름 newSoGrid 사용
 	  const rows = window.newSoGrid ? window.newSoGrid.getData() : [];
@@ -1388,7 +1403,8 @@ function fetchDiscountRate(rowKey, productId) {
 	    shipAddr: shipAddr,
 	    rm: orderRm,
 	    rciptAppoDt: rciptAppoDt || null,
-	    rciptAppoAmt: rciptAppoAmt ? Number(rciptAppoAmt) : null,
+	    rciptAppoAmt: rciptAppoAmt,
+	    //rciptAppoAmt: rciptAppoAmt ? Number(rciptAppoAmt) : null,
 	    appoMtd: appoMtd,
 	    
 	    detailList: detailList

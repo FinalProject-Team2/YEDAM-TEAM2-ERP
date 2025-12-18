@@ -570,6 +570,21 @@
 	       AND vend_id = #{vendId}
 	</update>
 
+
+	<!-- 주문취소 시 출하예약수량 감소 -->
+	<update id="decreaseOustReserveQty">
+	    UPDATE tb_stock
+	       SET oust_reserv_qy =
+	               CASE
+	                   WHEN NVL(oust_reserv_qy, 0) &lt; #{qty}
+	                   THEN 0
+	                   ELSE NVL(oust_reserv_qy, 0) - #{qty}
+	               END,
+	           updt_dt = SYSDATE,
+	           updt_by = #{updtBy}
+	     WHERE vend_id   = #{vendId}
+	       AND product_id = #{productId}
+	</update>
 	
 	<!-- 출하지시 INSERT -->
 	<insert id="insertOust" parameterType="store.yd2team.business.service.OustVO">
