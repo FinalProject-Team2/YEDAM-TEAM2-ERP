@@ -120,4 +120,40 @@
 	    AND role_id = #{roleId}
 	</select>
 
+	<!-- 신규 마스터 사원(tb_emp) 등록 -->
+	<insert id="insertMasterEmp" parameterType="store.yd2team.insa.service.EmpVO">
+		INSERT INTO tb_emp (
+			emp_id,
+			vend_id,
+			nm,
+			cttpc,
+			email,
+			dty,
+			clsf,
+			rspofc,
+			emplym_ty,
+			hffc_st,
+			crea_by
+		) VALUES (
+			#{empId},
+			#{vendId},
+			#{nm},
+			#{cttpc},
+			#{email},
+			#{dty},
+			#{clsf},
+			#{rspofc},
+			#{emplymTy},
+			#{hffcSt},
+			#{creaBy}
+		)
+	</insert>
+
+	<select id="getNextEmpId" resultType="string">
+		SELECT 'emp' || TO_CHAR(SYSDATE, 'YYMM') ||
+		       LPAD(NVL(MAX(SUBSTR(emp_id, LENGTH(emp_id)-2, 3)), 0) + 1, 3, '0') AS emp_id
+		FROM tb_emp
+		WHERE SUBSTR(emp_id, 4, 4) = TO_CHAR(SYSDATE, 'YYMM')
+	</select>
+
 </mapper>
