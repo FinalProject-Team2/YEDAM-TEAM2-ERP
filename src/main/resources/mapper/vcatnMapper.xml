@@ -101,8 +101,8 @@ insert into tb_vcatn(
 
 <update id="vcatnUpdateYrycData">
 UPDATE tb_yryc
-SET use_yryc   = use_yryc + #{vcatnDe},
-    remndr_yryc = remndr_yryc - #{vcatnDe},
+SET use_yryc   = use_yryc + #{vcatnDe}
+    ,remndr_yryc = remndr_yryc - #{vcatnDe}
     ,updt_dt = SYSDATE
     ,updt_by = 'myk'
 WHERE emp_id = #{empId}
@@ -120,8 +120,8 @@ delete from tb_vcatn where vcatn_id = #{vcatnId}
 
 <update id="yrycRollback">
 UPDATE tb_yryc
-SET use_yryc   = use_yryc - #{vcatnDe},
-    remndr_yryc = remndr_yryc + #{vcatnDe},
+SET use_yryc   = use_yryc - #{vcatnDe}
+    ,remndr_yryc = remndr_yryc + #{vcatnDe}
     ,updt_dt = SYSDATE
     ,updt_by = 'myk'
 WHERE emp_id = #{empId}
