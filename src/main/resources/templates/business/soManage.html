@@ -181,13 +181,13 @@ function toNumber(val) {
 	                   return num ? num.toLocaleString() : '';
 	               }
 			},
-			{ header: '총주문수량', name: 'ttSoQy', width: 120, align: 'right',
+			{ header: '총 주문수량', name: 'ttSoQy', width: 120, align: 'right',
 				formatter: ({ value }) => {
 	                   const num = toNumber(value);
 	                   return num ? num.toLocaleString() : '';
 	               } 
 			},
-			{ header: '재고수량', name: 'currStockQy', width: 120, align: 'right',
+			{ header: '현 재고수량', name: 'currStockQy', width: 120, align: 'right',
 	   				formatter: ({ value }) => {
 		                   const num = toNumber(value);
 		                   return num ? num.toLocaleString() : '';

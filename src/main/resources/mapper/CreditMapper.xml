@@ -90,6 +90,7 @@
 	<select id="selectCustcomDetail" parameterType="string" resultType="store.yd2team.business.service.CustcomVO">
 	    SELECT
 	        custcom_id,
+	        custcom_name,
 	        biz_addr,
 	        biz_tel,
 	        biz_fax,

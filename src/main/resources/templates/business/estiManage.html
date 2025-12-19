@@ -89,6 +89,25 @@
 .grid-readonly .tui-grid-cell {
   cursor: default !important;
 }
+
+.esti-history-table {
+  width: 90%;
+  margin: 0 auto;
+}
+
+.esti-history-table th,
+.esti-history-table td {
+  padding: 30px 40px;
+  font-size: 25px;
+}
+
+.esti-history-table .btn {
+  padding: 10px 30px;
+  font-size: 20px;
+}
+.esti-history-table .col-version { width: 60px; }
+.esti-history-table .col-view { width: 50px; }
+.esti-history-table .col-amount { width: 100px; white-space: nowrap; }
 </style>
 
 </head>
@@ -1016,11 +1035,14 @@ function fetchDiscountRate(rowKey, productId) {
 		console.log("견적 header:", data);
 		console.log("견적 detailList:", data.detailList);
 		
-	  // 헤더 세팅
-	  $("#autoCustcomId").val(data.custcomId);
-	  $("#autoCustcomName").val(data.custcomNameResult);
-	  $("#applyDate").val(data.dueDt);
-	  $("#autoRemark").val(data.rm || "");
+		// 헤더 세팅
+		$('#estiIdText').text(data.estiId);
+		$('#custcomNameText').text(data.custcomNameResult);
+	  
+		$("#autoCustcomId").val(data.custcomId);
+		$("#autoCustcomName").val(data.custcomNameResult);
+		$("#applyDate").val(data.dueDt);
+		$("#autoRemark").val(data.rm || "");
 
 	  // 그리드 데이터 변환
 	  const gridData = data.detailList.map(d => ({
@@ -1043,6 +1065,9 @@ function fetchDiscountRate(rowKey, productId) {
 	  $('#applyDate').val('');
 	  $('#autoRemark').val('');
 
+		$('#estiIdText').text(data.estiId);
+		$('#custcomNameText').text(data.custcomNameResult);
+	  
 	  // estiId 초기화 (안 하면 다음에 꼬임)
 	  $("#estiIdHidden").val('');
 
@@ -1091,6 +1116,14 @@ function fetchDiscountRate(rowKey, productId) {
 		  fetch(`/esti/history/${estiId}`)
 		    .then(res => res.json())
 		    .then(list => {
+		    	 // 상단 텍스트 세팅
+		        document.getElementById('estiIdText').innerText = estiId;
+
+		        if (list.length > 0) {
+		          document.getElementById('custcomNameText').innerText =
+		            list[0].custcomName || '';
+		        }
+		    	
 		      const tbody = document.getElementById("estiHistoryTbody");
 		      tbody.innerHTML = "";
 
