@@ -54,6 +54,7 @@ FROM    tb_mlss
       AND evl_begin_dt >= #{evlBeginDt}
     </if>    
 </where>
+order by crea_dt desc
 </select>
 
 <select id="mlssDtChk">
@@ -65,8 +66,8 @@ FROM    tb_mlss
 		    join tb_mlss b
 		    on a.mlss_id = b.mlss_id
 		    WHERE emp_id = #{empId}
-		      AND evl_begin_dt <= TRUNC(SYSDATE)
-		      AND evl_end_dt >= TRUNC(SYSDATE)
+		      AND TRUNC(evl_begin_dt) <= TRUNC(SYSDATE)
+		      AND TRUNC(evl_end_dt) >= TRUNC(SYSDATE)
 		    ORDER BY a.crea_dt DESC
 		)
 		WHERE ROWNUM = 1          

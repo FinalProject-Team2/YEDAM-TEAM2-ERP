@@ -78,6 +78,7 @@ INSERT INTO tb_edc (
 select *
 from tb_emp
 <where>
+vend_id = #{vendId}
 <if test="deptId != null">  AND dept_id = #{deptId}</if>
 <if test="clsf != null">  AND clsf = #{clsf}</if>
 <if test="rspofc != null">  AND rspofc = #{rspofc}</if>

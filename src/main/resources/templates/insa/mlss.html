@@ -560,17 +560,17 @@ let gridColums = [
 			        {
 			            name: "상사",
 			            data: [
-			                avg(result["상사"]["직무 역량"]),
-			                avg(result["상사"]["협업 역량"]),
-			                avg(result["상사"]["자기관리 역량"])
+			                avg(result["동료"]["직무 역량"]),
+			                avg(result["동료"]["협업 역량"]),
+			                avg(result["동료"]["자기관리 역량"])
 			            ]
 			        },
 			        {
 			            name: "동료",
 			            data: [
-			                avg(result["동료"]["직무 역량"]),
-			                avg(result["동료"]["협업 역량"]),
-			                avg(result["동료"]["자기관리 역량"])
+			                avg(result["상사"]["직무 역량"]),
+			                avg(result["상사"]["협업 역량"]),
+			                avg(result["상사"]["자기관리 역량"])
 			            ]
 			        }
 			    ];
@@ -751,11 +751,7 @@ let gridColums = [
 			    columnChart = toastui.Chart.columnChart({
 			        el: columnEl,
 			        data: {
-			            categories: [
-			              '업무 이해도', '전문성', '문제 해결 능력',
-			              '의사소통능력', '협력 태도', '문제해결 및 기여도',
-			              '시간 및 업무관리', '자기개발 및 학습태도', '책임감 및 규율 준수'
-			            ],
+			            categories: categories,
 			            series: [
 			              {
 			                name: '본인',
@@ -763,11 +759,11 @@ let gridColums = [
 			              },
 			              {
 			                name: '상사',
-			                data: suprrData
+			                data: crkData
 			              },
 			              {
 			                name: '동료',
-			                data: crkData
+			                data: suprrData
 			              }
 			            ]
 			          },
@@ -802,11 +798,11 @@ let gridColums = [
 											align : 'left',												
 										},{
 											header : '상사',
-											name : 'suprr',
+											name : 'crk',
 											align : 'left',												
 										},{
 											header : '동료',
-											name : 'crk',
+											name : 'suprr',
 											align : 'left',												
 										},{
 											header : '조직평균',
