@@ -2,12 +2,23 @@ package store.yd2team.business.service;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 public interface ShipmntService {
 
     // 출하 조회
     List<ShipmntVO> selectShipmntList(ShipmntVO vo);
 
     // 출하완료 처리 (다건)
-    void completeShipment(List<String> oustIds);
+   void completeShipment( String oustIds,
+           String vendId,
+           String empId,
+           String loginId);
+    
+	/*
+	 * void completeShipment( String oustIdsCsv, String vendId, String empId, String
+	 * loginId );
+	 */
+	/* void completeShipment(List<String> oustIds); */
 }
 

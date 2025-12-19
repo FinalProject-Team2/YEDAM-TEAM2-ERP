@@ -3,7 +3,7 @@ package store.yd2team.business.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.data.repository.query.Param;
+import org.apache.ibatis.annotations.Param;
 
 import store.yd2team.business.service.ShipmntVO;
 
@@ -19,10 +19,24 @@ public interface ShipmntMapper {
 	 */
 
     //출하처리 프로시져
-    void procShipmentComplete(@Param("oustIds") String oustIds,
-            @Param("vendId") String vendId,
-            @Param("empId") String empId,
-            @Param("loginId") String loginId);
+    void procShipmentComplete(
+            @Param("oustIds") String oustIds,
+            @Param("vendId")  String vendId,
+            @Param("empId")   String empId,
+            @Param("loginId") String loginId
+        );
+    
+	/*
+	 * void procShipmentComplete(
+	 * 
+	 * @Param("oustIds") String oustIds,
+	 * 
+	 * @Param("vendId") String vendId,
+	 * 
+	 * @Param("empId") String empId,
+	 * 
+	 * @Param("loginId") String loginId );
+	 */
 
 	
 }

@@ -98,6 +98,7 @@
 	
 	
 <script>
+
 //숫자 변환 유틸 (기존 그대로 사용)
 function toNumber(val) {
   if (val === null || val === undefined) return 0;
@@ -167,26 +168,28 @@ const searchForm = {
     console.log("검색조건 초기화:", searchForm);
 });
 
+// 2-1. 출하목록조회함수
+	function searchShipmentList() {
+
+	    searchForm.custcomId   = document.querySelector("#custcomId").value.trim();
+	    searchForm.custcomName = document.querySelector("#custcomName").value.trim();
+	    searchForm.nm          = document.querySelector("#nm").value.trim();
+	    searchForm.dueStart    = document.querySelector(".js-date-range-start").value;
+	    searchForm.dueEnd      = document.querySelector(".js-date-range-end").value;
+
+	    axios.post("/shipment/list", searchForm)
+	        .then(res => {
+	            console.log("조회결과 >>> ", res.data);
+	            oustGrid.resetData(res.data);
+	        })
+	        .catch(err => console.error("조회 중 오류:", err));
+	}
+
 // 2-2. 조회 버튼 이벤트
 document.getElementById("searchBtn").addEventListener("click", function () {
+	
+	searchShipmentList();
 
-    // 1) 화면 입력값 → searchForm 에 세팅
-    searchForm.custcomId = document.querySelector("#custcomId").value.trim();
-    searchForm.custcomName = document.querySelector("#custcomName").value.trim();
-    searchForm.nm = document.querySelector("#nm").value.trim();
-    searchForm.dueStart = document.querySelector(".js-date-range-start").value;
-    searchForm.dueEnd = document.querySelector(".js-date-range-end").value;
-
-
-    // 2) 백엔드 조회 요청 
-    axios.post("/shipment/list", searchForm)
-        .then(res => {
-            console.log("조회결과 >>> ", res.data);
-
-            // 3) 그리드 데이터 반영
-            oustGrid.resetData(res.data);
-        })
-        .catch(err => console.error("조회 중 오류:", err));
 });
 
 
@@ -200,13 +203,33 @@ document.getElementById("openRciptTretModal").addEventListener("click", function
         alert("출하처리할 항목을 선택하세요.");
         return;
     }
+    
+    // 이미 출하완료된 항목 존재 여부 체크
+    const completedRows = checkedRows.filter(row => row.shipmntSt === "출하완료");
+
+    if (completedRows.length > 0) {
+        alert("이미 출하완료된 항목이 포함되어 있습니다.");
+        return;
+    }
 
     // oustId 배열 추출
     const oustIds = checkedRows.map(row => row.oustId);
-
+    
     axios.post("/shipment/complete", oustIds, {
-    	  headers: { "Content-Type": "application/json" }
-    	});
+        headers: { "Content-Type": "application/json" }
+    })
+    .then(() => {
+        alert("출하처리가 완료되었습니다.");
+
+    
+        // 출하대기 그리드 새로고침
+        searchShipmentList();
+    })
+    .catch(err => {
+        console.error(err);
+        alert("출하처리 중 오류가 발생했습니다.");
+    });
+
 
 
 });

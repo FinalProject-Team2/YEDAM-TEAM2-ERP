@@ -19,7 +19,7 @@
 	                  x.main_product_name
 	           END                  AS productName
 	         , x.tt_price           AS ttPrice
-	         , NVL(x.shipmnt_st, '대기') AS shipmntSt
+	         , NVL(x.shipmnt_st, '출하대기') AS shipmntSt
 	         , x.shipmnt_dt         AS shipmntDt
 	
 	    FROM (
@@ -91,15 +91,14 @@
 	
 	</select>
 
-	<update id="callShipmentComplete" statementType="CALLABLE">
+	<select id="procShipmentComplete" statementType="CALLABLE">
 	    { CALL PROC_SHIPMENT_COMPLETE(
-	        #{oustIds, jdbcType=ARRAY, javaType=java.util.List,
-	          typeHandler=org.apache.ibatis.type.ArrayTypeHandler},
-	        #{vendId},
-	        #{empId},
-	        #{loginId}
+	        #{oustIds, jdbcType=VARCHAR},
+	        #{vendId,  jdbcType=VARCHAR},
+	        #{empId,   jdbcType=VARCHAR},
+	        #{loginId, jdbcType=VARCHAR}
 	    ) }
-	</update>
+	</select>
 
 
 

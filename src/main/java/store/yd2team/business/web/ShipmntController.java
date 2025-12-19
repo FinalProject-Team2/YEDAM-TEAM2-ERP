@@ -2,6 +2,7 @@ package store.yd2team.business.web;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import lombok.RequiredArgsConstructor;
 import store.yd2team.business.service.ShipmntService;
 import store.yd2team.business.service.ShipmntVO;
+import store.yd2team.common.util.LoginSession;
 
 @Controller
 @RequestMapping("/shipment")
@@ -36,8 +38,25 @@ public class ShipmntController {
 	// 출하처리버튼
 	@PostMapping("/complete")
 	@ResponseBody
-	public void completeShipment(@RequestBody List<String> oustIds) {
-		shipmntService.completeShipment(oustIds);
+	public ResponseEntity<Void> completeShipment(
+	        @RequestBody List<String> oustIds
+	) {
+	    String oustIdsCsv = String.join(",", oustIds);
+
+	    shipmntService.completeShipment(
+	        oustIdsCsv,
+	        LoginSession.getVendId(),
+	        LoginSession.getEmpId(),
+	        LoginSession.getLoginId()
+	    );
+
+	    return ResponseEntity.ok().build();
 	}
+	/*
+	 * @PostMapping("/complete")
+	 * 
+	 * @ResponseBody public void completeShipment(@RequestBody List<String> oustIds)
+	 * { shipmntService.completeShipment(oustIds); }
+	 */
 
 }
