@@ -137,7 +137,6 @@
 			<ul class="navbar-nav">
 				<li class="nav-item fw-semibold d-none d-lg-block ms-0">
 					<h1 class="welcome-text">
-						ERP 데이터 구조 
 						<span class="text-black fw-bold"
 						 th:if="${session.LOGIN_EMP != null}"
 						 th:text="${pageTitle}">대시 보드</span>
@@ -145,6 +144,8 @@
 						<!-- 로그인 안 했을 때: Guest 출력 -->
 						<span class="text-black fw-bold"
 							th:if="${session.LOGIN_EMP == null}"> Guest </span>
+						<span class="text-black fs-4"
+							th:if="${session.LOGIN_EMP != null && session.LOGIN_EMP.masYn == 'e1'}"> (관리자) </span>
 					</h1>
 				</li>
 			</ul>
