@@ -140,8 +140,8 @@ and a.emp_id = b.emp_id
 and b.dept_id = #{deptId}
 and a.mlss_id = (select mlss_id
                  from tb_mlss
-                 where evl_begin_dt <= TRUNC(SYSDATE)
-		      AND evl_end_dt >= TRUNC(SYSDATE)
+                 where TRUNC(evl_begin_dt) <= TRUNC(SYSDATE)
+		      AND TRUNC(evl_end_dt) >= TRUNC(SYSDATE)
               and ROWNUM = 1)]]>
               
 </select>
