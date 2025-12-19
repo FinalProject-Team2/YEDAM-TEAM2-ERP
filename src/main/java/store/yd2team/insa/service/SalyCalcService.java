@@ -32,6 +32,11 @@ public interface SalyCalcService {
                            String vendId, String loginEmpId);
 
     List<SalySpecItemVO> getSalySpecItems(String salySpecId, Long grpNo, String vendId);
+ // grpNm 기준 급여명세 항목 조회 (재로딩용)
+    List<SalySpecItemVO> getSalySpecItemsByGrpNm(String salySpecId,
+                                                 String grpNm,
+                                                 String vendId);
+
 
     // 단건 저장(필요시 유지)
     Long saveCalcGroup(String vendId, String empId, Long grpNo, String grpNm, List<String> itemIds);
@@ -51,4 +56,7 @@ public interface SalyCalcService {
     void resetSalyCalc(String salyLedgId, String vendId, String empId);
 
     Map<String, Object> getSavedCalcItems(String salyLedgId, Long grpNo, String vendId);
+    
+    List<SalySpecItemVO> getSalySpecItemsBySpecId(String salySpecId,
+            String vendId);
 }

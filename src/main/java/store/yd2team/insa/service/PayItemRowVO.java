@@ -18,5 +18,6 @@ public class PayItemRowVO {
     private String itemTy;   // A/D
     private String itemId;   // allow_id or duc_id
     private String itemNm;   // allow_nm or duc_nm
+    private Long dispNo;
     private Long   amt;      // 계산 금액
 }

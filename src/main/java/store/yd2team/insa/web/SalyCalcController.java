@@ -59,7 +59,8 @@ public class SalyCalcController {
             row.put("deptNm", vo.getDeptNm());
             row.put("clsfNm", vo.getClsfNm());           // ✅ 추가
             row.put("rspofcNm", vo.getRspofcNm());       // ✅ 추가
-            row.put("calcGrpNm", "");
+            row.put("calcGrpNm", vo.getCalcGrpNm());
+            row.put("grpNo", vo.getGrpNo());   // ✅ 이 줄 추가
             return row;
         }).toList();
     }
@@ -211,15 +212,22 @@ public class SalyCalcController {
         return res;
     }
 
-@GetMapping("/insa/saly/calc/items")
-    public List<SalySpecItemVO> items(@RequestParam("salySpecId") String salySpecId,
-                                      @RequestParam("grpNo") Long grpNo,
-                                      HttpSession session) {
+    /**
+     * ✅ 급여계산 모달 재조회용
+     * - saly_spec_id 기준으로 저장된 항목 전체 조회
+     */
+    @GetMapping("/insa/saly/calc/items")
+    public List<SalySpecItemVO> items(
+            @RequestParam("salySpecId") String salySpecId,
+            HttpSession session) {
 
         SessionDto login = getLogin(session);
         if (login == null) return List.of();
 
-        return salyCalcService.getSalySpecItems(salySpecId, grpNo, login.getVendId());
+        return salyCalcService.getSalySpecItemsBySpecId(
+                salySpecId,
+                login.getVendId()
+        );
     }
 
     // ✅ 급여계산그룹 저장(1건)
@@ -336,13 +344,14 @@ public class SalyCalcController {
     }
     @GetMapping("/insa/saly/calc/groupItems")
     @ResponseBody
-    public Map<String, Object> getGroupItems(@RequestParam("grpNo") Long grpNo,
-                                            HttpSession session) {
-
+    public Map<String, Object> getGroupItems(
+        @RequestParam("grpNm") String grpNm,
+        HttpSession session
+    ) {
         SessionDto login = getLogin(session);
         Map<String, Object> res = new HashMap<>();
 
-        if (login == null) {
+        if (login == null || grpNm == null || grpNm.isBlank()) {
             res.put("allowList", List.of());
             res.put("ducList", List.of());
             return res;
@@ -350,17 +359,35 @@ public class SalyCalcController {
 
         String vendId = login.getVendId();
 
-        // ✅ allowList / ducList를 각각 분리해서 내려주기
-        // (service.getAllowDucList는 수당+공제 합쳐서 주는 메서드라 list가 섞일 수 있음)
-        res.put("allowList", salyCalcService.getAllowDucList(vendId, grpNo).stream()
+        // 🔹 grpNm → grpNo 변환 (기존 서비스 최대한 유지)
+        Long grpNo = salyCalcService
+            .getCalcGroupList(vendId)
+            .stream()
+            .filter(g -> grpNm.equals(g.getGrpNm()))
+            .map(CalGrpVO::getGrpNo)
+            .findFirst()
+            .orElse(null);
+
+        if (grpNo == null) {
+            res.put("allowList", List.of());
+            res.put("ducList", List.of());
+            return res;
+        }
+
+        // ✅ 이후 로직은 기존 그대로
+        List<AllowDucVO> list = salyCalcService.getAllowDucList(vendId, grpNo);
+
+        res.put("allowList", list.stream()
                 .filter(vo -> vo.getAllowId() != null && !vo.getAllowId().isBlank())
                 .toList());
 
-        res.put("ducList", salyCalcService.getAllowDucList(vendId, grpNo).stream()
+        res.put("ducList", list.stream()
                 .filter(vo -> vo.getDucId() != null && !vo.getDucId().isBlank())
                 .toList());
 
         return res;
     }
+
+
 
 }
