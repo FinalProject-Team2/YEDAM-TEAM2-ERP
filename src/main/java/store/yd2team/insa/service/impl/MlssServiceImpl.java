@@ -39,6 +39,7 @@ public class MlssServiceImpl implements MlssService{
 		
 		//헤더등록.
 		MlssVO mvo = new MlssVO();
+		mvo.setVendId( LoginSession.getVendId() );
 		mvo.setMlssNm( val.getMlssNm() );
 		mvo.setEvlBeginDt( val.getEvlBeginDt() );
 		mvo.setEvlEndDt( val.getEvlEndDt() );

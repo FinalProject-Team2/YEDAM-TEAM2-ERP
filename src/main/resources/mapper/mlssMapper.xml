@@ -14,9 +14,9 @@ SELECT 'mlss' ||  LPAD(NVL(MAX(SUBSTR(mlss_id, LENGTH(mlss_id)-2, 3)), 0) + 1, 3
 FROM tb_mlss
 </selectKey>
 insert into tb_mlss(
-      mlss_id, evl_begin_dt, evl_end_dt, mlss_nm, suprr, crk, self, crea_by 
+      mlss_id, evl_begin_dt, evl_end_dt, mlss_nm, suprr, crk, self, crea_by, vend_id
     ) VALUES (
-      #{mlssId}, #{evlBeginDt}, #{evlEndDt}, #{mlssNm}, 0, 0, 0, 'myk' )
+      #{mlssId}, #{evlBeginDt}, #{evlEndDt}, #{mlssNm}, 0, 0, 0, 'myk', #{vendId} )
 </insert>
 
 <select id="mlssCreateId">
