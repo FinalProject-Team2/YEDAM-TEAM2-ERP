@@ -271,6 +271,7 @@
 
 	<!-- 모달 -->
 	<div th:replace="insa/modal/empRegistModal :: registModal"></div>
+	<div th:replace="insa/modal/empPdfModal :: empPdfModal"></div>
 	<script th:inline="javascript">	
 	function getList(el) {
 		//jquery형식 db요청방식
@@ -300,6 +301,17 @@
 		    alert("데이터 요청 중 오류 발생");
 		});
 	}	
+	
+	// 주문서 번호 PdfController로 넘기기
+	$("#emp-deta").on("click", function() {
+		const empIdVal = $("#v_empId").val();
+		console.log("emp아이디값나와라"+empIdVal);
+		$("#empPdfFrame").attr("src", `/empPdfExport?empId=${empIdVal}`);
+		const modalEl = $("#empPdfModal")[0];
+		const modal = new bootstrap.Modal(modalEl);
+		modal.show();
+	});
+	
 
 		// Grid 생성
 		const grid = new tui.Grid({
