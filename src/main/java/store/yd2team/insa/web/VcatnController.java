@@ -36,10 +36,9 @@ public class VcatnController {
 	//다중입력조회
 		@GetMapping("/vcatnJohoe")
 		@ResponseBody
-		public List<VcatnVO> edcJohoe(VcatnVO keyword) {		
-				System.out.println(keyword);
-				if(keyword.getConfmerId().equals("") ) {
-					keyword.setConfmerId(null);
+		public List<VcatnVO> edcJohoe(VcatnVO keyword) {	
+				if(LoginSession.getMasYn().equals("e1") ) {
+					keyword.setConfmerId("나는관리자");
 				}
 				System.out.println("변경후"+keyword);
 			return vcatnService.vcatnListVo(keyword);
