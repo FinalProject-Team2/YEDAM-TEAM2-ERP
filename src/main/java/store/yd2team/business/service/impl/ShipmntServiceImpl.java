@@ -38,15 +38,50 @@ public class ShipmntServiceImpl implements ShipmntService {
     //출하처리
     @Override
     @Transactional
-    public void completeShipment(List<String> oustIdList) {
+    public void completeShipment( 
+    		String oustIds,
+            String vendId,
+            String empId,
+            String loginId) {
 
-        String oustIds = String.join(",", oustIdList);
+        // List → "OU1,OU2,OU3" 형태로 변환
+        String oustIdCsv = String.join(",", oustIds);
 
         shipmntMapper.procShipmentComplete(
-            oustIds,
+            oustIdCsv,
             LoginSession.getVendId(),
             LoginSession.getEmpId(),
             LoginSession.getLoginId()
         );
     }
+    
+	/*
+	 * @Override
+	 * 
+	 * @Transactional public void completeShipment( String oustIdsCsv, String
+	 * vendId, String empId, String loginId ) { shipmntMapper.callShipmentComplete(
+	 * oustIdsCsv, vendId, empId, loginId ); }
+	 */
+    
+	/*
+	 * @Override
+	 * 
+	 * @Transactional public void completeShipment(List<String> oustIdList) {
+	 * 
+	 * String oustIds = String.join(",", oustIdList);
+	 * 
+	 * shipmntMapper.procShipmentComplete( oustIds, LoginSession.getVendId(),
+	 * LoginSession.getEmpId(), LoginSession.getLoginId() ); }
+	 */
+    
+	/*
+	 * @Override
+	 * 
+	 * @Transactional public void completeShipment(List<String> oustIdList) {
+	 * 
+	 * String oustIds = String.join(",", oustIdList);
+	 * 
+	 * shipmntMapper.procShipmentComplete( oustIds, LoginSession.getVendId(),
+	 * LoginSession.getEmpId(), LoginSession.getLoginId() ); }
+	 */
 }

@@ -89,6 +89,25 @@
 .grid-readonly .tui-grid-cell {
   cursor: default !important;
 }
+
+.esti-history-table {
+  width: 90%;
+  margin: 0 auto;
+}
+
+.esti-history-table th,
+.esti-history-table td {
+  padding: 30px 40px;
+  font-size: 25px;
+}
+
+.esti-history-table .btn {
+  padding: 10px 30px;
+  font-size: 20px;
+}
+.esti-history-table .col-version { width: 60px; }
+.esti-history-table .col-view { width: 50px; }
+.esti-history-table .col-amount { width: 100px; white-space: nowrap; }
 </style>
 
 </head>
@@ -237,27 +256,28 @@ function toNumber(val) {
 		data: estiData,
 		...estiGridOptions,
 		columns: [
-			{ header: '견적서코드', name: 'estiId' },
+			{ header: '견적서코드', name: 'estiId', width: 150, align: 'center' },
 			{ header: '버전', name: 'version', width: 100, align: 'center' },
 			{ header: '고객사명', name: 'custcomNameResult' },
-			{ header: '여신한도', name: 'cdtlnLmt', align: 'right',
-				formatter: ({ value }) => {
-                   const num = toNumber(value);
-                   return num ? num.toLocaleString() : '';
-               }
-			},
-			{ header: '금액합계(원)', name: 'totalAmount', align: 'right',
+			{ header: '여신한도', name: 'cdtlnLmt', width: 150, align: 'right',
 				formatter: ({ value }) => {
                    const num = toNumber(value);
                    return num ? num.toLocaleString() : '';
                }
 			},
 			{ header: '상품명', name: 'productName' },
+			{ header: '금액합계(원)', name: 'totalAmount', width: 150, align: 'right',
+				formatter: ({ value }) => {
+                   const num = toNumber(value);
+                   return num ? num.toLocaleString() : '';
+               }
+			},
 			/* { header: '주문일', name: 'soDt', align: 'right'  }, */
-			{ header: '납기일', name: 'dueDt', align: 'right'  },
+			{ header: '납기일', name: 'dueDt', width: 120, align: 'center'  },
 			{
 				  header: '승인 / 반려',
 				  name: 'apRj',
+				  width: 170,
 				  align: 'center',
 				  formatter: ({ row }) => {
 				    const estiId = row.estiId;
@@ -305,6 +325,7 @@ function toNumber(val) {
 	    		header: '상태', 
 	    		name: 'estiStNm', 
 	    		align: 'center',
+	    		width: 150,
 	    		formatter: ({ row }) => {
 	    		    // 반려일 경우 비고도 보여줌
 	    		    if (row.estiSt === 'es3') {
@@ -1014,11 +1035,14 @@ function fetchDiscountRate(rowKey, productId) {
 		console.log("견적 header:", data);
 		console.log("견적 detailList:", data.detailList);
 		
-	  // 헤더 세팅
-	  $("#autoCustcomId").val(data.custcomId);
-	  $("#autoCustcomName").val(data.custcomNameResult);
-	  $("#applyDate").val(data.dueDt);
-	  $("#autoRemark").val(data.rm || "");
+		// 헤더 세팅
+		$('#estiIdText').text(data.estiId);
+		$('#custcomNameText').text(data.custcomNameResult);
+	  
+		$("#autoCustcomId").val(data.custcomId);
+		$("#autoCustcomName").val(data.custcomNameResult);
+		$("#applyDate").val(data.dueDt);
+		$("#autoRemark").val(data.rm || "");
 
 	  // 그리드 데이터 변환
 	  const gridData = data.detailList.map(d => ({
@@ -1041,6 +1065,9 @@ function fetchDiscountRate(rowKey, productId) {
 	  $('#applyDate').val('');
 	  $('#autoRemark').val('');
 
+		$('#estiIdText').text(data.estiId);
+		$('#custcomNameText').text(data.custcomNameResult);
+	  
 	  // estiId 초기화 (안 하면 다음에 꼬임)
 	  $("#estiIdHidden").val('');
 
@@ -1089,6 +1116,14 @@ function fetchDiscountRate(rowKey, productId) {
 		  fetch(`/esti/history/${estiId}`)
 		    .then(res => res.json())
 		    .then(list => {
+		    	 // 상단 텍스트 세팅
+		        document.getElementById('estiIdText').innerText = estiId;
+
+		        if (list.length > 0) {
+		          document.getElementById('custcomNameText').innerText =
+		            list[0].custcomName || '';
+		        }
+		    	
 		      const tbody = document.getElementById("estiHistoryTbody");
 		      tbody.innerHTML = "";
 
@@ -1098,7 +1133,6 @@ function fetchDiscountRate(rowKey, productId) {
 		            <td>${row.version}</td>
 		            <td>${row.creaDt}</td>
 		            <td class="text-end">${Number(row.ttSupplyAmt).toLocaleString()}</td>
-		            <td>${renderStatusBadge(row.estiStNm)}</td>
 		            <td>${row.creaBy}</td>
 		            <td>
 		              <button class="btn btn-sm btn-outline-primary"
@@ -1177,21 +1211,21 @@ function fetchDiscountRate(rowKey, productId) {
 	  }
 	  
 	  // grid 편집 막기
-	  if (window.newEstiGrid) {
+/* 	  if (window.newEstiGrid) {
 		  window.newEstiGrid.getColumns().forEach(col => {
 		    window.newEstiGrid.setColumnOptions(col.name, {
 		      editable: !readonly
 		    });
 		  });
-		}
-	  /* if (window.newEstiGrid) {
+		} */
+	  if (window.newEstiGrid) {
 	    window.newEstiGrid.setColumns(
 	      window.newEstiGrid.getColumns().map(col => ({
 	        ...col,
 	        editor: readonly ? null : col.editor
 	      }))
 	    );
-	  } */
+	  }
 	}
 	
 	
@@ -1279,19 +1313,19 @@ function fetchDiscountRate(rowKey, productId) {
 	  return value.replace(/[^\d]/g, '');
 	}
 
-	// 1️⃣ 입력 중: 숫자만 허용 (콤마 없음)
+	// 입력 중: 숫자만 허용 (콤마 없음)
 	rciptAppoAmtInput.addEventListener('input', (e) => {
 	  e.target.value = onlyDigits(e.target.value);
 	});
 
-	// 2️⃣ 붙여넣기: 숫자만
+	// 붙여넣기: 숫자만
 	rciptAppoAmtInput.addEventListener('paste', (e) => {
 	  e.preventDefault();
 	  const text = (e.clipboardData || window.clipboardData).getData('text');
 	  e.target.value += onlyDigits(text);
 	});
 
-	// 3️⃣ 포커스 아웃: 천단위 콤마 표시
+	// 포커스 아웃: 천단위 콤마 표시
 	rciptAppoAmtInput.addEventListener('blur', (e) => {
 	  const value = onlyDigits(e.target.value);
 	  if (!value) return;
@@ -1302,11 +1336,13 @@ function fetchDiscountRate(rowKey, productId) {
 	  }
 	});
 
-	// 4️⃣ 다시 클릭(포커스): 콤마 제거하고 편집 가능
+	// 다시 클릭(포커스): 콤마 제거하고 편집 가능
 	rciptAppoAmtInput.addEventListener('focus', (e) => {
 	  e.target.value = onlyDigits(e.target.value);
 	});
 	
+	
+	  
 	// 2. 모달 열기/닫기
 	function openNewSoModal() {
 	  const modal = document.getElementById("newSoModal");
@@ -1357,6 +1393,16 @@ function fetchDiscountRate(rowKey, productId) {
 	
 	// 4. 모달 저장 버튼
 	$("#newSoModalSaveBtn").on("click", function () {
+		
+		// 숫지에 다시 콤마 제거
+		const rciptAppoAmtRaw = $("#rciptAppoAmt").val();
+
+		const rciptAppoAmt = rciptAppoAmtRaw
+		  ? Number(rciptAppoAmtRaw.replace(/,/g, ''))
+		  : null;
+		
+		  
+		
 	  // ▶ id 이름 newSoXXX 로 맞추기
 	  const estiId   = $("#newSoEstiId").val();
 	  const version  = $("#newSoVersion").val();  // 견적 버전
@@ -1366,9 +1412,12 @@ function fetchDiscountRate(rowKey, productId) {
 	  const shipAddr = $("#newSoShipAddr").val();
 	  const orderRm  = $("#newSoRm").val();
 	  const rciptAppoDt = $("#rciptAppoDt").val();   // 입금약속일
-	  const rciptAppoAmt = $("#rciptAppoAmt").val(); // 입금약속금액
+	  //const rciptAppoAmt = $("#rciptAppoAmt").val(); // 입금약속금액
 	  const appoMtd      = $("#appoMtd").val();      // 결제방법
 
+	  
+	  console.log("입금약속금액 raw =", $("#rciptAppoAmt").val());
+	  console.log("입금약속금액 payload =", rciptAppoAmt);
 	
 	  // ▶ grid 객체 이름 newSoGrid 사용
 	  const rows = window.newSoGrid ? window.newSoGrid.getData() : [];
@@ -1388,7 +1437,8 @@ function fetchDiscountRate(rowKey, productId) {
 	    shipAddr: shipAddr,
 	    rm: orderRm,
 	    rciptAppoDt: rciptAppoDt || null,
-	    rciptAppoAmt: rciptAppoAmt ? Number(rciptAppoAmt) : null,
+	    rciptAppoAmt: rciptAppoAmt,
+	    //rciptAppoAmt: rciptAppoAmt ? Number(rciptAppoAmt) : null,
 	    appoMtd: appoMtd,
 	    
 	    detailList: detailList

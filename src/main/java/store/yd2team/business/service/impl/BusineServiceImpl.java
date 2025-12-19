@@ -2,11 +2,13 @@ package store.yd2team.business.service.impl;
 import java.net.URI;
 import java.util.List;
 import java.util.Random;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import lombok.RequiredArgsConstructor;
 import store.yd2team.AiService;
 import store.yd2team.business.mapper.BusinessMapper;
@@ -56,27 +58,43 @@ public class BusineServiceImpl implements BusinessService {
 	}
  //휴면,이탈 기준 수정(완)
  @Override
- public int updateChurnStdrList(List<ChurnStdrVO> dormancyList, List<ChurnStdrVO> churnList) {
+ @Transactional
+ public int updateChurnStdrList(
+         List<ChurnStdrVO> dormancyList,
+         List<ChurnStdrVO> churnList,
+         String vendId,
+         String empId
+ ) {
+     if (vendId == null || vendId.isEmpty()) vendId = getLoginVendId();
+     if (empId  == null || empId.isEmpty())  empId  = getLoginEmpId();
+
+     businessMapper.initChurnStdrByVend(vendId, empId);
+
      int cnt = 0;
-    
-     String vendId = getLoginVendId();  // 세션 회사 코드
-     String empId  = getLoginEmpId();   // 세션 사원 ID
+
      if (dormancyList != null) {
          for (ChurnStdrVO vo : dormancyList) {
-       	  vo.setVendId(vendId);   // 어느 기준이든 내 회사 기준
-             vo.setUpdtBy(empId);   // 수정자
-             cnt += businessMapper.updateChurnStdr(vo);
+             vo.setVendId(vendId);
+             vo.setUpdtBy(empId);
+             cnt += businessMapper.updateChurnStdrByBizKey(vo);
          }
      }
+
      if (churnList != null) {
          for (ChurnStdrVO vo : churnList) {
-       	  vo.setVendId(vendId);
+             vo.setVendId(vendId);
              vo.setUpdtBy(empId);
-             cnt += businessMapper.updateChurnStdr(vo);
+             cnt += businessMapper.updateChurnStdrByBizKey(vo);
          }
      }
+
      return cnt;
  }
+
+
+
+
+
 	//휴면,이탈검색조회
 	@Override
 	public List<churnRiskVO> getchurnRiskList(churnRiskVO vo) {
@@ -196,7 +214,7 @@ public class BusineServiceImpl implements BusinessService {
 	    }
 	    return list;
  }
-  // 임시 구현: 나중에는 로그인한 회사 정보(세션/DB)에서 업종을 가져오도록 수정
+ // 임시 구현: 나중에는 로그인한 회사 정보(세션/DB)에서 업종을 가져오도록 수정
  private String getLoginCompanyIndustry() {
  	String biz = LoginSession.getBizcnd();
      return biz;

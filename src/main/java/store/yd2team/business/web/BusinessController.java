@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import jakarta.servlet.http.HttpSession;
 import store.yd2team.business.service.BusinessService;
 import store.yd2team.business.service.BusinessVO;
 import store.yd2team.business.service.ChurnStdrVO;
-import store.yd2team.business.service.ContactVO;
 import store.yd2team.business.service.MonthlySalesDTO;
 import store.yd2team.business.service.PotentialStdrVO;
+import store.yd2team.common.util.LoginSession;
 
 @Controller
 public class BusinessController {
@@ -29,6 +30,11 @@ public class BusinessController {
 		System.out.println("=== BusinessController.insert() 호출됨 ===");
 		model.addAttribute("test", "testone");
 		return "business/samplepage"; // /는 빼도 됨
+	}
+	@GetMapping("/debug/session")
+	@ResponseBody
+	public String debugSession() {
+	    return "vendId=" + LoginSession.getVendId() + ", empId=" + LoginSession.getEmpId();
 	}
 	//휴면,이탈객 기준등록 페이지열람
 	@GetMapping("/churnRiskStdrRegister")
@@ -42,14 +48,15 @@ public class BusinessController {
 	@PostMapping("/churnRiskStdrRegister/update")
 	@ResponseBody
 	public int updateChurnStdrList(@RequestBody ChurnStdrVO req) {
-	    System.out.println("=== BusinessController.updateChurnStdrList() 호출됨 ===");
-	    int cnt = businessService.updateChurnStdrList(
-		        req.getDormancyList(),
-		        req.getChurnList()
+	    return businessService.updateChurnStdrList(
+	        req.getDormancyList(),
+	        req.getChurnList(),
+	        LoginSession.getVendId(),
+	        LoginSession.getEmpId()
 	    );
-
-	    return cnt; // 업데이트 된 건수
 	}
+
+
 	//
 	@GetMapping("/churnRiskList")
 	public String churnRiskListForm(Model model) {
@@ -119,6 +126,8 @@ public class BusinessController {
 		
 		System.out.println("=== BusinessController.stdrlist() 호출됨 ===");
 		List<BusinessVO> potentialstdrList = businessService.getBusinessList(vo);
+		// 위에서 span이 쓰는 list도 채워주기
+//		model.addAttribute("list", potentialstdrList);
 		model.addAttribute("potentialstdrList", potentialstdrList);
 		model.addAttribute("stdrvo", vo);
 		

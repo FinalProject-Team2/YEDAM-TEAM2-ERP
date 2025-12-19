@@ -51,7 +51,7 @@
 								<div class="col-md-3">
 									<label class="form-label">업체규모</label> 
 									<select name="companySize" class="form-select">
-  <option value="" th:selected="${stdrvo == null || stdrvo.companySize == null || stdrvo.companySize == ''}"></option>
+  <option value="" th:selected="${stdrvo == null || stdrvo.companySize == null || stdrvo.companySize == ''}">규모선택</option>
   <option value="대기업" th:selected="${stdrvo != null && stdrvo.companySize == '대기업'}">대기업</option>
   <option value="준대기업" th:selected="${stdrvo != null && stdrvo.companySize == '준대기업'}">준대기업</option>
   <option value="중견기업" th:selected="${stdrvo != null && stdrvo.companySize == '중견기업'}">중견기업</option>
@@ -60,7 +60,7 @@
 </select>
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">지역/상권</label><input name="region" class="form-control"
+									<label class="form-label">지역/상권</label><input name="region" placeholder="지역" class="form-control"
        th:value="${stdrvo != null ? stdrvo.region : ''}">
 								</div>
 							</div>
@@ -191,7 +191,8 @@
        data: potentialData,
        scrollX: true,
        scrollY: true,
-       minBodyHeight: 0,
+       minBodyHeight : 0,
+       bodyHeight: 240,
        autoWidth: true,
        columns : [ {
 			header : '순위',
@@ -238,6 +239,7 @@
 		    align  : 'center',
 		    sortable : 'true',
 		    width: 150,
+		    className: 'col-emphasize'
 		} ]
 	});
    //
@@ -349,8 +351,7 @@
 	    	          { text: 'N', value: 'N' },
 	    	        ]
 	    	      }
-	    	    }  },
-           { header: '리드점수', name: 'leadScore', align: 'center' }
+	    	    }  }
        ]
    });
    //

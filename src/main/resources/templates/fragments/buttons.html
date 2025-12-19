@@ -151,6 +151,17 @@
     </button>
 </th:block>
 
+<!-- 출하취소 버튼 -->
+<th:block th:fragment="deleteShipmntButton(menuId, btnId)">
+    <button type="button"
+            class="btn btn-danger"
+            th:id="${btnId}"
+            th:disabled="${!@authView.canDelete(menuId)}"
+            th:classappend="${!@authView.canDelete(menuId)} ? ' btn-disabled'">
+        출하취소
+    </button>
+</th:block>
+
 <!-- 신규 버튼 (등록+수정 공용) -->
 <th:block th:fragment="newButton(menuId, btnId)">
     <button type="button"

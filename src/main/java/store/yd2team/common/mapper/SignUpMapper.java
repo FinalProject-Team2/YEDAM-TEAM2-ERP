@@ -35,5 +35,10 @@ public interface SignUpMapper {
             @Param("empAcctId") String empAcctId,
             @Param("roleId") String roleId);
 	
+	// 신규 마스터 사원(tb_emp) 등록
+	int insertMasterEmp(store.yd2team.insa.service.EmpVO emp);
+	
+	// tb_emp용 다음 emp_id 조회 (EmpMapper.setDbAddId와 동일 쿼리 사용)
+	String getNextEmpId();
 	
 }// end interface

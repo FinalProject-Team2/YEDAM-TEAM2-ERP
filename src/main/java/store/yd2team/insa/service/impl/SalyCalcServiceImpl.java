@@ -712,4 +712,28 @@ public class SalyCalcServiceImpl implements SalyCalcService {
         }
         return null;
     }
+
+	@Override
+	public int deleteSpecItemsByLedgId(String salyLedgId, String vendId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int resetSalySpecTotalsByLedgId(String salyLedgId, String vendId, String updtBy) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void resetSalyCalc(String salyLedgId, String vendId, String empId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Map<String, Object> getSavedCalcItems(String salyLedgId, Long grpNo, String vendId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

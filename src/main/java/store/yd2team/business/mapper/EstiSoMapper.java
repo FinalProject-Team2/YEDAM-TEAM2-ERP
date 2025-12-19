@@ -71,6 +71,16 @@ public interface EstiSoMapper {
     	    @Param("updtBy") String updtBy
     	);
     
+    // 출하예약수량 증가
+    int increaseOustReserveQty(
+        @Param("vendId") String vendId,
+        @Param("productId") String productId,
+        @Param("qty") Long qty,
+        @Param("updtBy") String updtBy
+    );
+    
+    
+    
     // ==================================================== 주문서관리
     // 주문서 조회
     List<EstiSoVO> selectSoHeaderList(EstiSoVO so);
@@ -90,19 +100,28 @@ public interface EstiSoMapper {
     
     // 보류버튼 이벤트
     void updateRejectStatus(
-            @Param("soId") String soId,
-            @Param("reason") String reason,
-            @Param("vendId") String vendId,
-            @Param("updtBy") String updtBy
-        );
+        @Param("soId") String soId,
+        @Param("reason") String reason,
+        @Param("vendId") String vendId,
+        @Param("updtBy") String updtBy
+    );
     
     // 주문취소버튼 이벤트
     void updateCancelStatus(
-            @Param("soId") String soId,
-            @Param("reason") String reason,
-            @Param("vendId") String vendId,
-            @Param("updtBy") String updtBy
-        );
+        @Param("soId") String soId,
+        @Param("reason") String reason,
+        @Param("vendId") String vendId,
+        @Param("updtBy") String updtBy
+    );
+    
+    // 주문취소 시 출하예약수량 감소
+    int decreaseOustReserveQty(
+	    @Param("vendId") String vendId,
+	    @Param("productId") String productId,
+	    @Param("qty") long qty,
+	    @Param("updtBy") String updtBy
+	); 
+   
     
     // 출하지시서 작성 저장 버튼
     void insertOust(OustVO vo);

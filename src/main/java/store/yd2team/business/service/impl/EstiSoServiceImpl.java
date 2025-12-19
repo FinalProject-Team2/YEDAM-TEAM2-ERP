@@ -201,6 +201,14 @@ public class EstiSoServiceImpl implements EstiSoService {
                 ttSupply += supply;
                 ttQty    += qy;
                 ttVat    += supply / 10;
+                
+             // 출하예약수량 증가
+                estiSoMapper.increaseOustReserveQty(
+                    vendId,
+                    d.getProductId(),
+                    qy,
+                    empId
+                );
 
                 // 주문 상세에도 세션 정보
                 d.setVendId(vendId);
@@ -360,6 +368,20 @@ public class EstiSoServiceImpl implements EstiSoService {
             return Map.of("success", false, "message", "취소할 수 없는 상태입니다.");
         }
 
+        // 1) 주문 상세 조회
+        List<EstiSoDetailVO> detailList = estiSoMapper.selectSoDetailList(soId);
+
+        // 2) 출하예약수량 롤백
+        for (EstiSoDetailVO d : detailList) {
+            estiSoMapper.decreaseOustReserveQty(
+                vendId,
+                d.getProductId(),
+                d.getQy(),
+                empId
+            );
+        }
+
+        // 3) 주문 상태 취소 처리
         estiSoMapper.updateCancelStatus(
             soId,
             reason,
@@ -372,6 +394,36 @@ public class EstiSoServiceImpl implements EstiSoService {
             "message", "취소 처리 완료되었습니다."
         );
     }
+
+	/*
+	 * @Transactional
+	 * 
+	 * @Override public Map<String, Object> cancelOrder(String soId, String reason)
+	 * {
+	 * 
+	 * String vendId = LoginSession.getVendId(); String empId =
+	 * LoginSession.getEmpId();
+	 * 
+	 * EstiSoVO header = estiSoMapper.getOrderHeader(soId);
+	 * 
+	 * if (header == null) { return Map.of("success", false, "message",
+	 * "존재하지 않는 주문서입니다."); }
+	 * 
+	 * String status = header.getProgrsSt();
+	 * 
+	 * if ("es9".equals(status)) { return Map.of("success", false, "message",
+	 * "이미 취소된 주문서입니다."); }
+	 * 
+	 * if ("es2".equals(status)) { return Map.of("success", false, "message",
+	 * "승인 상태에서는 취소할 수 없습니다."); }
+	 * 
+	 * if (!("es1".equals(status) || "es5".equals(status))) { return
+	 * Map.of("success", false, "message", "취소할 수 없는 상태입니다."); }
+	 * 
+	 * estiSoMapper.updateCancelStatus( soId, reason, vendId, empId );
+	 * 
+	 * return Map.of( "success", true, "message", "취소 처리 완료되었습니다." ); }
+	 */
     
     
     // 출하지시서 작성 저장 버튼

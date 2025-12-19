@@ -90,6 +90,7 @@
 	<select id="selectCustcomDetail" parameterType="string" resultType="store.yd2team.business.service.CustcomVO">
 	    SELECT
 	        custcom_id,
+	        custcom_name,
 	        biz_addr,
 	        biz_tel,
 	        biz_fax,
@@ -112,6 +113,69 @@
 		       updt_dt      = SYSDATE
 		 WHERE custcom_id   = #{custcomId}
 	</update>
+   
+
+	<!-- 여신 회전일수 배치(batch) 실행 -->
+	<update id="updateTurnoverAndPolicyBatch">
+        MERGE INTO tb_cdtln_lmt c
+        USING (
+            SELECT
+                c2.vend_id,
+                c2.custcom_id,
+                TRUNC(SYSDATE) -
+                TRUNC(
+                    COALESCE(
+                        r2.last_rcipt_dt,
+                        r3.last_trns_dt
+                    )
+                ) AS turnover_days
+            FROM tb_cdtln_lmt c2
+            LEFT JOIN (
+                SELECT vend_id, custcom_id, MAX(rcipt_dt) AS last_rcipt_dt
+                FROM tb_rcipt_detail
+                GROUP BY vend_id, custcom_id
+            ) r2
+              ON r2.vend_id = c2.vend_id
+             AND r2.custcom_id = c2.custcom_id
+            LEFT JOIN (
+                SELECT vend_id, custcom_id, MAX(trns_dt) AS last_trns_dt
+                FROM tb_rcipt
+                GROUP BY vend_id, custcom_id
+            ) r3
+              ON r3.vend_id = c2.vend_id
+             AND r3.custcom_id = c2.custcom_id
+        ) s
+        ON (
+            c.vend_id = s.vend_id
+            AND c.custcom_id = s.custcom_id
+        )
+        WHEN MATCHED THEN
+        UPDATE SET
+            c.turnover_days = NVL(s.turnover_days, 0),
+
+            c.credit_grad =
+                CASE
+                    WHEN NVL(s.turnover_days, 0) <![CDATA[ <= ]]> 30 THEN 'A'
+                    WHEN NVL(s.turnover_days, 0) <![CDATA[ <= ]]> 60 THEN 'B'
+                    WHEN NVL(s.turnover_days, 0) <![CDATA[ <= ]]> 90 THEN 'C'
+                    ELSE 'D'
+                END,
+
+            c.shipmnt_stop =
+                CASE
+                    WHEN NVL(s.turnover_days, 0) <![CDATA[ > ]]> 90 THEN 'Y'
+                    ELSE 'N'
+                END,
+
+            c.cdtln_check =
+                CASE
+                    WHEN NVL(s.turnover_days, 0) <![CDATA[ > ]]> 90 THEN 'N'
+                    ELSE 'Y'
+                END,
+
+            c.updt_dt = SYSDATE,
+            c.updt_by = #{updtBy}
+    </update>   
    
 	<!-- CreditMapper.xml 예시 -->
 	<insert id="insertCdtlnLmt" parameterType="store.yd2team.business.service.CreditVO">

@@ -37,6 +37,15 @@
    color: #fff;
    background-color: #343a40; /* 진한 회색 */
 }
+
+.modal-title {
+	font-size: 20px;
+	font-weight: bold;
+}
+#custcomInfo {
+	margin-left: 25px;
+	margin-bottom: 30px;
+}
 </style>
 </head>
 <body layout:fragment="content">
@@ -164,7 +173,7 @@ function getCreditMmByGrad(grade) {
        data: creditData,
        ...creditGridOptions,
        columns: [
-           { header: '고객코드', name: 'custcomId', width: 120 },
+           { header: '고객코드', name: 'custcomId', width: 120, align: 'center' },
            { header: '고객사',   name: 'custcomName', width: 180 },
            {
                header: '고객사상세조회',
@@ -264,7 +273,7 @@ function getCreditMmByGrad(grade) {
 			},
 			// 현재잔액 (조회 결과 내려오는 값, 필요하면 직접 수정 가능)
 			{
-			  header: '원금잔액',
+			  header: '채권잔액',
 			  name: 'remainAmt',
 			  width: 110,
 			  align: 'right',
@@ -279,7 +288,7 @@ function getCreditMmByGrad(grade) {
 			  header: '사용률(%)',
 			  name: 'useRate',
 			  width: 90,
-			  align: 'right',
+			  align: 'center',
 			  formatter: ({ value }) => {
 			    if (value === null || value === undefined || value === '') return '';
 			    const num = Number(value);
@@ -291,7 +300,7 @@ function getCreditMmByGrad(grade) {
 			    header: '최대연체(개월)',
 			    name: 'creditMm',
 			    width: 110,
-			    align: 'right',
+			    align: 'center',
 			    formatter: ({ row }) => getCreditMmByGrad(row.creditGrad)
 			},
 			{
@@ -313,7 +322,7 @@ function getCreditMmByGrad(grade) {
 			    header: '회전일수',
 			    name: 'turnoverDays',
 			    width: 90,
-			    align: 'right'
+			    align: 'center'
 			},
 			{ header: '한도초과여부', name: 'lmtoverCheck', width: 110, align: 'center' },
        ]
@@ -528,11 +537,16 @@ function getCreditMmByGrad(grade) {
        $('#pschTel').val('');
        $('#pschEmail').val('');
    }
+   
+   
    modal.addEventListener("click", (event) => {
        if (!event.target.closest(".modal-content")) {
            closeCreditModal();
        }
    });
+   
+   
+   
    document.addEventListener('click', (e) => {
 	   // 고객사상세조회 버튼 클릭
        if (e.target.classList.contains('open-client-modal-btn')) {
@@ -547,6 +561,8 @@ function getCreditMmByGrad(grade) {
 	           type: 'GET',
 	           data: { custcomId: custcomId },
 	           success: function (res) {
+	        	   $('#custcomIdText').text(res.custcomId);
+	        	   $('#custcomNameText').text(res.custcomName);
 	               $('#bizAddr').val(res.bizAddr || '');
 	               $('#bizTel').val(res.bizTel || '');
 	               $('#bizFax').val(res.bizFax || '');

@@ -28,55 +28,58 @@
 					<div class="card-body d-flex flex-column justify-content-between">
 						  <div class="row g-3">
 							    <!-- 위쪽 영역 -->
-							    <div class="col-4">
+<!-- 							    <div class="col-md-4">
 							      <label for="mcustcomId" class="form-label">고객코드</label>
 							      <input id="mcustcomId" type="text" class="form-control" readonly>
-							    </div>
-							    <div class="col-4">
-							      <label for="mcustcomName" class="form-label">고객사</label>
+							    </div> -->
+							    <input type="hidden" id="mcustcomId" value="" />
+							    <div class="col-md-4">
+							      <label for="mcustcomName" class="form-label">고객사명</label>
 							      <input id="mcustcomName" type="text" class="form-control">
 							    </div>
-							    <div class="col-4">
+							    <div class="col-md-4">
 							      <label for="mbizNo" class="form-label">사업자번호</label>
 							      <input id="mbizNo" type="text" class="form-control">
 							    </div>
-							
-							    <!-- 2번째줄 -->
-							    <div class="col-md-4">
-	                                <label for="mbizAddr" class="form-label">사업장주소</label> 
-									<input id="mbizAddr" type="text" class="form-control" placeholder="YEDAM" align-items-center>
-								</div>
 								<div class="col-md-4">
 	                                <label for="mbizTel" class="form-label">사업장연락처</label> 
-									<input id="mbizTel" type="text" class="form-control" placeholder="YEDAM" align-items-center>
+									<input id="mbizTel" type="text" class="form-control" align-items-center>
+								</div>
+							</div>
+							<div class="row g-3">
+							    <!-- 2번째줄 -->
+								<!-- 3번째줄 -->
+							    <div class="col-md-8">
+	                                <label for="mbizAddr" class="form-label">사업장주소</label> 
+									<input id="mbizAddr" type="text" class="form-control" align-items-center>
 								</div>
 								<div class="col-md-4">
 	                                <label for="mbizFax" class="form-label">Fax번호</label> 
-									<input id="mbizFax" type="text" class="form-control" placeholder="YEDAM" align-items-center>
+									<input id="mbizFax" type="text" class="form-control" align-items-center>
 								</div>
 							
-							    <!-- 3번째줄 -->
+							    <!-- 4번째줄 -->
 							    <div class="col-md-4">
 	                                <label for="mpsch" class="form-label">담당자</label> 
-									<input id="mpsch" type="text" class="form-control" placeholder="YEDAM" align-items-center>
+									<input id="mpsch" type="text" class="form-control" align-items-center>
 								</div>
 								<div class="col-md-4">
 	                                <label for="mpschTel" class="form-label">담당자연락처</label> 
-									<input id="mpschTel" type="text" class="form-control" placeholder="YEDAM" align-items-center>
+									<input id="mpschTel" type="text" class="form-control" align-items-center>
 								</div>
 								<div class="col-md-4">
 	                                <label for="mpschEmail" class="form-label">담당자이메일</label> 
-									<input id="mpschEmail" type="text" class="form-control" placeholder="YEDAM" align-items-center>
+									<input id="mpschEmail" type="text" class="form-control" align-items-center>
 								</div>
 							
 							    <!-- 아래 : 비고 (아래쪽에 붙도록) -->
 							    <div class="col-md-4">
 	                                <label for="mrpstr" class="form-label">대표자</label> 
-									<input id="mrpstr" type="text" class="form-control" placeholder="YEDAM" align-items-center>
+									<input id="mrpstr" type="text" class="form-control" align-items-center>
 								</div>
 								<div class="col-md-4">
 	                                <label for="mrpstrTel" class="form-label">대표자연락처</label> 
-									<input id="mrpstrTel" type="text" class="form-control" placeholder="YEDAM" align-items-center>
+									<input id="mrpstrTel" type="text" class="form-control" align-items-center>
 								</div>
 								<div class="col-md-4">
 	                                <label for="mbsTy" class="form-label">거래구분</label> 
