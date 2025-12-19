@@ -321,7 +321,7 @@
 		    	}		    	
 				handleStatusChange($(this).val());
 				// "신청"일 때는 아무것도 출력하지 않음
-				$cfmNm.val([[${Session.empId}]]);
+				$cfmNm.val([[${Session.empNm}]]);
 			});
 			
 			
@@ -473,8 +473,8 @@
 			        return value; // 그 외 값은 그대로 출력
 			      }
 			}, {
-				header : '승인자',
-				name : 'cfmNm',
+				header : '신청자',
+				name : 'nm',
 				align : 'center'
 			} ],
 			bodyHeight : 600, // 본문 높이 고정

@@ -14,9 +14,9 @@ SELECT 'mlss' ||  LPAD(NVL(MAX(SUBSTR(mlss_id, LENGTH(mlss_id)-2, 3)), 0) + 1, 3
 FROM tb_mlss
 </selectKey>
 insert into tb_mlss(
-      mlss_id, evl_begin_dt, evl_end_dt, mlss_nm, suprr, crk, self, crea_by 
+      mlss_id, evl_begin_dt, evl_end_dt, mlss_nm, suprr, crk, self, crea_by, vend_id
     ) VALUES (
-      #{mlssId}, #{evlBeginDt}, #{evlEndDt}, #{mlssNm}, 0, 0, 0, 'myk' )
+      #{mlssId}, #{evlBeginDt}, #{evlEndDt}, #{mlssNm}, 0, 0, 0, 'myk', #{vendId} )
 </insert>
 
 <select id="mlssCreateId">
@@ -54,6 +54,7 @@ FROM    tb_mlss
       AND evl_begin_dt >= #{evlBeginDt}
     </if>    
 </where>
+order by crea_dt desc
 </select>
 
 <select id="mlssDtChk">
@@ -65,8 +66,8 @@ FROM    tb_mlss
 		    join tb_mlss b
 		    on a.mlss_id = b.mlss_id
 		    WHERE emp_id = #{empId}
-		      AND evl_begin_dt <= TRUNC(SYSDATE)
-		      AND evl_end_dt >= TRUNC(SYSDATE)
+		      AND TRUNC(evl_begin_dt) <= TRUNC(SYSDATE)
+		      AND TRUNC(evl_end_dt) >= TRUNC(SYSDATE)
 		    ORDER BY a.crea_dt DESC
 		)
 		WHERE ROWNUM = 1          

@@ -20,6 +20,6 @@ public class OrgChartController {
 			public String orgChartRender(Model model) {
 				List<EmpVO> v = empService.getOrgRenderList( LoginSession.getVendId() );
 				model.addAttribute("orgList", v);
-				return "/insa/orgtest";
+				return "insa/orgtest";
 			}
 }

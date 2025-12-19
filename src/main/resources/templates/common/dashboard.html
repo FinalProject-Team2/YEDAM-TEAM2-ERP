@@ -215,6 +215,13 @@
 
   </div>
 
+<div th:if="${msg != null}">
+        <script>
+            alert('[[${msg}]]');
+        </script>
+    </div>
+
+
   <script>
     function setText(id, v) {
       const el = document.getElementById(id);

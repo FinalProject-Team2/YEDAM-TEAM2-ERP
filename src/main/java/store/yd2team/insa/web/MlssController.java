@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import store.yd2team.common.dto.SessionDto;
 import store.yd2team.common.util.LoginSession;
-import store.yd2team.insa.service.EmpVO;
 import store.yd2team.insa.service.MlssRequestVO;
 import store.yd2team.insa.service.MlssService;
 import store.yd2team.insa.service.MlssVO;
@@ -37,7 +37,7 @@ public class MlssController {
 	}
 	
 	@GetMapping("/mlss")
-	public String mlssRender(Model model) {
+	public String mlssRender(Model model, RedirectAttributes redirectAttributes) {
 		SessionDto session = LoginSession.getLoginSession();
 		if(session == null) {
 			return "common/logIn";
@@ -71,11 +71,11 @@ public class MlssController {
 		    }
 		}
 		MlssVO v = mlssService.mlssVisitChk( empId );				
-		if( v.getMlssId() != null) {	
+		if( v != null && v.getMlssId() != null) {	
 			
 		} else {
-			model.addAttribute("mlss", "평가 기간이 아닙니다");
-			return "index";
+			redirectAttributes.addFlashAttribute("msg", "평가 기간이 아닙니다");
+			return "redirect:/";
 		}
 		Map<String, List<MlssVO>> list = mlssService.mlssLoadBefore();
 		List<MlssVO> userWrterList = mlssService.mlssWrterLoadBefore(v.getMlssEmpId(), empId);

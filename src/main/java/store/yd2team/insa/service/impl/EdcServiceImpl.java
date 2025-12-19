@@ -77,10 +77,13 @@ public class EdcServiceImpl implements EdcService{
 	public int setDbEdcAdd(EdcVO edc) {
 		//edc Id생성
 		edc.setEdcId(edcMapper.setDbEdcAddId());
-		edc.setVendId("V001"); //임시로 넣는값 나중에 거래처 로그인하게되면 세선에서 받아올거임
+		edc.setVendId( LoginSession.getVendId() ); //임시로 넣는값 나중에 거래처 로그인하게되면 세선에서 받아올거임
 		edcMapper.setDbEdcAdd(edc);
-		EmpVO empVal = new EmpVO();		
+		EmpVO empVal = new EmpVO();	
+		System.out.println( "값이 뭔지 보여줘"+edc.getEdcSel().charAt(0) );
+		empVal.setVendId( LoginSession.getVendId() );
 		switch (edc.getEdcSel().charAt(0)) {
+				    case 'a' -> empVal.setVendId( LoginSession.getVendId() );
 				    case 'D' -> empVal.setDeptId(edc.getEdcSel());
 				    case 'k' -> empVal.setClsf(edc.getEdcSel());
 				    default  -> empVal.setRspofc(edc.getEdcSel());
