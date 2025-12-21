@@ -58,6 +58,10 @@ public class EstiSoVO {
     // 상세 리스트
     private List<EstiSoDetailVO> detailList;
     
+    // 이력보기 고객사
+    private String custcomNameText;
+    
+    
     private Long currStockQy;   // 재고수량 (첫 상품 기준)
     private Long ttSoQy;        // 총 주문수량 (첫 상품 기준)
     

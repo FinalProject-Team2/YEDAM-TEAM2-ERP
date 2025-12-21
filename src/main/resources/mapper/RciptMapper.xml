@@ -5,6 +5,7 @@
     <!-- 채권관리 -->
 	<select id="selectRciptList" parameterType="store.yd2team.business.service.RciptVO" resultType="store.yd2team.business.service.RciptVO">
 		SELECT 
+			  r.rcipt_id,
 		      r.custcom_id,
 		      c.custcom_name,
 		      r.trns_dt,
@@ -48,7 +49,7 @@
 	        AND r.trns_dt &lt;= TO_DATE(#{endDt}, 'YYYY-MM-DD')
 	    </if>
 	
-	    ORDER BY d.rcipt_dt DESC
+	    ORDER BY r.rcipt_id DESC
 	</select>
 	
 	<!--입금내역 insert구문  -->

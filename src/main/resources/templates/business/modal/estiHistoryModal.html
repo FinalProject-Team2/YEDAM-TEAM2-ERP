@@ -7,17 +7,19 @@
 
       <!-- header -->
       <div class="modal-header">
-        <h5 class="modal-title">📜 견적서 이력 (<span id="estiIdText"></span>)</h5>
+        <h5 class="modal-title">📜 견적서 이력</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
       <!-- body -->
-      <div class="modal-body">
+      <div class="modal-body mb-3">
 
         <!-- 상단 정보 -->
-        <div class="mb-3">
+        <div class="mb-3 esti-info">
           <strong>고객사 :</strong>
-          <span id="custcomNameText"></span>
+          <span id="custcomNameText"  class="me-4"></span>
+          <strong>견적서 :</strong>
+          <span id="estiIdText"></span>
         </div>
 
         <!-- 이력 테이블 -->
@@ -26,7 +28,7 @@
             <tr>
               <th>버전</th>
               <th>작성일</th>
-              <th>금액합계</th>
+              <th>금액합계(원)</th>
               <th>작성자</th>
               <th>보기</th>
             </tr>
