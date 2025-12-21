@@ -30,8 +30,10 @@ public interface BusinessMapper {
 	List<BusinessVO> getList();
 	//잠재 조건상세목록 조회
    List<PotentialStdrVO> getPotentialStdrDetailList(PotentialStdrVO cond);
+
 	    // 인서트
 	    int insertPotentialStdrDetail(PotentialStdrVO vo);
+	    int initPotentialStdrByVend(@Param("vendId") String vendId, @Param("empId") String empId);
 	    // 업데이트
 	    int updatePotentialStdrDetail(PotentialStdrVO vo);
 	    // 잠재고객 기준 상세 삭제

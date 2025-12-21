@@ -6,31 +6,32 @@
 
 <head>
 <meta charset="UTF-8">
-
 <title>employee-register</title>
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-<style>
-.fixed-photo {
-	width: 150px; /* 원하는 가로 크기 */
-	height: 200px; /* 원하는 세로 크기 */
-	object-fit: cover; /* 비율 유지하며 영역에 맞게 채움 */
-}
 
-.form-select {
-	color: #000 !important;
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+<style>
+.fixed-photo{
+	width:150px;
+	height:200px;
+	object-fit:cover;
+}
+.form-select{ color:#000 !important; }
+
+.row-deleted td{
+	background-color:#eee !important;
+	text-decoration:line-through;
 }
 </style>
 </head>
-<body layout:fragment="content">
 
+<body layout:fragment="content">
 
 	<div class="row">
 		<div class="col-md-6">
 			<!-- 업종 -->
 			<div class="card mb-3" style="height: 400px;">
-				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
 						<h5 class="card-title">업종</h5>
@@ -48,7 +49,6 @@
 
 			<!-- 설립 -->
 			<div class="card" style="height: 400px;">
-				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
 						<h5 class="card-title">설립</h5>
@@ -69,7 +69,6 @@
 		<div class="col-md-6">
 			<!-- 규모 -->
 			<div class="card mb-3" style="height: 400px;">
-				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
 						<h5 class="card-title">규모</h5>
@@ -87,461 +86,417 @@
 
 			<!-- 지역/상권 -->
 			<div class="card mb-3" style="height: 400px;">
-				<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 				<div class="card-header">
 					<div class="card-header-left">
 						<h5 class="card-title">지역/상권</h5>
 					</div>
 					<div class="card-header-right">
-							<div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_012', 'btnAddRegion')}"></div>
-						    <div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_012', 'btnSaveRegion')}"></div>
-						    <div th:replace="~{fragments/buttons :: deleteButton('MENU_SALES_012', 'btnDeleteRegion')}"></div>
-						</div>
+						<div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_012', 'btnAddRegion')}"></div>
+						<div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_012', 'btnSaveRegion')}"></div>
+						<div th:replace="~{fragments/buttons :: deleteButton('MENU_SALES_012', 'btnDeleteRegion')}"></div>
 					</div>
+				</div>
 				<div class="card-body">
 					<div id="regionGrid" style="margin: 20px;"></div>
 				</div>
-				</div>
 			</div>
 		</div>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	<script th:inline="javascript">
-	
 	const STDR_ID_INDUSTRY = "STDR-001"; // 업종
 	const STDR_ID_SIZE     = "STDR-002"; // 규모
 	const STDR_ID_YEAR     = "STDR-003"; // 설립
 	const STDR_ID_REGION   = "STDR-004"; // 지역/상권
-	
-	// 선택된 rowKey 저장용
+
+	// 선택된 rowKey 저장용 (현재 코드에서는 사용 안 함)
 	let selectedIndustryRowKey = null;
 	let selectedSizeRowKey     = null;
 	let selectedYearRowKey     = null;
 	let selectedRegionRowKey   = null;
-	
+
 	// 그리드 디자인
 	tui.Grid.applyTheme('default', {
 		cell : {
-			normal : { // 일반 셀(본문)
-				border : '#ccc',
-				background : "#fff",
-				showVerticalBorder : true, // 세로 라인 표시
-			},
-			header : { // 헤더 셀
-				border : '#ccc',
-				background : '#E3E6ED',
-				showVerticalBorder : true,
-			},
-			editable : { // ★ 편집 가능한 셀 공통 스타일
-				background : '#FFFDF0', // 연노랑 같은 색으로 표시
-				text : '#000'
-			},
-			selectedHeader : { // 헤더 클릭했을 때 색
-				background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-			},
-			selected : { // 선택된 셀 색
-				background : '#ffffff' // 필요하면 여기도 조정
-			}
+			normal : { border:'#ccc', background:"#fff", showVerticalBorder:true },
+			header : { border:'#ccc', background:'#E3E6ED', showVerticalBorder:true },
+			editable : { background:'#FFFDF0', text:'#000' },
+			selectedHeader : { background:'#E3E6ED' },
+			selected : { background:'#ffffff' }
 		}
 	});
-	
-	//업종
+
+	// 업종
 	const industryGrid = new tui.Grid({
-	    el: document.getElementById('industryGrid'),
-	    scrollX: false,
-	    scrollY: true,
-	    minBodyHeight : 0,
-	    rowHeaders: ['checkbox'],
-	    columns: [
-	        { header: '상세', name: 'stdrIteamInfo', editor: 'text'},
-	        { header: '점수', name: 'infoScore', editor: 'text' },
-	        { header: '상태', name: 'rowStatus', hidden: true },
-	        { header: 'STDR_ID', name: 'stdrId', hidden: true },
-	        { header: '상세ID', name: 'stdrDetailId', hidden: true }
-	    ]
+		el: document.getElementById('industryGrid'),
+		scrollX: false,
+		scrollY: true,
+		minBodyHeight: 0,
+		rowHeaders: ['checkbox'],
+		columns: [
+			{ header: '상세', name: 'stdrIteamInfo', editor: 'text' },
+			{ header: '점수', name: 'infoScore', editor: 'text' },
+			{ header: '상태', name: 'rowStatus', hidden: true },
+			{ header: 'STDR_ID', name: 'stdrId', hidden: true },
+			{ header: '상세ID', name: 'stdrDetailId', hidden: true }
+		]
 	});
-	//규모
+
+	// 규모
 	const sizeGrid = new tui.Grid({
-	    el: document.getElementById('sizeGrid'),
-	    scrollX: false,
-	    scrollY: true,
-	    rowHeaders: ['checkbox'],
-	    columns: [
-	        { header: '상세', name: 'stdrIteamInfo', editor: 'text' },
-	        { header: '점수', name: 'infoScore', editor: 'text' },
-	        { header: '상태', name: 'rowStatus', hidden: true },
-	        { header: 'STDR_ID', name: 'stdrId', hidden: true },
-	        { header: '상세ID', name: 'stdrDetailId', hidden: true }
-	    ]
+		el: document.getElementById('sizeGrid'),
+		scrollX: false,
+		scrollY: true,
+		rowHeaders: ['checkbox'],
+		columns: [
+			{ header: '상세', name: 'stdrIteamInfo', editor: 'text' },
+			{ header: '점수', name: 'infoScore', editor: 'text' },
+			{ header: '상태', name: 'rowStatus', hidden: true },
+			{ header: 'STDR_ID', name: 'stdrId', hidden: true },
+			{ header: '상세ID', name: 'stdrDetailId', hidden: true }
+		]
 	});
-	//설립일
+
+	// 설립일
 	const yearGrid = new tui.Grid({
-	    el: document.getElementById('yearGrid'),
-	    scrollX: false,
-	    scrollY: true,
-	    bodyHeight: 200,
-	    rowHeaders: ['checkbox'],
-	    columns: [
-	        { header: '상세', name: 'stdrIteamInfo', editor: 'text' },
-	        { header: '점수', name: 'infoScore', editor: 'text' },
-	        { header: '상태', name: 'rowStatus', hidden: true },
-	        { header: 'STDR_ID', name: 'stdrId', hidden: true },
-	        { header: '상세ID', name: 'stdrDetailId', hidden: true }
-	    ]
+		el: document.getElementById('yearGrid'),
+		scrollX: false,
+		scrollY: true,
+		bodyHeight: 200,
+		rowHeaders: ['checkbox'],
+		columns: [
+			{ header: '상세', name: 'stdrIteamInfo', editor: 'text' },
+			{ header: '점수', name: 'infoScore', editor: 'text' },
+			{ header: '상태', name: 'rowStatus', hidden: true },
+			{ header: 'STDR_ID', name: 'stdrId', hidden: true },
+			{ header: '상세ID', name: 'stdrDetailId', hidden: true }
+		]
 	});
-	//지역
+
+	// 지역
 	const regionGrid = new tui.Grid({
-	    el: document.getElementById('regionGrid'),
-	    scrollX: false,
-	    scrollY: true,
-	    bodyHeight: 200,
-	    rowHeaders: ['checkbox'],
-	    columns: [
-	        { header: '상세', name: 'stdrIteamInfo', editor: 'text'},
-	        { header: '점수', name: 'infoScore', editor: 'text' },
-	        { header: '상태', name: 'rowStatus', hidden: true },
-	        { header: 'STDR_ID', name: 'stdrId', hidden: true },
-	        { header: '상세ID', name: 'stdrDetailId', hidden: true }
-	    ]
+		el: document.getElementById('regionGrid'),
+		scrollX: false,
+		scrollY: true,
+		bodyHeight: 200,
+		rowHeaders: ['checkbox'],
+		columns: [
+			{ header: '상세', name: 'stdrIteamInfo', editor: 'text' },
+			{ header: '점수', name: 'infoScore', editor: 'text' },
+			{ header: '상태', name: 'rowStatus', hidden: true },
+			{ header: 'STDR_ID', name: 'stdrId', hidden: true },
+			{ header: '상세ID', name: 'stdrDetailId', hidden: true }
+		]
 	});
 
-		
-	//전체 조회하고 STDR_ID별로 기준분류
-	function getPotentialStdrDetailList() {
-	    $.ajax({
-	        url: '/potentialCustRegister/get',
-	        type: 'GET',
-	        dataType: 'json',
-	        success: function (list) {
-	        	
-	        	 // 상태값 초기화
-	            list.forEach(function(r) {
-	                if (!r.rowStatus) {
-	                    r.rowStatus = "";
-	                }
-	            });
-	        	 
-	            // STDR_ID별 분류
-	            const industryList = list.filter(r => r.stdrId === STDR_ID_INDUSTRY);
-	            const sizeList     = list.filter(r => r.stdrId === STDR_ID_SIZE);
-	            const yearList     = list.filter(r => r.stdrId === STDR_ID_YEAR);
-	            const regionList   = list.filter(r => r.stdrId === STDR_ID_REGION);
+	// ✅ infoScore 25 초과 입력 방지 + 알림 (공통)
+	function bindMaxScore25(grid) {
+		grid.on('afterChange', function (ev) {
+			if (!ev || !ev.changes) return;
 
-	            industryGrid.resetData(industryList);
-	            sizeGrid.resetData(sizeList);
-	            yearGrid.resetData(yearList);
-	            regionGrid.resetData(regionList);
-	            
-	            // 선택 초기화
-	            selectedIndustryRowKey = null;
-	            selectedSizeRowKey     = null;
-	            selectedYearRowKey     = null;
-	            selectedRegionRowKey   = null;
-	        },
-	        error: function (err) {
-	        	 console.error("조회 오류:", err);
-	             alert("조회 중 오류가 발생했습니다.");
-	        }
-	    });
+			ev.changes.forEach(function (change) {
+				if (change.columnName !== 'infoScore') return;
+
+				const rowKey = change.rowKey;
+				const v = grid.getValue(rowKey, 'infoScore');
+
+				// 빈 값 허용(지우는 것도 가능)
+				if (v === null || v === undefined || String(v).trim() === '') return;
+
+				const n = Number(v);
+
+				// 숫자 아니면 비우고 알림
+				if (Number.isNaN(n)) {
+					grid.setValue(rowKey, 'infoScore', '');
+					alert('점수는 숫자만 입력할 수 있습니다.');
+					return;
+				}
+
+				// 25 초과면 25로 고정 + 알림
+				if (n > 25) {
+					grid.setValue(rowKey, 'infoScore', 25);
+					alert('25점을 초과할 수 없습니다.');
+					return;
+				}
+
+				// 음수 방지
+				if (n < 0) {
+					grid.setValue(rowKey, 'infoScore', 0);
+					alert('0미만의 점수는 입력할 수 없습니다.');
+					return;
+				}
+			});
+		});
 	}
 
-	// 페이지 로딩 시 자동 조회
+	// ✅ 4개 그리드 모두 적용
+	bindMaxScore25(industryGrid);
+	bindMaxScore25(sizeGrid);
+	bindMaxScore25(yearGrid);
+	bindMaxScore25(regionGrid);
+
+	// 전체 조회하고 STDR_ID별로 기준분류
+	function getPotentialStdrDetailList() {
+		$.ajax({
+			url: '/potentialCustRegister/get',
+			type: 'GET',
+			dataType: 'json',
+			success: function (list) {
+				list.forEach(function(r) {
+					if (!r.rowStatus) r.rowStatus = "";
+				});
+
+				const industryList = list.filter(r => r.stdrId === STDR_ID_INDUSTRY);
+				const sizeList     = list.filter(r => r.stdrId === STDR_ID_SIZE);
+				const yearList     = list.filter(r => r.stdrId === STDR_ID_YEAR);
+				const regionList   = list.filter(r => r.stdrId === STDR_ID_REGION);
+
+				industryGrid.resetData(industryList);
+				sizeGrid.resetData(sizeList);
+				yearGrid.resetData(yearList);
+				regionGrid.resetData(regionList);
+
+				selectedIndustryRowKey = null;
+				selectedSizeRowKey     = null;
+				selectedYearRowKey     = null;
+				selectedRegionRowKey   = null;
+			},
+			error: function (err) {
+				console.error("조회 오류:", err);
+				alert("조회 중 오류가 발생했습니다.");
+			}
+		});
+	}
+
+	// 페이지 로딩 시 자동 조회 + 버튼 바인딩
 	$(document).ready(function () {
-	    getPotentialStdrDetailList();
-	
- 	// 전체 저장 버튼 이벤트
-	    $('#btnSaveAll').on('click', function () {
-	        savePotentialStdrDetailList();
-	    });
-	 // === 업종 카드 ===
-	    $('#btnAddIndustry').on('click', function () {
-	      addIndustryRow();
-	    });
-	    $('#btnSaveIndustry').on('click', function () {
-	      savePotentialStdrDetailList();
-	    });
-	    $('#btnDeleteIndustry').on('click', function () {
-	      deleteRows(industryGrid);
-	    });
+		getPotentialStdrDetailList();
 
-	    // === 설립 카드 ===
-	    $('#btnAddYear').on('click', function () {
-	      addYearRow();
-	    });
-	    $('#btnSaveYear').on('click', function () {
-	      savePotentialStdrDetailList();
-	    });
-	    $('#btnDeleteYear').on('click', function () {
-	      deleteRows(yearGrid);
-	    });
+		$('#btnSaveAll').on('click', function () {
+			savePotentialStdrDetailList();
+		});
 
-	    // === 규모 카드 ===
-	    $('#btnAddSize').on('click', function () {
-	      addSizeRow();
-	    });
-	    $('#btnSaveSize').on('click', function () {
-	      savePotentialStdrDetailList();
-	    });
-	    $('#btnDeleteSize').on('click', function () {
-	      deleteRows(sizeGrid);
-	    });
+		$('#btnAddIndustry').on('click', function () { addIndustryRow(); });
+		$('#btnSaveIndustry').on('click', function () { savePotentialStdrDetailList(); });
+		$('#btnDeleteIndustry').on('click', function () { deleteRows(industryGrid); });
 
-	    // === 지역/상권 카드 ===
-	    $('#btnAddRegion').on('click', function () {
-	      addRegionRow();
-	    });
-	    $('#btnSaveRegion').on('click', function () {
-	      savePotentialStdrDetailList();
-	    });
-	    $('#btnDeleteRegion').on('click', function () {
-	      deleteRows(regionGrid);
-	    });
+		$('#btnAddYear').on('click', function () { addYearRow(); });
+		$('#btnSaveYear').on('click', function () { savePotentialStdrDetailList(); });
+		$('#btnDeleteYear').on('click', function () { deleteRows(yearGrid); });
+
+		$('#btnAddSize').on('click', function () { addSizeRow(); });
+		$('#btnSaveSize').on('click', function () { savePotentialStdrDetailList(); });
+		$('#btnDeleteSize').on('click', function () { deleteRows(sizeGrid); });
+
+		$('#btnAddRegion').on('click', function () { addRegionRow(); });
+		$('#btnSaveRegion').on('click', function () { savePotentialStdrDetailList(); });
+		$('#btnDeleteRegion').on('click', function () { deleteRows(regionGrid); });
 	});
-	//
-	//
-	//
-	//
-	//기준별 STDR_DETAIL_ID 자동 증가 + 추가 버튼
+
+	// 기준별 STDR_DETAIL_ID 자동 증가
 	function getNextDetailId(grid, stdrId) {
-	    const rows = grid.getData();
-	    let maxNo = 0;
+		const rows = grid.getData();
+		let maxNo = 0;
 
-	    rows.forEach(function (r) {
-	        if (!r.stdrDetailId) return;
-	        const parts = r.stdrDetailId.split('.');
-	        if (parts.length !== 2) return;
-	        const num = parseInt(parts[1], 10);
-	        if (!isNaN(num) && num > maxNo) {
-	            maxNo = num;
-	        }
-	    });
+		rows.forEach(function (r) {
+			if (!r.stdrDetailId) return;
+			const parts = r.stdrDetailId.split('.');
+			if (parts.length !== 2) return;
 
-	    return stdrId + '.' + (maxNo + 1);
+			const num = parseInt(parts[1], 10);
+			if (!isNaN(num) && num > maxNo) maxNo = num;
+		});
+
+		return stdrId + '.' + (maxNo + 1);
 	}
 
 	function addIndustryRow() {
-	    const newId = getNextDetailId(industryGrid, STDR_ID_INDUSTRY);
-	    industryGrid.appendRow({
-	        stdrDetailId: newId,
-	        stdrId: STDR_ID_INDUSTRY,
-	        stdrIteamInfo: '',
-	        infoScore: 0,
-	        rowStatus: 'I'
-	    }, { focus: true });
+		const newId = getNextDetailId(industryGrid, STDR_ID_INDUSTRY);
+		industryGrid.appendRow({
+			stdrDetailId: newId,
+			stdrId: STDR_ID_INDUSTRY,
+			stdrIteamInfo: '',
+			infoScore: 0,
+			rowStatus: 'I'
+		}, { focus: true });
 	}
 
 	function addSizeRow() {
-	    const newId = getNextDetailId(sizeGrid, STDR_ID_SIZE);
-	    sizeGrid.appendRow({
-	        stdrDetailId: newId,
-	        stdrId: STDR_ID_SIZE,
-	        stdrIteamInfo: '',
-	        infoScore: 0,
-	        rowStatus: 'I'
-	    }, { focus: true });
+		const newId = getNextDetailId(sizeGrid, STDR_ID_SIZE);
+		sizeGrid.appendRow({
+			stdrDetailId: newId,
+			stdrId: STDR_ID_SIZE,
+			stdrIteamInfo: '',
+			infoScore: 0,
+			rowStatus: 'I'
+		}, { focus: true });
 	}
 
 	function addYearRow() {
-	    const newId = getNextDetailId(yearGrid, STDR_ID_YEAR);
-	    yearGrid.appendRow({
-	        stdrDetailId: newId,
-	        stdrId: STDR_ID_YEAR,
-	        stdrIteamInfo: '',
-	        infoScore: 0,
-	        rowStatus: 'I'
-	    }, { focus: true });
+		const newId = getNextDetailId(yearGrid, STDR_ID_YEAR);
+		yearGrid.appendRow({
+			stdrDetailId: newId,
+			stdrId: STDR_ID_YEAR,
+			stdrIteamInfo: '',
+			infoScore: 0,
+			rowStatus: 'I'
+		}, { focus: true });
 	}
 
 	function addRegionRow() {
-	    const newId = getNextDetailId(regionGrid, STDR_ID_REGION);
-	    regionGrid.appendRow({
-	        stdrDetailId: newId,
-	        stdrId: STDR_ID_REGION,
-	        stdrIteamInfo: '',
-	        infoScore: 0,
-	        rowStatus: 'I'
-	    }, { focus: true });
+		const newId = getNextDetailId(regionGrid, STDR_ID_REGION);
+		regionGrid.appendRow({
+			stdrDetailId: newId,
+			stdrId: STDR_ID_REGION,
+			stdrIteamInfo: '',
+			infoScore: 0,
+			rowStatus: 'I'
+		}, { focus: true });
 	}
-	//
-	//
-	//
-	//
-	//update
-	function bindRowStatusChange(grid) {
-    grid.on('afterChange', function (ev) {
-        ev.changes.forEach(function (change) {
-            const rowKey = change.rowKey;
-            const row = grid.getRow(rowKey);
-            if (!row) return;
-            // 2) 새로 추가된(I) 이거나 이미 삭제표시(D)인 건 건들지 말기
-            if (row.rowStatus === 'I' || row.rowStatus === 'D') {
-                return;
-            }
 
-            // 3) 나머지는 수정(U) 처리
-            grid.setValue(rowKey, 'rowStatus', 'U', false);
-		        });
-		    });
-		}
+	// 수정 시 rowStatus 자동 U
+	function bindRowStatusChange(grid) {
+		grid.on('afterChange', function (ev) {
+			if (!ev || !ev.changes) return;
+
+			ev.changes.forEach(function (change) {
+				const rowKey = change.rowKey;
+				const row = grid.getRow(rowKey);
+				if (!row) return;
+
+				// 신규(I) 또는 삭제(D)는 건드리지 않음
+				if (row.rowStatus === 'I' || row.rowStatus === 'D') return;
+
+				grid.setValue(rowKey, 'rowStatus', 'U', false);
+			});
+		});
+	}
 	bindRowStatusChange(industryGrid);
 	bindRowStatusChange(sizeGrid);
 	bindRowStatusChange(yearGrid);
 	bindRowStatusChange(regionGrid);
-	//
-	//
-	//
-	//
-	// 체크된 행들 한 번에 삭제 마킹
-	function deleteCheckedRows(grid) {
-	 console.log("deleteCheckedRows 호출");
-   	 const rowKeys = grid.getCheckedRowKeys();  // 체크된 rowKey 배열
 
-	    if (!rowKeys || rowKeys.length === 0) {
-	        alert('삭제할 행을 체크하십시오.');
-	        return;
-	    }
-	
-	    rowKeys.forEach(function(rowKey) {
-	        const row = grid.getRow(rowKey);
-	        if (!row) return;
-	
-	        // 새로 추가한 행(I) 이거나 ID 없는 경우 → 그냥 화면에서 제거 (DB insert도 안 됐으니까)
-	        if (row.rowStatus === 'I' || !row.stdrDetailId) {
-	            grid.removeRow(rowKey);
-	            return;
-	        }
-	
-	        // 기존 DB에 있던 행 → 삭제 플래그만 세팅
-	        grid.setValue(rowKey, 'rowStatus', 'D', false);
-	        grid.addRowClassName(rowKey, 'row-deleted');
-	        grid.uncheck(rowKey); // 체크 해제
-	        savePotentialStdrDetailList();
-	    });
-	}
-
-
-	
-	
 	// 전체 저장
 	window.savePotentialStdrDetailList = function () {
-	    const industryData = industryGrid.getData();
-	    const sizeData     = sizeGrid.getData();
-	    const yearData     = yearGrid.getData();
-	    const regionData   = regionGrid.getData();
+		const industryData = industryGrid.getData();
+		const sizeData     = sizeGrid.getData();
+		const yearData     = yearGrid.getData();
+		const regionData   = regionGrid.getData();
 
-	    const sendList = []
-	        .concat(industryData, sizeData, yearData, regionData)
-	        .filter(r => r.rowStatus === 'I' || r.rowStatus === 'U' || r.rowStatus === 'D');
+		const sendList = []
+			.concat(industryData, sizeData, yearData, regionData)
+			.filter(r => r.rowStatus === 'I' || r.rowStatus === 'U' || r.rowStatus === 'D');
 
-	    if (sendList.length === 0) {
-	        alert('변경된 내용이 없습니다.');
-	        return;
-	    }
-	    
-	    // ★ 빈 칸 검증 (삭제 D는 제외)
-	    for (let row of sendList) {
-	        if (row.rowStatus === 'D') {
-	            continue; // 삭제건은 스킵
-	        }
+		if (sendList.length === 0) {
+			alert('변경된 내용이 없습니다.');
+			return;
+		}
 
-	        // 상세값 체크
-	        if (!row.stdrIteamInfo || row.stdrIteamInfo.trim() === "") {
-	            alert('상세를 모두 입력해주세요.');
-	            return;
-	        }
+		for (let row of sendList) {
+			if (row.rowStatus === 'D') continue;
 
-	        // 점수값 체크
-	        if (row.infoScore === null || row.infoScore === undefined || row.infoScore === "") {
-	            alert('점수를 모두 입력해주세요.');
-	            return;
-	        }
-	    }
+			if (!row.stdrIteamInfo || row.stdrIteamInfo.trim() === "") {
+				alert('상세를 모두 입력해주세요.');
+				return;
+			}
 
-	    $.ajax({
-	        url: '/potentialCustRegister/save',
-	        type: 'POST',
-	        contentType: 'application/json',
-	        data: JSON.stringify(sendList),
-	        success: function (res) {
-	            if (res === 'OK') {
-	                alert('저장 완료');
-	                getPotentialStdrDetailList();
-	            } else {
-	                alert('저장 실패');
-	            }
-	        },
-	        error: function () {
-	            alert('저장 중 오류');
-	        }
-	    });
+			if (row.infoScore === null || row.infoScore === undefined || String(row.infoScore).trim() === "") {
+				alert('점수를 모두 입력해주세요.');
+				return;
+			}
+
+			// ✅ 저장 시에도 0~25 숫자 검증(이중 안전장치)
+			const scoreNum = Number(row.infoScore);
+
+			if (Number.isNaN(scoreNum)) {
+				alert('점수는 숫자만 입력해주세요.');
+				return;
+			}
+			if (scoreNum > 25) {
+				alert('점수는 25점을 초과할 수 없습니다.');
+				return;
+			}
+			if (scoreNum < 0) {
+				alert('점수는 0점 미만으로 입력할 수 없습니다.');
+				return;
+			}
+		}
+
+		$.ajax({
+			url: '/potentialCustRegister/save',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(sendList),
+			success: function (res) {
+				if (res === 'OK') {
+					alert('저장 완료');
+					getPotentialStdrDetailList();
+				} else {
+					alert('저장 실패');
+				}
+			},
+			error: function () {
+				alert('저장 중 오류');
+			}
+		});
 	}
-	
-	// 각 카드의 삭제 버튼에서 호출
-	$("#btnDeleteIndustry").on("click", function () {
-	    deleteRows(industryGrid);
-	});
-	$("#btnDeleteSize").on("click", function () {
-	    deleteRows(sizeGrid);
-	});
-	$("#btnDeleteYear").on("click", function () {
-	    deleteRows(yearGrid);
-	});
-	$("#btnDeleteRegion").on("click", function () {
-	    deleteRows(regionGrid);
-	});
-	
-	//삭제
+
+	// 삭제
 	function deleteRows(grid) {
-    const checkedRows = grid.getCheckedRows();
+		const checkedRows = grid.getCheckedRows();
 
-    if (checkedRows.length === 0) {
-        alert("삭제할 행을 선택하세요.");
-        return;
-    }
+		if (checkedRows.length === 0) {
+			alert("삭제할 행을 선택하세요.");
+			return;
+		}
 
-    const deleteIdList = checkedRows.map(r => r.stdrDetailId);
+		const deleteIdList = checkedRows.map(r => r.stdrDetailId);
 
-    checkedRows.forEach(row => {
-        grid.setValue(row.rowKey, "rowStatus", "D");
-    });
+		checkedRows.forEach(row => {
+			grid.setValue(row.rowKey, "rowStatus", "D");
+		});
 
-    $.ajax({
-        url: "/business/potentialStdr/delete",
-        type: "post",
-        contentType: "application/json",
-        data: JSON.stringify(deleteIdList),
-        success: function () {
-            alert("삭제되었습니다.");
-
-            checkedRows.forEach(row => {
-                grid.removeRow(row.rowKey);
-            });
-        },
-        error: function () {
-            alert("삭제 중 오류 발생");
-        }
-    });
-}
-
-
-
+		$.ajax({
+			url: "/business/potentialStdr/delete",
+			type: "post",
+			contentType: "application/json",
+			data: JSON.stringify(deleteIdList),
+			success: function () {
+				alert("삭제되었습니다.");
+				checkedRows.forEach(row => {
+					grid.removeRow(row.rowKey);
+				});
+			},
+			error: function () {
+				alert("삭제 중 오류 발생");
+			}
+		});
+	}
 	</script>
-<style>
-	.row-deleted td {
-    background-color: #eee !important;
-    text-decoration: line-through;
-}
-</style>
-	
+
 </body>
 </html>

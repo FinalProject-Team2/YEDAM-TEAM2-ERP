@@ -227,23 +227,37 @@ public class BusineServiceImpl implements BusinessService {
      return businessMapper.getPotentialStdrDetailList(cond);
  }
  // 잠재고객 기준상세목록 등록 및 수정(완) - I/U 통합 저장
+ @Override
+ @Transactional
  public void savePotentialStdrDetailList(List<PotentialStdrVO> list) {
-	  if (list == null) return;
-	    String vendId = getLoginVendId();
-	    String empId  = getLoginEmpId();
-	 
+     if (list == null || list.isEmpty()) return;
+
+     String vendId = getLoginVendId();
+     String empId  = getLoginEmpId();
+
+     // ✅ 1) 최초 저장이면 기본 템플릿을 회사별로 전체 복사 (없으면 아무것도 안 함)
+     businessMapper.initPotentialStdrByVend(vendId, empId);
+
+     // ✅ 2) 변경분만 처리 (I/U/D)
      for (PotentialStdrVO row : list) {
-   	  row.setVendId(vendId);  // 항상 세션 회사 기준
-   	 
-         if ("I".equals(row.getRowStatus())) {
-       	  row.setCreaBy(empId);  // 등록자
-      	   	  businessMapper.insertPotentialStdrDetail(row);
-         } else if ("U".equals(row.getRowStatus())) {
-       	  row.setUpdtBy(empId);  // 수정자
-      	   		businessMapper.updatePotentialStdrDetail(row);
-         }
+         row.setVendId(vendId); // 무조건 로그인 회사 기준으로 저장
+
+         String st = row.getRowStatus();
+         if ("I".equals(st)) {
+             row.setCreaBy(empId);
+             businessMapper.insertPotentialStdrDetail(row);
+
+         } else if ("U".equals(st)) {
+             row.setUpdtBy(empId);
+             businessMapper.updatePotentialStdrDetail(row);
+
+         } else if ("D".equals(st)) {
+             // D도 save로 처리하고 싶으면 여기서 삭제
+             businessMapper.deletePotentialStdr(row);
          }
      }
+ }
+
 	//잠재고객 기준상세목록 삭제(완)
 	@Override
 	public int deletePotentialStdrList(List<String> idList) {
