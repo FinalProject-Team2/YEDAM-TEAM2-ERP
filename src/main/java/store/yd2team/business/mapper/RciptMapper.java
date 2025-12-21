@@ -1,5 +1,6 @@
 package store.yd2team.business.mapper;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,12 +11,9 @@ public interface RciptMapper {
 	//검색조건(조회)
 	List<RciptVO> selectRciptList(RciptVO searchVO);
 	
-	// 조회 고객사 auto complete(고객코드, 고객사명)
-	/*
-	 * List<RciptVO> searchCustcomId(String keyword); // 고객사코드(아이디) 검색 List<RciptVO>
-	 * searchCustcomName(String keyword); // 고객사명 검색
-	 */	
-	//입금내역
-	// int insertRciptDetail(RciptVO vo);
-	int callInsertRciptProcedure(RciptVO vo);
+	// 입금처리
+	void callRciptPayment(Map<String, Object> param);
+	
+	// 입금 상세내역
+	List<RciptVO> selectRciptDetailList(String rciptId);
 }

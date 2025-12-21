@@ -2,100 +2,86 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="store.yd2team.business.mapper.RciptMapper">
     
-    <!-- 채권관리 -->
+    <!-- 채권조회 -->
 	<select id="selectRciptList" parameterType="store.yd2team.business.service.RciptVO" resultType="store.yd2team.business.service.RciptVO">
-		SELECT 
-		      r.custcom_id,
-		      c.custcom_name,
-		      r.trns_dt,
-		      r.ltst_rcipt_dt AS ltstRciptDt,
-		      d.pmt_mtd,
-		      r.bond_amt,
-		      d.rcipt_amt,
-		      r.bond_baln,
-		      r.delay_fg,
-		      r.rpay_yn
-		  FROM tb_rcipt r
-		  LEFT JOIN tb_rcipt_detail d
-		    ON r.rcipt_id = d.rcipt_id
-		  LEFT JOIN tb_custcom c
-		    ON r.custcom_id = c.custcom_id
-	      WHERE 1 = 1
-	    
-	    <!-- 1) 고객코드 -->
+	
+	    SELECT
+	          r.rcipt_id                     AS rciptId
+	        , r.custcom_id                   AS custcomId
+	        , c.custcom_name                 AS custcomName
+	        , r.trns_dt                      AS trnsDt
+	        , r.bond_amt                     AS bondAmt
+	        , r.bond_baln                    AS bondBaln
+	        , r.ltst_rcipt_dt                AS ltstRciptDt
+	        , r.delay_fg                     AS delayFg
+	        , r.rpay_yn                      AS rpayYn
+	
+	        /* 누적 입금액 (서브쿼리) */
+	        , (
+	            SELECT NVL(SUM(d.rcipt_amt), 0)
+	              FROM tb_rcipt_detail d
+	             WHERE d.rcipt_id = r.rcipt_id
+	          ) AS rciptAmtSum
+	
+	    FROM tb_rcipt r
+	    JOIN tb_custcom c
+	      ON r.custcom_id = c.custcom_id
+	
+	    WHERE 1 = 1
+	
+	    <!-- 고객코드 -->
 	    <if test="custcomId != null and custcomId != ''">
 	        AND r.custcom_id = #{custcomId}
 	    </if>
 	
-	    <!-- 2) 고객사명  -->
+	    <!-- 고객사명 -->
 	    <if test="custcomName != null and custcomName != ''">
 	        AND c.custcom_name LIKE '%' || #{custcomName} || '%'
 	    </if>
 	
-	    <!-- 3) 결제구분 -->
-	    <if test="pmtMtd != null and pmtMtd != ''">
-	        AND c.pmtMtd LIKE '%' || #{pmtMtd} || '%'
-	    </if>
+	    <!-- 채권 발생일 -->
+	    <if test="startDt != null">
+		    AND r.trns_dt &gt;= #{startDt}
+		</if>
+		
+		<!-- 채권 발생일 종료 -->
+		<if test="endDt != null">
+		    AND r.trns_dt &lt;= #{endDt}
+		</if>
 	
-	    <!-- 4 거래일자 범위 (trns_dt 기준) -->
-	    <!-- 4-1 시작일 이상 -->
-	    <if test="startDt != null and startDt != ''">
-	        AND r.trns_dt &gt;= TO_DATE(#{startDt}, 'YYYY-MM-DD')
-	    </if>
+	    ORDER BY
+	        r.ltst_rcipt_dt DESC NULLS LAST,
+	        r.trns_dt DESC
 	
-	    <!-- 4-2 종료일 이하 -->
-	    <if test="endDt != null and endDt != ''">
-	        AND r.trns_dt &lt;= TO_DATE(#{endDt}, 'YYYY-MM-DD')
-	    </if>
-	
-	    ORDER BY d.rcipt_dt DESC
 	</select>
 	
-	<!--입금내역 insert구문  -->
-<!-- 	<insert id="insertRciptDetail" statementType="CALLABLE"
-	  parameterType="store.yd2team.business.service.RciptVO">
-	
-	CALL prc_apply_receipt
-	(
-		     #{vendId}
-		   , #{custcomId}
-	  	   , #{rciptAmt}
-		   , #{rciptDt}
-		   , #{pmtMtd}
-	       , #{rm}	
-	)
-	</insert> -->
-	
-	<update id="callInsertRciptProcedure" parameterType="store.yd2team.business.service.RciptVO" statementType="CALLABLE">
 
-    { CALL pr_rcipt_payment(
-        #{vendId,    mode=IN, jdbcType=VARCHAR},
-        #{custcomId, mode=IN, jdbcType=VARCHAR},
-        TO_DATE(#{rciptDt, mode=IN, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
-        #{rciptAmt,  mode=IN, jdbcType=NUMERIC},
-        #{pmtMtd,    mode=IN, jdbcType=VARCHAR},
-        #{rm,        mode=IN, jdbcType=VARCHAR},
-        #{creaBy,    mode=IN, jdbcType=VARCHAR},
-        #{updtBy,    mode=IN, jdbcType=VARCHAR},
-        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
-    ) }
+	<!-- 입금처리 버튼 프로시저 호출 -->
+	<update id="callRciptPayment" parameterType="map">
+	    CALL pr_rcipt_payment(
+	          #{vendId}
+	        , #{rciptId}
+	        , #{custcomId}
+	        , TO_DATE(#{rciptDt}, 'YYYY-MM-DD')
+	        , #{rciptAmt}
+	        , #{pmtMtd}
+	        , #{rm}
+	        , #{empId}
+	    )
+	</update>
+	
+	<!-- 입금내역 조회 (채권 상세 / 통장식) -->
+    <select id="selectRciptDetailList" parameterType="string" resultType="store.yd2team.business.service.RciptVO">
 
-</update>
-	
-	<!-- <update id="callInsertRciptProcedure" parameterType="store.yd2team.business.service.RciptVO" statementType="CALLABLE">
-	
-	    { CALL pr_rcipt_payment(
-	        #{vendId,     jdbcType=VARCHAR},
-	        #{custcomId,  jdbcType=VARCHAR},
-	        #{rciptDt,    jdbcType=DATE},
-	        #{rciptAmt,   jdbcType=NUMERIC},
-	        #{pmtMtd,     jdbcType=VARCHAR},
-	        #{rm,         jdbcType=VARCHAR},
-	        #{creaBy,     jdbcType=VARCHAR},
-	        #{updtBy,     jdbcType=VARCHAR},
-	        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
-	    ) }
-	
-	</update> -->
+        SELECT
+              d.rcipt_dt     AS rciptDt
+            , d.rcipt_amt    AS rciptAmt
+            , d.pmt_mtd      AS pmtMtd
+            , d.rm           AS rm
+        FROM tb_rcipt_detail d
+        WHERE d.rcipt_id = #{rciptId}
+        ORDER BY d.rcipt_dt ASC
 
+    </select>
+	
 </mapper>

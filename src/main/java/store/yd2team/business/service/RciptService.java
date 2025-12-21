@@ -7,12 +7,9 @@ public interface RciptService {
 	//조회
 	List<RciptVO> searchRcipt(RciptVO searchVO);
 
-	//조회조건 자동완성
-	/*
-	 * List<RciptVO> searchCustcomId(String keyword); List<RciptVO>
-	 * searchCustcomName(String keyword);
-	 */
-
-	//입금내역
-	int insertRciptDetail(RciptVO vo);
+	// 입금처리
+	void saveRcipt(RciptVO vo);
+	
+	// 입금 상세내역
+	List<RciptVO> selectRciptDetailList(String rciptId);
 }
