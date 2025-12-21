@@ -12,7 +12,6 @@ public class RciptVO {
 //조회 조건 (검색용 필드)
     private String custcomId;  // 고객코드
     private String custcomName;  // 고객사명
-    private String pmtMtd;  // 결제방법
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDt;  // 거래일자 시작일 (datepicker: startDt)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -29,17 +28,20 @@ public class RciptVO {
     private String delayFg; // 연체구분
     private String rpayYn; // 상환여부
     
+    private Long rciptAmtSum; // 누적입금액
     
-    private String resultMsg; // 프로시저 결괏값 받기용
+    // private String resultMsg; // 프로시저 결괏값 받기용 OUT파라미터 사용 안하는걸로 수정해서 주석처리
     private String rciptId; //입금할때 필요한 채권PK
+    
 // 입금내역 테이블(tb_rcipt_detail)
-    //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") -- String으로 변환해서 주석처리
-    private String rciptDt;  // 입금일자
+    private String rciptDt;  // 입금일자 (저장/프로시저 전달용)
     private Long rciptAmt;  // 입금급액
+    private String pmtMtd;    // 결제방법
     private String rm;  // 비고
     
     
  // 공통 세션정보
+    private String empId;
     private String vendId;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate creaDt;

@@ -41,7 +41,7 @@
 							<label for="custcomName" class="form-label">고객사명</label>
 							<input id="custcomName" type="text" class="form-control">
 						</div>
-						<div class="col-md-2">
+<!-- 						<div class="col-md-2">
 							<label class="form-label">결제방법</label>
 							<select id="pmtMtd" class="form-control">
 								<option value="">전체</option>
@@ -50,9 +50,9 @@
 								<option>계좌이체</option>
 								<option>어음</option>
 							</select>
-						</div>
+						</div> -->
 						<div class="col-md-4">
-							<label class="form-label">기간</label>
+							<label class="form-label">채권발생일</label>
 								<div class="d-flex align-items-center js-date-range">
 
 									<!-- 시작일 -->
@@ -93,8 +93,9 @@
 			</div>
 		</div>
 	</div>
-	<div th:replace="business/modal/rciptTretModal :: rciptTretModal"></div>
-	
+
+
+<div th:replace="business/modal/rciptListModal :: rciptListModal"></div>
 	
 <script>
 		function toNumber(val) {
@@ -103,12 +104,18 @@
 		    if (str === '') return 0;
 		    return Number(str) || 0;
 		}
+		
+		// 모달 금액입력 천단위 자동 콤마
+		$('#rciptAmt').on('input', function () {
+		    let val = $(this).val().replace(/[^0-9]/g, '');
+		    $(this).val(val.replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+		});
 
 
 		let searchForm = {
 				custcomId: "",
 			    custcomName: "",
-			    pmtMtd: "",
+			    //pmtMtd: "",
 			    startDt: "",
 			    endDt: ""
 		};
@@ -129,15 +136,36 @@
             scrollY: true,
             autoWidth: true,
             columns: [
-                {header: '고객코드', name: 'custcomId', width: 130, align: 'center'},
-                {header: '고객사명', name: 'custcomName', width: 210, align: 'left'},
-                {header: '거래일자', name: 'trnsDt', width: 120, align: 'center'},
-                {header: '최근납입일', name: 'ltstRciptDt', width: 120, align: 'center'},
-                {header: '결제방법', name: 'pmtMtd', width: 130, align: 'center'},
+            	/* {header: '채권ID', name: 'rciptId', width: 130, align: 'center'}, */
+            	{
+		            header: '채권ID',
+		            name: 'rciptId',
+		            width: 130,
+		            align: 'center',
+		            formatter: ({ value }) => {
+		            	  return `<a class="rcipt-link" style="pointer-events:auto">${value}</a>`;
+		            	}
+		            /* formatter: ({ value }) => {
+	            	  return `<a href="#" class="rcipt-link" data-rcipt-id="${value}">${value}</a>`;
+	            	} */
+		        },
+                {header: '고객ID', name: 'custcomId', width: 130, align: 'center'},
+                {header: '고객사명', name: 'custcomName', width: 300, align: 'left'},
+                {header: '채권발생일', name: 'trnsDt', width: 160, align: 'center'},
                 {
-                    header: '채권금액',
+                    header: '채권금액(원)',
                     name: 'bondAmt',
-                    editor: 'text',
+                    width: 180,
+                    align: 'right',
+                    formatter: ({value}) => {
+                        const num = toNumber(value);
+                        return num ? num.toLocaleString() : '';
+                    }
+                },
+                /* {header: '결제방법', name: 'pmtMtd', width: 120, align: 'center'}, */
+                {
+                    header: '누적입금액(원)',
+                    name: 'rciptAmtSum',
                     width: 180,
                     align: 'right',
                     formatter: ({value}) => {
@@ -146,17 +174,7 @@
                     }
                 },
                 {
-                    header: '입금금액',
-                    name: 'rciptAmt',
-                    width: 180,
-                    align: 'right',
-                    formatter: ({value}) => {
-                        const num = toNumber(value);
-                        return num ? num.toLocaleString() : '';
-                    }
-                },
-                {
-                    header: '채권잔액',
+                    header: '채권잔액(원)',
                     name: 'bondBaln',
                     width: 180,
                     align: 'right',
@@ -165,9 +183,10 @@
                         return num ? num.toLocaleString() : '';
                     }
                 },
-                {header: '연체구분', name: 'delayFg', width: 100, align: 'center'},
-                {header: '상환여부', name: 'rpayYn', width: 100, align: 'center'},
-                {header: '비고', name: 'rm', width: 150, align: 'center'},
+                {header: '최근입금일', name: 'ltstRciptDt', width: 160, align: 'center'},
+                {header: '상환여부', name: 'rpayYn', width: 130, align: 'center'},
+                //{header: '연체구분', name: 'delayFg', width: 100, align: 'center'},
+                //{header: '비고', name: 'rm', width: 150, align: 'center'},
             ]
         });
         
@@ -179,7 +198,7 @@
 	    searchForm = {
 			custcomId: "",
 		    custcomName: "",
-		    pmtMtd: "",
+		    //pmtMtd: "",
 		    startDt: "",
 		    endDt: ""
 	    };
@@ -188,7 +207,7 @@
 	    // 2) 화면 Input 값 초기화
 	    searchdiv.querySelector("#custcomId").value = "";
 	    searchdiv.querySelector("#custcomName").value = "";
-	    searchdiv.querySelector("#pmtMtd").value = "";
+	    //searchdiv.querySelector("#pmtMtd").value = "";
 	    searchdiv.querySelector(".js-date-range-start").value = "";
 	    searchdiv.querySelector(".js-date-range-end").value = "";
 	
@@ -199,13 +218,12 @@
 	    console.log("검색조건 초기화:", searchForm);
 	});
 
-	// 2-2. 조회 버튼 이벤트
-	document.getElementById("searchBtn").addEventListener("click", function () {
-	
-	    // 1) 화면 입력값 → searchForm 에 세팅
+	// 조회 함수
+	function seacrchRcipt(){
+		// 1) 화면 입력값 → searchForm 에 세팅
 	    searchForm.custcomId = document.querySelector("#custcomId").value.trim();
 	    searchForm.custcomName = document.querySelector("#custcomName").value.trim();
-	    searchForm.pmtMtd = document.querySelector("#pmtMtd").value.trim(); 
+	    //searchForm.pmtMtd = document.querySelector("#pmtMtd").value.trim(); 
 	    searchForm.startDt = document.querySelector(".js-date-range-start").value;
 	    searchForm.endDt = document.querySelector(".js-date-range-end").value;
 	
@@ -220,6 +238,12 @@
 	            grid.resetData(res.data);
 	        })
 	        .catch(err => console.error("조회 중 오류:", err));
+	}
+	
+	// 2-2. 조회 버튼 이벤트
+	document.getElementById("searchBtn").addEventListener("click", function () {
+
+		seacrchRcipt();
 	});
         
         
@@ -241,9 +265,14 @@
 	        
 	        const custcomId = grid.getValue(rowKey,'custcomId');
 	        const custcomName =  grid.getValue(rowKey,'custcomName');
-	            		
-    		rciptdetailform.custcomIdHidden.value = custcomId;
-    		rciptdetailform.custcomName.value = custcomName;
+	        const rciptId = grid.getValue(rowKey, 'rciptId');
+	            
+	        
+	        //document.getElementById('custcomIdHidden').value = custcomId;
+	        //document.getElementById('mCustcomName').value = custcomName;
+	        $('#custcomIdHidden').val(custcomId);
+	        $('#mCustcomName').val(custcomName);
+	        $('#rciptIdHidden').val(rciptId);
 	        
 	        
 	        rciptTretModal.classList.add("show");
@@ -266,38 +295,214 @@
     		}
     	});
     	
-    	// 저장버튼 이벤트
-    	document.getElementById('modalSaveBtn').addEventListener('click', () => {
-    		const payload = {
-    		  custcomId: rciptdetailform.custcomIdHidden.value,
-    		  //vendId: document.getElementById('modalSaveBtn').value,
-    		  rciptDt: rciptdetailform.rciptDt.value,
-    		  rciptAmt: rciptdetailform.rciptAmt.value,
-    		  pmtMtd: rciptdetailform.pmtMtd.value,
-    		  rm: rciptdetailform.rm.value
-    		};
-    		
-    		axios.post('/rcipt/save', payload)
-    		  .then(res => {
-    		    if (res.data.result === 'success') {
-    		      alert('저장 완료');
-    		
-    		      // 폼 초기화
-    		      document.rciptdetailform.reset();
-    		
-    		      // 그리드 새로고침
-    		      //reloadPriceGrid();
-    		      
-    		    } else {
-    		      alert(res.data.message || '저장 실패');
-    		    }
-    		  })
-    		  .catch(err => {
-    		    console.error('저장 오류: ', err);
-    		    alert('저장 중 오류 발생');
-    		  });
-    	});
+
+    	
+// ==============================================  입금처리 저장버튼 이벤트
+    	$(document).ready(function () { // 이 줄은 html 로딩이 끝난 뒤 실행됨
+
+	    $('#modalSaveBtn').on('click', function () {
+	
+	        // 모달 입력 값 가져오기
+	        const custcomId = $('#custcomIdHidden').val();
+	        const rciptDt   = $('#rciptDt').val();
+	        const rciptAmt  = $('#rciptAmt').val().replace(/,/g, '');
+	        const pmtMtd    = $('#mPmtMtd').val();
+	        const rm        = $('#rm').val();
+	
+	        // 기본 검증 (UX)
+	        if (!custcomId) {
+	            alert('고객사를 선택해주세요.');
+	            return;
+	        }
+	
+	        if (!rciptDt) {
+	            alert('입금일자를 선택해주세요.');
+	            return;
+	        }
+	
+	        if (!rciptAmt || Number(rciptAmt) <= 0) {
+	            alert('입금금액을 입력해주세요.');
+	            return;
+	        }
+	
+	        if (!pmtMtd) {
+	            alert('결제방법을 선택해주세요.');
+	            return;
+	        }
+	
+	        // payload 구성
+	        const payload = {
+			    rciptId: $('#rciptIdHidden').val(),
+			    custcomId: $('#custcomIdHidden').val(),
+			    rciptDt: $('#rciptDt').val(),
+			    rciptAmt: $('#rciptAmt').val().replace(/,/g, ''),
+			    pmtMtd: $('#pmtMtd option:selected').val(),
+			    rm: $('#rm').val()
+			};
+	
+	        // 중복 클릭 방지
+	        $('#modalSaveBtn').prop('disabled', true);
+	
+	        // 서버 호출
+	        $.ajax({
+	            url: '/rcipt/save',
+	            type: 'POST',
+	            contentType: 'application/json; charset=UTF-8',
+	            dataType: 'json',
+	            data: JSON.stringify(payload),
+	            success: function (res) {
+	
+	                if (res.success) {
+	                    alert(res.message || '입금 처리가 완료되었습니다.');
+	
+	                    // 모달 닫기
+	                    closeRciptTretModal();
+	
+	                    // 필요 시 목록 재조회
+	                    seacrchRcipt();
+	
+	                } else {
+	                    alert(res.message || '입금 처리에 실패했습니다.');
+	                }
+	            },
+	            error: function (xhr, status, error) {
+	                console.error(error);
+	                alert('서버 오류가 발생했습니다.');
+	            },
+	            complete: function () {
+	                // 버튼 다시 활성화
+	                $('#modalSaveBtn').prop('disabled', false);
+	            }
+	        });
+	    });
+	
+	}); // 입금처리 저장 end
         
+// ======================================================입금 상세내역
+	// 채권id 클릭 이벤트
+	grid.on('click', function (ev) {
+		console.log('click rciptId', ev, grid.getRow(ev.rowKey));
+		
+	  // 유효성
+	  if (ev.rowKey == null || !ev.columnName) return;
+	  if (ev.columnName !== 'rciptId') return;
+	
+	  // 클릭 대상이 a 태그면 기본 동작 방지
+	  if (ev.nativeEvent) {
+	    const target = ev.nativeEvent.target;
+	    if (target && target.matches('a.rcipt-link')) {
+	      ev.nativeEvent.preventDefault();
+	    }
+	  }
+	
+	  // 안전하게 rowData 가져오기
+	  const rowData = grid.getRow(ev.rowKey);
+	  if (!rowData) return;
+	
+	  // 모달 오픈
+	  openRciptListModal(rowData);
+	});
+	
+	// 입금 상세내역 모달 DOM 참조
+	const rciptListModal    = document.getElementById('rciptListModal');
+	const rciptListBackdrop = document.getElementById('rciptListBackdrop');
+	
+	console.log(rciptListModal, rciptListBackdrop);
+	
+	// 입금 상세내역 모달 오픈 이벤트
+	function openRciptListModalUI() {
+	  if (!rciptListModal || !rciptListBackdrop) return;
+	
+	  rciptListModal.classList.add('show');
+	  rciptListModal.style.display = 'block';
+	
+	  rciptListBackdrop.classList.add('show');
+	  rciptListBackdrop.style.display = 'block';
+	
+	  if (window.rciptListGrid) {
+	    setTimeout(() => window.rciptListGrid.refreshLayout(), 0);
+	  }
+	}
+	
+	
+	// 모달 닫기
+	function closeRciptListModalUI() {
+	  if (!rciptListModal || !rciptListBackdrop) return;
+	
+	  rciptListModal.classList.remove('show');
+	  rciptListModal.style.display = 'none';
+	
+	  rciptListBackdrop.classList.remove('show');
+	  rciptListBackdrop.style.display = 'none';
+	}
+	
+	// 모달 오픈 데이터 로드
+	function openRciptListModal(rowData) {
+
+	    if (!rowData || !rowData.rciptId) {
+	        alert('채권 정보가 없습니다.');
+	        return;
+	    }
+
+	    document.getElementById('rciptIdText').innerText = rowData.rciptId;
+	    document.getElementById('mCustcomNameText').innerText = rowData.custcomName;
+	    
+
+	    openRciptListModalUI();
+
+	    fetch(`/rcipt/detail/list?rciptId=${rowData.rciptId}`)
+	        .then(res => res.json())
+	        .then(data => {
+	            window.rciptListGrid.resetData(data || []);
+	            window.rciptListGrid.refreshLayout();
+	        })
+	        .catch(err => {
+	            console.error(err);
+	            alert('입금 내역 조회 중 오류가 발생했습니다.');
+	        });
+	}
+	
+	// 바깥 클릭 시 모달 닫기
+	if (rciptListModal) {
+	  rciptListModal.addEventListener('click', function (event) {
+	    // .modal-content 바깥을 클릭하면 닫기
+	    if (!event.target.closest('.modal-content')) {
+	      closeRciptListModalUI();
+	    }
+	  });
+	}
+	
+	// 백드롭 클릭으로 닫기
+	if (rciptListBackdrop) {
+	  rciptListBackdrop.addEventListener('click', function () {
+	    closeRciptListModalUI();
+	  });
+	}
+	
+	
+	// 입금 상세내역 모달 그리드
+	window.rciptListGrid = new tui.Grid({
+	    el: document.getElementById('rciptListGrid'),
+	    data: [],
+	    scrollX: false,
+	    scrollY: true,
+	    bodyHeight: 300,
+	    columnOptions: { resizable: true },
+	    columns: [
+	        { header: '입금일자', name: 'rciptDt', align: 'center', width: 120 },
+	        {
+	            header: '입금금액',
+	            name: 'rciptAmt',
+	            align: 'right',
+	            width: 150,
+	            formatter: ({ value }) => value ? Number(value).toLocaleString() : ''
+	        },
+	        { header: '결제방법', name: 'pmtMtd', align: 'center', width: 120 },
+	        { header: '비고', name: 'rm', align: 'left' }
+	    ]
+	});
+	
+	
     </script>
 </body>
 </html>
