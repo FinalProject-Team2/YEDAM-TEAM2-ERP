@@ -1,2211 +1,2403 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout}">
-<head>
-<meta charset="UTF-8">
-
-<!-- Toast UI Grid -->
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-
-<title>salyLedg</title>
-
-<style>
-.saly-tab-wrapper {
-	margin-bottom: 0;
-}
-
-.saly-tab-wrapper .nav-tabs {
-	display: flex;
-	gap: 0;
-	margin-bottom: 0;
-	border-bottom: none !important;
-}
-
-.saly-tab-wrapper .nav-item {
-	margin-bottom: -1px;
-}
-
-.saly-tab-wrapper .nav-link {
-	border-radius: 10px 10px 0 0;
-	padding: 8px 20px;
-	background-color: #f7f8fa;
-	color: #a1a6ad;
-	font-weight: 500;
-	border: 1px solid #d1d5db;
-	border-bottom-color: #d1d5db;
-	box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.03);
-	transition: background-color 0.15s ease, color 0.15s ease, box-shadow
-		0.15s ease;
-}
-
-.saly-tab-wrapper .nav-item+.nav-item .nav-link {
-	margin-left: -1px;
-}
-
-.saly-tab-wrapper .nav-link:not(.active):hover {
-	background-color: #eff1f4;
-	color: #7a7f87;
-}
-
-.saly-tab-wrapper .nav-link.active {
-	background-color: #ffffff;
-	color: #111111;
-	font-weight: 600;
-	border-color: #d1d5db;
-	border-bottom-color: #ffffff;
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-	z-index: 2;
-}
-
-.saly-card-body>.mt-2 {
-	margin-top: 0 !important;
-}
-
-/* ====== 급여계산 모달 버튼 라인(지웅님 설계 느낌) ====== */
-.saly-calc-top-actions {
-	display: flex;
-	justify-content: flex-end;
-	align-items: flex-end;
-	gap: 12px;
-	margin-bottom: 10px;
-}
-
-.saly-calc-top-actions .mini-box {
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-	align-items: flex-end;
-}
-
-.saly-calc-top-actions label {
-	font-size: 12px;
-	color: #666;
-	margin: 0;
-}
-
-/* ✅ FIX: 라디오 체크 표시(파란불) 확실히 보이게 */
-input[type="radio"] {
-	accent-color: #2563eb;
-}
-
-/* ✅ 급여계산: 계산그룹 미적용(grpNo 없음/0) 행의 동적항목 셀은 일반셀처럼(하얀 배경) */
-.tui-grid-cell.calc-readonly-cell, .tui-grid-cell.calc-readonly-cell .tui-grid-cell-content
-	{
-	background-color: #fff !important;
-}
-</style>
-</head>
-
-<body layout:fragment="content">
-	<div class="row">
-		<!-- 검색조건 -->
-		<div class="col-md-12">
-			<div class="card mb-3">
-				<div class="card-header">
-					<h5 class="card-title">검색조건</h5>
-					<div class="card-header-right">
-						<button class="btn btn-outline-dark" id="btnSearch">조회</button>
-					</div>
-				</div>
-				<div class="card-body">
-					<div class="row">
-						<div class="col-md-2">
-							<label class="form-label">급여대장명칭</label> <input type="text"
-								id="srchSalyNm" class="form-control">
+	<!DOCTYPE html>
+	<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:decorate="~{layout}">
+	<head>
+	<meta charset="UTF-8">
+	
+	<!-- Toast UI Grid -->
+	<link rel="stylesheet"
+		href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+	<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+	
+	<title>salyLedg</title>
+	
+	<style>
+	.saly-tab-wrapper {
+		margin-bottom: 0;
+	}
+	
+	.saly-tab-wrapper .nav-tabs {
+		display: flex;
+		gap: 0;
+		margin-bottom: 0;
+		border-bottom: none !important;
+	}
+	
+	.saly-tab-wrapper .nav-item {
+		margin-bottom: -1px;
+	}
+	
+	.saly-tab-wrapper .nav-link {
+		border-radius: 10px 10px 0 0;
+		padding: 8px 20px;
+		background-color: #f7f8fa;
+		color: #a1a6ad;
+		font-weight: 500;
+		border: 1px solid #d1d5db;
+		border-bottom-color: #d1d5db;
+		box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.03);
+		transition: background-color 0.15s ease, color 0.15s ease, box-shadow
+			0.15s ease;
+	}
+	
+	.saly-tab-wrapper .nav-item+.nav-item .nav-link {
+		margin-left: -1px;
+	}
+	
+	.saly-tab-wrapper .nav-link:not(.active):hover {
+		background-color: #eff1f4;
+		color: #7a7f87;
+	}
+	
+	.saly-tab-wrapper .nav-link.active {
+		background-color: #ffffff;
+		color: #111111;
+		font-weight: 600;
+		border-color: #d1d5db;
+		border-bottom-color: #ffffff;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+		z-index: 2;
+	}
+	
+	.saly-card-body>.mt-2 {
+		margin-top: 0 !important;
+	}
+	
+	/* ====== 급여계산 모달 버튼 라인(지웅님 설계 느낌) ====== */
+	.saly-calc-top-actions {
+		display: flex;
+		justify-content: flex-end;
+		align-items: flex-end;
+		gap: 12px;
+		margin-bottom: 10px;
+	}
+	
+	.saly-calc-top-actions .mini-box {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		align-items: flex-end;
+	}
+	
+	.saly-calc-top-actions label {
+		font-size: 12px;
+		color: #666;
+		margin: 0;
+	}
+	
+	/* ✅ FIX: 라디오 체크 표시(파란불) 확실히 보이게 */
+	input[type="radio"] {
+		accent-color: #2563eb;
+	}
+	
+	/* ✅ 급여계산: 계산그룹 미적용(grpNo 없음/0) 행의 동적항목 셀은 일반셀처럼(하얀 배경) */
+	.tui-grid-cell.calc-readonly-cell, .tui-grid-cell.calc-readonly-cell .tui-grid-cell-content
+		{
+		background-color: #fff !important;
+	}
+	</style>
+	</head>
+	
+	<body layout:fragment="content">
+		<div class="row">
+			<!-- 검색조건 -->
+			<div class="col-md-12">
+				<div class="card mb-3">
+					<div class="card-header">
+						<h5 class="card-title">검색조건</h5>
+						<div class="card-header-right">
+							<button class="btn btn-outline-dark" id="btnSearch">조회</button>
 						</div>
-						<div class="col-md-4">
-							<label class="form-label">지급일자</label>
-							<div class="d-flex align-items-center js-date-range">
-								<div class="input-group date me-2">
-									<input type="text" class="form-control js-date-range-start"
-										id="payDtStart" placeholder="날짜 선택"> <span
-										class="input-group-text js-date-range-icon-start"><i
-										class="bi bi-calendar"></i></span>
-								</div>
-								<span class="mx-1 fw-bold fs-5">~</span>
-								<div class="input-group date ms-2">
-									<input type="text" class="form-control js-date-range-end"
-										id="payDtEnd" placeholder="날짜 선택"> <span
-										class="input-group-text js-date-range-icon-end"><i
-										class="bi bi-calendar"></i></span>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-md-2">
+								<label class="form-label">급여대장명칭</label> <input type="text"
+									id="srchSalyNm" class="form-control">
+							</div>
+							<div class="col-md-4">
+								<label class="form-label">지급일자</label>
+								<div class="d-flex align-items-center js-date-range">
+									<div class="input-group date me-2">
+										<input type="text" class="form-control js-date-range-start"
+											id="payDtStart" placeholder="날짜 선택"> <span
+											class="input-group-text js-date-range-icon-start"><i
+											class="bi bi-calendar"></i></span>
+									</div>
+									<span class="mx-1 fw-bold fs-5">~</span>
+									<div class="input-group date ms-2">
+										<input type="text" class="form-control js-date-range-end"
+											id="payDtEnd" placeholder="날짜 선택"> <span
+											class="input-group-text js-date-range-icon-end"><i
+											class="bi bi-calendar"></i></span>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-
-			<!-- 급여목록 -->
-			<div class="card">
-				<div class="card-header">
-					<h5 class="card-title mb-0">급여목록</h5>
-					<div class="card-header-right d-flex gap-2">
-						<div
-							th:replace="~{fragments/buttons :: calcButton('MENU_HR_008', 'btnSalyCalc')}"></div>
-						<button class="btn btn-outline-dark" id="btnSalySpec">명세서
-							조회</button>
-						<div
-							th:replace="~{fragments/buttons :: regButton('MENU_HR_008', 'openSalyRegistModal')}"></div>
-						<div
-							th:replace="~{fragments/buttons :: confirmButton('MENU_HR_008', 'btnToggleConfirm')}"></div>
-						<div
-							th:replace="~{fragments/buttons :: deleteButton('MENU_HR_008', 'btnSalyDelete')}"></div>
+	
+				<!-- 급여목록 -->
+				<div class="card">
+					<div class="card-header">
+						<h5 class="card-title mb-0">급여목록</h5>
+						<div class="card-header-right d-flex gap-2">
+							<div
+								th:replace="~{fragments/buttons :: calcButton('MENU_HR_008', 'btnSalyCalc')}"></div>
+							<button class="btn btn-outline-dark" id="btnSalySpec">명세서
+								조회</button>
+							<div
+								th:replace="~{fragments/buttons :: regButton('MENU_HR_008', 'openSalyRegistModal')}"></div>
+							<div
+								th:replace="~{fragments/buttons :: confirmButton('MENU_HR_008', 'btnToggleConfirm')}"></div>
+							<div
+								th:replace="~{fragments/buttons :: deleteButton('MENU_HR_008', 'btnSalyDelete')}"></div>
+						</div>
 					</div>
-				</div>
-
-				<div class="card-body saly-card-body">
-					<div class="saly-tab-wrapper">
-						<ul class="nav nav-tabs" id="salyStatusTabs">
-							<li class="nav-item">
-								<button class="nav-link active" type="button"
-									data-status="BEFORE_PAY">지급전</button>
-							</li>
-							<li class="nav-item">
-								<button class="nav-link" type="button" data-status="PAID">지급완료</button>
-							</li>
-						</ul>
+	
+					<div class="card-body saly-card-body">
+						<div class="saly-tab-wrapper">
+							<ul class="nav nav-tabs" id="salyStatusTabs">
+								<li class="nav-item">
+									<button class="nav-link active" type="button"
+										data-status="BEFORE_PAY">지급전</button>
+								</li>
+								<li class="nav-item">
+									<button class="nav-link" type="button" data-status="PAID">지급완료</button>
+								</li>
+							</ul>
+						</div>
+	
+						<div id="grid" class="mt-2"></div>
 					</div>
-
-					<div id="grid" class="mt-2"></div>
 				</div>
 			</div>
 		</div>
-	</div>
-
-	<!-- ✅ 기존 모달 include (그대로 유지) -->
-	<div th:replace="insa/modal/salyRegistModal :: salyRegistModal"></div>
-
-	<!-- ✅ 급여계산 모달 include -->
-	<div th:replace="insa/modal/salyCalcModal :: salyCalcModal"></div>
-
-	<!-- ✅ 급여계산그룹 모달 include -->
-	<div th:replace="insa/modal/salyItemModal :: salyItemModal"></div>
-
-	<script>
-  /***********************
-   * ✅ 공용: JSON 안전 fetch
-   ***********************/
-  async function fetchJsonSafe(url, options) {
-    const res = await fetch(url, options);
-    const text = await res.text().catch(() => "");
-
-    if (!res.ok) {
-      let msg = text;
-      try {
-        const j = JSON.parse(text);
-        msg = j?.message || j?.error || text;
-      } catch (_) {}
-      throw new Error(`HTTP ${res.status} - ${msg}`);
-    }
-
-    try {
-      return JSON.parse(text);
-    } catch (e) {
-      throw new Error("응답이 JSON이 아닙니다: " + text);
-    }
-  }
-
-  /***********************
-   * 0. 공통: 부서 셀렉트 로딩 (모달용만 사용)
-   ***********************/
-  function loadDeptOptions() {
-    const modalDept  = document.getElementById("salyDept");
-
-    if (modalDept) {
-      modalDept.innerHTML = '<option value="">전체</option>';
-    }
-
-    fetch('/insa/edc/inputOption')
-      .then(res => res.json())
-      .then(data => {
-        const deptList = data.dept || [];
-        deptList.forEach(d => {
-          if (modalDept) {
-            const opt2 = document.createElement("option");
-            opt2.value = d.deptId;
-            opt2.textContent = d.deptNm;
-            modalDept.appendChild(opt2);
-          }
-        });
-      })
-      .catch(() => {
-        alert("부서 목록을 불러오는 중 오류가 발생했습니다.");
-      });
-  }
-
-  /***********************
-   * 1. 메인 그리드 데이터
-   ***********************/
-  let originalGridData = [];
-  let currentTabStatus = "BEFORE_PAY"; // BEFORE_PAY / PAID
-  let gridData = [];
-  let selectedRowKey = null;
-
-  /***************************
-   * 2. 메인 급여대장 TUI Grid
-   ***************************/
-  const grid = new tui.Grid({
-    el: document.getElementById("grid"),
-    data: gridData,
-    bodyHeight: 408,
-    scrollX: false,
-    scrollY: true,
-    rowHeaders: [],
-    columns: [
-      {
-        header: "",
-        name: "선택",
-        width: 50,
-        align: "center",
-        formatter: ({ rowKey }) => `<input type="radio" name="salyLedgRadio" data-row-key="${rowKey}" />`
-      },
-      { header: "귀속연월",     name: "revsMmdd",   align: "center" },
-      { header: "지급일",       name: "payDt",      align: "center" },
-      { header: "급여대장명칭", name: "salyLedgNm" },
-      { header: "인원수",       name: "rcnt",       align: "right" },
-      {
-        header: "지급총액",
-        name: "ttPayAmt",
-        align: "right",
-        formatter: ({ value }) => {
-          if (value == null || value === "") return "";
-          return Number(value).toLocaleString("ko-KR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          });
-        }
-      },
-      { header: "지급상태", name: "salyLedgStNm", align: "center" }
-    ]
-  });
-
-  /*************************
-   * ✅ 메인 라디오 UI 동기화 (DOM 안정형)
-   *************************/
-  function syncMainRadioUI() {
-    const radios = document.querySelectorAll('input[type="radio"][name="salyLedgRadio"]');
-    radios.forEach(r => { r.checked = false; });
-
-    if (selectedRowKey == null) return;
-
-    const radio = document.querySelector(
-      `input[type="radio"][name="salyLedgRadio"][data-row-key="${selectedRowKey}"]`
-    );
-    if (radio) radio.checked = true;
-  }
-
-  /************************
-   * 3. DB에서 급여대장 목록 조회
-   ************************/
-  function loadSalyList() {
-    const salyNmInput    = document.getElementById("srchSalyNm");
-    const payDtStartInput = document.getElementById("payDtStart");
-    const payDtEndInput   = document.getElementById("payDtEnd");
-
-    const salyNm    = salyNmInput ? salyNmInput.value.trim() : "";
-    const payDtStart = payDtStartInput ? payDtStartInput.value.trim() : "";
-    const payDtEnd   = payDtEndInput ? payDtEndInput.value.trim() : "";
-
-    const params = new URLSearchParams();
-    if (salyNm)    params.append("salyLedgNm", salyNm);
-    if (payDtStart) params.append("payDtStart", payDtStart);
-    if (payDtEnd)   params.append("payDtEnd", payDtEnd);
-
-    fetch("/insa/saly/list?" + params.toString())
-      .then(res => {
-        if (!res.ok) throw new Error("급여대장 목록 조회 실패 (HTTP " + res.status + ")");
-        return res.json();
-      })
-      .then(list => {
-        originalGridData = (list || []).map(r => {
-          let revsMmdd = r.revsYm ? String(r.revsYm) : "";
-          let payDtStr = "";
-          if (r.payDt) {
-            let raw = String(r.payDt);
-            if (raw.includes("T")) raw = raw.substring(0, 10);
-            payDtStr = raw;
-          }
-
-          return {
-            salyLedgId : r.salyLedgId,
-            revsMmdd   : revsMmdd,
-            payDt      : payDtStr,
-            salyLedgNm : r.salyLedgNm,
-            rcnt       : r.rcnt,
-            salyLedgSt : r.salyLedgSt,
-            salyLedgStNm: r.salyLedgStNm || "",
-            ttPayAmt   : r.ttPayAmt
-          };
-        });
-
-        selectedRowKey = null;
-        applyTabFilter();
-      })
-      .catch(err => {
-        console.error("급여대장 목록 조회 오류", err);
-        alert("급여대장 목록 조회 중 오류가 발생했습니다.");
-      });
-  }
-
-  document.getElementById("btnSearch")?.addEventListener("click", loadSalyList);
-
-  const srchSalyNmEl   = document.getElementById("srchSalyNm");
-  const payDtStartEl   = document.getElementById("payDtStart");
-  const payDtEndEl     = document.getElementById("payDtEnd");
-  [srchSalyNmEl, payDtStartEl, payDtEndEl].forEach(el => {
-    if (!el) return;
-    el.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        loadSalyList();
-      }
-    });
-  });
-
-  /*************************
-   * 4. 라디오 선택 헬퍼
-   *************************/
-  function getSelectedRow() {
-    if (selectedRowKey === null || selectedRowKey === undefined) return null;
-    const row = grid.getRow(selectedRowKey);
-    if (!row) return null;
-    return { rowKey: selectedRowKey, row };
-  }
-
-  function clearRadioSelection() {
-    selectedRowKey = null;
-    syncMainRadioUI();
-    updateConfirmButtonLabel();
-    updateRegButtonLabel();
-  }
-
-  /*************************
-   * 5. 탭으로 지급전 / 지급완료 분리
-   *************************/
-  const statusTabs         = document.querySelectorAll("#salyStatusTabs .nav-link");
-  const btnSalyDelete      = document.getElementById("btnSalyDelete");
-  const btnSalyCalc        = document.getElementById("btnSalyCalc");
-  const btnSalySpec        = document.getElementById("btnSalySpec");
-  const btnToggleConfirm   = document.getElementById("btnToggleConfirm");
-  const openSalyRegistBtn  = document.getElementById("openSalyRegistModal");
-
-  function applyTabFilter() {
-    if (currentTabStatus === "PAID") {
-      gridData = originalGridData.filter(row => row.salyLedgSt === "sal3");
-    } else {
-      gridData = originalGridData.filter(row => row.salyLedgSt !== "sal3");
-    }
-    grid.resetData(gridData);
-
-    const isPaidTab = currentTabStatus === "PAID";
-
-    if (btnSalyDelete) {
-      btnSalyDelete.style.display = isPaidTab ? "none" : "";
-      btnSalyDelete.disabled      = isPaidTab;
-    }
-    if (btnSalyCalc) {
-      btnSalyCalc.style.display   = isPaidTab ? "none" : "";
-      btnSalyCalc.disabled        = isPaidTab;
-    }
-    if (btnToggleConfirm) {
-      btnToggleConfirm.style.display = isPaidTab ? "none" : "";
-      btnToggleConfirm.disabled      = isPaidTab;
-    }
-    if (openSalyRegistBtn) {
-      openSalyRegistBtn.style.display = isPaidTab ? "none" : "";
-      openSalyRegistBtn.disabled      = isPaidTab;
-    }
-    if (btnSalySpec) {
-      btnSalySpec.style.display = "";
-      btnSalySpec.disabled      = false;
-    }
-
-    syncMainRadioUI();
-    updateConfirmButtonLabel();
-    updateRegButtonLabel();
-  }
-
-  statusTabs.forEach(tab => {
-    tab.addEventListener("click", function () {
-      statusTabs.forEach(t => t.classList.remove("active"));
-      this.classList.add("active");
-      currentTabStatus = this.dataset.status || "BEFORE_PAY";
-
-      selectedRowKey = null;
-      applyTabFilter();
-    });
-  });
-
-  /*************************
-   * 6. 확정/확정취소 토글 버튼
-   *************************/
-  function updateConfirmButtonLabel() {
-    if (!btnToggleConfirm) return;
-
-    const selected = getSelectedRow();
-    if (!selected) {
-      btnToggleConfirm.textContent = "확정";
-      return;
-    }
-
-    const { row } = selected;
-    const code = row.salyLedgSt;
-
-    if (code === "sal1") btnToggleConfirm.textContent = "확정";
-    else if (code === "sal2") btnToggleConfirm.textContent = "확정취소";
-    else if (code === "sal3") btnToggleConfirm.textContent = "확정";
-  }
-
-  if (btnToggleConfirm) {
-    btnToggleConfirm.addEventListener("click", () => {
-      const selected = getSelectedRow();
-      if (!selected) {
-        alert("확정/취소할 급여대장을 선택해주세요.");
-        return;
-      }
-
-      const { rowKey, row } = selected;
-      const code = row.salyLedgSt;
-
-      if (code === "sal3") {
-        alert("지급완료된 급여대장은 확정 상태를 변경할 수 없습니다.");
-        return;
-      }
-
-      if (code === "sal1") {
-        grid.setValue(rowKey, "salyLedgSt", "sal2");
-        grid.setValue(rowKey, "salyLedgStNm", "확정");
-      } else if (code === "sal2") {
-        grid.setValue(rowKey, "salyLedgSt", "sal1");
-        grid.setValue(rowKey, "salyLedgStNm", "미확정");
-      }
-
-      updateConfirmButtonLabel();
-    });
-  }
-  /*************************
-   * 6-1. 등록/수정 토글 버튼 라벨
-   *************************/
-  function updateRegButtonLabel() {
-    if (!openSalyRegistBtn) return;
-
-    const selected = getSelectedRow();
-
-    // ✅ 라디오 미선택 = 등록
-    if (!selected) {
-      openSalyRegistBtn.textContent = "등록";
-      return;
-    }
-
-    // ✅ 라디오 선택 = 수정
-    openSalyRegistBtn.textContent = "수정";
-  }
-  /*************************
-   * ✅ 메인 그리드 라디오 토글(안정형)
-   *************************/
-   grid.on("click", (ev) => {
-
-	    const { rowKey, nativeEvent } = ev;
-	    if (rowKey == null) return;
-	    const target = nativeEvent.target;
-	    //if (!(target instanceof HTMLInputElement)) return;
-	    //if (target.type !== "radio") return;
-
-	      if (target.tagName === "INPUT") {
-	          console.log("input태그임");
-	          if(target.checked) {
-	              selectedRowKey = rowKey;
+	
+		<!-- ✅ 기존 모달 include (그대로 유지) -->
+		<div th:replace="insa/modal/salyRegistModal :: salyRegistModal"></div>
+	
+		<!-- ✅ 급여계산 모달 include -->
+		<div th:replace="insa/modal/salyCalcModal :: salyCalcModal"></div>
+	
+		<!-- ✅ 급여계산그룹 모달 include -->
+		<div th:replace="insa/modal/salyItemModal :: salyItemModal"></div>
+	
+		<script>
+	  /***********************
+	   * ✅ 공용: JSON 안전 fetch
+	   ***********************/
+	  async function fetchJsonSafe(url, options) {
+	    const res = await fetch(url, options);
+	    const text = await res.text().catch(() => "");
+	
+	    if (!res.ok) {
+	      let msg = text;
+	      try {
+	        const j = JSON.parse(text);
+	        msg = j?.message || j?.error || text;
+	      } catch (_) {}
+	      throw new Error(`HTTP ${res.status} - ${msg}`);
+	    }
+	
+	    try {
+	      return JSON.parse(text);
+	    } catch (e) {
+	      throw new Error("응답이 JSON이 아닙니다: " + text);
+	    }
+	  }
+	
+	  /***********************
+	   * 0. 공통: 부서 셀렉트 로딩 (모달용만 사용)
+	   ***********************/
+	  function loadDeptOptions() {
+	    const modalDept  = document.getElementById("salyDept");
+	
+	    if (modalDept) {
+	      modalDept.innerHTML = '<option value="">전체</option>';
+	    }
+	
+	    fetch('/insa/edc/inputOption')
+	      .then(res => res.json())
+	      .then(data => {
+	        const deptList = data.dept || [];
+	        deptList.forEach(d => {
+	          if (modalDept) {
+	            const opt2 = document.createElement("option");
+	            opt2.value = d.deptId;
+	            opt2.textContent = d.deptNm;
+	            modalDept.appendChild(opt2);
 	          }
-	      } else {
-	          console.log("else로 옴");
-	          target.children[0].checked = false;
-	          selectedRowKey = null;
-	      }
-	      updateConfirmButtonLabel();
-	      
+	        });
+	      })
+	      .catch(() => {
+	        alert("부서 목록을 불러오는 중 오류가 발생했습니다.");
+	      });
+	  }
+	
+	  /***********************
+	   * 1. 메인 그리드 데이터
+	   ***********************/
+	  let originalGridData = [];
+	  let currentTabStatus = "BEFORE_PAY"; // BEFORE_PAY / PAID
+	  let gridData = [];
+	  let selectedRowKey = null;
+	
+	  /***************************
+	   * 2. 메인 급여대장 TUI Grid
+	   ***************************/
+	  const grid = new tui.Grid({
+	    el: document.getElementById("grid"),
+	    data: gridData,
+	    bodyHeight: 408,
+	    scrollX: false,
+	    scrollY: true,
+	    rowHeaders: [],
+	    columns: [
+	      {
+	        header: "",
+	        name: "선택",
+	        width: 50,
+	        align: "center",
+	        formatter: ({ rowKey }) => `<input type="radio" name="salyLedgRadio" data-row-key="${rowKey}" />`
+	      },
+	      { header: "귀속연월",     name: "revsMmdd",   align: "center" },
+	      { header: "지급일",       name: "payDt",      align: "center" },
+	      { header: "급여대장명칭", name: "salyLedgNm" },
+	      { header: "인원수",       name: "rcnt",       align: "right" },
+	      {
+	        header: "지급총액",
+	        name: "ttPayAmt",
+	        align: "right",
+	        formatter: ({ value }) => {
+	          if (value == null || value === "") return "";
+	          return Number(value).toLocaleString("ko-KR", {
+	            minimumFractionDigits: 2,
+	            maximumFractionDigits: 2
+	          });
+	        }
+	      },
+	      { header: "지급상태", name: "salyLedgStNm", align: "center" }
+	    ]
 	  });
-
-  /*************************
-   * 7. 삭제 버튼 (API 연동)
-   *************************/
-  if (btnSalyDelete) {
-    btnSalyDelete.addEventListener("click", () => {
-      const selected = getSelectedRow();
-      if (!selected) {
-        alert("삭제할 급여대장을 선택해주세요.");
-        return;
-      }
-      const { row } = selected;
-
-      if (!confirm("선택한 급여대장을 삭제하시겠습니까?")) return;
-
-      fetch("/insa/saly/delete", {
-        method : "POST",
-        headers: { "Content-Type": "application/json" },
-        body   : JSON.stringify({ salyLedgId: row.salyLedgId })
-      })
-      .then(res => res.json())
-      .then(body => {
-        if (!body || body.result !== "SUCCESS") {
-          alert((body && body.message) || "삭제 중 오류가 발생했습니다.");
-          return;
-        }
-        alert("삭제되었습니다.");
-        loadSalyList();
-      })
-      .catch(err => {
-        console.error("급여대장 삭제 오류", err);
-        alert("급여대장 삭제 중 오류가 발생했습니다.");
-      });
-    });
-  }
-
-  /***********************
-   * 9. (기존) 등록/수정 모달 & 사원 그리드
-   ***********************/
-  const modal   = document.getElementById("salyRegistModal");
-  const back    = document.getElementById("salyRegistBackdrop");
-  const btnSalyEmpSearch = document.getElementById("btnSalyEmpSearch");
-  const salyEmpNmCond = document.getElementById("salyEmpNmCond");
-  const modalDept = document.getElementById("salyDept");
-
-  const grid2El = document.getElementById("grid2");
-  let grid2 = null;
-
-  let editMode = false;
-  let editingSalyLedgId = null;
-  let initialCheckedEmpIds = [];
-
-  function initEmpGrid() {
-    if (!grid2El || grid2) return;
-    grid2 = new tui.Grid({
-      el: grid2El,
-      data: [],
-      bodyHeight: 320,
-      scrollX: false,
-      scrollY: true,
-      rowHeaders: ['checkbox'],
-      columns: [
-        { header: "사원번호", name: "empId" },
-        { header: "사원명",   name: "nm" },
-        { header: "고용형태", name: "emplymTyNm" },
-        { header: "부서명",   name: "deptNm" }
-      ]
-    });
-  }
-
-  function applyCheckedEmpIdsToGrid2() {
-    if (!grid2 || !initialCheckedEmpIds || initialCheckedEmpIds.length === 0) return;
-    const rows = grid2.getData();
-    rows.forEach(row => {
-      if (initialCheckedEmpIds.includes(row.empId)) {
-        grid2.check(row.rowKey);
-      }
-    });
-  }
-
-  function loadEmpList() {
-    if (!grid2) return;
-
-    const deptId = modalDept ? (modalDept.value || "") : "";
-    const empNm  = salyEmpNmCond ? salyEmpNmCond.value.trim() : "";
-
-    fetch("/insa/saly/empList", {
-      method : "POST",
-      headers: { "Content-Type": "application/json" },
-      body   : JSON.stringify({ deptId, empNm })
-    })
-    .then(res => res.json())
-    .then(list => {
-      const data = (list || []).map(e => ({
-        empId:      e.empId,
-        nm:         e.nm,
-        emplymTyNm: e.emplymTyNm || e.emplymTy || "",
-        deptNm:     e.deptNm || ""
-      }));
-      grid2.resetData(data);
-      applyCheckedEmpIdsToGrid2();
-    })
-    .catch(err => {
-      console.error("사원 조회 오류", err);
-      alert("사원 목록 조회 중 오류가 발생했습니다.");
-    });
-  }
-
-  function initRevsYmPicker() {
-    const $revsYm = $("#revs_ym");
-    if (!$revsYm.length) return;
-    if ($revsYm.data("datepicker")) $revsYm.datepicker("destroy");
-
-    const today = new Date();
-    const lastMonthLastDay = new Date(today.getFullYear(), today.getMonth(), 0);
-
-    $revsYm
-      .datepicker({
-        format: "yyyy-mm",
-        autoclose: true,
-        minViewMode: 1,
-        language: "ko",
-        endDate: lastMonthLastDay
-      })
-      .on("show", function () {
-        const $self  = $(this);
-        const $modal = $self.closest(".modal");
-        if (!$modal.length) return;
-
-        const modalZ = parseInt($modal.css("z-index"), 10) || 1055;
-        setTimeout(function () {
-          $(".datepicker-dropdown").each(function () {
-            this.style.setProperty("z-index", String(modalZ + 10), "important");
-          });
-        }, 0);
-      });
-  }
-
-  function initPayDtPicker() {
-    const $payDt = $("#payDt");
-    if (!$payDt.length) return;
-    if ($payDt.data("datepicker")) $payDt.datepicker("destroy");
-
-    const today = new Date();
-    const todayZero = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-    $payDt
-      .datepicker({
-        format: "yyyy-mm-dd",
-        autoclose: true,
-        language: "ko",
-        startDate: todayZero,
-        beforeShowDay: function (date) {
-          const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-          return (d < todayZero) ? false : true;
-        }
-      })
-      .on("show", function () {
-        const $self  = $(this);
-        const $modal = $self.closest(".modal");
-        if (!$modal.length) return;
-
-        const modalZ = parseInt($modal.css("z-index"), 10) || 1055;
-        setTimeout(function () {
-          $(".datepicker-dropdown").each(function () {
-            this.style.setProperty("z-index", String(modalZ + 10), "important");
-          });
-        }, 0);
-      });
-  }
-
-  function openSalyModal() {
-    if (!modal || !back) return;
-
-    modal.classList.add("show");
-    modal.style.display = "block";
-    back.style.display  = "block";
-
-    initRevsYmPicker();
-    initPayDtPicker();
-
-    initEmpGrid();
-    loadEmpList();
-
-    if (grid2 && grid2.refreshLayout) grid2.refreshLayout();
-  }
-
-  function closeSalyRegistModal() {
-    if (modal) {
-      modal.classList.remove("show");
-      modal.style.display = "none";
-    }
-    if (back) back.style.display = "none";
-
-    editMode = false;
-    editingSalyLedgId = null;
-    initialCheckedEmpIds = [];
-  }
-
-  if (openSalyRegistBtn) {
-    openSalyRegistBtn.addEventListener("click", () => {
-      const selected = getSelectedRow();
-
-      if (!selected) {
-        editMode = false;
-        editingSalyLedgId = null;
-        initialCheckedEmpIds = [];
-
-        if (window.TeamCommon && TeamCommon.modal && typeof TeamCommon.modal.reset === "function") {
-          TeamCommon.modal.reset(modal);
-        }
-
-        openSalyModal();
-      } else {
-        const { row } = selected;
-        editMode = true;
-        editingSalyLedgId = row.salyLedgId;
-        initialCheckedEmpIds = [];
-
-        fetch("/insa/saly/detail?salyLedgId=" + encodeURIComponent(row.salyLedgId))
-          .then(res => res.json())
-          .then(vo => {
-            if (!vo || !vo.salyLedgId) {
-              alert("급여대장 정보를 불러오지 못했습니다.");
-              return;
-            }
-
-            initialCheckedEmpIds = Array.isArray(vo.empIdList) ? vo.empIdList : [];
-
-            openSalyModal();
-            fillSalyModal(vo);
-            setTimeout(applyCheckedEmpIdsToGrid2, 0);
-          })
-          .catch(err => {
-            console.error("급여대장 상세 조회 오류", err);
-            alert("급여대장 상세 조회 중 오류가 발생했습니다.");
-          });
-      }
-    });
-  }
-
-  function fillSalyModal(vo) {
-    const salyNmInput = document.getElementById("salyNm");
-    const revsYmInput = document.getElementById("revs_ym");
-    const payDtInput  = document.getElementById("payDt");
-
-    if (salyNmInput) salyNmInput.value = vo.salyLedgNm || "";
-    if (revsYmInput) revsYmInput.value = vo.revsYm || "";
-    if (payDtInput)  payDtInput.value  = vo.payDt || "";
-
-    if (vo.revsYm && $('#revs_ym').data('datepicker')) $('#revs_ym').datepicker('update', vo.revsYm);
-    if (vo.payDt  && $('#payDt').data('datepicker'))  $('#payDt').datepicker('update', vo.payDt);
-  }
-
-  if (back) back.addEventListener("click", closeSalyRegistModal);
-  if (modal) {
-    modal.addEventListener("click", function (e) {
-      if (!e.target.closest(".modal-content")) closeSalyRegistModal();
-    });
-  }
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeSalyRegistModal();
-  });
-
-  btnSalyEmpSearch?.addEventListener("click", loadEmpList);
-  salyEmpNmCond?.addEventListener("keydown", e => { if (e.key === "Enter") loadEmpList(); });
-  modalDept?.addEventListener("change", loadEmpList);
-
-  /***********************
-   * 11. (기존) 급여대장 저장 (신규/수정 공통)
-   ***********************/
-  const btnSalySaveEl = document.getElementById("btnSalySave");
-  if (btnSalySaveEl) {
-    btnSalySaveEl.addEventListener("click", () => {
-      const salyNm = document.getElementById("salyNm")?.value.trim() || "";
-      const revsYm = document.getElementById("revs_ym")?.value.trim() || "";
-      const payDt  = document.getElementById("payDt")?.value.trim() || "";
-
-      if (!salyNm) { alert("급여대장명칭을 입력하세요."); return; }
-      if (!revsYm) { alert("귀속연월을 선택하세요."); return; }
-      if (!payDt)  { alert("지급일자를 선택하세요."); return; }
-      if (!grid2)  { alert("사원 목록 그리드가 초기화되지 않았습니다."); return; }
-
-      const checkedRows = grid2.getCheckedRows();
-      if (!checkedRows || checkedRows.length === 0) {
-        alert("급여명세서를 생성할 사원을 한 명 이상 선택하세요.");
-        return;
-      }
-
-      const empIdList = checkedRows.map(r => r.empId);
-      const isEdit = editMode && editingSalyLedgId;
-
-      const payload = {
-        salyLedgId : isEdit ? editingSalyLedgId : null,
-        salyLedgNm : salyNm,
-        revsYm     : revsYm,
-        payDt      : payDt,
-        empIdList  : empIdList
-      };
-
-      fetch("/insa/saly/save", {
-        method : "POST",
-        headers: { "Content-Type": "application/json" },
-        body   : JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(body => {
-        if (body.result !== "SUCCESS") {
-          alert(body.message || "저장 중 오류가 발생했습니다.");
-          return;
-        }
-
-        alert("저장되었습니다.");
-        loadSalyList();
-        closeSalyRegistModal();
-      })
-      .catch(err => {
-        console.error("급여대장 저장 오류", err);
-        alert("급여대장 저장 중 오류가 발생했습니다.");
-      });
-    });
-  }
-
-  /* ============================================================
-   * ✅ 급여계산 / 급여계산그룹
-   * ============================================================ */
-
-  function moneyFmt({ value }) {
-    if (value == null || value === "") return "";
-    const n = Number(value);
-    if (!Number.isFinite(n)) return value;
-    return n.toLocaleString("ko-KR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  }
-
-  // ================== 급여계산 모달 상태 ==================
-  const calcBackdrop = document.getElementById("salyCalcBackdrop");
-  const calcModal    = document.getElementById("salyCalcModal");
-  const btnOpenCalc  = document.getElementById("btnSalyCalc");
-  const btnCalcClose = document.getElementById("btnSalyCalcClose");
-  const btnOpenItem  = document.getElementById("btnOpenSalyItemModal");
-  const btnCalcSave  = document.getElementById("btnCalcSave");
-  const gridCalcEl   = document.getElementById("gridCalc");
-
-  let gridCalc = null;
-  let currentCalcSalyLedgId = null;
-
-  let selectedGrpNo = null;
-  let selectedGrpNm = "";
-  let selectedGroupItems = [];
-
-  // ✅ (신규) '확인'은 미리보기만: 계산 결과를 메모리에 보관했다가 '저장'에서만 DB 반영
-  let pendingCalcBySpecId = {}; // { [salySpecId]: { items:[], payAmt, ttDucAmt, actPayAmt } }
-  let pendingGrpNo = null;
-
-  // ✅ (추가) editor로 값이 바뀐 행(사원)을 저장 대상으로 추적
-  let dirtySpecIdSet = new Set();
-  // ✅ (추가) grpNo별 항목 메타 캐시 (itemTy/itemNm)
-  let groupItemMetaByGrpNo = {}; // { [grpNo]: { [itemId]: { itemTy, itemNm } } }
-
-  const baseCalcColumns = [
-    { header:"사원번호", name:"empId", align:"center", width:100 },
-    { header:"사원명",   name:"empNm", align:"center", width:120 },
-    { header:"부서명",   name:"deptNm", align:"center", width:120 },
-    { header:"직급",     name:"clsfNm",   align:"center", width:80 },
-    { header:"직책",     name:"rspofcNm", align:"center", width:80 },
-    { header:"적용된 계산그룹", name:"calcGrpNm", align:"center", width:150 }
-  ];
-
-  function initCalcGrid() {
-    if (!gridCalcEl || gridCalc) return;
-    gridCalc = new tui.Grid({
-      el: gridCalcEl,
-      data: [],
-      bodyHeight: 520,
-      scrollX: true,
-      scrollY: true,
-      rowHeaders: ['checkbox'],
-      columns: [...baseCalcColumns]
-    });
-
-    // ✅ FIX: 계산그룹을 한 번도 적용하지 않은 행은 editor 진입 자체를 막는다.
-    // - 시각적 구분은 하지 않되, 편집만 차단.
-    // - 적용된 행은 기존처럼 editor로 수정 가능.
-gridCalc.on('editingStart', (ev) => {
-  try {
-    const row = gridCalc.getRow(ev.rowKey);
-    const grpNo = row ? row.grpNo : null;
-
-    // 1) 그룹 미적용이면 편집 막기 (기존 그대로)
-    if (grpNo == null || grpNo === "" || Number(grpNo) === 0) {
-      ev.stop();
-      return;
-    }
-
-    // ✅ 2) 그룹 적용됐어도, "동적항목 컬럼"에서 값이 비어있으면 편집 막기
-    const v = row ? row[ev.columnName] : null;
-    const isEmpty = (v == null || String(v).trim() === "");
-    if (isEmpty) {
-      ev.stop();
-      return;
-    }
-
-  } catch (e) {
-    ev.stop();
-  }
-});
-
-
-
-
-
-// ✅ (추가) editor 변경 감지 → 체크/확인 없이도 저장 대상(dirty)로 잡기
-gridCalc.on('afterChange', (ev) => {
-  const changes = ev?.changes || [];
-  if (!changes.length) return;
-
-  const baseNameSet = new Set((baseCalcColumns || []).map(c => c.name));
-  changes.forEach(ch => {
-    const col = ch?.columnName;
-    if (!col) return;
-
-    // 동적 항목 컬럼만 dirty 처리(기본 컬럼은 제외)
-    if (baseNameSet.has(col)) return;
-
-    const row = gridCalc.getRow(ch.rowKey);
-    if (!row || !row.salySpecId) return;
-
-    dirtySpecIdSet.add(row.salySpecId);
-  });
-});
-  }
-
-  function openSalyCalcModal() {
-    if (!calcModal || !calcBackdrop) return;
-    calcModal.classList.add("show");
-    calcModal.style.display = "block";
-    calcBackdrop.style.display = "block";
-
-    initCalcGrid();
-    if (gridCalc && gridCalc.refreshLayout) {
-      setTimeout(() => gridCalc.refreshLayout(), 0);
-    }
-  }
-
-  function closeSalyCalcModal() {
-    if (calcModal) {
-      calcModal.classList.remove("show");
-      calcModal.style.display = "none";
-    }
-    if (calcBackdrop) calcBackdrop.style.display = "none";
-    currentCalcSalyLedgId = null;
-  }
-
-  calcBackdrop?.addEventListener("click", closeSalyCalcModal);
-  calcModal?.addEventListener("click", (e) => {
-    if (!e.target.closest(".modal-content")) closeSalyCalcModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      if (calcModal && calcModal.style.display === "block") closeSalyCalcModal();
-    }
-  });
-  btnCalcClose?.addEventListener("click", closeSalyCalcModal);
-
-  /* ============================================================
-   * ✅ [수정] 재진입 로딩
-   * - grpNo가 있는 행만 대상으로 동적컬럼 + DB items 채움
-   * - 전체 행에 그룹명이 퍼지지 않도록 보장
-   * ============================================================ */
-  function loadCalcSpecList(salyLedgId) {
-    if (!gridCalc) return;
-
-
-    // ✅ (추가) 재로딩 시 변경 추적/미리보기 상태 초기화
-    dirtySpecIdSet.clear();
-    pendingCalcBySpecId = {};
-    pendingGrpNo = null;
-
-    fetch("/insa/saly/calc/specList?salyLedgId=" + encodeURIComponent(salyLedgId))
-      .then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text().catch(() => "");
-          throw new Error("HTTP " + res.status + " / " + text);
-        }
-        return res.json();
-      })
-      .then(async (data) => {
-        const list = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.list) ? data.list
-          : Array.isArray(data?.data) ? data.data
-          : null;
-
-        if (!list) throw new Error("specList 응답이 배열이 아닙니다.");
-
-        const rows = list.map(v => ({
-          salySpecId: v.salySpecId,
-          empId: v.empId,
-          empNm: v.empNm,
-          deptNm: v.deptNm || "",
-          clsfNm: v.clsfNm || "",
-          rspofcNm: v.rspofcNm || "",
-          grpNo: (v.grpNo ?? v.grp_no ?? v.GRP_NO ?? null),
-          calcGrpNm: (v.calcGrpNm ?? v.calc_grp_nm ?? v.CALC_GRP_NM ?? "") || "",
-          payAmt: (v.payAmt ?? v.pay_amt ?? null),
-          ttDucAmt: (v.ttDucAmt ?? v.tt_duc_amt ?? null),
-          actPayAmt: (v.actPayAmt ?? v.act_pay_amt ?? null)
-        }));
-
-        // 1) 기본 컬럼 + 데이터 먼저
-        gridCalc.setColumns([...baseCalcColumns]);
-        gridCalc.resetData(rows);
-
-        // 2) 재진입: grpNo 있는 행만 대상
-        const appliedRows = rows.filter(r => r.grpNo != null && r.salySpecId);
-        if (appliedRows.length === 0) {
-          console.log("[loadCalcSpecList] appliedRows=0 (no grpNo). rows sample:", rows.slice(0,3), "raw list sample:", list.slice(0,3));
-          if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
-          return;
-        }
-
-        // 현재 구조(동적컬럼 1세트)상: 첫 grpNo 기준으로 컬럼 구성
-        const savedGrpNo = appliedRows[0].grpNo;
-        selectedGrpNo = savedGrpNo;
-        selectedGrpNm = appliedRows[0].calcGrpNm || "";
-
-        // 3) groupItems로 동적컬럼 생성
-        const gi = await fetchJsonSafe("/insa/saly/calc/groupItems?grpNo=" + encodeURIComponent(savedGrpNo));
-        selectedGroupItems = gi;
-
-        const dynamicCols = buildDynamicColumnsByGroupItems(selectedGroupItems);
-        gridCalc.setColumns([...baseCalcColumns, ...dynamicCols]);
-        
-        applyReadonlyCellBgForNoGroup(dynamicCols);
-
-        // 4) DB에서 items 조회해서 값 채우기 (적용된 행만!)
-        const appliedSpecIds = appliedRows
-          .filter(r => Number(r.grpNo) === Number(savedGrpNo))
-          .map(r => r.salySpecId)
-          .filter(Boolean);
-
-        await fillCalculatedAmountsForSelectedSpecs(savedGrpNo, appliedSpecIds, null);
-        applyReadonlyCellBgForNoGroup(dynamicCols);
-        // ✅ 재진입 시: 실제 값(0 제외) 있는 컬럼만 남김
-        const prunedCols = pruneEmptyDynamicColumns(dynamicCols);
-        if (prunedCols.length !== dynamicCols.length) {
-          gridCalc.setColumns([...baseCalcColumns, ...prunedCols]);
-          applyReadonlyCellBgForNoGroup(prunedCols);
-        }
-
-        if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
-      })
-      .catch(err => {
-        console.error("급여계산 사원 로딩 오류", err);
-        alert("급여계산 대상 사원 조회 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
-      });
-  }
-
-  /* ============================================================
-   * ✅ [수정] 동적 컬럼 만들기
-   * - items가 배열이든, {allowList, ducList} 객체든 전부 처리
-   * ============================================================ */
-   function buildDynamicColumnsByGroupItems(items) {
-	   // ✅ groupItems 응답 형태가 배열/객체(allowList, ducList 등) 어떤 것이든 처리
-	   const raw = (() => {
-	     if (Array.isArray(items)) return [...items];
-	     if (!items) return [];
-	     // {allowList, ducList} 또는 {allow, duc} 또는 {list} 등 방어
-	     const a = items.allowList ?? items.allow ?? items.allowItems ?? [];
-	     const d = items.ducList ?? items.duc ?? items.ducItems ?? [];
-	     const l = items.list ?? items.items ?? [];
-	     const merged = []
-	       .concat(Array.isArray(l) ? l : [])
-	       .concat(Array.isArray(a) ? a : [])
-	       .concat(Array.isArray(d) ? d : []);
-	     return merged;
-	   })();
-
-	   // ✅ 어떤 응답이 와도 itemId/itemNm/itemTy/dispNo로 정규화
-	   const list = raw
-	     .map((it) => {
-	       if (!it) return null;
-
-	       const itemId =
-	         it.itemId ?? it.item_id ??
-	         it.allowId ?? it.allow_id ??
-	         it.ducId ?? it.duc_id;
-
-	       const itemNm =
-	         it.itemNm ?? it.item_nm ??
-	         it.allowNm ?? it.allow_nm ??
-	         it.ducNm ?? it.duc_nm ??
-	         it.codeNm ?? it.code_nm; // 혹시 code_nm으로 내려오는 경우 대비
-
-	       const itemTy =
-	         it.itemTy ?? it.item_ty ??
-	         (it.allowId || it.allow_id ? "A" : (it.ducId || it.duc_id ? "D" : null));
-
-	       const dispNo =
-	         it.dispNo ?? it.disp_no ?? it.itemNo ?? it.item_no;
-
-	       if (!itemId) return null;
-
-	       return { itemId: String(itemId), itemNm: String(itemNm ?? ""), itemTy, dispNo };
-	     })
-	     .filter(Boolean);
-
-	   const toNum = (v) => {
-	     const n = Number(v);
-	     return Number.isFinite(n) ? n : 999999;
-	   };
-
-	   // ✅ A(수당) 먼저, 그 다음 D(공제), 같은 타입이면 표시번호→id
-	   list.sort((a, b) => {
-	     const at = (a.itemTy === "A") ? 0 : 1;
-	     const bt = (b.itemTy === "A") ? 0 : 1;
-	     if (at !== bt) return at - bt;
-
-	     const an = toNum(a.dispNo);
-	     const bn = toNum(b.dispNo);
-	     if (an !== bn) return an - bn;
-
-	     return String(a.itemId).localeCompare(String(b.itemId));
-	   });
-
-	   return list.map((it) => ({
-		   header: it.itemNm,
-		   name: it.itemId,
-		   align: "right",
-		   width: 120,
-		   editor: "text",
-		   formatter: moneyFmt
-		 }));
-
-	 }
-
-
-
-
-  /********************************************************
-   * ✅ (추가) 재진입 시 "전부 0/빈값"인 동적 컬럼 숨기기
-   * - groupItems에는 있지만 실제 DB(tb_saly_spec_item)에 값이 하나도 없으면
-   *   컬럼을 숨겨서 화면이 깔끔하게 보이게 함
-   * - 0도 "값 없음"으로 간주(집계/표시 의미 없음)
-   ********************************************************/
-  function pruneEmptyDynamicColumns(dynamicCols) {
-    if (!gridCalc) return dynamicCols || [];
-    const rows = gridCalc.getData() || [];
-    const cols = dynamicCols || [];
-
-    const toNum = (v) => {
-      if (v == null) return 0;
-      if (typeof v === "number") return v;
-      const s = String(v).replace(/,/g, "").trim();
-      if (s === "") return 0;
-      const n = Number(s);
-      return Number.isFinite(n) ? n : NaN;
-    };
-
-    return cols.filter(col => {
-      const key = col?.name;
-      if (!key) return false;
-
-      // 한 행이라도 0이 아닌 값이 있으면 컬럼 유지
-      return rows.some(r => {
-        const v = r ? r[key] : null;
-        if (v == null || v === "") return false;
-        const n = toNum(v);
-        if (!Number.isFinite(n)) return true; // 숫자로 변환 불가(문자 등)면 일단 유지
-        return n !== 0;
-      });
-    });
-  }
-
-  /********************************************************
-   * ✅ (단일 정의) 계산결과 셀 채우기
-   * - previewMap 있으면(적용 직후) 화면용 calcGrpNm 덮어쓰기 OK
-   * - previewMap 없으면(재진입 DB조회) calcGrpNm 절대 덮어쓰지 않음
-   ********************************************************/
-   async function fillCalculatedAmountsForSelectedSpecs(grpNo, selectedSpecIds, previewMap) {
-	   if (!gridCalc) return;
-
-	   const rows = gridCalc.getData() || [];
-	   const selectedSet = new Set(selectedSpecIds || []);
-
-	   const tasks = rows.map(async (row) => {
-	     if (!selectedSet.has(row.salySpecId)) return row;
-
-	     let items = null;
-	     let totals = null;
-
-	     // ✅ 1) 미리보기 맵이 있으면 우선 사용
-	     if (previewMap && previewMap[row.salySpecId]) {
-	       const one = previewMap[row.salySpecId];
-	       items = Array.isArray(one.items) ? one.items : [];
-	       totals = one;
-	     } else {
-	       // ✅ 2) 없으면 DB에서 조회
-	       const url =
-	         "/insa/saly/calc/items?salySpecId=" + encodeURIComponent(row.salySpecId) +
-	         "&grpNo=" + encodeURIComponent(grpNo);
-
-	       const data = await fetchJsonSafe(url);
-
-	       // 서버가 {items:[...]} / {list:[...]} 형태로 주는 경우까지 방어  ✅(수정)
-	       items = Array.isArray(data)
-	         ? data
-	         : (Array.isArray(data?.items) ? data.items
-	           : (Array.isArray(data?.list) ? data.list : []));
-	       totals = (!Array.isArray(data) && data) ? data : null;
-	     }
-
-	     // ✅ 동적 컬럼 값 채우기 (키가 itemId / item_id / allowId / ducId 어떤 형태든 처리)
-	     (items || []).forEach((it) => {
-	       if (!it) return;
-
-	       const itemId =
-	         it.itemId ?? it.item_id ??
-	         it.allowId ?? it.allow_id ??
-	         it.ducId ?? it.duc_id;
-
-	       const amt = it.amt ?? it.AMT ?? it.amount ?? it.AMOUNT ?? null;
-
-	       if (!itemId) return;
-	       row[String(itemId)] = amt;
-	     });
-
-	     // ✅ 합계 갱신 (미리보기/DB 둘 중 있으면)
-	     if (totals) {
-	       if (totals.payAmt != null) row.payAmt = totals.payAmt;
-	       if (totals.ttDucAmt != null) row.ttDucAmt = totals.ttDucAmt;
-	       if (totals.actPayAmt != null) row.actPayAmt = totals.actPayAmt;
-	     }
-
-	     return row;
-	   });
-
-	   await Promise.all(tasks);
-	   gridCalc.resetData(rows);
-	   if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
-	 }
-
-
-  btnOpenCalc?.addEventListener("click", () => {
-    const selected = getSelectedRow();
-    if (!selected) {
-      alert("급여계산할 급여대장을 선택해주세요.");
-      return;
-    }
-    const { row } = selected;
-    if (row.salyLedgSt === "sal3") {
-      alert("지급완료된 급여대장은 급여계산을 할 수 없습니다.");
-      return;
-    }
-
-    currentCalcSalyLedgId = row.salyLedgId;
-    openSalyCalcModal();
-    loadCalcSpecList(currentCalcSalyLedgId);
-  });
-
-  // ================== 급여계산그룹(그룹+항목) 모달 ==================
-  const itemBackdrop = document.getElementById("salyItemBackdrop");
-  const itemModal    = document.getElementById("salyItemModal");
-  const btnItemClose = document.getElementById("btnSalyItemClose");
-
-  const gridGrpEl    = document.getElementById("gridGrp");
-  const gridItemEl   = document.getElementById("gridItem");
-  const grpHintEl    = document.getElementById("grpHint");
-
-  const btnItemAdd   = document.getElementById("btnItemAdd");
-  const btnItemDel   = document.getElementById("btnItemDel");
-  const btnItemSave  = document.getElementById("btnItemSave");
-  const btnItemOk    = document.getElementById("btnItemOk");
-
-  let gridGrp  = null;
-  let gridItem = null;
-
-  let grpRowKeySelected = null;
-  let editingNewGroup = false;
-
-  let touchedGrpRowKeySet = new Set();
-
-  let currentItemTab = "A";
-  let allItemRowsCache = [];
-
-  const checkedSetByGrpRowKey = new Map();
-  let checkedItemIdSet = new Set();
-
-  let isSyncingItemChecks = false;
-
-  function markCurrentGroupAsUpdated() {
-    if (!gridGrp) return;
-    if (grpRowKeySelected == null) return;
-
-    const row = gridGrp.getRow(grpRowKeySelected);
-    const grpNo = row?.grpNo;
-
-    if (!grpNo) return;
-
-    touchedGrpRowKeySet.add(grpRowKeySelected);
-
-    if (typeof gridGrp.setRowState === "function") {
-      gridGrp.setRowState(grpRowKeySelected, "UPDATED");
-    }
-  }
-
-  function setGrpHint(msg) {
-    if (!grpHintEl) return;
-    grpHintEl.textContent = msg || "";
-  }
-
-  function ensureItemTabsUI() {
-    if (!gridItemEl) return;
-    if (document.getElementById("salyItemTabs")) return;
-
-    const wrap = document.createElement("div");
-    wrap.className = "saly-tab-wrapper";
-    wrap.style.marginBottom = "0";
-
-    wrap.innerHTML = `
-      <ul class="nav nav-tabs" id="salyItemTabs">
-        <li class="nav-item">
-          <button class="nav-link active" type="button" data-itemtab="A">수당</button>
-        </li>
-        <li class="nav-item">
-          <button class="nav-link" type="button" data-itemtab="D">공제</button>
-        </li>
-      </ul>
-    `;
-
-    gridItemEl.parentNode.insertBefore(wrap, gridItemEl);
-
-    const tabs = wrap.querySelectorAll(".nav-link");
-    tabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        persistCurrentGroupCheckedSet();
-
-        tabs.forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        currentItemTab = tab.dataset.itemtab || "A";
-        applyItemTabFilter();
-      });
-    });
-  }
-
-  function setItemTabsActive(tabCode) {
-    const tabEl = document.getElementById("salyItemTabs");
-    if (!tabEl) return;
-    const links = tabEl.querySelectorAll(".nav-link");
-    links.forEach(l => l.classList.remove("active"));
-    const target = tabEl.querySelector(`.nav-link[data-itemtab="${tabCode}"]`);
-    if (target) target.classList.add("active");
-  }
-
-  function syncCheckedSetFromGridItem() {
-    if (!gridItem) return;
-    const checked = gridItem.getCheckedRows() || [];
-    checked.forEach(r => {
-      if (r && r.itemId) checkedItemIdSet.add(r.itemId);
-    });
-  }
-
-  function removeUncheckedFromCurrentTabRows() {
-    if (!gridItem) return;
-    const visibleRows = gridItem.getData() || [];
-    const checkedNow = new Set((gridItem.getCheckedRows() || []).map(r => r.itemId));
-    visibleRows.forEach(r => {
-      if (!r?.itemId) return;
-      if (!checkedNow.has(r.itemId)) checkedItemIdSet.delete(r.itemId);
-    });
-  }
-
-  function applyCheckedSetToGridItem() {
-    if (!gridItem) return;
-
-    isSyncingItemChecks = true;
-    try {
-      const rows = gridItem.getData() || [];
-      rows.forEach(r => {
-        if (r && r.itemId && checkedItemIdSet.has(r.itemId)) {
-          gridItem.check(r.rowKey);
-        }
-      });
-    } finally {
-      isSyncingItemChecks = false;
-    }
-  }
-
-  function persistCurrentGroupCheckedSet() {
-    if (grpRowKeySelected == null) return;
-    if (!gridItem) return;
-
-    syncCheckedSetFromGridItem();
-    removeUncheckedFromCurrentTabRows();
-
-    checkedSetByGrpRowKey.set(grpRowKeySelected, new Set(checkedItemIdSet));
-  }
-
-  function loadCheckedSetForGroupRowKey(rowKey) {
-    const saved = checkedSetByGrpRowKey.get(rowKey);
-    checkedItemIdSet = saved ? new Set(saved) : new Set();
-  }
-
-  function applyItemTabFilter() {
-    if (!gridItem) return;
-
-    const filtered = (allItemRowsCache || []).filter(r => r.itemTy === currentItemTab);
-    gridItem.resetData(filtered);
-
-    applyCheckedSetToGridItem();
-
-    if (gridItem.refreshLayout) setTimeout(() => gridItem.refreshLayout(), 0);
-  }
-
-  function initGrpGrid() {
-    if (!gridGrpEl || gridGrp) return;
-
-    gridGrp = new tui.Grid({
-      el: gridGrpEl,
-      data: [],
-      bodyHeight: 180,
-      scrollX: false,
-      scrollY: true,
-      rowHeaders: [],
-      editingType: "cell",
-      columns: [
-        {
-          header: "",
-          name: "선택",
-          width: 50,
-          align: "center",
-          formatter: ({ rowKey }) => `<input type="radio" name="payCalcGrpRadio" data-row-key="${rowKey}" />`
-        },
-        { header: "그룹번호", name: "grpNo", hidden: true },
-        { header:"그룹명", name:"grpNm", editor:"text", minWidth: 300 }
-      ]
-    });
-
-    gridGrp.on("click", async (ev) => {
-      const { rowKey, nativeEvent } = ev;
-      if (rowKey == null) return;
-
-      const target = nativeEvent.target;
-      if (!(target instanceof HTMLElement) || target.type !== "radio") return;
-
-      persistCurrentGroupCheckedSet();
-
-      grpRowKeySelected = rowKey;
-
-      const row = gridGrp.getRow(rowKey);
-      const grpNo = row?.grpNo;
-
-      await loadAllItemsToCache();
-
-      if (!grpNo) {
-        editingNewGroup = true;
-        setGrpHint("(신규 그룹) 항목 선택 후 저장");
-
-        loadCheckedSetForGroupRowKey(rowKey);
-
-        currentItemTab = "A";
-        setItemTabsActive("A");
-        applyItemTabFilter();
-
-      } else {
-        editingNewGroup = false;
-        setGrpHint("선택 그룹: " + (row.grpNm || "") + " (grpNo=" + grpNo + ")");
-
-        const hasLocal = checkedSetByGrpRowKey.has(rowKey);
-        const wasTouched = touchedGrpRowKeySet.has(rowKey);
-
-        if (!hasLocal && !wasTouched) {
-          const groupItemIds = await fetchGroupItemIds(grpNo);
-          checkedSetByGrpRowKey.set(rowKey, new Set(groupItemIds));
-        }
-
-        loadCheckedSetForGroupRowKey(rowKey);
-
-        currentItemTab = "A";
-        setItemTabsActive("A");
-        applyItemTabFilter();
-      }
-    });
-  }
-
-  function initItemGrid() {
-    if (!gridItemEl || gridItem) return;
-
-    gridItem = new tui.Grid({
-      el: gridItemEl,
-      data: [],
-      bodyHeight: 360,
-      scrollX: true,
-      scrollY: true,
-      rowHeaders: ['checkbox'],
-      columns: [
-        { header:"구분",     name:"itemTyNm", align:"center", width:80 },
-        { header:"표시번호", name:"dispNo",   align:"center", width:90 },
-        { header:"항목ID",   name:"itemId",   width:170 },
-        { header:"항목명",   name:"itemNm",   width:220 },
-        { header:"계산식",   name:"calFmlt",  width:200 },
-        { header:"산출방법", name:"calMthd",  width:280 }
-      ]
-    });
-
-    gridItem.on("check", () => {
-      if (isSyncingItemChecks) return;
-      syncCheckedSetFromGridItem();
-      persistCurrentGroupCheckedSet();
-      markCurrentGroupAsUpdated();
-    });
-
-    gridItem.on("uncheck", () => {
-      if (isSyncingItemChecks) return;
-      removeUncheckedFromCurrentTabRows();
-      persistCurrentGroupCheckedSet();
-      markCurrentGroupAsUpdated();
-    });
-  }
-
-  function openSalyItemModal() {
-    if (!itemModal || !itemBackdrop) return;
-
-    itemModal.classList.add("show");
-    itemModal.style.display = "block";
-    itemBackdrop.style.display = "block";
-
-    initGrpGrid();
-    initItemGrid();
-
-    ensureItemTabsUI();
-
-    if (gridGrp && gridGrp.refreshLayout) setTimeout(() => gridGrp.refreshLayout(), 0);
-    if (gridItem && gridItem.refreshLayout) setTimeout(() => gridItem.refreshLayout(), 0);
-
-    loadGroupList();
-  }
-
-  function closeSalyItemModal() {
-    persistCurrentGroupCheckedSet();
-
-    if (itemModal) {
-      itemModal.classList.remove("show");
-      itemModal.style.display = "none";
-    }
-    if (itemBackdrop) itemBackdrop.style.display = "none";
-
-    grpRowKeySelected = null;
-    editingNewGroup = false;
-    setGrpHint("");
-
-    currentItemTab = "A";
-    setItemTabsActive("A");
-  }
-
-  itemBackdrop?.addEventListener("click", closeSalyItemModal);
-  itemModal?.addEventListener("click", (e) => {
-    if (!e.target.closest(".modal-content")) closeSalyItemModal();
-  });
-  btnItemClose?.addEventListener("click", closeSalyItemModal);
-
-  btnOpenItem?.addEventListener("click", () => {
-    if (!currentCalcSalyLedgId) {
-      alert("급여계산 모달이 먼저 열려야 합니다.");
-      return;
-    }
-    if (!gridCalc) {
-      alert("사원 목록 그리드가 초기화되지 않았습니다.");
-      return;
-    }
-    const checkedRows = gridCalc.getCheckedRows() || [];
-    if (checkedRows.length === 0) {
-      alert("급여계산그룹을 적용할 사원을 먼저 체크하세요.");
-      return;
-    }
-    openSalyItemModal();
-  });
-
-  async function loadGroupList() {
-    if (!gridGrp) return;
-
-    try {
-      const list = await fetch("/insa/saly/calc/grp/list").then(r => r.json());
-      const rows = (list || []).map(x => ({
-        grpNo: x.grpNo,
-        grpNm: x.grpNm
-      }));
-
-      gridGrp.resetData(rows);
-
-      // ✅ 다시 열었을 때 "이전에 적용했던 그룹"을 자동 선택하지 않도록
-      //    항상 처음 상태(미선택)로 시작한다.
-      setGrpHint("그룹을 선택하거나 행추가를 누르세요.");
-      allItemRowsCache = [];
-      if (gridItem) gridItem.resetData([]);
-
-      grpRowKeySelected = null;
-      checkedItemIdSet = new Set();
-
-    } catch (err) {
-      console.error("그룹 목록 로딩 오류", err);
-      alert("급여계산그룹 목록 조회 중 오류가 발생했습니다.");
-    }
-  }
-
-  async function loadAllItemsToCache() {
-    if (!gridItem) return;
-
-    try {
-      const list = await fetch("/insa/saly/item/list").then(r => r.json());
-
-      const rows = (list || []).map(x => ({
-        itemTy: x.itemTy,
-        itemTyNm: (x.itemTy === "A" ? "수당" : "공제"),
-        itemId: x.itemId,
-        itemNm: x.itemNm,
-        dispNo: x.dispNo,
-        calFmlt: x.calFmlt,
-        calMthd: x.calMthd,
-        ynCode: x.ynCode
-      }));
-
-      const toNum = (v) => {
-        const n = Number(v);
-        return Number.isFinite(n) ? n : 999999;
-      };
-
-      rows.sort((a,b) => {
-        const at = a.itemTy === "A" ? 0 : 1;
-        const bt = b.itemTy === "A" ? 0 : 1;
-        if (at !== bt) return at - bt;
-        const an = toNum(a.dispNo);
-        const bn = toNum(b.dispNo);
-        if (an !== bn) return an - bn;
-        return String(a.itemId).localeCompare(String(b.itemId));
-      });
-
-      allItemRowsCache = rows;
-
-    } catch (err) {
-      console.error("전체 항목 로딩 오류", err);
-      alert("수당/공제 항목 조회 중 오류가 발생했습니다.");
-    }
-  }
-
-  async function fetchGroupItemIds(grpNo) {
-    try {
-      const list = await fetch("/insa/saly/item/list?grpNo=" + encodeURIComponent(grpNo)).then(r => r.json());
-      return (list || []).map(x => x.itemId).filter(Boolean);
-    } catch (err) {
-      console.error("그룹 항목 조회 오류", err);
-      alert("그룹 항목 조회 중 오류가 발생했습니다.");
-      return [];
-    }
-  }
-
-  btnItemAdd?.addEventListener("click", async () => {
-    if (!gridGrp) return;
-
-    persistCurrentGroupCheckedSet();
-
-    gridGrp.appendRow({ grpNo: "", grpNm: "" }, { focus: true });
-
-    const data = gridGrp.getData() || [];
-    const last = data[data.length - 1];
-    const rowKey = last?.rowKey;
-
-    grpRowKeySelected = rowKey;
-    editingNewGroup = true;
-
-    setTimeout(() => {
-      const radio = gridGrpEl.querySelector(`input[type="radio"][name="payCalcGrpRadio"][data-row-key="${rowKey}"]`);
-      if (radio) radio.checked = true;
-    }, 0);
-
-    setGrpHint("(신규 그룹) 항목 선택 후 저장");
-
-    await loadAllItemsToCache();
-
-    checkedSetByGrpRowKey.set(rowKey, new Set());
-    loadCheckedSetForGroupRowKey(rowKey);
-
-    currentItemTab = "A";
-    setItemTabsActive("A");
-    applyItemTabFilter();
-  });
-
-  btnItemDel?.addEventListener("click", () => {
-    if (!gridGrp) return;
-    if (grpRowKeySelected == null) {
-      alert("삭제할 그룹을 선택해주세요.");
-      return;
-    }
-
-    checkedSetByGrpRowKey.delete(grpRowKeySelected);
-
-    gridGrp.removeRow(grpRowKeySelected);
-
-    grpRowKeySelected = null;
-    editingNewGroup = false;
-    setGrpHint("그룹을 선택하거나 행추가를 누르세요.");
-
-    allItemRowsCache = [];
-    checkedItemIdSet = new Set();
-    gridItem?.resetData([]);
-  });
-
-  btnItemSave?.addEventListener("click", async () => {
-    if (!gridGrp || !gridItem) return;
-
-    persistCurrentGroupCheckedSet();
-    gridGrp.finishEditing();
-
-    const { createdRows, updatedRows, deletedRows } = gridGrp.getModifiedRows();
-
-    const createdKeySet = new Set((createdRows || []).map(r => r.rowKey));
-    const deletedKeySet = new Set((deletedRows || []).map(r => r.rowKey));
-
-    touchedGrpRowKeySet.forEach((rk) => {
-      if (createdKeySet.has(rk)) return;
-      if (deletedKeySet.has(rk)) return;
-
-      const r = gridGrp.getRow(rk);
-      if (!r?.grpNo) return;
-
-      const already = (updatedRows || []).some(
-        u => u.rowKey === rk || Number(u.grpNo) === Number(r.grpNo)
-      );
-      if (!already) updatedRows.push({ ...r, rowKey: rk });
-    });
-
-    const invalid = [...createdRows, ...updatedRows].some(r => !(r.grpNm || "").trim());
-    if (invalid) {
-      alert("그룹명은 필수입니다.");
-      return;
-    }
-
-    const getItemIdsByRowKey = (rowKey) => {
-      const set = checkedSetByGrpRowKey.get(rowKey);
-      return set ? Array.from(set) : [];
-    };
-
-    const payload = {
-      createdRows: (createdRows || []).map(r => ({
-        grpNm: r.grpNm,
-        itemIds: getItemIdsByRowKey(r.rowKey)
-      })),
-      updatedRows: (updatedRows || []).map(r => ({
-        grpNo: r.grpNo,
-        grpNm: r.grpNm,
-        itemIds: getItemIdsByRowKey(r.rowKey)
-      })),
-      deletedRows: (deletedRows || []).map(r => ({
-        grpNo: r.grpNo
-      }))
-    };
-
-    try {
-      const res = await fetchJsonSafe("/insa/saly/calc/grp/saveAll", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      if (res?.result !== "SUCCESS") {
-        alert(res?.message || "저장 실패");
-        return;
-      }
-
-      alert("저장되었습니다.");
-
-      touchedGrpRowKeySet.clear();
-
-      grpRowKeySelected = null;
-      editingNewGroup = false;
-
-      checkedSetByGrpRowKey.clear();
-      checkedItemIdSet = new Set();
-
-      await loadGroupList();
-
-    } catch (e) {
-      console.error(e);
-      alert("급여계산그룹 저장 오류\n\n" + (e?.message || ""));
-    }
-  });
-
-  // ✅ 확인(그룹 적용 확정) : run 호출도 fetchJsonSafe로 (에러 본문까지 잡아냄)
-  btnItemOk?.addEventListener("click", async () => {
-    if (!gridGrp) return;
-    if (grpRowKeySelected == null) {
-      alert("적용할 그룹을 선택해주세요.");
-      return;
-    }
-
-    persistCurrentGroupCheckedSet();
-
-    const row = gridGrp.getRow(grpRowKeySelected);
-    const grpNo = row?.grpNo;
-
-    if (!grpNo) {
-      alert("신규 그룹은 저장 후 선택할 수 있습니다.");
-      return;
-    }
-
-    selectedGrpNo = grpNo;
-    selectedGrpNm = row.grpNm || "";
-
-    try {
-      const items = await fetchJsonSafe(
-        "/insa/saly/item/list?grpNo=" + encodeURIComponent(selectedGrpNo)
-      );
-
-      selectedGroupItems = (items || []).map(x => ({
-        itemTy: x.itemTy,
-        itemId: x.itemId,
-        itemNm: x.itemNm,
-        dispNo: x.dispNo,
-        calFmlt: x.calFmlt,
-        calMthd: x.calMthd
-      }));
-
-      closeSalyItemModal();
-
-      if (gridCalc) {
-        const rows = gridCalc.getData() || [];
-        const checked = gridCalc.getCheckedRows() || [];
-        const selectedSet = new Set(checked.map(r => r.salySpecId));
-
-        rows.forEach(r => {
-          if (selectedSet.has(r.salySpecId)) {
-            r.calcGrpNm = selectedGrpNm;
-          }
-        });
-
-        gridCalc.resetData(rows);
-        if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
-      }
-
-      if (!gridCalc) return;
-      if (!currentCalcSalyLedgId) {
-        alert("급여대장이 선택되지 않았습니다.");
-        return;
-      }
-
-      const checkedRows = gridCalc.getCheckedRows() || [];
-      if (checkedRows.length === 0) {
-        alert("급여계산을 적용할 사원을 체크박스로 선택하세요.");
-        return;
-      }
-
-      const salySpecIdList = checkedRows.map(r => r.salySpecId).filter(Boolean);
-
-      const runRes = await fetchJsonSafe("/insa/saly/calc/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          salyLedgId: currentCalcSalyLedgId,
-          grpNo: selectedGrpNo,
-          salySpecIdList
-        })
-      });
-
-      if (runRes?.result !== "SUCCESS") {
-        throw new Error(runRes?.message || "급여계산(미리보기) 실패");
-      }
-
-      pendingCalcBySpecId = runRes?.data || {};
-      pendingGrpNo = selectedGrpNo;
-
-      const dynamicCols = buildDynamicColumnsByGroupItems(selectedGroupItems);
-      gridCalc.setColumns([...baseCalcColumns, ...dynamicCols]);
-      
-      applyReadonlyCellBgForNoGroup(dynamicCols);
-
-      await fillCalculatedAmountsForSelectedSpecs(selectedGrpNo, salySpecIdList, pendingCalcBySpecId);
-
-      if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
-      alert("계산 미리보기가 반영되었습니다. (저장은 '저장' 버튼)");
-
-    } catch (err) {
-      console.error("그룹 적용/계산 오류", err);
-      alert("그룹 적용 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
-    }
-  });
-
-  //✅ 급여계산 저장(=DB 반영)
-    //✅ 급여계산 저장(=DB 반영)
-  document.addEventListener("click", async (e) => {
-    const btn = e.target.closest("#btnCalcSave");
-    if (!btn) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    console.log("[btnCalcSave] click");
-
-    if (!gridCalc) return;
-    if (!currentCalcSalyLedgId) {
-      alert("급여대장이 선택되지 않았습니다.");
-      return;
-    }
-    gridCalc.finishEditing();
-
-    const rows = gridCalc.getData() || [];
-
-    // ============================================================
-    // 1) (기존) '확인(미리보기)' 기반 저장 경로 (그대로 유지)
-    //    - 사용자가 그룹에서 확인 눌러 계산한 직후, pendingCalcBySpecId로 저장
-    // ============================================================
-    const checked = gridCalc.getCheckedRows() || [];
-    const checkedSpecIds = checked.map(r => r.salySpecId).filter(Boolean);
-
-    const canUsePreviewSave =
-      selectedGrpNo != null &&
-      pendingGrpNo != null &&
-      Number(pendingGrpNo) === Number(selectedGrpNo) &&
-      checkedSpecIds.length > 0;
-
-    if (canUsePreviewSave) {
-      try {
-        const previewList = checkedSpecIds.map(specId => {
-          const one = pendingCalcBySpecId[specId] || {};
-          return {
-            salySpecId: specId,
-            items: Array.isArray(one.items) ? one.items : []
-          };
-        });
-
-        console.log("[btnCalcSave] payload(preview)", {
-          salyLedgId: currentCalcSalyLedgId,
-          grpNo: selectedGrpNo,
-          previewList
-        });
-
-        const saveRes = await fetchJsonSafe("/insa/saly/calc/save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            salyLedgId: currentCalcSalyLedgId,
-            grpNo: selectedGrpNo,
-            previewList
-          })
-        });
-
-        if (saveRes?.result !== "SUCCESS") {
-          throw new Error(saveRes?.message || "급여계산 저장 실패");
-        }
-
-        const dynamicCols = buildDynamicColumnsByGroupItems(selectedGroupItems);
-        gridCalc.setColumns([...baseCalcColumns, ...dynamicCols]);
-
-        await fillCalculatedAmountsForSelectedSpecs(selectedGrpNo, checkedSpecIds, pendingCalcBySpecId);
-
-        // ✅ 저장 이후: 변경 추적/미리보기 상태 초기화
-        dirtySpecIdSet.clear();
-        pendingCalcBySpecId = {};
-        pendingGrpNo = null;
-
-        if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
-        loadSalyList();
-        return;
-
-      } catch (err) {
-        console.error("급여계산 처리 오류(preview save)", err);
-        alert("급여계산 처리 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
-        return;
-      }
-    }
-
-    // ============================================================
-    // 2) (신규) 재진입/수정 저장 경로
-    //    - 계산그룹 '확인'을 안 눌러도, editor로 값 수정(dirty)만 있으면 저장
-    //    - 체크박스 선택 불필요
-    // ============================================================
-    if (!dirtySpecIdSet || dirtySpecIdSet.size === 0) {
-      alert("변경된 값이 없습니다.");
-      return;
-    }
-
-    // ✅ 저장 대상: editor로 값이 바뀐 행만
-    const dirtyRows = rows.filter(r => r && r.salySpecId && dirtySpecIdSet.has(r.salySpecId));
-    if (dirtyRows.length === 0) {
-      alert("변경된 값이 없습니다.");
-      return;
-    }
-
-    // ✅ grpNo 결정
-    let grpNoToSave = selectedGrpNo;
-    if (grpNoToSave == null) {
-      const grpSet = new Set(dirtyRows.map(r => r.grpNo).filter(v => v != null));
-      if (grpSet.size !== 1) {
-        alert("저장할 계산그룹(grpNo)을 판단할 수 없습니다. (여러 그룹이 섞여있거나 grpNo가 없습니다)\n계산그룹을 선택하거나, 한 그룹만 수정해주세요.");
-        return;
-      }
-      grpNoToSave = [...grpSet][0];
-    }
-
-    // ✅ 동적 항목 컬럼(itemId) 목록
-    const columns = gridCalc.getColumns() || [];
-    const baseNameSet = new Set((baseCalcColumns || []).map(c => c.name));
-    // 기본컬럼 외에, 시스템 컬럼도 제외
-    baseNameSet.add("salySpecId");
-    baseNameSet.add("grpNo");
-    baseNameSet.add("payAmt");
-    baseNameSet.add("ttDucAmt");
-    baseNameSet.add("actPayAmt");
-
-    const itemIds = columns
-      .map(c => c.name)
-      .filter(n => n && !baseNameSet.has(n));
-
-    if (itemIds.length === 0) {
-      alert("저장할 항목 컬럼이 없습니다. (동적 항목이 구성되지 않았습니다)");
-      return;
-    }
-
-    // ✅ item 메타 준비(itemTy/itemNm)
-    async function ensureItemMeta(grpNo) {
-      const key = String(grpNo);
-      if (groupItemMetaByGrpNo[key]) return groupItemMetaByGrpNo[key];
-
-      const meta = {};
-
-      // 1) selectedGroupItems에서 만들기(가능하면)
-      const fromSelected = (() => {
-        if (!selectedGroupItems) return [];
-        if (Array.isArray(selectedGroupItems)) return selectedGroupItems;
-        const a = selectedGroupItems.allowList ?? selectedGroupItems.allow ?? [];
-        const d = selectedGroupItems.ducList ?? selectedGroupItems.duc ?? [];
-        const l = selectedGroupItems.list ?? selectedGroupItems.items ?? [];
-        return []
-          .concat(Array.isArray(l) ? l : [])
-          .concat(Array.isArray(a) ? a : [])
-          .concat(Array.isArray(d) ? d : []);
-      })();
-
-      fromSelected.forEach(it => {
-        if (!it) return;
-        const itemId =
-          it.itemId ?? it.item_id ??
-          it.allowId ?? it.allow_id ??
-          it.ducId ?? it.duc_id;
-        if (!itemId) return;
-
-        const itemNm =
-          it.itemNm ?? it.item_nm ??
-          it.allowNm ?? it.allow_nm ??
-          it.ducNm ?? it.duc_nm ??
-          it.codeNm ?? it.code_nm ??
-          "";
-
-        const itemTy =
-          it.itemTy ?? it.item_ty ??
-          (it.allowId || it.allow_id ? "A" : (it.ducId || it.duc_id ? "D" : null));
-
-        meta[String(itemId)] = { itemTy: itemTy || null, itemNm: String(itemNm || "") };
-      });
-
-      // 2) 부족하면 서버에서 조회해서 채우기
-      const missing = itemIds.some(id => !meta[String(id)]);
-      if (missing) {
-        const list = await fetchJsonSafe("/insa/saly/item/list?grpNo=" + encodeURIComponent(grpNo));
-        (list || []).forEach(x => {
-          if (!x?.itemId) return;
-          meta[String(x.itemId)] = { itemTy: x.itemTy || null, itemNm: String(x.itemNm || "") };
-        });
-      }
-
-      groupItemMetaByGrpNo[key] = meta;
-      return meta;
-    }
-
-    try {
-      const metaById = await ensureItemMeta(grpNoToSave);
-
-      // ✅ payload: 현재 그리드 값 그대로 저장
-      // - amt가 0/빈값이면 items에 포함하지 않음(=DB에 0 인서트 방지)
-      const previewList = dirtyRows.map(r => {
-        const items = [];
-
-        itemIds.forEach(itemId => {
-          const raw = r[itemId];
-          const amt = Number(String(raw ?? "0").replaceAll(",", "").trim() || "0");
-
-          if (!Number.isFinite(amt) || amt === 0) return;
-
-          const m = metaById[String(itemId)] || {};
-          items.push({
-            itemTy: m.itemTy ?? null,
-            itemId: String(itemId),
-            itemNm: m.itemNm ?? String(itemId),
-            amt: amt
-          });
-        });
-
-        return { salySpecId: r.salySpecId, items };
-      });
-
-      console.log("[btnCalcSave] payload(manual edit)", {
-        salyLedgId: currentCalcSalyLedgId,
-        grpNo: grpNoToSave,
-        previewList
-      });
-
-      const saveRes = await fetchJsonSafe("/insa/saly/calc/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          salyLedgId: currentCalcSalyLedgId,
-          grpNo: grpNoToSave,
-          previewList
-        })
-      });
-
-      if (saveRes?.result !== "SUCCESS") {
-        throw new Error(saveRes?.message || "급여계산 저장 실패");
-      }
-
-      // ✅ 저장 후: 방금 수정한 값 기준으로 재조회해서 화면 동기화(안전)
-      const dirtySpecIds = dirtyRows.map(r => r.salySpecId).filter(Boolean);
-      await fillCalculatedAmountsForSelectedSpecs(grpNoToSave, dirtySpecIds, null);
-
-      dirtySpecIdSet.clear();
-      pendingCalcBySpecId = {};
-      pendingGrpNo = null;
-
-      if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
-      alert("저장되었습니다.");
-      loadSalyList(); // ✅ 추가
-
-    } catch (err) {
-      console.error("급여계산 처리 오류(manual edit save)", err);
-      alert("급여계산 처리 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
-    }
-  });
-
-
-  /***********************
-   * 12. 페이지 로드 시 초기작업
-   ***********************/
-  document.addEventListener("DOMContentLoaded", () => {
-    loadDeptOptions();
-    loadSalyList();
-  });
-  
-  function applyReadonlyCellBgForNoGroup(dynamicCols) {
-	  if (!gridCalc) return;
-
-	  const cols = (dynamicCols || []).map(c => c?.name).filter(Boolean);
-	  if (!cols.length) return;
-
-	  const rowCount = typeof gridCalc.getRowCount === "function"
-	    ? gridCalc.getRowCount()
-	    : (gridCalc.getData() || []).length;
-
-	  for (let rowKey = 0; rowKey < rowCount; rowKey++) {
-	    const row = gridCalc.getRow(rowKey);
-	    const grpNo = row ? row.grpNo : null;
-	    const isNoGroup = (grpNo == null || grpNo === "" || Number(grpNo) === 0);
-
-	    cols.forEach((colName) => {
-	      // 매번 초기화(재진입/재계산 반복 대비)
-	      if (typeof gridCalc.removeCellClassName === "function") {
-	        gridCalc.removeCellClassName(rowKey, colName, "calc-readonly-cell");
+	
+	  /*************************
+	   * ✅ 메인 라디오 UI 동기화 (DOM 안정형)
+	   *************************/
+	  function syncMainRadioUI() {
+	    const radios = document.querySelectorAll('input[type="radio"][name="salyLedgRadio"]');
+	    radios.forEach(r => { r.checked = false; });
+	
+	    if (selectedRowKey == null) return;
+	
+	    const radio = document.querySelector(
+	      `input[type="radio"][name="salyLedgRadio"][data-row-key="${selectedRowKey}"]`
+	    );
+	    if (radio) radio.checked = true;
+	  }
+	
+	  /************************
+	   * 3. DB에서 급여대장 목록 조회
+	   ************************/
+	  function loadSalyList() {
+	    const salyNmInput    = document.getElementById("srchSalyNm");
+	    const payDtStartInput = document.getElementById("payDtStart");
+	    const payDtEndInput   = document.getElementById("payDtEnd");
+	
+	    const salyNm    = salyNmInput ? salyNmInput.value.trim() : "";
+	    const payDtStart = payDtStartInput ? payDtStartInput.value.trim() : "";
+	    const payDtEnd   = payDtEndInput ? payDtEndInput.value.trim() : "";
+	
+	    const params = new URLSearchParams();
+	    if (salyNm)    params.append("salyLedgNm", salyNm);
+	    if (payDtStart) params.append("payDtStart", payDtStart);
+	    if (payDtEnd)   params.append("payDtEnd", payDtEnd);
+	
+	    fetch("/insa/saly/list?" + params.toString())
+	      .then(res => {
+	        if (!res.ok) throw new Error("급여대장 목록 조회 실패 (HTTP " + res.status + ")");
+	        return res.json();
+	      })
+	      .then(list => {
+	        originalGridData = (list || []).map(r => {
+	          let revsMmdd = r.revsYm ? String(r.revsYm) : "";
+	          let payDtStr = "";
+	          if (r.payDt) {
+	            let raw = String(r.payDt);
+	            if (raw.includes("T")) raw = raw.substring(0, 10);
+	            payDtStr = raw;
+	          }
+	
+	          return {
+	            salyLedgId : r.salyLedgId,
+	            revsMmdd   : revsMmdd,
+	            payDt      : payDtStr,
+	            salyLedgNm : r.salyLedgNm,
+	            rcnt       : r.rcnt,
+	            salyLedgSt : r.salyLedgSt,
+	            salyLedgStNm: r.salyLedgStNm || "",
+	            ttPayAmt   : r.ttPayAmt
+	          };
+	        });
+	
+	        selectedRowKey = null;
+	        applyTabFilter();
+	      })
+	      .catch(err => {
+	        console.error("급여대장 목록 조회 오류", err);
+	        alert("급여대장 목록 조회 중 오류가 발생했습니다.");
+	      });
+	  }
+	
+	  document.getElementById("btnSearch")?.addEventListener("click", loadSalyList);
+	
+	  const srchSalyNmEl   = document.getElementById("srchSalyNm");
+	  const payDtStartEl   = document.getElementById("payDtStart");
+	  const payDtEndEl     = document.getElementById("payDtEnd");
+	  [srchSalyNmEl, payDtStartEl, payDtEndEl].forEach(el => {
+	    if (!el) return;
+	    el.addEventListener("keydown", function (e) {
+	      if (e.key === "Enter") {
+	        e.preventDefault();
+	        loadSalyList();
 	      }
-
-	      const v = row ? row[colName] : null;
-	      const isEmpty = (v == null || String(v).trim() === ""); // ✅ 값 비어있음
-
-	      // ✅ 1) 그룹 미적용 행 OR 2) 그룹 적용됐지만 해당 셀이 비어있음
-	      if ((isNoGroup || isEmpty) && typeof gridCalc.addCellClassName === "function") {
-	        gridCalc.addCellClassName(rowKey, colName, "calc-readonly-cell");
+	    });
+	  });
+	
+	  /*************************
+	   * 4. 라디오 선택 헬퍼
+	   *************************/
+	  function getSelectedRow() {
+	    if (selectedRowKey === null || selectedRowKey === undefined) return null;
+	    const row = grid.getRow(selectedRowKey);
+	    if (!row) return null;
+	    return { rowKey: selectedRowKey, row };
+	  }
+	
+	  function clearRadioSelection() {
+	    selectedRowKey = null;
+	    syncMainRadioUI();
+	    updateConfirmButtonLabel();
+	    updateRegButtonLabel();
+	  }
+	
+	  /*************************
+	   * 5. 탭으로 지급전 / 지급완료 분리
+	   *************************/
+	  const statusTabs         = document.querySelectorAll("#salyStatusTabs .nav-link");
+	  const btnSalyDelete      = document.getElementById("btnSalyDelete");
+	  const btnSalyCalc        = document.getElementById("btnSalyCalc");
+	  const btnSalySpec        = document.getElementById("btnSalySpec");
+	  const btnToggleConfirm   = document.getElementById("btnToggleConfirm");
+	  const openSalyRegistBtn  = document.getElementById("openSalyRegistModal");
+	
+	  function applyTabFilter() {
+	    if (currentTabStatus === "PAID") {
+	      gridData = originalGridData.filter(row => row.salyLedgSt === "sal3");
+	    } else {
+	      gridData = originalGridData.filter(row => row.salyLedgSt !== "sal3");
+	    }
+	    grid.resetData(gridData);
+	
+	    const isPaidTab = currentTabStatus === "PAID";
+	
+	    if (btnSalyDelete) {
+	      btnSalyDelete.style.display = isPaidTab ? "none" : "";
+	      btnSalyDelete.disabled      = isPaidTab;
+	    }
+	    if (btnSalyCalc) {
+	      btnSalyCalc.style.display   = isPaidTab ? "none" : "";
+	      btnSalyCalc.disabled        = isPaidTab;
+	    }
+	    if (btnToggleConfirm) {
+	      btnToggleConfirm.style.display = isPaidTab ? "none" : "";
+	      btnToggleConfirm.disabled      = isPaidTab;
+	    }
+	    if (openSalyRegistBtn) {
+	      openSalyRegistBtn.style.display = isPaidTab ? "none" : "";
+	      openSalyRegistBtn.disabled      = isPaidTab;
+	    }
+	    if (btnSalySpec) {
+	      btnSalySpec.style.display = "";
+	      btnSalySpec.disabled      = false;
+	    }
+	
+	    syncMainRadioUI();
+	    updateConfirmButtonLabel();
+	    updateRegButtonLabel();
+	  }
+	
+	  statusTabs.forEach(tab => {
+	    tab.addEventListener("click", function () {
+	      statusTabs.forEach(t => t.classList.remove("active"));
+	      this.classList.add("active");
+	      currentTabStatus = this.dataset.status || "BEFORE_PAY";
+	
+	      selectedRowKey = null;
+	      applyTabFilter();
+	    });
+	  });
+	
+	  /*************************
+	   * 6. 확정/확정취소 토글 버튼
+	   *************************/
+	  function updateConfirmButtonLabel() {
+	    if (!btnToggleConfirm) return;
+	
+	    const selected = getSelectedRow();
+	    if (!selected) {
+	      btnToggleConfirm.textContent = "확정";
+	      return;
+	    }
+	
+	    const { row } = selected;
+	    const code = row.salyLedgSt;
+	
+	    if (code === "sal1") btnToggleConfirm.textContent = "확정";
+	    else if (code === "sal2") btnToggleConfirm.textContent = "확정취소";
+	    else if (code === "sal3") btnToggleConfirm.textContent = "확정";
+	  }
+	
+	  if (btnToggleConfirm) {
+	    btnToggleConfirm.addEventListener("click", () => {
+	      const selected = getSelectedRow();
+	      if (!selected) {
+	        alert("확정/취소할 급여대장을 선택해주세요.");
+	        return;
+	      }
+	
+	      const { rowKey, row } = selected;
+	      const code = row.salyLedgSt;
+	
+	      if (code === "sal3") {
+	        alert("지급완료된 급여대장은 확정 상태를 변경할 수 없습니다.");
+	        return;
+	      }
+	
+	      if (code === "sal1") {
+	        grid.setValue(rowKey, "salyLedgSt", "sal2");
+	        grid.setValue(rowKey, "salyLedgStNm", "확정");
+	      } else if (code === "sal2") {
+	        grid.setValue(rowKey, "salyLedgSt", "sal1");
+	        grid.setValue(rowKey, "salyLedgStNm", "미확정");
+	      }
+	
+	      updateConfirmButtonLabel();
+	    });
+	  }
+	  /*************************
+	   * 6-1. 등록/수정 토글 버튼 라벨
+	   *************************/
+	  function updateRegButtonLabel() {
+	    if (!openSalyRegistBtn) return;
+	
+	    const selected = getSelectedRow();
+	
+	    // ✅ 라디오 미선택 = 등록
+	    if (!selected) {
+	      openSalyRegistBtn.textContent = "등록";
+	      return;
+	    }
+	
+	    // ✅ 라디오 선택 = 수정
+	    openSalyRegistBtn.textContent = "수정";
+	  }
+	  /*************************
+	   * ✅ 메인 그리드 라디오 토글(안정형)
+	   *************************/
+	   grid.on("click", (ev) => {
+	
+		    const { rowKey, nativeEvent } = ev;
+		    if (rowKey == null) return;
+		    const target = nativeEvent.target;
+		    //if (!(target instanceof HTMLInputElement)) return;
+		    //if (target.type !== "radio") return;
+	
+		      if (target.tagName === "INPUT") {
+		          console.log("input태그임");
+		          if(target.checked) {
+		              selectedRowKey = rowKey;
+		          }
+		      } else {
+		          console.log("else로 옴");
+		          target.children[0].checked = false;
+		          selectedRowKey = null;
+		      }
+		      updateConfirmButtonLabel();
+		      
+		  });
+	
+	  /*************************
+	   * 7. 삭제 버튼 (API 연동)
+	   *************************/
+	  if (btnSalyDelete) {
+	    btnSalyDelete.addEventListener("click", () => {
+	      const selected = getSelectedRow();
+	      if (!selected) {
+	        alert("삭제할 급여대장을 선택해주세요.");
+	        return;
+	      }
+	      const { row } = selected;
+	
+	      if (!confirm("선택한 급여대장을 삭제하시겠습니까?")) return;
+	
+	      fetch("/insa/saly/delete", {
+	        method : "POST",
+	        headers: { "Content-Type": "application/json" },
+	        body   : JSON.stringify({ salyLedgId: row.salyLedgId })
+	      })
+	      .then(res => res.json())
+	      .then(body => {
+	        if (!body || body.result !== "SUCCESS") {
+	          alert((body && body.message) || "삭제 중 오류가 발생했습니다.");
+	          return;
+	        }
+	        alert("삭제되었습니다.");
+	        loadSalyList();
+	      })
+	      .catch(err => {
+	        console.error("급여대장 삭제 오류", err);
+	        alert("급여대장 삭제 중 오류가 발생했습니다.");
+	      });
+	    });
+	  }
+	
+	  /***********************
+	   * 9. (기존) 등록/수정 모달 & 사원 그리드
+	   ***********************/
+	  const modal   = document.getElementById("salyRegistModal");
+	  const back    = document.getElementById("salyRegistBackdrop");
+	  const btnSalyEmpSearch = document.getElementById("btnSalyEmpSearch");
+	  const salyEmpNmCond = document.getElementById("salyEmpNmCond");
+	  const modalDept = document.getElementById("salyDept");
+	
+	  const grid2El = document.getElementById("grid2");
+	  let grid2 = null;
+	
+	  let editMode = false;
+	  let editingSalyLedgId = null;
+	  let initialCheckedEmpIds = [];
+	
+	  function initEmpGrid() {
+	    if (!grid2El || grid2) return;
+	    grid2 = new tui.Grid({
+	      el: grid2El,
+	      data: [],
+	      bodyHeight: 320,
+	      scrollX: false,
+	      scrollY: true,
+	      rowHeaders: ['checkbox'],
+	      columns: [
+	        { header: "사원번호", name: "empId" },
+	        { header: "사원명",   name: "nm" },
+	        { header: "고용형태", name: "emplymTyNm" },
+	        { header: "부서명",   name: "deptNm" }
+	      ]
+	    });
+	  }
+	
+	  function applyCheckedEmpIdsToGrid2() {
+	    if (!grid2 || !initialCheckedEmpIds || initialCheckedEmpIds.length === 0) return;
+	    const rows = grid2.getData();
+	    rows.forEach(row => {
+	      if (initialCheckedEmpIds.includes(row.empId)) {
+	        grid2.check(row.rowKey);
 	      }
 	    });
 	  }
-	}
+	
+	  function loadEmpList() {
+	    if (!grid2) return;
+	
+	    const deptId = modalDept ? (modalDept.value || "") : "";
+	    const empNm  = salyEmpNmCond ? salyEmpNmCond.value.trim() : "";
+	
+	    fetch("/insa/saly/empList", {
+	      method : "POST",
+	      headers: { "Content-Type": "application/json" },
+	      body   : JSON.stringify({ deptId, empNm })
+	    })
+	    .then(res => res.json())
+	    .then(list => {
+	      const data = (list || []).map(e => ({
+	        empId:      e.empId,
+	        nm:         e.nm,
+	        emplymTyNm: e.emplymTyNm || e.emplymTy || "",
+	        deptNm:     e.deptNm || ""
+	      }));
+	      grid2.resetData(data);
+	      applyCheckedEmpIdsToGrid2();
+	    })
+	    .catch(err => {
+	      console.error("사원 조회 오류", err);
+	      alert("사원 목록 조회 중 오류가 발생했습니다.");
+	    });
+	  }
+	
+	  function initRevsYmPicker() {
+	    const $revsYm = $("#revs_ym");
+	    if (!$revsYm.length) return;
+	    if ($revsYm.data("datepicker")) $revsYm.datepicker("destroy");
+	
+	    const today = new Date();
+	    const lastMonthLastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+	
+	    $revsYm
+	      .datepicker({
+	        format: "yyyy-mm",
+	        autoclose: true,
+	        minViewMode: 1,
+	        language: "ko",
+	        endDate: lastMonthLastDay
+	      })
+	      .on("show", function () {
+	        const $self  = $(this);
+	        const $modal = $self.closest(".modal");
+	        if (!$modal.length) return;
+	
+	        const modalZ = parseInt($modal.css("z-index"), 10) || 1055;
+	        setTimeout(function () {
+	          $(".datepicker-dropdown").each(function () {
+	            this.style.setProperty("z-index", String(modalZ + 10), "important");
+	          });
+	        }, 0);
+	      });
+	  }
+	
+	  function initPayDtPicker() {
+	    const $payDt = $("#payDt");
+	    if (!$payDt.length) return;
+	    if ($payDt.data("datepicker")) $payDt.datepicker("destroy");
+	
+	    const today = new Date();
+	    const todayZero = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+	
+	    $payDt
+	      .datepicker({
+	        format: "yyyy-mm-dd",
+	        autoclose: true,
+	        language: "ko",
+	        startDate: todayZero,
+	        beforeShowDay: function (date) {
+	          const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+	          return (d < todayZero) ? false : true;
+	        }
+	      })
+	      .on("show", function () {
+	        const $self  = $(this);
+	        const $modal = $self.closest(".modal");
+	        if (!$modal.length) return;
+	
+	        const modalZ = parseInt($modal.css("z-index"), 10) || 1055;
+	        setTimeout(function () {
+	          $(".datepicker-dropdown").each(function () {
+	            this.style.setProperty("z-index", String(modalZ + 10), "important");
+	          });
+	        }, 0);
+	      });
+	  }
+	
+	  function openSalyModal() {
+	    if (!modal || !back) return;
+	
+	    modal.classList.add("show");
+	    modal.style.display = "block";
+	    back.style.display  = "block";
+	
+	    initRevsYmPicker();
+	    initPayDtPicker();
+	
+	    initEmpGrid();
+	    loadEmpList();
+	
+	    if (grid2 && grid2.refreshLayout) grid2.refreshLayout();
+	  }
+	
+	  function closeSalyRegistModal() {
+	    if (modal) {
+	      modal.classList.remove("show");
+	      modal.style.display = "none";
+	    }
+	    if (back) back.style.display = "none";
+	
+	    editMode = false;
+	    editingSalyLedgId = null;
+	    initialCheckedEmpIds = [];
+	  }
+	
+	  if (openSalyRegistBtn) {
+	    openSalyRegistBtn.addEventListener("click", () => {
+	      const selected = getSelectedRow();
+	
+	      if (!selected) {
+	        editMode = false;
+	        editingSalyLedgId = null;
+	        initialCheckedEmpIds = [];
+	
+	        if (window.TeamCommon && TeamCommon.modal && typeof TeamCommon.modal.reset === "function") {
+	          TeamCommon.modal.reset(modal);
+	        }
+	
+	        openSalyModal();
+	      } else {
+	        const { row } = selected;
+	        editMode = true;
+	        editingSalyLedgId = row.salyLedgId;
+	        initialCheckedEmpIds = [];
+	
+	        fetch("/insa/saly/detail?salyLedgId=" + encodeURIComponent(row.salyLedgId))
+	          .then(res => res.json())
+	          .then(vo => {
+	            if (!vo || !vo.salyLedgId) {
+	              alert("급여대장 정보를 불러오지 못했습니다.");
+	              return;
+	            }
+	
+	            initialCheckedEmpIds = Array.isArray(vo.empIdList) ? vo.empIdList : [];
+	
+	            openSalyModal();
+	            fillSalyModal(vo);
+	            setTimeout(applyCheckedEmpIdsToGrid2, 0);
+	          })
+	          .catch(err => {
+	            console.error("급여대장 상세 조회 오류", err);
+	            alert("급여대장 상세 조회 중 오류가 발생했습니다.");
+	          });
+	      }
+	    });
+	  }
+	
+	  function fillSalyModal(vo) {
+	    const salyNmInput = document.getElementById("salyNm");
+	    const revsYmInput = document.getElementById("revs_ym");
+	    const payDtInput  = document.getElementById("payDt");
+	
+	    if (salyNmInput) salyNmInput.value = vo.salyLedgNm || "";
+	    if (revsYmInput) revsYmInput.value = vo.revsYm || "";
+	    if (payDtInput)  payDtInput.value  = vo.payDt || "";
+	
+	    if (vo.revsYm && $('#revs_ym').data('datepicker')) $('#revs_ym').datepicker('update', vo.revsYm);
+	    if (vo.payDt  && $('#payDt').data('datepicker'))  $('#payDt').datepicker('update', vo.payDt);
+	  }
+	
+	  if (back) back.addEventListener("click", closeSalyRegistModal);
+	  if (modal) {
+	    modal.addEventListener("click", function (e) {
+	      if (!e.target.closest(".modal-content")) closeSalyRegistModal();
+	    });
+	  }
+	  document.addEventListener("keydown", function (e) {
+	    if (e.key === "Escape") closeSalyRegistModal();
+	  });
+	
+	  btnSalyEmpSearch?.addEventListener("click", loadEmpList);
+	  salyEmpNmCond?.addEventListener("keydown", e => { if (e.key === "Enter") loadEmpList(); });
+	  modalDept?.addEventListener("change", loadEmpList);
+	
+	  /***********************
+	   * 11. (기존) 급여대장 저장 (신규/수정 공통)
+	   ***********************/
+	  const btnSalySaveEl = document.getElementById("btnSalySave");
+	  if (btnSalySaveEl) {
+	    btnSalySaveEl.addEventListener("click", () => {
+	      const salyNm = document.getElementById("salyNm")?.value.trim() || "";
+	      const revsYm = document.getElementById("revs_ym")?.value.trim() || "";
+	      const payDt  = document.getElementById("payDt")?.value.trim() || "";
+	
+	      if (!salyNm) { alert("급여대장명칭을 입력하세요."); return; }
+	      if (!revsYm) { alert("귀속연월을 선택하세요."); return; }
+	      if (!payDt)  { alert("지급일자를 선택하세요."); return; }
+	      if (!grid2)  { alert("사원 목록 그리드가 초기화되지 않았습니다."); return; }
+	
+	      const checkedRows = grid2.getCheckedRows();
+	      if (!checkedRows || checkedRows.length === 0) {
+	        alert("급여명세서를 생성할 사원을 한 명 이상 선택하세요.");
+	        return;
+	      }
+	
+	      const empIdList = checkedRows.map(r => r.empId);
+	      const isEdit = editMode && editingSalyLedgId;
+	
+	      const payload = {
+	        salyLedgId : isEdit ? editingSalyLedgId : null,
+	        salyLedgNm : salyNm,
+	        revsYm     : revsYm,
+	        payDt      : payDt,
+	        empIdList  : empIdList
+	      };
+	
+	      fetch("/insa/saly/save", {
+	        method : "POST",
+	        headers: { "Content-Type": "application/json" },
+	        body   : JSON.stringify(payload)
+	      })
+	      .then(res => res.json())
+	      .then(body => {
+	        if (body.result !== "SUCCESS") {
+	          alert(body.message || "저장 중 오류가 발생했습니다.");
+	          return;
+	        }
+	
+	        alert("저장되었습니다.");
+	        loadSalyList();
+	        closeSalyRegistModal();
+	      })
+	      .catch(err => {
+	        console.error("급여대장 저장 오류", err);
+	        alert("급여대장 저장 중 오류가 발생했습니다.");
+	      });
+	    });
+	  }
+	
+	  /* ============================================================
+	   * ✅ 급여계산 / 급여계산그룹
+	   * ============================================================ */
+	
+	  function moneyFmt({ value }) {
+	    if (value == null || value === "") return "";
+	    const n = Number(value);
+	    if (!Number.isFinite(n)) return value;
+	    return n.toLocaleString("ko-KR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+	  }
+	
+	  // ================== 급여계산 모달 상태 ==================
+	  const calcBackdrop = document.getElementById("salyCalcBackdrop");
+	  const calcModal    = document.getElementById("salyCalcModal");
+	  const btnOpenCalc  = document.getElementById("btnSalyCalc");
+	  const btnCalcClose = document.getElementById("btnSalyCalcClose");
+	  const btnOpenItem  = document.getElementById("btnOpenSalyItemModal");
+	  const btnCalcSave  = document.getElementById("btnCalcSave");
+	  const gridCalcEl   = document.getElementById("gridCalc");
+	
+	  let gridCalc = null;
+	  let currentCalcSalyLedgId = null;
+	
+	  let selectedGrpNo = null;
+	  let selectedGrpNm = "";
+	  let selectedGroupItems = [];
+	
+	  // ✅ (신규) '확인'은 미리보기만: 계산 결과를 메모리에 보관했다가 '저장'에서만 DB 반영
+	  let pendingCalcBySpecId = {}; // { [salySpecId]: { items:[], payAmt, ttDucAmt, actPayAmt } }
+	  let pendingGrpNo = null;
+	
+	  // ✅ (추가) editor로 값이 바뀐 행(사원)을 저장 대상으로 추적
+	  let dirtySpecIdSet = new Set();
+	  // ✅ (추가) grpNo별 항목 메타 캐시 (itemTy/itemNm)
+	  let groupItemMetaByGrpNo = {}; // { [grpNo]: { [itemId]: { itemTy, itemNm } } }
+	
+	  const baseCalcColumns = [
+		  {
+			  header: "salySpecId",
+			  name: "salySpecId",
+			  hidden: true
+			},
+	    { header:"사원번호", name:"empId", align:"center", width:100 },
+	    { header:"사원명",   name:"empNm", align:"center", width:120 },
+	    { header:"부서명",   name:"deptNm", align:"center", width:120 },
+	    { header:"직급",     name:"clsfNm",   align:"center", width:80 },
+	    { header:"직책",     name:"rspofcNm", align:"center", width:80 },
+	    { header:"적용된 계산그룹", name:"calcGrpNm", align:"center", width:150 }
+	  ];
+	
+	  function initCalcGrid() {
+	    if (!gridCalcEl || gridCalc) return;
+	    gridCalc = new tui.Grid({
+	      el: gridCalcEl,
+	      data: [],
+	      bodyHeight: 520,
+	      scrollX: true,
+	      scrollY: true,
+	      rowHeaders: ['checkbox'],
+	      columns: [...baseCalcColumns]
+	    });
+	
+	    // ✅ FIX: 계산그룹을 한 번도 적용하지 않은 행은 editor 진입 자체를 막는다.
+	    // - 시각적 구분은 하지 않되, 편집만 차단.
+	    // - 적용된 행은 기존처럼 editor로 수정 가능.
+		gridCalc.on('editingStart', (ev) => {
+		  try {
+		    const row = gridCalc.getRow(ev.rowKey);
+		    const grpNo = row ? row.grpNo : null;
+		
+		    // 1) 그룹 미적용이면 편집 막기
+		    if (grpNo == null || grpNo === "" || Number(grpNo) === 0) {
+		      ev.stop();
+		      return;
+		    }
+		
+		    // 2) 값이 없으면 편집 막기 (✅ 0도 빈값 취급)
+		    const v = row ? row[ev.columnName] : null;
+		
+		    const n = (v == null) ? NaN : Number(String(v).replaceAll(",", "").trim());
+		    const isEmpty =
+		      v == null ||
+		      String(v).trim() === "" ||
+		      (!Number.isNaN(n) && n === 0);
+		
+		    if (isEmpty) {
+		      ev.stop();
+		      return;
+		    }
+		
+		  } catch (e) {
+		    ev.stop();
+		  }
+		});
 
-</script>
-</body>
-</html>
+	
+		// ✅ editor로 금액 바뀌면 pendingCalcBySpecId도 같이 갱신 (저장 시 수정값 반영)
+		gridCalc.on("afterChange", (ev) => {
+		  try {
+		    if (!ev || !Array.isArray(ev.changes)) return;
+
+		    ev.changes.forEach((c) => {
+		      if (!c) return;
+
+		      const rowKey = c.rowKey;
+		      const colName = c.columnName;
+
+		      // 동적컬럼(calc_A_9 형태)만 추적
+		      if (!colName || !String(colName).startsWith("calc_")) return;
+
+		      const row = gridCalc.getRow(rowKey);
+		      if (!row) return;
+
+		      const salySpecId = row.salySpecId;
+		      if (!salySpecId) return;
+
+		      // calc_{itemTy}_{dispNo} 파싱
+		      const parts = String(colName).split("_"); // ["calc","A","9"]
+		      const itemTy = parts[1];
+		      const dispNo = Number(parts[2]);
+
+		      if (!itemTy || !Number.isFinite(dispNo)) return;
+
+		      // 새 값 -> 숫자
+		      const rawVal = c.value;
+		      const amt = (rawVal == null || rawVal === "")
+		        ? 0
+		        : Number(String(rawVal).replaceAll(",", "").trim());
+
+		      // 숫자 아니면 무시
+		      if (!Number.isFinite(amt)) return;
+
+		      // ✅ 수정된 사원 추적
+		      dirtySpecIdSet.add(salySpecId);
+
+		      // ✅ pendingCalcBySpecId 없으면 만들어 둠(수정만 하고 저장하는 케이스 방어)
+		      if (!pendingCalcBySpecId[salySpecId]) {
+		        pendingCalcBySpecId[salySpecId] = { items: [], payAmt: 0, ttDucAmt: 0, actPayAmt: 0 };
+		      }
+		      if (!Array.isArray(pendingCalcBySpecId[salySpecId].items)) {
+		        pendingCalcBySpecId[salySpecId].items = [];
+		      }
+
+		      // itemNm 구하기: 컬럼 header를 itemNm로 사용
+		      // (지웅님 buildDynamicColumnsByGroupItems에서 header가 itemNm로 들어가니까 이게 가장 안전)
+		      const col = gridCalc.getColumns().find(x => x && x.name === colName);
+		      const itemNm = (col && col.header) ? String(col.header) : "";
+
+		      // ✅ 같은 (itemTy, dispNo) 항목 찾기/없으면 생성
+		      let it = pendingCalcBySpecId[salySpecId].items.find(x =>
+		        x && String(x.itemTy) === String(itemTy) && Number(x.dispNo) === dispNo
+		      );
+
+		      if (!it) {
+		        it = { itemTy, dispNo, amt: 0, itemNm: itemNm };
+		        pendingCalcBySpecId[salySpecId].items.push(it);
+		      }
+
+		      it.amt = amt;
+		      it.itemNm = itemNm; // ✅ itemNm도 같이 보존/전달
+		    });
+		  } catch (e) {
+		    console.error("afterChange sync error", e);
+		  }
+		});
+
+	  }
+	
+	  function openSalyCalcModal() {
+	    if (!calcModal || !calcBackdrop) return;
+	    calcModal.classList.add("show");
+	    calcModal.style.display = "block";
+	    calcBackdrop.style.display = "block";
+	
+	    initCalcGrid();
+	    if (gridCalc && gridCalc.refreshLayout) {
+	      setTimeout(() => gridCalc.refreshLayout(), 0);
+	    }
+	  }
+	
+	  function closeSalyCalcModal() {
+	    if (calcModal) {
+	      calcModal.classList.remove("show");
+	      calcModal.style.display = "none";
+	    }
+	    if (calcBackdrop) calcBackdrop.style.display = "none";
+	    currentCalcSalyLedgId = null;
+	  }
+	
+	  calcBackdrop?.addEventListener("click", closeSalyCalcModal);
+	  calcModal?.addEventListener("click", (e) => {
+	    if (!e.target.closest(".modal-content")) closeSalyCalcModal();
+	  });
+	  document.addEventListener("keydown", (e) => {
+	    if (e.key === "Escape") {
+	      if (calcModal && calcModal.style.display === "block") closeSalyCalcModal();
+	    }
+	  });
+	  btnCalcClose?.addEventListener("click", closeSalyCalcModal);
+	
+	  /* ============================================================
+	   * ✅ [수정] 재진입 로딩
+	   * - grpNo가 있는 행만 대상으로 동적컬럼 + DB items 채움
+	   * - 전체 행에 그룹명이 퍼지지 않도록 보장
+	   * ============================================================ */
+	   async function loadCalcSpecList(salyLedgId) {
+		   if (!gridCalc) return;
+	
+		   // ✅ 재로딩 시 변경 추적/미리보기 상태 초기화
+		   dirtySpecIdSet.clear();
+		   pendingCalcBySpecId = {};
+		   pendingGrpNo = null; // 있어도 무방(기존 흐름 유지)
+	
+		   fetch("/insa/saly/calc/specList?salyLedgId=" + encodeURIComponent(salyLedgId))
+		     .then(async (res) => {
+		       if (!res.ok) {
+		         const text = await res.text().catch(() => "");
+		         throw new Error("HTTP " + res.status + " / " + text);
+		       }
+		       return res.json();
+		     })
+		     .then(async (data) => {
+		       const list = Array.isArray(data)
+		         ? data
+		         : Array.isArray(data?.list) ? data.list
+		         : Array.isArray(data?.data) ? data.data
+		         : null;
+	
+		       if (!list) throw new Error("specList 응답이 배열이 아닙니다.");
+	
+		       const rows = list.map(v => ({
+		         salySpecId: v.salySpecId,
+		         empId: v.empId,
+		         empNm: v.empNm,
+		         deptNm: v.deptNm || "",
+		         clsfNm: v.clsfNm || "",
+		         rspofcNm: v.rspofcNm || "",
+		         // specList는 기존대로 grpNo/calcGrpNm 내려주면 화면 표시용으로만 씁니다
+		         grpNo: (v.grpNo ?? v.grp_no ?? v.GRP_NO ?? null),
+		         calcGrpNm: (v.calcGrpNm ?? v.calc_grp_nm ?? v.CALC_GRP_NM ?? "") || "",
+		         payAmt: (v.payAmt ?? v.pay_amt ?? null),
+		         ttDucAmt: (v.ttDucAmt ?? v.tt_duc_amt ?? null),
+		         actPayAmt: (v.actPayAmt ?? v.act_pay_amt ?? null)
+		       }));
+	
+		       // 1) 기본 컬럼 + 데이터
+		       gridCalc.setColumns([...baseCalcColumns]);
+		       gridCalc.resetData(rows);
+	
+		       // 2) 계산그룹 적용된 명세서만 골라서 재조회
+		       const appliedRows = rows.filter(r =>
+		         r.salySpecId &&
+		         r.calcGrpNm && r.calcGrpNm.trim() !== ""
+		       );
+	
+		       if (appliedRows.length === 0) {
+		         if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
+		         return;
+		       }
+	
+		       // ✅ 핵심: 재조회는 groupItems(grpNo/grpNm) 쓰지 말고, 명세서ID로 items를 가져옵니다.
+		       const appliedSpecIds = appliedRows.map(r => r.salySpecId).filter(Boolean);
+	
+		       // 3) 모든 specId의 items를 모아서 "동적 컬럼" 구성
+		       const allItems = [];
+		       for (const specId of appliedSpecIds) {
+		         const res = await fetchJsonSafe(
+		           "/insa/saly/calc/items?salySpecId=" + encodeURIComponent(specId)
+		         );
+	
+		         const items = Array.isArray(res)
+		         ? res
+		         : (res.data || res.items || res.list || []);
+	
+		         allItems.push(...items);
+		       }
+	
+		    // itemTy + dispNo 기준으로 유니크 컬럼 구성
+		       const uniqMap = new Map();
+
+		       // ✅ 여기서는 "래퍼 객체" 말고, 원본 item 자체를 Map에 넣어야 buildDynamicColumnsByGroupItems가 그대로 먹습니다.
+		       allItems.forEach((it) => {
+		         if (!it) return;
+
+		         const itemTy = it.itemTy ?? it.item_ty ?? it.ITEM_TY;
+		         const dispNo = it.dispNo ?? it.disp_no ?? it.DISP_NO;
+
+		         if (itemTy == null || dispNo == null) return;
+
+		         const key = `calc_${itemTy}_${dispNo}`;
+		         if (!uniqMap.has(key)) uniqMap.set(key, it);
+		       });
+
+		       const dynamicCols = buildDynamicColumnsByGroupItems(
+		         Array.from(uniqMap.values())
+		       );
+
+		       // ✅ Toast Grid setColumns는 "배열 하나"를 넣어야 하므로 스프레드로 합쳐야 합니다.
+		       gridCalc.setColumns([...baseCalcColumns, ...dynamicCols]);
+		       applyReadonlyCellBgForNoGroup(dynamicCols);
+
+		       // 4) 값 채우기 (재조회는 specId만)
+		       await fillCalculatedAmountsForSelectedSpecs(appliedSpecIds, null);
+
+		       // 5) 실제 값(0 제외) 없는 동적컬럼 제거
+		       if (dynamicCols.length > 0) {
+		         const prunedCols = pruneEmptyDynamicColumns(dynamicCols);
+		         gridCalc.setColumns([...baseCalcColumns, ...prunedCols]);
+		         applyReadonlyCellBgForNoGroup(prunedCols);
+		       }
+
+		       if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
+
+
+		     })
+		     .catch(err => {
+		       console.error("급여계산 사원 로딩 오류", err);
+		       alert("급여계산 대상 사원 조회 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
+		     });
+		 }
+	
+	   function buildDynamicColumnsByGroupItems(items) {
+		   console.log("raw[0] =", Array.isArray(items) ? items[0] : items);
+
+		   const raw = (() => {
+		     // ✅ 1) 배열이면 그대로 써야 함
+		     if (Array.isArray(items)) return items;
+		     if (!items) return [];
+
+		     const a = items.allowList ?? items.allow ?? items.allowItems ?? [];
+		     const d = items.ducList ?? items.duc ?? items.ducItems ?? [];
+		     const l = items.list ?? items.items ?? [];
+		     return []
+		       .concat(Array.isArray(l) ? l : [])
+		       .concat(Array.isArray(a) ? a : [])
+		       .concat(Array.isArray(d) ? d : []);
+		   })();
+
+		   const list = raw
+		     .map((it) => {
+		       if (!it) return null;
+
+		       // ✅ wrapper({ it, itemTy, dispNo }) 형태면 원본으로 풀기
+		       it = it.it ?? it;
+
+		       const itemNo = it.itemNo ?? it.item_no ?? it.ITEM_NO;
+
+		       const itemId =
+		         it.itemId ?? it.item_id ??
+		         it.allowId ?? it.allow_id ??
+		         it.ducId ?? it.duc_id ??
+		         itemNo;
+
+		       const itemNm =
+		         it.itemNm ?? it.item_nm ??
+		         it.allowNm ?? it.allow_nm ??
+		         it.ducNm ?? it.duc_nm ??
+		         it.codeNm ?? it.code_nm ?? "";
+
+		       const itemTy =
+		         it.itemTy ?? it.item_ty ??
+		         (it.allowId || it.allow_id ? "A" : (it.ducId || it.duc_id ? "D" : null));
+
+		       const dispNo = it.dispNo ?? it.disp_no ?? it.DISP_NO;
+
+		       // ✅ 컬럼키에 필수
+		       if (itemTy == null || dispNo == null) return null;
+
+		       return {
+		         itemId: String(itemId ?? ""),
+		         itemNo: (itemNo == null ? null : Number(itemNo)),
+		         itemNm: String(itemNm),
+		         itemTy: String(itemTy),
+		         dispNo: Number(dispNo),
+		       };
+		     })
+		     .filter(Boolean);
+
+		   const toNum = (v) => (Number.isFinite(Number(v)) ? Number(v) : 999999);
+
+		   // ✅ 정렬: A(수당) → D(공제) → dispNo → itemNo
+		   list.sort((a, b) => {
+		     const at = (a.itemTy === "A") ? 0 : 1;
+		     const bt = (b.itemTy === "A") ? 0 : 1;
+		     if (at !== bt) return at - bt;
+
+		     const an = toNum(a.dispNo);
+		     const bn = toNum(b.dispNo);
+		     if (an !== bn) return an - bn;
+
+		     const ao = (a.itemNo == null ? 999999999 : a.itemNo);
+		     const bo = (b.itemNo == null ? 999999999 : b.itemNo);
+		     if (ao !== bo) return ao - bo;
+
+		     return String(a.itemId).localeCompare(String(b.itemId));
+		   });
+
+		   return list.map((it) => ({
+		     header: (it.itemNm && String(it.itemNm).trim().length > 0)
+		       ? String(it.itemNm).trim()
+		       : `(${it.itemTy}${it.dispNo})`,
+		     name: `calc_${it.itemTy}_${it.dispNo}`,
+		     align: "right",
+		     width: 120,
+		     editor: "text",
+		     formatter: moneyFmt,
+		   }));
+		 }
+
+	
+	  /********************************************************
+	   * ✅ (추가) 재진입 시 "전부 0/빈값"인 동적 컬럼 숨기기
+	   * - groupItems에는 있지만 실제 DB(tb_saly_spec_item)에 값이 하나도 없으면
+	   *   컬럼을 숨겨서 화면이 깔끔하게 보이게 함
+	   * - 0도 "값 없음"으로 간주(집계/표시 의미 없음)
+	   ********************************************************/
+	   function pruneEmptyDynamicColumns(dynamicCols) {
+		   if (!Array.isArray(dynamicCols) || dynamicCols.length === 0) return [];
+
+		   // 1) 현재 그리드의 row 데이터 가져오기 (사용 중인 방식에 맞게 하나만 남기세요)
+		   const rows = gridCalc?.getData?.() ?? gridCalc?.getRows?.() ?? [];
+
+		   // 2) 값이 하나라도 있는 컬럼만 남긴다
+		   return dynamicCols.filter((col) => {
+		     const key = col.name;
+		     if (!key) return false;
+
+		     // 어떤 row라도 값이 있으면 유지
+		     for (let i = 0; i < rows.length; i++) {
+		       const v = rows[i]?.[key];
+		       if (v !== null && v !== undefined && String(v).trim() !== "" && Number(v) !== 0) {
+		         return true;
+		       }
+		     }
+		     return false;
+		   });
+		 }
+
+	
+	   /********************************************************
+	    * ✅ (교체) 계산결과 셀 채우기
+	    * - previewMap 있으면(적용 직후) previewMap 우선
+	    * - 없으면(재진입) DB에서 salySpecId만으로 조회
+	    * - 동적 컬럼 키는 itemId가 아니라 (itemTy + dispNo) 기반
+	    ********************************************************/
+	   async function fillCalculatedAmountsForSelectedSpecs(selectedSpecIds, previewMap) {
+	     if (!gridCalc) return;
+	
+	     const rows = gridCalc.getData() || [];
+	  // (수정) ✅ 배열만 Set으로
+	     const selectedArr = Array.isArray(selectedSpecIds) ? selectedSpecIds : [];
+	     const selectedSet = new Set(selectedArr);
+	
+	     // salySpecId별 items를 한 번에 받아서 Map으로 캐싱 (재조회용)
+	     const needDbFetch = [];
+	     rows.forEach(r => {
+	       if (!selectedSet.has(r.salySpecId)) return;
+	       if (previewMap && previewMap[r.salySpecId]) return;
+	       needDbFetch.push(r.salySpecId);
+	     });
+	
+	     const dbItemsMap = new Map(); // salySpecId -> items[]
+	     if (needDbFetch.length > 0) {
+	       const uniq = Array.from(new Set(needDbFetch));
+	       const results = await Promise.all(
+	         uniq.map(async (specId) => {
+	        	 const url =
+	        		  "/insa/saly/calc/items?salySpecId=" + encodeURIComponent(specId);
+	
+	        		const data = await fetchJsonSafe(url);
+	
+	        		const items = Array.isArray(data)
+	        		  ? data
+	        		  : (Array.isArray(data?.items) ? data.items
+	        		    : (Array.isArray(data?.list) ? data.list : []));
+	
+	        		const totals = (!Array.isArray(data) && data) ? data : null;
+	
+	           // 지금은 items만 확실히 처리
+	           return [specId, items];
+	         })
+	       );
+	
+	       results.forEach(([specId, items]) => dbItemsMap.set(specId, items || []));
+	     }
+	
+	     // 실제 grid row 업데이트
+	     const updatedRows = await Promise.all(rows.map(async (row) => {
+	       if (!selectedSet.has(row.salySpecId)) return row;
+	
+	       let items = [];
+	       let totals = null;
+	
+	       if (previewMap && previewMap[row.salySpecId]) {
+	         const one = previewMap[row.salySpecId];
+	         items = Array.isArray(one.items) ? one.items : [];
+	         totals = one;
+	       } else {
+	         items = dbItemsMap.get(row.salySpecId) || [];
+	         totals = null;
+	       }
+	
+	    // ✅ 동적 컬럼 값 채우기 (컬럼 name = calc_{itemTy}_{dispNo} 형태로 매칭)
+	       (items || []).forEach((it) => {
+	         if (!it) return;
+
+	         // ✅ 재조회/미리보기/대문자 키까지 전부 커버
+	         const itemTy = it.itemTy ?? it.item_ty ?? it.ITEM_TY ?? it.itemty;
+	         const dispNoRaw = it.dispNo ?? it.disp_no ?? it.DISP_NO ?? it.dispno;
+
+	         // dispNo는 "9" 같은 문자열로 와도 되고 숫자로 와도 됨 → 키 만들 때 문자열로 통일
+	         const dispNo = (dispNoRaw == null) ? null : String(dispNoRaw).trim();
+
+	         if (!itemTy || !dispNo) return; // 키 못 만들면 주입 불가
+
+	         const key = `calc_${String(itemTy).trim()}_${dispNo}`;
+
+	         // amt도 다양한 키 가능성 커버
+	         const amtRaw = it.amt ?? it.AMT ?? it.amount ?? it.AMOUNT ?? 0;
+	         const amt = Number(String(amtRaw).replaceAll(",", "").trim() || "0");
+
+	         // grid row에 값 주입
+	         row[key] = Number.isFinite(amt) ? amt : 0;
+	       });
+
+
+	
+	       // totals가 내려오는 구조면 여기서 합계도 채워넣기
+	       if (totals) {
+	         row.payAmt    = totals.payAmt    ?? row.payAmt;
+	         row.ttDucAmt  = totals.ttDucAmt  ?? row.ttDucAmt;
+	         row.actPayAmt = totals.actPayAmt ?? row.actPayAmt;
+	       }
+	
+	       return row;
+	     }));
+	
+	     gridCalc.resetData(updatedRows);
+	   }
+	
+	
+	
+	  btnOpenCalc?.addEventListener("click", () => {
+	    const selected = getSelectedRow();
+	    if (!selected) {
+	      alert("급여계산할 급여대장을 선택해주세요.");
+	      return;
+	    }
+	    const { row } = selected;
+	    if (row.salyLedgSt === "sal3") {
+	      alert("지급완료된 급여대장은 급여계산을 할 수 없습니다.");
+	      return;
+	    }
+	
+	    currentCalcSalyLedgId = row.salyLedgId;
+	    openSalyCalcModal();
+	    loadCalcSpecList(currentCalcSalyLedgId);
+	  });
+	
+	  // ================== 급여계산그룹(그룹+항목) 모달 ==================
+	  const itemBackdrop = document.getElementById("salyItemBackdrop");
+	  const itemModal    = document.getElementById("salyItemModal");
+	  const btnItemClose = document.getElementById("btnSalyItemClose");
+	
+	  const gridGrpEl    = document.getElementById("gridGrp");
+	  const gridItemEl   = document.getElementById("gridItem");
+	  const grpHintEl    = document.getElementById("grpHint");
+	
+	  const btnItemAdd   = document.getElementById("btnItemAdd");
+	  const btnItemDel   = document.getElementById("btnItemDel");
+	  const btnItemSave  = document.getElementById("btnItemSave");
+	  const btnItemOk    = document.getElementById("btnItemOk");
+	
+	  let gridGrp  = null;
+	  let gridItem = null;
+	
+	  let grpRowKeySelected = null;
+	  let editingNewGroup = false;
+	
+	  let touchedGrpRowKeySet = new Set();
+	
+	  let currentItemTab = "A";
+	  let allItemRowsCache = [];
+	
+	  const checkedSetByGrpRowKey = new Map();
+	  let checkedItemIdSet = new Set();
+	
+	  let isSyncingItemChecks = false;
+	
+	  function markCurrentGroupAsUpdated() {
+	    if (!gridGrp) return;
+	    if (grpRowKeySelected == null) return;
+	
+	    const row = gridGrp.getRow(grpRowKeySelected);
+	    const grpNo = row?.grpNo;
+	
+	    if (!grpNo) return;
+	
+	    touchedGrpRowKeySet.add(grpRowKeySelected);
+	
+	    if (typeof gridGrp.setRowState === "function") {
+	      gridGrp.setRowState(grpRowKeySelected, "UPDATED");
+	    }
+	  }
+	
+	  function setGrpHint(msg) {
+	    if (!grpHintEl) return;
+	    grpHintEl.textContent = msg || "";
+	  }
+	
+	  function ensureItemTabsUI() {
+	    if (!gridItemEl) return;
+	    if (document.getElementById("salyItemTabs")) return;
+	
+	    const wrap = document.createElement("div");
+	    wrap.className = "saly-tab-wrapper";
+	    wrap.style.marginBottom = "0";
+	
+	    wrap.innerHTML = `
+	      <ul class="nav nav-tabs" id="salyItemTabs">
+	        <li class="nav-item">
+	          <button class="nav-link active" type="button" data-itemtab="A">수당</button>
+	        </li>
+	        <li class="nav-item">
+	          <button class="nav-link" type="button" data-itemtab="D">공제</button>
+	        </li>
+	      </ul>
+	    `;
+	
+	    gridItemEl.parentNode.insertBefore(wrap, gridItemEl);
+	
+	    const tabs = wrap.querySelectorAll(".nav-link");
+	    tabs.forEach(tab => {
+	      tab.addEventListener("click", () => {
+	        persistCurrentGroupCheckedSet();
+	
+	        tabs.forEach(t => t.classList.remove("active"));
+	        tab.classList.add("active");
+	        currentItemTab = tab.dataset.itemtab || "A";
+	        applyItemTabFilter();
+	      });
+	    });
+	  }
+	
+	  function setItemTabsActive(tabCode) {
+	    const tabEl = document.getElementById("salyItemTabs");
+	    if (!tabEl) return;
+	    const links = tabEl.querySelectorAll(".nav-link");
+	    links.forEach(l => l.classList.remove("active"));
+	    const target = tabEl.querySelector(`.nav-link[data-itemtab="${tabCode}"]`);
+	    if (target) target.classList.add("active");
+	  }
+	
+	  function syncCheckedSetFromGridItem() {
+	    if (!gridItem) return;
+	    const checked = gridItem.getCheckedRows() || [];
+	    checked.forEach(r => {
+	      if (r && r.itemId) checkedItemIdSet.add(r.itemId);
+	    });
+	  }
+	
+	  function removeUncheckedFromCurrentTabRows() {
+	    if (!gridItem) return;
+	    const visibleRows = gridItem.getData() || [];
+	    const checkedNow = new Set((gridItem.getCheckedRows() || []).map(r => r.itemId));
+	    visibleRows.forEach(r => {
+	      if (!r?.itemId) return;
+	      if (!checkedNow.has(r.itemId)) checkedItemIdSet.delete(r.itemId);
+	    });
+	  }
+	
+	  function applyCheckedSetToGridItem() {
+	    if (!gridItem) return;
+	
+	    isSyncingItemChecks = true;
+	    try {
+	      const rows = gridItem.getData() || [];
+	      rows.forEach(r => {
+	        if (r && r.itemId && checkedItemIdSet.has(r.itemId)) {
+	          gridItem.check(r.rowKey);
+	        }
+	      });
+	    } finally {
+	      isSyncingItemChecks = false;
+	    }
+	  }
+	
+	  function persistCurrentGroupCheckedSet() {
+	    if (grpRowKeySelected == null) return;
+	    if (!gridItem) return;
+	
+	    syncCheckedSetFromGridItem();
+	    removeUncheckedFromCurrentTabRows();
+	
+	    checkedSetByGrpRowKey.set(grpRowKeySelected, new Set(checkedItemIdSet));
+	  }
+	
+	  function loadCheckedSetForGroupRowKey(rowKey) {
+	    const saved = checkedSetByGrpRowKey.get(rowKey);
+	    checkedItemIdSet = saved ? new Set(saved) : new Set();
+	  }
+	
+	  function applyItemTabFilter() {
+	    if (!gridItem) return;
+	
+	    const filtered = (allItemRowsCache || []).filter(r => r.itemTy === currentItemTab);
+	    gridItem.resetData(filtered);
+	
+	    applyCheckedSetToGridItem();
+	
+	    if (gridItem.refreshLayout) setTimeout(() => gridItem.refreshLayout(), 0);
+	  }
+	
+	  function initGrpGrid() {
+	    if (!gridGrpEl || gridGrp) return;
+	
+	    gridGrp = new tui.Grid({
+	      el: gridGrpEl,
+	      data: [],
+	      bodyHeight: 180,
+	      scrollX: false,
+	      scrollY: true,
+	      rowHeaders: [],
+	      editingType: "cell",
+	      columns: [
+	        {
+	          header: "",
+	          name: "선택",
+	          width: 50,
+	          align: "center",
+	          formatter: ({ rowKey }) => `<input type="radio" name="payCalcGrpRadio" data-row-key="${rowKey}" />`
+	        },
+	        { header: "그룹번호", name: "grpNo", hidden: true },
+	        { header:"그룹명", name:"grpNm", editor:"text", minWidth: 300 }
+	      ]
+	    });
+	
+	    gridGrp.on("click", async (ev) => {
+	      const { rowKey, nativeEvent } = ev;
+	      if (rowKey == null) return;
+	
+	      const target = nativeEvent.target;
+	      if (!(target instanceof HTMLElement) || target.type !== "radio") return;
+	
+	      persistCurrentGroupCheckedSet();
+	
+	      grpRowKeySelected = rowKey;
+	
+	      const row = gridGrp.getRow(rowKey);
+	      const grpNo = row?.grpNo;
+	
+	      await loadAllItemsToCache();
+	
+	      if (!grpNo) {
+	        editingNewGroup = true;
+	        setGrpHint("(신규 그룹) 항목 선택 후 저장");
+	
+	        loadCheckedSetForGroupRowKey(rowKey);
+	
+	        currentItemTab = "A";
+	        setItemTabsActive("A");
+	        applyItemTabFilter();
+	
+	      } else {
+	        editingNewGroup = false;
+	        setGrpHint("선택 그룹: " + (row.grpNm || "") + " (grpNo=" + grpNo + ")");
+	
+	        const hasLocal = checkedSetByGrpRowKey.has(rowKey);
+	        const wasTouched = touchedGrpRowKeySet.has(rowKey);
+	
+	        if (!hasLocal && !wasTouched) {
+	          const groupItemIds = await fetchGroupItemIds(grpNo);
+	          checkedSetByGrpRowKey.set(rowKey, new Set(groupItemIds));
+	        }
+	
+	        loadCheckedSetForGroupRowKey(rowKey);
+	
+	        currentItemTab = "A";
+	        setItemTabsActive("A");
+	        applyItemTabFilter();
+	      }
+	    });
+	  }
+	
+	  function initItemGrid() {
+	    if (!gridItemEl || gridItem) return;
+	
+	    gridItem = new tui.Grid({
+	      el: gridItemEl,
+	      data: [],
+	      bodyHeight: 360,
+	      scrollX: true,
+	      scrollY: true,
+	      rowHeaders: ['checkbox'],
+	      columns: [
+	        { header:"구분",     name:"itemTyNm", align:"center", width:80 },
+	        { header:"표시번호", name:"dispNo",   align:"center", width:90 },
+	        { header:"항목ID",   name:"itemId",   width:170 },
+	        { header:"항목명",   name:"itemNm",   width:220 },
+	        { header:"계산식",   name:"calFmlt",  width:200 },
+	        { header:"산출방법", name:"calMthd",  width:280 }
+	      ]
+	    });
+	
+	    gridItem.on("check", () => {
+	      if (isSyncingItemChecks) return;
+	      syncCheckedSetFromGridItem();
+	      persistCurrentGroupCheckedSet();
+	      markCurrentGroupAsUpdated();
+	    });
+	
+	    gridItem.on("uncheck", () => {
+	      if (isSyncingItemChecks) return;
+	      removeUncheckedFromCurrentTabRows();
+	      persistCurrentGroupCheckedSet();
+	      markCurrentGroupAsUpdated();
+	    });
+	  }
+	
+	  function openSalyItemModal() {
+	    if (!itemModal || !itemBackdrop) return;
+	
+	    itemModal.classList.add("show");
+	    itemModal.style.display = "block";
+	    itemBackdrop.style.display = "block";
+	
+	    initGrpGrid();
+	    initItemGrid();
+	
+	    ensureItemTabsUI();
+	
+	    if (gridGrp && gridGrp.refreshLayout) setTimeout(() => gridGrp.refreshLayout(), 0);
+	    if (gridItem && gridItem.refreshLayout) setTimeout(() => gridItem.refreshLayout(), 0);
+	
+	    loadGroupList();
+	  }
+	
+	  function closeSalyItemModal() {
+	    persistCurrentGroupCheckedSet();
+	
+	    if (itemModal) {
+	      itemModal.classList.remove("show");
+	      itemModal.style.display = "none";
+	    }
+	    if (itemBackdrop) itemBackdrop.style.display = "none";
+	
+	    grpRowKeySelected = null;
+	    editingNewGroup = false;
+	    setGrpHint("");
+	
+	    currentItemTab = "A";
+	    setItemTabsActive("A");
+	  }
+	
+	  itemBackdrop?.addEventListener("click", closeSalyItemModal);
+	  itemModal?.addEventListener("click", (e) => {
+	    if (!e.target.closest(".modal-content")) closeSalyItemModal();
+	  });
+	  btnItemClose?.addEventListener("click", closeSalyItemModal);
+	
+	  btnOpenItem?.addEventListener("click", () => {
+	    if (!currentCalcSalyLedgId) {
+	      alert("급여계산 모달이 먼저 열려야 합니다.");
+	      return;
+	    }
+	    if (!gridCalc) {
+	      alert("사원 목록 그리드가 초기화되지 않았습니다.");
+	      return;
+	    }
+	    const checkedRows = gridCalc.getCheckedRows() || [];
+	    if (checkedRows.length === 0) {
+	      alert("급여계산그룹을 적용할 사원을 먼저 체크하세요.");
+	      return;
+	    }
+	    openSalyItemModal();
+	  });
+	
+	  async function loadGroupList() {
+	    if (!gridGrp) return;
+	
+	    try {
+	      const list = await fetch("/insa/saly/calc/grp/list").then(r => r.json());
+	      const rows = (list || []).map(x => ({
+	        grpNo: x.grpNo,
+	        grpNm: x.grpNm
+	      }));
+	
+	      gridGrp.resetData(rows);
+	
+	      // ✅ 다시 열었을 때 "이전에 적용했던 그룹"을 자동 선택하지 않도록
+	      //    항상 처음 상태(미선택)로 시작한다.
+	      setGrpHint("그룹을 선택하거나 행추가를 누르세요.");
+	      allItemRowsCache = [];
+	      if (gridItem) gridItem.resetData([]);
+	
+	      grpRowKeySelected = null;
+	      checkedItemIdSet = new Set();
+	
+	    } catch (err) {
+	      console.error("그룹 목록 로딩 오류", err);
+	      alert("급여계산그룹 목록 조회 중 오류가 발생했습니다.");
+	    }
+	  }
+	
+	  async function loadAllItemsToCache() {
+	    if (!gridItem) return;
+	
+	    try {
+	      const list = await fetch("/insa/saly/item/list").then(r => r.json());
+	
+	      const rows = (list || []).map(x => ({
+	        itemTy: x.itemTy,
+	        itemTyNm: (x.itemTy === "A" ? "수당" : "공제"),
+	        itemId: x.itemId,
+	        itemNm: x.itemNm,
+	        dispNo: x.dispNo,
+	        calFmlt: x.calFmlt,
+	        calMthd: x.calMthd,
+	        ynCode: x.ynCode
+	      }));
+	
+	      const toNum = (v) => {
+	        const n = Number(v);
+	        return Number.isFinite(n) ? n : 999999;
+	      };
+	
+	      rows.sort((a,b) => {
+	        const at = a.itemTy === "A" ? 0 : 1;
+	        const bt = b.itemTy === "A" ? 0 : 1;
+	        if (at !== bt) return at - bt;
+	        const an = toNum(a.dispNo);
+	        const bn = toNum(b.dispNo);
+	        if (an !== bn) return an - bn;
+	        return String(a.itemId).localeCompare(String(b.itemId));
+	      });
+	
+	      allItemRowsCache = rows;
+	
+	    } catch (err) {
+	      console.error("전체 항목 로딩 오류", err);
+	      alert("수당/공제 항목 조회 중 오류가 발생했습니다.");
+	    }
+	  }
+	
+	  async function fetchGroupItemIds(grpNo) {
+	    try {
+	      const list = await fetch("/insa/saly/item/list?grpNo=" + encodeURIComponent(grpNo)).then(r => r.json());
+	      return (list || []).map(x => x.itemId).filter(Boolean);
+	    } catch (err) {
+	      console.error("그룹 항목 조회 오류", err);
+	      alert("그룹 항목 조회 중 오류가 발생했습니다.");
+	      return [];
+	    }
+	  }
+	
+	  btnItemAdd?.addEventListener("click", async () => {
+	    if (!gridGrp) return;
+	
+	    persistCurrentGroupCheckedSet();
+	
+	    gridGrp.appendRow({ grpNo: "", grpNm: "" }, { focus: true });
+	
+	    const data = gridGrp.getData() || [];
+	    const last = data[data.length - 1];
+	    const rowKey = last?.rowKey;
+	
+	    grpRowKeySelected = rowKey;
+	    editingNewGroup = true;
+	
+	    setTimeout(() => {
+	      const radio = gridGrpEl.querySelector(`input[type="radio"][name="payCalcGrpRadio"][data-row-key="${rowKey}"]`);
+	      if (radio) radio.checked = true;
+	    }, 0);
+	
+	    setGrpHint("(신규 그룹) 항목 선택 후 저장");
+	
+	    await loadAllItemsToCache();
+	
+	    checkedSetByGrpRowKey.set(rowKey, new Set());
+	    loadCheckedSetForGroupRowKey(rowKey);
+	
+	    currentItemTab = "A";
+	    setItemTabsActive("A");
+	    applyItemTabFilter();
+	  });
+	
+	  btnItemDel?.addEventListener("click", () => {
+	    if (!gridGrp) return;
+	    if (grpRowKeySelected == null) {
+	      alert("삭제할 그룹을 선택해주세요.");
+	      return;
+	    }
+	
+	    checkedSetByGrpRowKey.delete(grpRowKeySelected);
+	
+	    gridGrp.removeRow(grpRowKeySelected);
+	
+	    grpRowKeySelected = null;
+	    editingNewGroup = false;
+	    setGrpHint("그룹을 선택하거나 행추가를 누르세요.");
+	
+	    allItemRowsCache = [];
+	    checkedItemIdSet = new Set();
+	    gridItem?.resetData([]);
+	  });
+	
+	  btnItemSave?.addEventListener("click", async () => {
+		try { gridCalc.finishEditing(); } catch (e) {}
+		  
+	    if (!gridGrp || !gridItem) return;
+	
+	    persistCurrentGroupCheckedSet();
+	    gridGrp.finishEditing();
+	
+	    const { createdRows, updatedRows, deletedRows } = gridGrp.getModifiedRows();
+	
+	    const createdKeySet = new Set((createdRows || []).map(r => r.rowKey));
+	    const deletedKeySet = new Set((deletedRows || []).map(r => r.rowKey));
+	
+	    touchedGrpRowKeySet.forEach((rk) => {
+	      if (createdKeySet.has(rk)) return;
+	      if (deletedKeySet.has(rk)) return;
+	
+	      const r = gridGrp.getRow(rk);
+	      if (!r?.grpNo) return;
+	
+	      const already = (updatedRows || []).some(
+	        u => u.rowKey === rk || Number(u.grpNo) === Number(r.grpNo)
+	      );
+	      if (!already) updatedRows.push({ ...r, rowKey: rk });
+	    });
+	 // ✅ 그룹명 중복 방지(프론트) - 저장 전 검증
+	    const normalizeGrpNm = (s) =>
+	      String(s ?? "")
+	        .trim()
+	        .replace(/\s+/g, " ")   // 연속 공백 정리
+	        .toLowerCase();         // 대소문자 무시(원하면 제거 가능)
+
+	    const deletedKeySet2 = new Set((deletedRows || []).map(r => r.rowKey));
+
+	    // grid에 남아있는(삭제 제외) 모든 행 기준으로 "중복 그룹명" 검사
+	    const nameToRowKey = new Map();
+	    let dupRowKey = null;
+
+	    (gridGrp.getData() || []).forEach(r => {
+	      if (!r) return;
+	      if (deletedKeySet2.has(r.rowKey)) return; // 삭제 예정은 검사 제외
+
+	      const nm = normalizeGrpNm(r.grpNm);
+	      if (!nm) return; // 빈값은 아래 필수검사에서 걸리므로 여기선 스킵
+
+	      if (nameToRowKey.has(nm)) {
+	        dupRowKey = r.rowKey; // 중복 발견
+	        return;
+	      }
+	      nameToRowKey.set(nm, r.rowKey);
+	    });
+
+	    if (dupRowKey != null) {
+	      alert("이미 존재하는 그룹명입니다. 그룹명은 중복으로 저장할 수 없습니다.");
+
+	      // ✅ 중복 난 행으로 포커스 이동(가능하면)
+	      try {
+	        gridGrp.focus(dupRowKey, "grpNm");
+	        gridGrp.startEditing(dupRowKey, "grpNm");
+	      } catch (_) {}
+	      return;
+	    }
+
+	    const invalid = [...createdRows, ...updatedRows].some(r => !(r.grpNm || "").trim());
+	    if (invalid) {
+	      alert("그룹명은 필수입니다.");
+	      return;
+	    }
+	
+	    const getItemIdsByRowKey = (rowKey) => {
+	      const set = checkedSetByGrpRowKey.get(rowKey);
+	      return set ? Array.from(set) : [];
+	    };
+	
+	    const payload = {
+	      createdRows: (createdRows || []).map(r => ({
+	        grpNm: r.grpNm,
+	        itemIds: getItemIdsByRowKey(r.rowKey)
+	      })),
+	      updatedRows: (updatedRows || []).map(r => ({
+	        grpNo: r.grpNo,
+	        grpNm: r.grpNm,
+	        itemIds: getItemIdsByRowKey(r.rowKey)
+	      })),
+	      deletedRows: (deletedRows || []).map(r => ({
+	        grpNo: r.grpNo
+	      }))
+	    };
+	
+	    try {
+	    	console.log("[GRP SAVE] payload=", payload);
+	    	console.log("[GRP SAVE] createdRows=", payload.createdRows);
+	    	console.log("[GRP SAVE] updatedRows=", payload.updatedRows);
+	    	console.log("[GRP SAVE] deletedRows=", payload.deletedRows);
+	      const res = await fetchJsonSafe("/insa/saly/calc/grp/saveAll", {
+	        method: "POST",
+	        headers: { "Content-Type": "application/json" },
+	        body: JSON.stringify(payload)
+	      });
+	
+	      if (res?.result !== "SUCCESS") {
+	        alert(res?.message || "저장 실패");
+	        return;
+	      }
+	
+	      alert("저장되었습니다.");
+	
+	      touchedGrpRowKeySet.clear();
+	
+	      grpRowKeySelected = null;
+	      editingNewGroup = false;
+	
+	      checkedSetByGrpRowKey.clear();
+	      checkedItemIdSet = new Set();
+	
+	      await loadGroupList();
+	
+	    } catch (e) {
+	      console.error(e);
+	      alert("급여계산그룹 저장 오류\n\n" + (e?.message || ""));
+	    }
+	  });
+	
+	  // ✅ 확인(그룹 적용 확정) : run 호출도 fetchJsonSafe로 (에러 본문까지 잡아냄)
+	  btnItemOk?.addEventListener("click", async () => {
+	    if (!gridGrp) return;
+	    if (grpRowKeySelected == null) {
+	      alert("적용할 그룹을 선택해주세요.");
+	      return;
+	    }
+	
+	    persistCurrentGroupCheckedSet();
+	
+	    const row = gridGrp.getRow(grpRowKeySelected);
+	    const grpNo = row?.grpNo;
+	
+	    if (!grpNo) {
+	      alert("신규 그룹은 저장 후 선택할 수 있습니다.");
+	      return;
+	    }
+	
+	    selectedGrpNo = grpNo;
+	    selectedGrpNm = row.grpNm || "";
+	
+	    try {
+	      const items = await fetchJsonSafe(
+	        "/insa/saly/item/list?grpNo=" + encodeURIComponent(selectedGrpNo)
+	      );
+	
+	      selectedGroupItems = (items || []).map(x => ({
+	        itemTy: x.itemTy,
+	        itemId: x.itemId,
+	        itemNm: x.itemNm,
+	        dispNo: x.dispNo,
+	        calFmlt: x.calFmlt,
+	        calMthd: x.calMthd
+	      }));
+	
+	      closeSalyItemModal();
+	
+	      if (gridCalc) {
+	        const rows = gridCalc.getData() || [];
+	        const checked = gridCalc.getCheckedRows() || [];
+	        const selectedSet = new Set(checked.map(r => r.salySpecId));
+	
+	        rows.forEach(r => {
+	        	if (selectedSet.has(r.salySpecId)) {
+	        		  r.calcGrpNm = selectedGrpNm;
+	        		  r.grpNo = selectedGrpNo;   // ✅ 이 줄 추가
+	        		}
+	        });
+	
+	        gridCalc.resetData(rows);
+	        if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
+	      }
+	
+	      if (!gridCalc) return;
+	      if (!currentCalcSalyLedgId) {
+	        alert("급여대장이 선택되지 않았습니다.");
+	        return;
+	      }
+	
+	      const checkedRows = gridCalc.getCheckedRows() || [];
+	      if (checkedRows.length === 0) {
+	        alert("급여계산을 적용할 사원을 체크박스로 선택하세요.");
+	        return;
+	      }
+	
+	      const salySpecIdList = checkedRows.map(r => r.salySpecId).filter(Boolean);
+	
+	      const runRes = await fetchJsonSafe("/insa/saly/calc/run", {
+	        method: "POST",
+	        headers: { "Content-Type": "application/json" },
+	        body: JSON.stringify({
+	          salyLedgId: currentCalcSalyLedgId,
+	          grpNo: selectedGrpNo,
+	          salySpecIdList
+	        })
+	      });
+	
+	      if (runRes?.result !== "SUCCESS") {
+	        throw new Error(runRes?.message || "급여계산(미리보기) 실패");
+	      }
+	
+	      pendingCalcBySpecId = runRes?.data || {};
+	      pendingGrpNo = selectedGrpNo;
+	
+	      const dynamicCols = buildDynamicColumnsByGroupItems(selectedGroupItems);
+	      gridCalc.setColumns([...baseCalcColumns, ...dynamicCols]);
+	      
+	      console.log("[A] dynamic col names:", gridCalc.getColumns().map(c => c.name));
+	      console.log("[A] first row keys:", Object.keys(gridCalc.getRow(0) || {}));
+	      console.log("[A] preview sample:", pendingCalcBySpecId && Object.entries(pendingCalcBySpecId)[0]);
+	      
+	      await fillCalculatedAmountsForSelectedSpecs(salySpecIdList, pendingCalcBySpecId);
+	      applyReadonlyCellBgForNoGroup(dynamicCols);
+	      
+	      console.log("[B] first row after fill:", gridCalc.getRow(0));
+	      console.log("[B] first row keys after fill:", Object.keys(gridCalc.getRow(0) || {}));
+	
+	      if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
+	      alert("계산 미리보기가 반영되었습니다. (저장은 '저장' 버튼)");
+	
+	    } catch (err) {
+	      console.error("그룹 적용/계산 오류", err);
+	      alert("그룹 적용 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
+	    }
+	  });
+	
+	  //✅ 급여계산 저장(=DB 반영)
+	    //✅ 급여계산 저장(=DB 반영)
+	  document.addEventListener("click", async (e) => {
+	    const btn = e.target.closest("#btnCalcSave");
+	    if (!btn) return;
+	
+	    e.preventDefault();
+	    e.stopPropagation();
+	
+	    console.log("[btnCalcSave] click");
+	
+	    if (!gridCalc) return;
+	    if (!currentCalcSalyLedgId) {
+	      alert("급여대장이 선택되지 않았습니다.");
+	      return;
+	    }
+	    gridCalc.finishEditing();
+	
+	    const rows = gridCalc.getData() || [];
+	
+	    // ============================================================
+	    // 1) (기존) '확인(미리보기)' 기반 저장 경로 (그대로 유지)
+	    //    - 사용자가 그룹에서 확인 눌러 계산한 직후, pendingCalcBySpecId로 저장
+	    // ============================================================
+	    const checked = gridCalc.getCheckedRows() || [];
+	    const checkedSpecIds = checked.map(r => r.salySpecId).filter(Boolean);
+	
+	    const canUsePreviewSave =
+	    	  (!dirtySpecIdSet || dirtySpecIdSet.size === 0) &&   // ✅ 추가
+	    	  selectedGrpNo != null &&
+	    	  pendingGrpNo != null &&
+	    	  Number(pendingGrpNo) === Number(selectedGrpNo) &&
+	    	  checkedSpecIds.length > 0;
+	
+	    if (canUsePreviewSave) {
+	      try {
+	        const previewList = checkedSpecIds.map(specId => {
+	          const one = pendingCalcBySpecId[specId] || {};
+	          return {
+	            salySpecId: specId,
+	            items: Array.isArray(one.items) ? one.items : []
+	          };
+	        });
+	
+	        console.log("[btnCalcSave] payload(preview)", {
+	          salyLedgId: currentCalcSalyLedgId,
+	          grpNo: selectedGrpNo,
+	          previewList
+	        });
+	
+	        const saveRes = await fetchJsonSafe("/insa/saly/calc/save", {
+	          method: "POST",
+	          headers: { "Content-Type": "application/json" },
+	          body: JSON.stringify({
+	            salyLedgId: currentCalcSalyLedgId,
+	            grpNo: selectedGrpNo,
+	            saveMode: "PATCH",
+	            previewList
+	          })
+	        });
+	
+	        if (saveRes?.result !== "SUCCESS") {
+	          throw new Error(saveRes?.message || "급여계산 저장 실패");
+	        }
+	
+	        const dynamicCols = buildDynamicColumnsByGroupItems(selectedGroupItems);
+	        gridCalc.setColumns([...baseCalcColumns, ...dynamicCols]);
+	
+	        await fillCalculatedAmountsForSelectedSpecs(checkedSpecIds, pendingCalcBySpecId);
+	
+	        // ✅ 저장 이후: 변경 추적/미리보기 상태 초기화
+	        dirtySpecIdSet.clear();
+	        pendingCalcBySpecId = {};
+	        pendingGrpNo = null;
+	
+	        if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
+	        loadSalyList();
+	        return;
+	
+	      } catch (err) {
+	        console.error("급여계산 처리 오류(preview save)", err);
+	        alert("급여계산 처리 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
+	        return;
+	      }
+	    }
+	
+	    // ============================================================
+	    // 2) (신규) 재진입/수정 저장 경로
+	    //    - 계산그룹 '확인'을 안 눌러도, editor로 값 수정(dirty)만 있으면 저장
+	    //    - 체크박스 선택 불필요
+	    // ============================================================
+	    if (!dirtySpecIdSet || dirtySpecIdSet.size === 0) {
+	      alert("변경된 값이 없습니다.");
+	      return;
+	    }
+	
+	    // ✅ 저장 대상: editor로 값이 바뀐 행만
+	    const dirtyRows = rows.filter(r => r && r.salySpecId && dirtySpecIdSet.has(r.salySpecId));
+	    if (dirtyRows.length === 0) {
+	      alert("변경된 값이 없습니다.");
+	      return;
+	    }
+	
+	    // ✅ grpNo 결정
+	    let grpNoToSave = selectedGrpNo;
+	    if (grpNoToSave == null) {
+	      const grpSet = new Set(dirtyRows.map(r => r.grpNo).filter(v => v != null));
+	      if (grpSet.size !== 1) {
+	        alert("저장할 계산그룹(grpNo)을 판단할 수 없습니다. (여러 그룹이 섞여있거나 grpNo가 없습니다)\n계산그룹을 선택하거나, 한 그룹만 수정해주세요.");
+	        return;
+	      }
+	      grpNoToSave = [...grpSet][0];
+	    }
+	
+	    // ✅ 동적 항목 컬럼(itemId) 목록
+	    const columns = gridCalc.getColumns() || [];
+	    const baseNameSet = new Set((baseCalcColumns || []).map(c => c.name));
+	    // 기본컬럼 외에, 시스템 컬럼도 제외
+	    baseNameSet.add("salySpecId");
+	    baseNameSet.add("grpNo");
+	    baseNameSet.add("payAmt");
+	    baseNameSet.add("ttDucAmt");
+	    baseNameSet.add("actPayAmt");
+	
+	    const itemIds = columns
+	      .map(c => c.name)
+	      .filter(n => n && !baseNameSet.has(n));
+	
+	    if (itemIds.length === 0) {
+	      alert("저장할 항목 컬럼이 없습니다. (동적 항목이 구성되지 않았습니다)");
+	      return;
+	    }
+	
+	    // ✅ item 메타 준비(itemTy/itemNm)
+	    async function ensureItemMeta(grpNo) {
+	      const key = String(grpNo);
+	      if (groupItemMetaByGrpNo[key]) return groupItemMetaByGrpNo[key];
+	
+	      const meta = {};
+	
+	      // 1) selectedGroupItems에서 만들기(가능하면)
+	      const fromSelected = (() => {
+	        if (!selectedGroupItems) return [];
+	        if (Array.isArray(selectedGroupItems)) return selectedGroupItems;
+	        const a = selectedGroupItems.allowList ?? selectedGroupItems.allow ?? [];
+	        const d = selectedGroupItems.ducList ?? selectedGroupItems.duc ?? [];
+	        const l = selectedGroupItems.list ?? selectedGroupItems.items ?? [];
+	        return []
+	          .concat(Array.isArray(l) ? l : [])
+	          .concat(Array.isArray(a) ? a : [])
+	          .concat(Array.isArray(d) ? d : []);
+	      })();
+	
+	      fromSelected.forEach(it => {
+	        if (!it) return;
+	        const itemId =
+	          it.itemId ?? it.item_id ??
+	          it.allowId ?? it.allow_id ??
+	          it.ducId ?? it.duc_id;
+	        if (!itemId) return;
+	
+	        const itemNm =
+	          it.itemNm ?? it.item_nm ??
+	          it.allowNm ?? it.allow_nm ??
+	          it.ducNm ?? it.duc_nm ??
+	          it.codeNm ?? it.code_nm ??
+	          "";
+	
+	        const itemTy =
+	          it.itemTy ?? it.item_ty ??
+	          (it.allowId || it.allow_id ? "A" : (it.ducId || it.duc_id ? "D" : null));
+	
+	        meta[String(itemId)] = { itemTy: itemTy || null, itemNm: String(itemNm || "") };
+	      });
+	
+	      // 2) 부족하면 서버에서 조회해서 채우기
+	      const missing = itemIds.some(id => !meta[String(id)]);
+	      if (missing) {
+	        const list = await fetchJsonSafe("/insa/saly/item/list?grpNo=" + encodeURIComponent(grpNo));
+	        (list || []).forEach(x => {
+	          if (!x?.itemId) return;
+	          meta[String(x.itemId)] = { itemTy: x.itemTy || null, itemNm: String(x.itemNm || "") };
+	        });
+	      }
+	
+	      groupItemMetaByGrpNo[key] = meta;
+	      return meta;
+	    }
+	
+	    try {
+	      const metaById = await ensureItemMeta(grpNoToSave);
+	
+	      // ✅ payload: 현재 그리드 값 그대로 저장
+	      // - amt가 0/빈값이면 items에 포함하지 않음(=DB에 0 인서트 방지)
+	      const previewList = dirtyRows.map(r => {
+	        const items = [];
+	
+	        itemIds.forEach(colKey => {
+	        	  const raw = r[colKey];
+	        	  const amt = Number(String(raw ?? "0").replaceAll(",", "").trim() || "0");
+	        	  if (!Number.isFinite(amt) || amt === 0) return;
+
+	        	  // ✅ colKey가 "calc_A_9" 같은 경우 여기서 itemTy/dispNo를 뽑아낸다
+	        	  const m1 = /^calc_([AD])_(\d+)$/.exec(String(colKey));
+	        	  let itemTy = null;
+	        	  let dispNo = null;
+
+	        	  if (m1) {
+	        	    itemTy = m1[1];         // "A" or "D"
+	        	    dispNo = m1[2];         // "9" 같은 문자열
+	        	  } else {
+	        	    // 혹시 ALW/DUC 형태면 기존 방식 유지
+	        	    const meta = metaById[String(colKey)] || {};
+	        	    itemTy = meta.itemTy ?? null;
+	        	  }
+
+	        	  // ✅ itemNm은 meta가 있으면 쓰고, 없으면 colKey라도 넣어둠(헤더는 서버 저장용이라 치명적이지 않음)
+	        	  const meta = metaById[String(colKey)] || {};
+
+	        	  items.push({
+	        	    itemTy: itemTy,              // ✅ 절대 null이면 안 됨
+	        	    dispNo: dispNo,
+	        	    amt: amt
+	        	  });
+	        	});
+	
+	        return { salySpecId: r.salySpecId, items };
+	      });
+	
+	      console.log("[btnCalcSave] payload(manual edit)", {
+	        salyLedgId: currentCalcSalyLedgId,
+	        grpNo: grpNoToSave,
+	        previewList
+	      });
+	
+	      const saveRes = await fetchJsonSafe("/insa/saly/calc/save", {
+	        method: "POST",
+	        headers: { "Content-Type": "application/json" },
+	        body: JSON.stringify({
+	        	  salyLedgId: currentCalcSalyLedgId,
+	        	  grpNo: grpNoToSave,
+	        	  saveMode: "PATCH",
+	        	  previewList
+	        	})
+	      });
+	
+	      if (saveRes?.result !== "SUCCESS") {
+	        throw new Error(saveRes?.message || "급여계산 저장 실패");
+	      }
+	
+	      // ✅ 저장 후: 방금 수정한 값 기준으로 재조회해서 화면 동기화(안전)
+	      const dirtySpecIds = dirtyRows.map(r => r.salySpecId).filter(Boolean);
+	      await fillCalculatedAmountsForSelectedSpecs(dirtySpecIds, null);
+	
+	      dirtySpecIdSet.clear();
+	      pendingCalcBySpecId = {};
+	      pendingGrpNo = null;
+	
+	      if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
+	      alert("저장되었습니다.");
+	      loadSalyList(); // ✅ 추가
+	
+	    } catch (err) {
+	      console.error("급여계산 처리 오류(manual edit save)", err);
+	      alert("급여계산 처리 중 오류가 발생했습니다.\n\n" + (err?.message || ""));
+	    }
+	  });
+	
+	
+	  /***********************
+	   * 12. 페이지 로드 시 초기작업
+	   ***********************/
+	  document.addEventListener("DOMContentLoaded", () => {
+	    loadDeptOptions();
+	    loadSalyList();
+	  });
+	  
+	  function applyReadonlyCellBgForNoGroup(dynamicCols) {
+		  if (!gridCalc) return;
+
+		  const cols = (dynamicCols || []).map(c => c?.name).filter(Boolean);
+		  if (!cols.length) return;
+
+		  const rowCount = typeof gridCalc.getRowCount === "function"
+		    ? gridCalc.getRowCount()
+		    : (gridCalc.getData() || []).length;
+
+		  for (let rowKey = 0; rowKey < rowCount; rowKey++) {
+		    const row = gridCalc.getRow(rowKey);
+		    const grpNo = row ? row.grpNo : null;
+		    const isNoGroup = (grpNo == null || grpNo === "" || Number(grpNo) === 0);
+
+		    cols.forEach((colName) => {
+		      if (typeof gridCalc.removeCellClassName === "function") {
+		        gridCalc.removeCellClassName(rowKey, colName, "calc-readonly-cell");
+		      }
+
+		      const v = row ? row[colName] : null;
+
+		      const n = (v == null) ? NaN : Number(String(v).replaceAll(",", "").trim());
+		      const isEmpty =
+		        v == null ||
+		        String(v).trim() === "" ||
+		        (!Number.isNaN(n) && n === 0);   // ✅ 0도 빈값 취급
+
+		      if ((isNoGroup || isEmpty) && typeof gridCalc.addCellClassName === "function") {
+		        gridCalc.addCellClassName(rowKey, colName, "calc-readonly-cell");
+		      }
+		    });
+		  }
+		}
+	
+	</script>
+	</body>
+	</html>

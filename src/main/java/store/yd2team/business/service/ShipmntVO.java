@@ -39,4 +39,8 @@ public class ShipmntVO {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate updtDt;
 	private String updtBy;
+	
+	// 출하취소
+	private String cancelReason;
+	private Integer shipQty;
 }

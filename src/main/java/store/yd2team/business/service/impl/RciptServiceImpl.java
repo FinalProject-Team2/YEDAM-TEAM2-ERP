@@ -1,6 +1,8 @@
 package store.yd2team.business.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,36 +24,55 @@ public class RciptServiceImpl implements RciptService {
     public List<RciptVO> searchRcipt(RciptVO searchVO) {
         return rciptMapper.selectRciptList(searchVO);
     }
-/*    
-    // 조회 고객사 auto complete(고객코드, 고객사명)
-    @Override
-    public List<RciptVO> searchCustcomId(String keyword) {
-        return rciptMapper.searchCustcomId(keyword);
-    }
-    @Override
-    public List<RciptVO> searchCustcomName(String keyword) {
-        return rciptMapper.searchCustcomName(keyword);
-    }
-*/
     
-    //입금내역
+    // 입금처리
     @Override
     @Transactional
-    public int insertRciptDetail(RciptVO vo) {
+    public void saveRcipt(RciptVO vo) {
 
-        vo.setVendId(LoginSession.getVendId());
-        vo.setCreaBy(LoginSession.getEmpId());
-        vo.setUpdtBy(LoginSession.getEmpId());
+        String vendId = LoginSession.getVendId();
+        String empId  = LoginSession.getEmpId();
 
-        rciptMapper.callInsertRciptProcedure(vo);
-        
-        System.out.println(">>> RESULT_MSG FROM PROCEDURE = " + vo.getResultMsg());
-
-        // OUT 파라미터에 담긴 결과 체크
-        if (vo.getResultMsg() != null && vo.getResultMsg().startsWith("SUCCESS")) {
-            return 1;
-        } else {
-            return 0;
+        // 필수값 검증
+        if (vo.getRciptId() == null || vo.getRciptId().isEmpty()) {
+            throw new RuntimeException("입금 대상 채권 정보가 없습니다.");
         }
+
+        if (vo.getRciptAmt() == null || vo.getRciptAmt() <= 0) {
+            throw new RuntimeException("입금금액이 올바르지 않습니다.");
+        }
+
+        // custcomId는 검증/로그용
+        if (vo.getCustcomId() == null || vo.getCustcomId().isEmpty()) {
+            throw new RuntimeException("고객사 정보가 없습니다.");
+        }
+
+        // 프로시저 파라미터 구성
+        Map<String, Object> param = new HashMap<>();
+        param.put("vendId", vendId);
+        param.put("rciptId", vo.getRciptId()); 
+        param.put("custcomId", vo.getCustcomId());
+        param.put("rciptDt", vo.getRciptDt());
+        param.put("rciptAmt", vo.getRciptAmt());
+        param.put("pmtMtd", vo.getPmtMtd());
+        param.put("rm", vo.getRm());
+        param.put("empId", empId);
+
+        // 프로시저 호출
+        rciptMapper.callRciptPayment(param);
     }
+    
+    
+    // 입금 상세내역
+    @Override
+    @Transactional(readOnly = true)
+    public List<RciptVO> selectRciptDetailList(String rciptId) {
+
+        if (rciptId == null || rciptId.isEmpty()) {
+            throw new RuntimeException("채권 ID가 없습니다.");
+        }
+
+        return rciptMapper.selectRciptDetailList(rciptId);
+    }
+
 }

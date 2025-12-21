@@ -6,28 +6,27 @@
 <head>
 <meta charset="UTF-8">
 <title>potentialCustList</title>
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 </head>
+
 <style>
 .fixed-photo {
-	width: 150px; /* 원하는 가로 크기 */
-	height: 200px; /* 원하는 세로 크기 */
-	object-fit: cover; /* 비율 유지하며 영역에 맞게 채움 */
+	width: 150px;
+	height: 200px;
+	object-fit: cover;
 }
-
 .form-select {
 	color: #000 !important;
 }
 </style>
+
 <body layout:fragment="content">
 
 	<form th:action="@{/potentialCustList}" method="post">
 		<div class="row">
 			<div class="col-md-12 mb-3">
 				<div class="card">
-					<!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
 					<div class="card-header">
 						<div class="card-header-left">
 							<h5 class="card-title">조회조건</h5>
@@ -36,169 +35,183 @@
 							<form th:action="@{/potential/sync}" method="post" class="mb-2">
 								<button class="btn btn-primary">공공데이터조회</button>
 							</form>
-							<!-- <button class="btn btn-dark">초기화</button> -->
 							<button class="btn btn-outline-dark" type="submit">검색조회</button>
 						</div>
 					</div>
+
 					<div class="card-body">
 						<div class="row mb-2">
 							<div class="row mb-2">
 								<div class="col-md-3">
-									<label class="form-label">업종</label> <input name="industryType" class="form-control" placeholder="업종" th:value="${stdrvo != null ? stdrvo.industryType : ''}">
+									<label class="form-label">업종</label>
+									<input name="industryType" class="form-control" placeholder="업종"
+									       th:value="${stdrvo != null ? stdrvo.industryType : ''}">
 								</div>
+
 								<div class="col-md-3">
-									<label class="form-label">업체규모</label> 
+									<label class="form-label">업체규모</label>
 									<select name="companySize" class="form-select" placeholder="규모">
-  <option value="" th:selected="${stdrvo == null || stdrvo.companySize == null || stdrvo.companySize == ''}">규모선택</option>
-  <option value="대기업" th:selected="${stdrvo != null && stdrvo.companySize == '대기업'}">대기업</option>
-  <option value="준대기업" th:selected="${stdrvo != null && stdrvo.companySize == '준대기업'}">준대기업</option>
-  <option value="중견기업" th:selected="${stdrvo != null && stdrvo.companySize == '중견기업'}">중견기업</option>
-  <option value="강소기업" th:selected="${stdrvo != null && stdrvo.companySize == '강소기업'}">강소기업</option>
-  <option value="중소기업" th:selected="${stdrvo != null && stdrvo.companySize == '중소기업'}">중소기업</option>
-</select>
+										<option value="" th:selected="${stdrvo == null || stdrvo.companySize == null || stdrvo.companySize == ''}">규모선택</option>
+										<option value="대기업" th:selected="${stdrvo != null && stdrvo.companySize == '대기업'}">대기업</option>
+										<option value="준대기업" th:selected="${stdrvo != null && stdrvo.companySize == '준대기업'}">준대기업</option>
+										<option value="중견기업" th:selected="${stdrvo != null && stdrvo.companySize == '중견기업'}">중견기업</option>
+										<option value="강소기업" th:selected="${stdrvo != null && stdrvo.companySize == '강소기업'}">강소기업</option>
+										<option value="중소기업" th:selected="${stdrvo != null && stdrvo.companySize == '중소기업'}">중소기업</option>
+									</select>
 								</div>
+
 								<div class="col-md-3">
-									<label class="form-label">지역/상권</label><input name="region" class="form-control"  placeholder="지역" th:value="${stdrvo != null ? stdrvo.region : ''}">
+									<label class="form-label">지역/상권</label>
+									<input name="region" class="form-control" placeholder="지역"
+									       th:value="${stdrvo != null ? stdrvo.region : ''}">
 								</div>
 							</div>
+
 							<div class="col-md-6">
 								<label class="form-label">설립일</label>
 								<div class="d-flex align-items-center js-date-range">
-									<!-- 시작일 -->
 									<div class="input-group date">
-										<input type="text" class="form-control datepicker js-date-range-start" placeholder="시작일" name="startEstablishDate" th:value="${stdrvo != null ? stdrvo.startEstablishDate : ''}"> 
-										<span class="input-group-text js-date-range-icon-start"> 
-										<i class="bi bi-calendar"></i>
+										<input type="text" class="form-control datepicker js-date-range-start"
+										       placeholder="시작일" name="startEstablishDate"
+										       th:value="${stdrvo != null ? stdrvo.startEstablishDate : ''}">
+										<span class="input-group-text js-date-range-icon-start">
+											<i class="bi bi-calendar"></i>
 										</span>
 									</div>
 
 									<span class="mx-1 fw-bold fs-5">~</span>
 
-									<!-- 종료일 -->
 									<div class="input-group date ms-2">
-										<input type="text" class="form-control datepicker js-date-range-end" placeholder="종료일" name="endEstablishDate"  th:value="${stdrvo != null ? stdrvo.endEstablishDate : ''}"> 
-										<span class="input-group-text js-date-range-icon-end"> 
-										<i class="bi bi-calendar"></i>
+										<input type="text" class="form-control datepicker js-date-range-end"
+										       placeholder="종료일" name="endEstablishDate"
+										       th:value="${stdrvo != null ? stdrvo.endEstablishDate : ''}">
+										<span class="input-group-text js-date-range-icon-end">
+											<i class="bi bi-calendar"></i>
 										</span>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
+
 				</div>
 			</div>
 		</div>
 	</form>
 
-
-	<!-- 잠재고객 -->
 	<form th:action="@{/potentialCustList}" method="post">
 		<div class="card mb-3">
 			<div class="card-header">
 				<div class="card-header-left">
 					<h5 class="card-title">잠재고객목록</h5>
 				</div>
-				<!-- card-header-left end  -->
 			</div>
 			<div class="card-body">
-				<div id="potentialgrid"
-					style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+				<div id="potentialgrid" style="height: 400px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 			</div>
 		</div>
 	</form>
 
-
-
-
-
-
-
-
-
-
-
-
 	<script th:inline="javascript">
-		// 휴먼/이탈고객 데이터
 		tui.Grid.applyTheme('default', {
 			cell : {
-				normal : { // 일반 셀(본문)
-					border : '#ccc',
-					background : "#fff",
-					showVerticalBorder : true, // 세로 라인 표시
-				},
-				header : { // 헤더 셀
-					border : '#ccc',
-					background : '#E3E6ED',
-					showVerticalBorder : true,
-				},
-				editable : { // ★ 편집 가능한 셀 공통 스타일
-					background : '#FFFDF0', // 연노랑 같은 색으로 표시
-					text : '#000'
-				},
-				selectedHeader : { // 헤더 클릭했을 때 색
-					background : '#E3E6ED' // 헤더랑 똑같이 → 색 안 바뀌는 것처럼 보임
-				},
-				selected : { // 선택된 셀 색
-					background : '#ffffff' // 필요하면 여기도 조정
-				}
+				normal : { border : '#ccc', background : "#fff", showVerticalBorder : true },
+				header : { border : '#ccc', background : '#E3E6ED', showVerticalBorder : true },
+				editable : { background : '#FFFDF0', text : '#000' },
+				selectedHeader : { background : '#E3E6ED' },
+				selected : { background : '#ffffff' }
 			}
 		});
-		
-		
-		const potentialData = /*[[${potentialstdrList}]]*/ [];
-	    console.log(potentialData);
 
-		// Grid 생성
+		// ✅ 서버 데이터
+		const rawData = /*[[${potentialstdrList}]]*/ [];
+		console.log('rawData', rawData);
+
+		// ✅ leadScore 기준 내림차순 정렬 + rank 재부여
+		// 1. null 방지 + 숫자 변환
+const sorted = rawData
+  .map(row => ({
+    ...row,
+    leadScore: row.leadScore == null ? 0 : Number(row.leadScore)
+  }))
+  .sort((a, b) => b.leadScore - a.leadScore);
+
+// 2. 공동 순위 계산 (1,1,3 방식)
+let currentRank = 0;
+let prevScore = null;
+
+const potentialData = sorted.map((row, index) => {
+  if (prevScore === row.leadScore) {
+    // 같은 점수 → 같은 등수
+    row.rank = currentRank;
+  } else {
+    // 다른 점수 → 현재 인덱스 + 1
+    currentRank = index + 1;
+    row.rank = currentRank;
+    prevScore = row.leadScore;
+  }
+  return row;
+});
+
+console.log('potentialData(with tie rank)', potentialData);
+
 		const potentialgrid = new tui.Grid({
 			el : document.getElementById('potentialgrid'),
 			data : potentialData,
 			scrollX : true,
 			scrollY : true,
 			minBodyHeight : 0,
-			bodyHeight: 240,
+			bodyHeight: 375,
 			autoWidth : true,
-			columns : [ {
-				header : '순위',
-				name : 'rank',
-				sortable : 'true',
-				align : 'center',
-				width: 150
-			}, {
-				header : '업체명',
-				name : 'vendNm',
-				align  : 'center',
-			}, {
-				header : '업종',
-				name : 'industryType',
-				sortable : 'true',
-			}, {
-				header : '규모',
-				name : 'companySize',
-				align : 'center',
-				width: 150
-			}, {
-	            header: '설립일',
-	            name: 'establishDate',
-	            formatter: ({ value }) => {
-	                const d = new Date(value);
-	                return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
-	            },
-	            width: 150,
-	            align : 'center'
-	        }, {
-				header : '지역/상권',
-				name : 'region',
-				align : 'center',
-				width: 150,
-			},{
-			    header : '리드점수',
-			    name   : 'leadScore',   // leadscore → leadScore 로 수정
-			    align  : 'center',
-			    sortable : 'true',
-			    width: 150,
-			    className: 'col-emphasize'
-			} ]
+			columns : [
+				{
+					header : '순위',
+					name : 'rank',
+					sortable : true,
+					align : 'center',
+					width: 80
+				},
+				{
+					header : '업체명',
+					name : 'vendNm',
+					align  : 'center'
+				},
+				{
+					header : '업종',
+					name : 'industryType',
+					sortable : true
+				},
+				{
+					header : '규모',
+					name : 'companySize',
+					align : 'center',
+					width: 120
+				},
+				{
+					header: '설립일',
+					name: 'establishDate',
+					formatter: ({ value }) => {
+						if (!value) return '';
+						const d = new Date(value);
+						return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
+					},
+					width: 150,
+					align : 'center'
+				},
+				{
+					header : '지역/상권',
+					name : 'region',
+					align : 'center',
+					width: 150
+				},
+				{
+					header : '리드점수',
+					name   : 'leadScore',
+					align  : 'center',
+					sortable : true,
+					width: 120
+				}
+			]
 		});
 	</script>
 </body>

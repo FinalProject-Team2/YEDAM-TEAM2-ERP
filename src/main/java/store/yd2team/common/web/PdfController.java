@@ -54,6 +54,30 @@ public class PdfController {
 	    );
 	}
 	
+	@RequestMapping("/empPdfExport")
+	public void reportgunRo(@RequestParam("empId") String empId, HttpServletResponse response) throws Exception {
+
+	    Connection conn = datasource.getConnection();
+
+	    String filename = getClass()
+	            .getResource("/static/report/gunRo.jasper")
+	            .getFile();
+
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("emp_id", empId); // ← 선택한 주문서코드
+
+	    JasperPrint jasperPrint =
+	            JasperFillManager.fillReport(filename, params, conn);
+
+	    response.setContentType("application/pdf");
+	    response.setHeader("Content-Disposition", "inline; filename=gunRo.pdf");
+
+	    JasperExportManager.exportReportToPdfStream(
+	            jasperPrint,
+	            response.getOutputStream()
+	    );
+	}
+	
 		/*
 		 * @RequestMapping("/jumunseo") public void reportJumunseo(HttpServletRequest
 		 * request, HttpServletResponse response) throws Exception { Connection conn =

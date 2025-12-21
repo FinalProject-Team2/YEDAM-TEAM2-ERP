@@ -239,8 +239,7 @@
 								class="form-select">
 								<th:block th:each="val : ${basiLi}">
 									<option th:value="${val.basiNo}" th:text="${val.basiNm}"></option>
-								</th:block>
-								<option value="B005">하드코딩메뉴(선택x)</option>
+								</th:block>								
 							</select>
 						</div>
 
@@ -272,7 +271,8 @@
 
 	<!-- 모달 -->
 	<div th:replace="insa/modal/empRegistModal :: registModal"></div>
-	<script>	
+	<div th:replace="insa/modal/empPdfModal :: empPdfModal"></div>
+	<script th:inline="javascript">	
 	function getList(el) {
 		//jquery형식 db요청방식
 		// .empJohoe 클래스 가진 input 값들을 객체로 수집
@@ -301,6 +301,17 @@
 		    alert("데이터 요청 중 오류 발생");
 		});
 	}	
+	
+	// 주문서 번호 PdfController로 넘기기
+	$("#emp-deta").on("click", function() {
+		const empIdVal = $("#v_empId").val();
+		console.log("emp아이디값나와라"+empIdVal);
+		$("#empPdfFrame").attr("src", `/empPdfExport?empId=${empIdVal}`);
+		const modalEl = $("#empPdfModal")[0];
+		const modal = new bootstrap.Modal(modalEl);
+		modal.show();
+	});
+	
 
 		// Grid 생성
 		const grid = new tui.Grid({
@@ -328,6 +339,35 @@
 			bodyHeight : 440, // 본문 높이 고정
 		});
 
+		//부서 옵션선택시 실행이벤트		
+		let basiOptOb = [];
+		  $("#v_deptId").on("change", function() {
+			  basiOptOb = [];
+			  const deptIdVal = $("#v_deptId").val();			  
+			  const deptv = [[${dept}]];
+			  const basiv = [[${basiLi}]];			  
+			  console.log(deptv);
+			  console.log(basiv);
+			  for(let v1 of basiv) {
+				  let optV = {};
+				  if(v1.deptId == deptIdVal) {
+					  optV["basiNo"] = v1.basiNo
+					  optV["basiNm"] = v1.basiNm
+				  	  basiOptOb.push(optV);
+				  }
+			  }
+			  $("#v_basiNo").empty(); // 기존 옵션 제거
+
+			  $.each(basiOptOb, function(index, val) {
+			    $("#v_basiNo").append(
+			      $("<option>", {
+			        value: val.basiNo,
+			        text: val.basiNm
+			      })
+			    );
+			  });
+
+		  });
 				
 		//사진 업로드
 		$(document).ready(function () {
@@ -355,6 +395,8 @@
 			    };
 			    reader.readAsDataURL(file);
 			  });
+			  
+			  
 			
 			});
 		

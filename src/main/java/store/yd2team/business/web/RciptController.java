@@ -32,20 +32,6 @@ public class RciptController {
         // 필요 시 공통코드/콤보 데이터 모델에 담아서 내려주기
         return "business/rcipt";   // templates/business/atmpt.html
     }
-/*    
-    // 조회조건 고객코드
-    @GetMapping("/custcomIdSearch")
-    @ResponseBody
-    public List<RciptVO> searchCustcomId(@RequestParam("keyword") String keyword) {
-        return rciptService.searchCustcomId(keyword);
-    }
-    // 조회조건 고객사명
-    @GetMapping("/custcomNameSearch")
-    @ResponseBody
-    public List<RciptVO> searchCustcomName(@RequestParam("keyword") String keyword) {
-        return rciptService.searchCustcomName(keyword);
-    }
-*/
     
     // 조회
     @PostMapping("/list")
@@ -55,72 +41,41 @@ public class RciptController {
     }
 
    
-    // 저장
+    // 입금처리
     @PostMapping("/save")
     @ResponseBody
     public Map<String, Object> saveRcipt(@RequestBody RciptVO vo) {
+
         Map<String, Object> result = new HashMap<>();
 
         try {
-            rciptService.insertRciptDetail(vo);
-            int cnt = "SUCCESS".equals(vo.getResultMsg())? 1 : 0;
-            System.out.println(">>> CONTROLLER RESULT_MSG = " + vo.getResultMsg());
+            rciptService.saveRcipt(vo);
+            result.put("success", true);
+            result.put("message", "입금 처리가 완료되었습니다.");
 
-            if (cnt > 0) {
-                result.put("result", "success");
-            } else {
-                result.put("result", "fail");
-                result.put("message", vo.getResultMsg());
-            }
+        } catch (RuntimeException e) {
+            // 👉 업무 에러 / 프로시저 에러 전부 여기로
+            result.put("success", false);
+            result.put("message", e.getMessage());
 
         } catch (Exception e) {
-            result.put("result", "fail");
-            result.put("message", e.getMessage());
+            result.put("success", false);
+            result.put("message", "입금 처리 중 오류가 발생했습니다.");
         }
 
         return result;
     }
     
-    
-	/*
-	 * @PostMapping("/save")
-	 * 
-	 * @ResponseBody public Map<String, Object> saveRcipt(@RequestBody RciptVO vo) {
-	 * Map<String, Object> result = new HashMap<>();
-	 * 
-	 * try { int cnt = rciptService.insertRciptDetail(vo);
-	 * 
-	 * if (cnt > 0) { result.put("result", "success"); } else { result.put("result",
-	 * "fail"); result.put("message", "저장 처리 실패"); }
-	 * 
-	 * } catch (Exception e) { e.printStackTrace(); result.put("result", "fail");
-	 * result.put("message", "오류 발생: " + e.getMessage()); }
-	 * 
-	 * return result; }
-	 */
-    
-    
-    
-	/*
-	 * @PostMapping("/save")
-	 * 
-	 * @ResponseBody public Map<String, Object> saveRciptDetail(@RequestBody RciptVO
-	 * vo) {
-	 * 
-	 * 
-	 * Map<String, Object> result = new HashMap<>();
-	 * 
-	 * try { System.out.println("### Controller Request VO : " + vo);
-	 * 
-	 * int saveResult = rciptService.insertRciptDetail(vo);
-	 * 
-	 * result.put("result", saveResult > 0 ? "success" : "success"); // 무조건 success
-	 * 처리 result.put("message", "입금상세저장");
-	 * 
-	 * } catch (Exception e) { System.out.println("### Exception : " +
-	 * e.getMessage()); result.put("result", "fail"); result.put("message",
-	 * e.getMessage()); }
-	 * 
-	 * System.out.println("### Final Response : " + result); return result; }
-	 */
+    // 입금상세내역 조회
+    @GetMapping("/detail/list")
+    @ResponseBody
+    public List<RciptVO> selectRciptDetailList(
+            @RequestParam("rciptId") String rciptId) {
+
+        if (rciptId == null || rciptId.isEmpty()) {
+            throw new IllegalArgumentException("채권 ID가 없습니다.");
+        }
+
+        return rciptService.selectRciptDetailList(rciptId);
+    }
 }

@@ -8,21 +8,36 @@
 <title>churn_risk_list</title>
 <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-</head>
+  <!-- ✅ layout이 head에 합쳐줄 fragment -->
+  <th:block layout:fragment="css">
+    <style>
+      .churn-stdr-wrapper .help-text{
+        font-size: 12px;
+        color: #868e96;
+        font-weight: 400;
+        opacity: 0.9;
+        line-height: 1.3;
+        white-space: normal;
+        margin-left: 6px;
+      }
 
-<style>
-.fixed-photo {
-	width: 150px;
-	height: 200px;
-	object-fit: cover;
-}
-.form-select {
-	color: #000 !important;
-}
-</style>
+      .churn-stdr-wrapper .card-header-left{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .churn-stdr-wrapper .card-header-left .card-title{
+        margin-bottom: 0;
+        white-space: nowrap;
+      }
+    </style>
+  </th:block>
+</head>
 
 <body layout:fragment="content">
 
+<div class="churn-stdr-wrapper">
 	<form th:action="@{/churnRiskList}" method="post" th:object="${cond}">
 		<div class="row">
 			<div class="col-md-12 mb-3">
@@ -96,12 +111,30 @@
 		<div class="card-header">
 			<div class="card-header-left">
 				<h5 class="card-title">휴먼고객목록</h5>
+				<span class="help-text churn-help">* 휴면: 40점이상, 주의: 60점이상, 이탈위험: 80점이상</span>
 			</div>
 		</div>
 		<div class="card-body">
 			<div id="dormancygrid" style="height: 500px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
 		</div>
 	</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	<script th:inline="javascript">
 		tui.Grid.applyTheme('default', {
@@ -125,34 +158,41 @@
 			minBodyHeight : 0,
 			autoWidth : true,
 			columns : [ {
-				header : '업체명',
-				name : 'custcomName',
-				sortable : 'true'
-			}, {
-				header : '업체코드',
-				name : 'customerId',
-				sortable : 'true'
-			}, {
-				header : '휴면/이탈',
-				name : 'customerStatus',
-				sortable : 'true'
-			}, {
-				header : '거래중단기간',
-				name : 'trendScore',
-				align : 'center'
-			}, {
-				header : '매출변동',
-				name : 'recScore',
-				align : 'center'
-			}, {
-				header : '평균구매주기',
-				name : 'freqScore',
-				align : 'center'
-			}, {
-				header : '이탈위험점수',
-				name : 'finalScore',
-				align : 'center'
-			} ]
+				  header : '업체명',
+				  name : 'custcomName',
+				  sortable : true,
+				  align: 'center'
+				}, {
+				  header : '업체코드',
+				  name : 'customerId',
+				  sortable : true,
+				}, {
+				  header : '휴면/이탈',
+				  name : 'customerStatus',
+				  sortable : true,
+				  align: 'center'
+				}, {
+				  header : '거래중단기간(점수)',
+				  name : 'recScore',
+				  align : 'center',
+				  formatter: ({ value }) => value != null ? value + '점' : ''
+				}, {
+				  header : '매출변동(점수)',
+				  name : 'trendScore',
+				  align : 'center',
+				  formatter: ({ value }) => value != null ? value + '점' : ''
+				}, {
+				  header : '평균구매주기(점수)',
+				  name : 'freqScore',
+				  align : 'center',
+				  formatter: ({ value }) => value != null ? value + '점' : ''
+				}, {
+				  header : '이탈위험점수',
+				  name : 'finalScore',
+				  align : 'center',
+				  formatter: ({ value }) => value != null ? value + '점' : ''
+				} ]
+
 		});
 	</script>
 

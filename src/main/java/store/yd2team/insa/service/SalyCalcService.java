@@ -25,13 +25,19 @@ public interface SalyCalcService {
      * - 미리보기에서 넘어온 계산 결과를 DB에 반영한다.
      */
     void savePreviewResult(String salyLedgId, Long grpNo, List<Map<String, Object>> previewList,
-                           String vendId, String loginEmpId);
+            String saveMode,
+            String vendId, String loginEmpId);
 
     // (기존) 급여계산 실행 (선택 사원만) - 필요 시 유지
     void calculateSalyLedg(String salyLedgId, Long grpNo, List<String> salySpecIdList,
                            String vendId, String loginEmpId);
 
     List<SalySpecItemVO> getSalySpecItems(String salySpecId, Long grpNo, String vendId);
+ // grpNm 기준 급여명세 항목 조회 (재로딩용)
+    List<SalySpecItemVO> getSalySpecItemsByGrpNm(String salySpecId,
+                                                 String grpNm,
+                                                 String vendId);
+
 
     // 단건 저장(필요시 유지)
     Long saveCalcGroup(String vendId, String empId, Long grpNo, String grpNm, List<String> itemIds);
@@ -51,4 +57,7 @@ public interface SalyCalcService {
     void resetSalyCalc(String salyLedgId, String vendId, String empId);
 
     Map<String, Object> getSavedCalcItems(String salyLedgId, Long grpNo, String vendId);
+    
+    List<SalySpecItemVO> getSalySpecItemsBySpecId(String salySpecId,
+            String vendId);
 }

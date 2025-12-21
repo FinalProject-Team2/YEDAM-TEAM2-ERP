@@ -91,6 +91,7 @@
 	
 	</select>
 
+	<!-- 출하처리 -->
 	<select id="procShipmentComplete" statementType="CALLABLE">
 	    { CALL PROC_SHIPMENT_COMPLETE(
 	        #{oustIds, jdbcType=VARCHAR},
@@ -101,7 +102,59 @@
 	</select>
 
 
+	<!-- 현재 출하 상태 조회 -->
+	<select id="selectShipmntStatus" resultType="string">
+	    select shipmnt_st
+	    from tb_shipmnt
+	    where oust_id = #{oustId}
+	</select>
 
+	<!-- 출하취소 상태 업데이트 -->
+	<update id="updateOustShipmntCancel">
+	    update tb_oust
+	    set shipmnt_st = '출하취소',
+	        rm = #{cancelReason},
+	        updt_by = #{userId},
+	        updt_dt = sysdate
+	    where oust_id = #{oustId}
+	</update>
 	
+	<update id="updateShipmntCancel">
+	    update tb_shipmnt
+	    set shipmnt_st = '출하취소',
+	        rm = #{cancelReason},
+	        updt_by = #{userId},
+	        updt_dt = sysdate
+	    where oust_id = #{oustId}
+	</update>
+	
+	
+	<!--  원복할 상품 주문id조회 -->
+	<select id="selectSoIdByOustId" resultType="string">
+	    select o.so_id
+	    from tb_oust o
+	    where o.oust_id = #{oustId}
+	</select>
+	
+	
+	<!-- 주문 상세 상품별 수량 조회 -->
+	<select id="selectSoDetailQtyList" resultType="store.yd2team.business.service.ShipmntVO">
+	    select
+	        product_id,
+	        qy as shipQty
+	    from tb_so_detail
+	    where so_id = #{soId}
+	</select>
 
+
+	<!-- 출하예약수량 원복 -->
+	<update id="rollbackReserveQty">
+	    update tb_stock
+	    set oust_reserv_qy = oust_reserv_qy - #{shipQty},
+	        updt_by = #{userId},
+	        updt_dt = sysdate
+	    where vend_id = #{vendId}
+	      and product_id = #{productId}
+	      and oust_reserv_qy >= #{shipQty}
+	</update>
 </mapper>

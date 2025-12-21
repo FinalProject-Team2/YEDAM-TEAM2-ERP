@@ -21,13 +21,6 @@ public interface SalyCalcMapper {
 
     void callPrcCalcSalyItems(Map<String, Object> p);
 
-    void deleteSpecItemsBySpecAndGrp(@Param("salySpecId") String salySpecId,
-                                     @Param("grpNo") Long grpNo);
-
-    void deleteSpecItemsBySpecAndItemIds(Map<String, Object> p);
-
-    /** ✅ (추가) spec+grp에서 itemIdList에 "없는" 항목 삭제 */
-    void deleteSpecItemsBySpecAndItemIdsNotIn(Map<String, Object> p);
 
     Long selectNextSpecItemNo();
 
@@ -37,9 +30,6 @@ public interface SalyCalcMapper {
     void mergeSpecItem(Map<String, Object> p);
 
     void updateSalySpecTotals(Map<String, Object> p);
-
-    List<SalySpecItemVO> selectSalySpecItems(@Param("salySpecId") String salySpecId,
-                                             @Param("grpNo") Long grpNo);
 
     List<CalGrpVO> selectCalcGroupList(@Param("vendId") String vendId);
 
@@ -68,4 +58,32 @@ public interface SalyCalcMapper {
 
     void deleteCalcGroup(@Param("vendId") String vendId,
                          @Param("grpNo") Long grpNo);
+    
+ // grpNo → grpNm 변환
+    String selectGrpNm(@Param("vendId") String vendId,
+                       @Param("grpNo") Long grpNo);
+
+    // spec + grpNm 기준 전체 삭제
+    void deleteSpecItemsBySpecAndGrpNm(@Param("salySpecId") String salySpecId,
+                                       @Param("grpNm") String grpNm);
+
+    // spec + grpNm 기준, key(itemTy_dispNo) NOT IN 삭제
+    void deleteSpecItemsBySpecAndDispNosNotIn(Map<String, Object> p);
+
+    // 저장된 급여명세 항목 조회 (grpNm 기준)
+    List<SalySpecItemVO> selectSalySpecItemsByGrpNm(@Param("salySpecId") String salySpecId,
+                                                    @Param("grpNm") String grpNm);
+ // ✅ 재조회용: saly_spec_id 기준 전체 조회
+    List<SalySpecItemVO> selectSalySpecItemsBySpecId(@Param("salySpecId") String salySpecId);
+ // (B안) 항목 1건만 삭제: spec + grpNm + itemTy + dispNo
+    int deleteSpecItemByKey(@Param("salySpecId") String salySpecId,
+                            @Param("grpNm") String grpNm,
+                            @Param("itemTy") String itemTy,
+                            @Param("dispNo") Long dispNo);
+
+    // (1번) DB에서 합계 재합산: spec + grpNm 기준
+    Map<String, Object> selectSpecTotalsByGrpNm(@Param("salySpecId") String salySpecId,
+                                                @Param("grpNm") String grpNm);
+    void deleteSpecItemsBySpecId(@Param("salySpecId") String salySpecId);
+
 }

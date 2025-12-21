@@ -22,16 +22,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SalySpecItemVO {
 
-    private String salySpecItemId; // PK (있으면)
+	private Long   itemNo;         // PK SalySpecItemVO PK
     private String salySpecId;     // FK tb_saly_spec
-    private Long   grpNo;          // FK tb_pay_cal_grp.grp_no
-
-    private Long   itemNo;         // ✅ 항목번호(표시순서 저장용)
-
-    private String itemTy;         // 'A' 수당 / 'D' 공제
-    private String itemId;         // allow_id / duc_id
-    private String itemNm;         // 표시명
+    private String   grpNm;          // 급여계산그룹의 그룹명
+    private String itemNm;         // 수당공제명 표시하는거
+    private Long dispNo; // 표시번호 저장용 
     private Long   amt;            // 금액
+    private String itemTy;         // 'A' 수당 / 'D' 공제
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date creaDt;

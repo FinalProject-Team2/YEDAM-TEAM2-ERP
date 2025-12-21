@@ -44,7 +44,7 @@ public class MlssController {
 		}
 		
 		String empId = session.getEmpId();
-		List<MlssVO> empList = mlssService.mlssEmpList( session.getEmpId(), session.getDeptId() );
+		List<MlssVO> empList = mlssService.mlssEmpList( empId, session.getDeptId() );
 		String targetClsf = "";
 		Iterator<MlssVO> it = empList.iterator();
 		while (it.hasNext()) {
