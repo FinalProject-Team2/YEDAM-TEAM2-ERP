@@ -38,9 +38,7 @@ public class ShipmntController {
     // 출하처리
     @PostMapping("/complete")
     @ResponseBody
-    public ResponseEntity<Void> completeShipment(
-            @RequestBody List<String> oustIds
-    ) {
+    public ResponseEntity<Void> completeShipment(@RequestBody List<String> oustIds) {
         String oustIdsCsv = String.join(",", oustIds);
 
         shipmntService.completeShipment(
@@ -57,14 +55,23 @@ public class ShipmntController {
 	 // ✅ 출하취소 (프론트와 URL 일치)
 	  
 	 @PostMapping("/cancel")
-	  
-	 @ResponseBody public ResponseEntity<?> cancelShipment(@RequestBody ShipmntVO
-	 dto) {
-	  
-	 shipmntService.cancelShipment( dto.getOustId(), LoginSession.getVendId(),
-	 LoginSession.getEmpId(), LoginSession.getLoginId() );
+	 @ResponseBody
+	 public ResponseEntity<?> cancelShipment(@RequestBody ShipmntVO dto) {
+		  
+		 shipmntService.cancelShipment(
+		        dto.getOustId(),
+		        dto.getCancelReason(),
+		        LoginSession.getVendId(),
+		        LoginSession.getLoginId()
+		    );
+		 
+			/*
+			 * shipmntService.cancelShipment( dto.getOustId(), LoginSession.getVendId(),
+			 * LoginSession.getEmpId(), LoginSession.getLoginId() );
+			 */
+		 
+		 return ResponseEntity.ok().body( java.util.Map.of("message", "출하 취소 처리되었습니다.") );
 	 
-	 return ResponseEntity.ok().body( java.util.Map.of("message",
-	 "출하 취소 처리되었습니다.") ); }
+	 }
 	 
 }

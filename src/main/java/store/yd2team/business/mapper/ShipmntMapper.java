@@ -26,6 +26,38 @@ public interface ShipmntMapper {
             @Param("loginId") String loginId
         );
     
+    // ==============================================================  출하취소
+ // 출하취소 상태 업데이트
+    void updateOustShipmntCancel(
+	    @Param("oustId") String oustId,
+	    @Param("cancelReason") String cancelReason,
+	    @Param("userId") String userId
+	);
+
+	void updateShipmntCancel(
+	    @Param("oustId") String oustId,
+	    @Param("cancelReason") String cancelReason,
+	    @Param("userId") String userId
+	);
+
+    // oust_id → so_id 조회
+    String selectSoIdByOustId(
+            @Param("oustId") String oustId
+    );
+
+    // 주문상세 상품별 수량 조회 (tb_so_detail.qy)
+    List<ShipmntVO> selectSoDetailQtyList(
+            @Param("soId") String soId
+    );
+
+    // 출하예약수량 원복
+    void rollbackReserveQty(
+            @Param("vendId") String vendId,
+            @Param("productId") String productId,
+            @Param("shipQty") Integer shipQty,
+            @Param("userId") String userId
+    );
+    
 	/*
 	 * void procShipmentComplete(
 	 * 

@@ -55,39 +55,67 @@ public class ShipmntServiceImpl implements ShipmntService {
         );
     }
 
-	@Override
-	public void cancelShipment(String oustId, String vendId, String empId, String loginId) {
-		// TODO Auto-generated method stub
-		
-	}
+    // 출하취소
+    @Transactional
+    @Override
+    public void cancelShipment(
+            String oustId,
+            String cancelReason,
+            String vendId,
+            String userId
+    ) {
+        // 출하상태 (oust)
+        shipmntMapper.updateOustShipmntCancel(
+                oustId,
+                cancelReason,
+                userId
+        );
+
+        // 출하상태 (shipmnt)
+        shipmntMapper.updateShipmntCancel(
+                oustId,
+                cancelReason,
+                userId
+        );
+
+        // so_id 조회
+        String soId = shipmntMapper.selectSoIdByOustId(oustId);
+        if (soId == null) {
+            throw new IllegalStateException("so_id 없음 : " + oustId);
+        }
+
+        // 주문상세 상품별 수량 조회
+        List<ShipmntVO> list =
+                shipmntMapper.selectSoDetailQtyList(soId);
+
+        // 상품별 출하예약수량 원복
+        for (ShipmntVO vo : list) {
+            shipmntMapper.rollbackReserveQty(
+                    vendId,
+                    vo.getProductId(),
+                    vo.getShipQty(),
+                    userId
+            );
+        }
+    }
     
 	/*
 	 * @Override
 	 * 
-	 * @Transactional public void completeShipment( String oustIdsCsv, String
-	 * vendId, String empId, String loginId ) { shipmntMapper.callShipmentComplete(
-	 * oustIdsCsv, vendId, empId, loginId ); }
-	 */
-    
-	/*
-	 * @Override
+	 * @Transactional public void cancelShipment( String oustId, String
+	 * cancelReason, String vendId, String userId ) {
 	 * 
-	 * @Transactional public void completeShipment(List<String> oustIdList) {
+	 * // 1. 출하 상태 업데이트 (출하취소 + 사유) shipmntMapper.updateShipmntCancel( oustId,
+	 * cancelReason, userId );
 	 * 
-	 * String oustIds = String.join(",", oustIdList);
+	 * // 2. so_id 조회 String soId = shipmntMapper.selectSoIdByOustId(oustId); if
+	 * (soId == null) { throw new IllegalStateException("so_id 없음 : " + oustId); }
 	 * 
-	 * shipmntMapper.procShipmentComplete( oustIds, LoginSession.getVendId(),
-	 * LoginSession.getEmpId(), LoginSession.getLoginId() ); }
-	 */
-    
-	/*
-	 * @Override
+	 * // 3. 주문상세 상품별 수량 조회 List<ShipmntVO> detailList =
+	 * shipmntMapper.selectSoDetailQtyList(soId);
 	 * 
-	 * @Transactional public void completeShipment(List<String> oustIdList) {
-	 * 
-	 * String oustIds = String.join(",", oustIdList);
-	 * 
-	 * shipmntMapper.procShipmentComplete( oustIds, LoginSession.getVendId(),
-	 * LoginSession.getEmpId(), LoginSession.getLoginId() ); }
+	 * // 4. 상품별 출하예약수량 원복 for (ShipmntVO vo : detailList) {
+	 * shipmntMapper.rollbackReserveQty( vendId, vo.getProductId(), vo.getShipQty(),
+	 * userId ); } }
 	 */
 }

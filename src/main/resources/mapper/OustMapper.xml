@@ -19,7 +19,7 @@
 		WHERE (#{custcomName} IS NULL OR cu.custcom_name LIKE '%' || #{custcomName} || '%')
 	      AND (#{dueStart} IS NULL OR so.due_dt >= #{dueStart})
 	      AND (#{dueEnd} IS NULL OR so.due_dt &lt;= #{dueEnd})
-		ORDER BY so.due_dt DESC
+		ORDER BY so.due_dt DESC, ou.oust_id DESC
 	</select>
 
 </mapper>
