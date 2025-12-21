@@ -288,16 +288,27 @@ document.getElementById('deleteShipmntBtn').addEventListener('click', async () =
   }
 
   try {
-	  await axios.post(
-			  "/ship/cancel",
+	  await axios.post("/shipment/cancel",
 			  {
 			    oustId: row.oustId,
-			    reason
+			    cancelReason: reason 
 			  },
 			  {
 			    headers: { "Content-Type": "application/json" }
 			  }
 			);
+
+    alert("출하 취소 처리되었습니다.");
+
+    // 상태 즉시 반영
+    oustGrid.setValue(row.rowKey, 'shipmntSt', '출하취소');
+
+  } catch (err) {
+    console.error(err);
+    alert("취소 처리 중 오류가 발생했습니다.");
+  }
+});
+
 
 
        
