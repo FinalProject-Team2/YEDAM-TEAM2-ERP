@@ -145,7 +145,28 @@ const searchForm = {
       			  },
             	  //{ header: '작업자', name: 'empId' },
              	  //{ header: '주문수량(EA)', name: 'ttSoQy' }, 
-            	  { header: '출하상태', name: 'shipmntSt', width: 120, align: 'center' }, 
+            	  { 
+             		  header: '출하상태', 
+             		  name: 'shipmntSt', 
+             		  width: 120, 
+             		  align: 'center',
+             		  formatter: ({ value }) => {
+             		    if (value === '출하취소') {
+             		      return `<span style="color:red;font-weight:bold;">출하취소</span>`;
+             		    }
+             		    if (value === '출하완료') {
+             		      return `<span style="color:green;">출하완료</span>`;
+             		    }
+             		    return value || '';
+             		  }
+/* 	       			  formatter: ({ row }) => {
+	     			      if (!row.codeNm) return '';
+	     			      if (row.stResn) {
+	     			          return `${row.codeNm}<br><span style="color:red">${row.stResn}</span>`;
+	     			      }
+	     			      return row.codeNm;
+	       			 	} */
+             		  }, 
             	]
         });
 
@@ -166,9 +187,9 @@ const searchForm = {
 	    $('.js-date-range-end').datepicker('update', '');
 	
     console.log("검색조건 초기화:", searchForm);
-});
+	});
 
-// 2-1. 출하목록조회함수
+	// 2-1. 출하목록조회함수
 	function searchShipmentList() {
 
 	    searchForm.custcomId   = document.querySelector("#custcomId").value.trim();
@@ -185,12 +206,12 @@ const searchForm = {
 	        .catch(err => console.error("조회 중 오류:", err));
 	}
 
-// 2-2. 조회 버튼 이벤트
-document.getElementById("searchBtn").addEventListener("click", function () {
+	// 2-2. 조회 버튼 이벤트
+	document.getElementById("searchBtn").addEventListener("click", function () {
+		
+		searchShipmentList();
 	
-	searchShipmentList();
-
-});
+	});
 
 
 //================================================================== <출하처리 버튼 이벤트>
@@ -233,6 +254,51 @@ document.getElementById("openRciptTretModal").addEventListener("click", function
 
 
 });
+
+//2-3. 출하취소버튼 이벤트
+document.getElementById('deleteShipmntBtn').addEventListener('click', async () => {
+
+  const checkedRows = oustGrid.getCheckedRows();
+
+  if (checkedRows.length === 0) {
+    alert("취소 할 항목을 선택하세요.");
+    return;
+  }
+
+  if (checkedRows.length > 1) {
+    alert("취소는 한 건씩만 처리할 수 있습니다.");
+    return;
+  }
+
+  const row = checkedRows[0];
+
+  if (row.shipmntSt === '출하완료') {
+    alert("이미 출하완료된 건은 취소할 수 없습니다.");
+    return;
+  }
+
+  const reason = prompt(`[${row.oustId}] 취소 사유를 입력하세요:`);
+  if (!reason || reason.trim() === '') {
+    alert("취소 사유는 필수입니다.");
+    return;
+  }
+
+  if (!confirm(`${row.oustId} 출하 취소 처리하시겠습니까?`)) {
+    return;
+  }
+
+  try {
+	  await axios.post(
+			  "/ship/cancel",
+			  {
+			    oustId: row.oustId,
+			    reason
+			  },
+			  {
+			    headers: { "Content-Type": "application/json" }
+			  }
+			);
+
 
        
     </script>
