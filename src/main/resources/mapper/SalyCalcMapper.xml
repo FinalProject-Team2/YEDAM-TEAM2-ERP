@@ -280,7 +280,6 @@ WHERE ss.saly_ledg_id = #{salyLedgId}
   )
   WHEN MATCHED THEN
     UPDATE SET
-      t.item_nm = s.item_nm,
       t.amt     = s.amt,
       t.updt_dt = SYSDATE,
       t.updt_by = #{updtBy}
@@ -383,6 +382,28 @@ WHERE ss.saly_ledg_id = #{salyLedgId}
    WHERE saly_spec_id = #{salySpecId}
      AND grp_nm       = #{grpNm}
 </delete>
+<!-- (B안) 항목 1건 삭제: spec + grpNm + itemTy + dispNo -->
+<delete id="deleteSpecItemByKey">
+  DELETE FROM tb_saly_spec_item
+   WHERE saly_spec_id = #{salySpecId}
+     AND grp_nm       = #{grpNm}
+     AND item_ty      = #{itemTy}
+     AND disp_no      = #{dispNo}
+</delete>
 
+<!-- (1번) DB에서 합계 재합산: spec + grpNm 기준 -->
+<select id="selectSpecTotalsByGrpNm" resultType="map">
+  SELECT
+    NVL(SUM(CASE WHEN item_ty = 'A' THEN amt END), 0) AS payAmt,
+    NVL(SUM(CASE WHEN item_ty = 'D' THEN amt END), 0) AS ttDucAmt
+  FROM tb_saly_spec_item
+  WHERE saly_spec_id = #{salySpecId}
+    AND grp_nm       = #{grpNm}
+</select>
+
+<delete id="deleteSpecItemsBySpecId">
+  DELETE FROM tb_saly_spec_item
+   WHERE saly_spec_id = #{salySpecId}
+</delete>
 
 </mapper>

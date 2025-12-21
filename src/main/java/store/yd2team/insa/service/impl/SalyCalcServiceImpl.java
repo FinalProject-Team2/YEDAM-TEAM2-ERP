@@ -133,14 +133,36 @@ public class SalyCalcServiceImpl implements SalyCalcService {
     @Override
     @Transactional(transactionManager = "mybatisTxManager", propagation = Propagation.REQUIRES_NEW)
     public void savePreviewResult(String salyLedgId, Long grpNo, List<Map<String, Object>> previewList,
+                                  String saveMode,
                                   String vendId, String loginEmpId) {
 
-        if (previewList == null) previewList = List.of();
+        if (previewList == null) previewList = new ArrayList<Map<String, Object>>();
 
         log.info("[SAVE] start salyLedgId={}, grpNo={}, previewCnt={}", salyLedgId, grpNo, previewList.size());
 
         Map<String, Long> allowDispMap = buildAllowDispMap(vendId, grpNo);
         Map<String, Long> ducDispMap   = buildDucDispMap(vendId, grpNo);
+        
+     // ✅ dispNo -> itemNm 복원용 맵 (REPLACE 저장에서 itemNm이 비면 채우기)
+        Map<Long, String> allowNmByDisp = new HashMap<>();
+        List<AllowDucVO> allowListForNm = salyCalcMapper.selectAllowListForCalc(vendId, grpNo);
+        if (allowListForNm != null) {
+            for (AllowDucVO vo : allowListForNm) {
+                if (vo != null && vo.getDispNo() != null) {
+                    allowNmByDisp.put(vo.getDispNo().longValue(), vo.getAllowNm());
+                }
+            }
+        }
+
+        Map<Long, String> ducNmByDisp = new HashMap<>();
+        List<AllowDucVO> ducListForNm = salyCalcMapper.selectDucListForCalc(vendId, grpNo);
+        if (ducListForNm != null) {
+            for (AllowDucVO vo : ducListForNm) {
+                if (vo != null && vo.getDispNo() != null) {
+                    ducNmByDisp.put(vo.getDispNo().longValue(), vo.getDucNm());
+                }
+            }
+        }
 
         // ✅ grpNo -> grpNm (저장/조회 키)
         String grpNm = salyCalcMapper.selectGrpNm(vendId, grpNo);
@@ -148,52 +170,78 @@ public class SalyCalcServiceImpl implements SalyCalcService {
         grpNm = grpNm.trim();
 
         for (Map<String, Object> one : previewList) {
-            String salySpecId = (String) one.get("salySpecId");
+
+            String salySpecId = (one == null) ? null : (String) one.get("salySpecId");
             if (salySpecId == null || salySpecId.isBlank()) continue;
-
-            List<PayItemRowVO> items = coercePayItemRows(one.get("items"));
-            CalcResult cr = normalizeItems(items == null ? List.of() : items, allowDispMap, ducDispMap);
-
-            // ✅ (1) 중복 제거 + 0원 제외  (키: itemTy + dispNo)
-            Map<String, PayItemRowVO> uniqMap = new LinkedHashMap<>();
-            for (PayItemRowVO it : cr.items) {
-                if (it == null) continue;
-                if (it.getItemId() == null || it.getItemId().isBlank()) continue;
-
-                long amt = (it.getAmt() == null ? 0L : it.getAmt());
-                if (amt == 0L) continue;
-
-                String dispNo = resolveDispNo(it.getItemTy(), it.getItemId(), allowDispMap, ducDispMap);
-                String key = makeKey(it.getItemTy(), dispNo); // 예: A_10, D_30
-                uniqMap.put(key, it); // 같은 key면 마지막 값으로 덮어씀
+            
+            if (saveMode == null || saveMode.isBlank()) saveMode = "REPLACE";
+            if ("REPLACE".equalsIgnoreCase(saveMode)) {
+                salyCalcMapper.deleteSpecItemsBySpecId(salySpecId);
             }
 
-            List<String> keyList = new ArrayList<>(uniqMap.keySet());
+            List<PayItemRowVO> items = coercePayItemRows(one.get("items"));
+            CalcResult cr = normalizeItems(items == null ? new ArrayList<PayItemRowVO>() : items, allowDispMap, ducDispMap);
 
-            // ✅ (2) 저장 규칙: spec+grpNm 기준 “이번 keyList에 없는 것” 삭제
-            if (keyList.isEmpty()) {
-                salyCalcMapper.deleteSpecItemsBySpecAndGrpNm(salySpecId, grpNm);
-            } else {
-                Map<String, Object> delNotIn = new HashMap<>();
-                delNotIn.put("salySpecId", salySpecId);
-                delNotIn.put("grpNm", grpNm);
-                delNotIn.put("keyList", keyList);
-                salyCalcMapper.deleteSpecItemsBySpecAndDispNosNotIn(delNotIn);
-
-                // ✅ (3) 남길/갱신할 항목은 MERGE (spec+grpNm+itemTy+dispNo 기준)
-                for (String key : keyList) {
-                    PayItemRowVO it = uniqMap.get(key);
+            // ✅ (B안) 항목별 delete/merge (NOT IN 삭제 사용 안 함)
+            if (cr != null && cr.items != null) {
+                for (PayItemRowVO it : cr.items) {
                     if (it == null) continue;
 
-                    String dispNo = resolveDispNo(it.getItemTy(), it.getItemId(), allowDispMap, ducDispMap);
+                    String itemTy = it.getItemTy();
+                    if (itemTy == null || itemTy.isBlank()) continue;
 
-                    Map<String, Object> m = new HashMap<>();
+                    // dispNo 우선 (manual edit save는 dispNo가 핵심)
+                    Long dispNoLong = it.getDispNo();
+
+                    if (dispNoLong == null) {
+                        String itemId = it.getItemId();
+                        if (itemId != null && !itemId.isBlank()) {
+                            String dispNoStr = resolveDispNo(itemTy, itemId, allowDispMap, ducDispMap);
+                            try {
+                                dispNoLong = Long.parseLong(dispNoStr);
+                            } catch (Exception e) {
+                                continue; // dispNo 복원 실패면 스킵(잘못 저장/삭제 방지)
+                            }
+                        } else {
+                            continue; // dispNo도 itemId도 없으면 식별 불가
+                        }
+                    }
+
+                    long amt = (it.getAmt() == null ? 0L : it.getAmt().longValue());
+
+                    if (amt == 0L) {
+                        // ✅ 0이면 그 항목(한 칸)만 삭제
+                        salyCalcMapper.deleteSpecItemByKey(salySpecId, grpNm, itemTy, dispNoLong);
+                        continue;
+                    }
+
+                    // ✅ 0이 아니면 merge
+                    Map<String, Object> m = new HashMap<String, Object>();
                     m.put("salySpecId", salySpecId);
                     m.put("grpNm", grpNm);
-                    m.put("itemTy", it.getItemTy());
-                    m.put("dispNo", dispNo); // XML에서 TO_NUMBER(#{dispNo})로 처리 권장
-                    m.put("itemNm", it.getItemNm());
-                    m.put("amt", it.getAmt() == null ? 0L : it.getAmt());
+                    m.put("itemTy", itemTy);
+                    m.put("dispNo", dispNoLong);
+
+                 // ✅ itemNm은 항상 세팅 (PATCH여도 INSERT 대비 필수)
+                    String nm = (it.getItemNm() == null ? "" : String.valueOf(it.getItemNm()).trim());
+
+                    // itemNm이 비어있으면 dispNo로 복원
+                    if (nm.isBlank()) {
+                        if ("A".equalsIgnoreCase(itemTy)) {
+                            nm = String.valueOf(allowNmByDisp.getOrDefault(dispNoLong, ""));
+                        } else if ("D".equalsIgnoreCase(itemTy)) {
+                            nm = String.valueOf(ducNmByDisp.getOrDefault(dispNoLong, ""));
+                        }
+                    }
+
+                    // 최후 fallback
+                    if (nm.isBlank()) nm = "(" + itemTy + dispNoLong + ")";
+
+                    m.put("itemNm", nm);
+
+
+                 m.put("amt", amt);
+
                     m.put("creaBy", loginEmpId);
                     m.put("updtBy", loginEmpId);
 
@@ -201,32 +249,32 @@ public class SalyCalcServiceImpl implements SalyCalcService {
                 }
             }
 
-            // ✅ 합계는 “0원 제외 + uniqMap 기준”으로 갱신
-            long payAmt = 0L;
-            long ttDucAmt = 0L;
-            for (String key : keyList) {
-                PayItemRowVO it = uniqMap.get(key);
-                if (it == null) continue;
+            // ✅ (1번) 합계는 DB에서 재합산해서 update (반드시 for(one) 안에서 실행)
+            Map<String, Object> totals = salyCalcMapper.selectSpecTotalsByGrpNm(salySpecId, grpNm);
 
-                String itemTy = it.getItemTy();
-                long amt = (it.getAmt() == null ? 0L : it.getAmt());
+            Object pObj = (totals == null ? null : totals.get("payAmt"));
+            if (pObj == null && totals != null) pObj = totals.get("PAYAMT");
 
-                if ("A".equalsIgnoreCase(itemTy)) payAmt += amt;
-                else if ("D".equalsIgnoreCase(itemTy)) ttDucAmt += amt;
-            }
+            Object dObj = (totals == null ? null : totals.get("ttDucAmt"));
+            if (dObj == null && totals != null) dObj = totals.get("TTDUCAMT");
+
+            long payAmt = (pObj instanceof Number) ? ((Number) pObj).longValue() : 0L;
+            long ttDucAmt = (dObj instanceof Number) ? ((Number) dObj).longValue() : 0L;
             long actPayAmt = payAmt - ttDucAmt;
 
-            Map<String, Object> upd = new HashMap<>();
+            Map<String, Object> upd = new HashMap<String, Object>();
             upd.put("salySpecId", salySpecId);
             upd.put("payAmt", payAmt);
             upd.put("ttDucAmt", ttDucAmt);
             upd.put("actPayAmt", actPayAmt);
             upd.put("updtBy", loginEmpId);
+
             salyCalcMapper.updateSalySpecTotals(upd);
         }
 
         log.info("[SAVE] end {}", salyLedgId);
     }
+
 
     // (기존) 급여계산 실행 (선택 사원만) - 필요 시 유지
     @Override
@@ -259,7 +307,7 @@ public class SalyCalcServiceImpl implements SalyCalcService {
             previewList.add(one);
         }
 
-        savePreviewResult(salyLedgId, grpNo, previewList, vendId, loginEmpId);
+        savePreviewResult(salyLedgId, grpNo, previewList, "REPLACE", vendId, loginEmpId);
     }
 
     /**
@@ -516,11 +564,13 @@ public class SalyCalcServiceImpl implements SalyCalcService {
                     String itemId = asString(m.get("itemId"));
                     String itemNm = asString(m.get("itemNm"));
                     Long amt = asLong(m.get("amt"));
+                    Long dispNo = asLong(m.get("dispNo"));
 
                     out.add(PayItemRowVO.builder()
                             .itemTy(itemTy)
                             .itemId(itemId)
                             .itemNm(itemNm)
+                            .dispNo(dispNo)
                             .amt(amt)
                             .build());
                 }
@@ -532,20 +582,32 @@ public class SalyCalcServiceImpl implements SalyCalcService {
     }
 
     private String resolveDispNo(String itemTy, String itemId,
-                                 Map<String, Long> allowDispMap,
-                                 Map<String, Long> ducDispMap) {
-        long v = resolveDispNoLong(itemTy, itemId, allowDispMap, ducDispMap);
-        return Long.toString(v);
-    }
-
+            Map<String, Long> allowDispMap,
+            Map<String, Long> ducDispMap) {
+	long v = resolveDispNoLong(itemTy, itemId, allowDispMap, ducDispMap);
+	return Long.toString(v);
+	}
+	
     private long resolveDispNoLong(String itemTy, String itemId,
-                                   Map<String, Long> allowDispMap,
-                                   Map<String, Long> ducDispMap) {
-        if (itemId == null) return 999999L;
-        if ("A".equalsIgnoreCase(itemTy)) return allowDispMap.getOrDefault(itemId, 999999L);
-        if ("D".equalsIgnoreCase(itemTy)) return ducDispMap.getOrDefault(itemId, 999999L);
-        return 999999L;
-    }
+            Map<String, Long> allowDispMap,
+            Map<String, Long> ducDispMap) {
+
+		// ✅ 0) itemId가 숫자면(예: "9") = manual edit save에서 dispNo를 itemId로 보낸 케이스
+		//    이 경우 그대로 dispNo로 인정
+		if (itemId != null && itemId.matches("\\d+")) {
+		try { return Long.parseLong(itemId); }
+		catch (Exception ignore) {}
+		}
+		
+		// ✅ 1) itemId 없으면 “매핑 실패”로 보고 0 반환 (999999 같은 큰수 금지)
+		if (itemId == null || itemId.isBlank()) return 0L;
+		
+		if ("A".equalsIgnoreCase(itemTy)) return allowDispMap.getOrDefault(itemId, 0L);
+		if ("D".equalsIgnoreCase(itemTy)) return ducDispMap.getOrDefault(itemId, 0L);
+		return 0L;
+		}
+
+
 
     private String makeKey(String itemTy, String dispNo) {
         String ty = (itemTy == null ? "" : itemTy.toUpperCase(Locale.ROOT));
@@ -559,15 +621,27 @@ public class SalyCalcServiceImpl implements SalyCalcService {
 
         for (String itemId : itemIds) {
             if (itemId == null || itemId.isBlank()) continue;
+
+            // ✅ 여기 추가
+            String up = itemId.trim().toUpperCase(Locale.ROOT);
+            String itemTy;
+            if (up.startsWith("ALW")) itemTy = "A";      // 수당
+            else if (up.startsWith("DUC")) itemTy = "D"; // 공제
+            else {
+                throw new IllegalArgumentException("itemTy 판단 불가 itemId=" + itemId);
+            }
+
             Map<String, Object> row = new HashMap<>();
             row.put("vendId", vendId);
             row.put("grpNo", grpNo);
+            row.put("itemTy", itemTy);   // ✅ 이 줄이 핵심
             row.put("itemId", itemId);
             row.put("creaBy", empId);
             list.add(row);
         }
         return list;
     }
+
 
     private String asString(Object o) {
         return (o == null) ? null : String.valueOf(o);

@@ -916,53 +916,107 @@
 	    // ✅ FIX: 계산그룹을 한 번도 적용하지 않은 행은 editor 진입 자체를 막는다.
 	    // - 시각적 구분은 하지 않되, 편집만 차단.
 	    // - 적용된 행은 기존처럼 editor로 수정 가능.
-	gridCalc.on('editingStart', (ev) => {
-	  try {
-	    const row = gridCalc.getRow(ev.rowKey);
-	    const grpNo = row ? row.grpNo : null;
+		gridCalc.on('editingStart', (ev) => {
+		  try {
+		    const row = gridCalc.getRow(ev.rowKey);
+		    const grpNo = row ? row.grpNo : null;
+		
+		    // 1) 그룹 미적용이면 편집 막기
+		    if (grpNo == null || grpNo === "" || Number(grpNo) === 0) {
+		      ev.stop();
+		      return;
+		    }
+		
+		    // 2) 값이 없으면 편집 막기 (✅ 0도 빈값 취급)
+		    const v = row ? row[ev.columnName] : null;
+		
+		    const n = (v == null) ? NaN : Number(String(v).replaceAll(",", "").trim());
+		    const isEmpty =
+		      v == null ||
+		      String(v).trim() === "" ||
+		      (!Number.isNaN(n) && n === 0);
+		
+		    if (isEmpty) {
+		      ev.stop();
+		      return;
+		    }
+		
+		  } catch (e) {
+		    ev.stop();
+		  }
+		});
+
 	
-	    // 1) 그룹 미적용이면 편집 막기 (기존 그대로)
-	    if (grpNo == null || grpNo === "" || Number(grpNo) === 0) {
-	      ev.stop();
-	      return;
-	    }
-	
-	    // ✅ 2) 그룹 적용됐어도, "동적항목 컬럼"에서 값이 비어있으면 편집 막기
-	    const v = row ? row[ev.columnName] : null;
-	    const isEmpty = (v == null || String(v).trim() === "");
-	    if (isEmpty) {
-	      ev.stop();
-	      return;
-	    }
-	
-	  } catch (e) {
-	    ev.stop();
-	  }
-	});
-	
-	
-	
-	
-	
-	// ✅ (추가) editor 변경 감지 → 체크/확인 없이도 저장 대상(dirty)로 잡기
-	gridCalc.on('afterChange', (ev) => {
-	  const changes = ev?.changes || [];
-	  if (!changes.length) return;
-	
-	  const baseNameSet = new Set((baseCalcColumns || []).map(c => c.name));
-	  changes.forEach(ch => {
-	    const col = ch?.columnName;
-	    if (!col) return;
-	
-	    // 동적 항목 컬럼만 dirty 처리(기본 컬럼은 제외)
-	    if (baseNameSet.has(col)) return;
-	
-	    const row = gridCalc.getRow(ch.rowKey);
-	    if (!row || !row.salySpecId) return;
-	
-	    dirtySpecIdSet.add(row.salySpecId);
-	  });
-	});
+		// ✅ editor로 금액 바뀌면 pendingCalcBySpecId도 같이 갱신 (저장 시 수정값 반영)
+		gridCalc.on("afterChange", (ev) => {
+		  try {
+		    if (!ev || !Array.isArray(ev.changes)) return;
+
+		    ev.changes.forEach((c) => {
+		      if (!c) return;
+
+		      const rowKey = c.rowKey;
+		      const colName = c.columnName;
+
+		      // 동적컬럼(calc_A_9 형태)만 추적
+		      if (!colName || !String(colName).startsWith("calc_")) return;
+
+		      const row = gridCalc.getRow(rowKey);
+		      if (!row) return;
+
+		      const salySpecId = row.salySpecId;
+		      if (!salySpecId) return;
+
+		      // calc_{itemTy}_{dispNo} 파싱
+		      const parts = String(colName).split("_"); // ["calc","A","9"]
+		      const itemTy = parts[1];
+		      const dispNo = Number(parts[2]);
+
+		      if (!itemTy || !Number.isFinite(dispNo)) return;
+
+		      // 새 값 -> 숫자
+		      const rawVal = c.value;
+		      const amt = (rawVal == null || rawVal === "")
+		        ? 0
+		        : Number(String(rawVal).replaceAll(",", "").trim());
+
+		      // 숫자 아니면 무시
+		      if (!Number.isFinite(amt)) return;
+
+		      // ✅ 수정된 사원 추적
+		      dirtySpecIdSet.add(salySpecId);
+
+		      // ✅ pendingCalcBySpecId 없으면 만들어 둠(수정만 하고 저장하는 케이스 방어)
+		      if (!pendingCalcBySpecId[salySpecId]) {
+		        pendingCalcBySpecId[salySpecId] = { items: [], payAmt: 0, ttDucAmt: 0, actPayAmt: 0 };
+		      }
+		      if (!Array.isArray(pendingCalcBySpecId[salySpecId].items)) {
+		        pendingCalcBySpecId[salySpecId].items = [];
+		      }
+
+		      // itemNm 구하기: 컬럼 header를 itemNm로 사용
+		      // (지웅님 buildDynamicColumnsByGroupItems에서 header가 itemNm로 들어가니까 이게 가장 안전)
+		      const col = gridCalc.getColumns().find(x => x && x.name === colName);
+		      const itemNm = (col && col.header) ? String(col.header) : "";
+
+		      // ✅ 같은 (itemTy, dispNo) 항목 찾기/없으면 생성
+		      let it = pendingCalcBySpecId[salySpecId].items.find(x =>
+		        x && String(x.itemTy) === String(itemTy) && Number(x.dispNo) === dispNo
+		      );
+
+		      if (!it) {
+		        it = { itemTy, dispNo, amt: 0, itemNm: itemNm };
+		        pendingCalcBySpecId[salySpecId].items.push(it);
+		      }
+
+		      it.amt = amt;
+		      it.itemNm = itemNm; // ✅ itemNm도 같이 보존/전달
+		    });
+		  } catch (e) {
+		    console.error("afterChange sync error", e);
+		  }
+		});
+
 	  }
 	
 	  function openSalyCalcModal() {
@@ -1002,7 +1056,7 @@
 	   * - grpNo가 있는 행만 대상으로 동적컬럼 + DB items 채움
 	   * - 전체 행에 그룹명이 퍼지지 않도록 보장
 	   * ============================================================ */
-	   function loadCalcSpecList(salyLedgId) {
+	   async function loadCalcSpecList(salyLedgId) {
 		   if (!gridCalc) return;
 	
 		   // ✅ 재로딩 시 변경 추적/미리보기 상태 초기화
@@ -1068,49 +1122,49 @@
 		         );
 	
 		         const items = Array.isArray(res)
-		           ? res
-		           : (res.items || res.list || []);
+		         ? res
+		         : (res.data || res.items || res.list || []);
 	
 		         allItems.push(...items);
 		       }
 	
-		       // itemTy + dispNo 기준으로 유니크 컬럼 구성
+		    // itemTy + dispNo 기준으로 유니크 컬럼 구성
 		       const uniqMap = new Map();
-		       allItems.forEach(it => {
+
+		       // ✅ 여기서는 "래퍼 객체" 말고, 원본 item 자체를 Map에 넣어야 buildDynamicColumnsByGroupItems가 그대로 먹습니다.
+		       allItems.forEach((it) => {
 		         if (!it) return;
-	
-		         // 컨트롤러/VO에서 dispNo 이름이 다를 수 있으니 보정
+
 		         const itemTy = it.itemTy ?? it.item_ty ?? it.ITEM_TY;
 		         const dispNo = it.dispNo ?? it.disp_no ?? it.DISP_NO;
-	
+
 		         if (itemTy == null || dispNo == null) return;
-	
+
 		         const key = `calc_${itemTy}_${dispNo}`;
-		         if (!uniqMap.has(key)) uniqMap.set(key, {
-		           ...it,
-		           itemTy,
-		           dispNo
-		         });
+		         if (!uniqMap.has(key)) uniqMap.set(key, it);
 		       });
-	
+
 		       const dynamicCols = buildDynamicColumnsByGroupItems(
 		         Array.from(uniqMap.values())
 		       );
-	
+
+		       // ✅ Toast Grid setColumns는 "배열 하나"를 넣어야 하므로 스프레드로 합쳐야 합니다.
 		       gridCalc.setColumns([...baseCalcColumns, ...dynamicCols]);
 		       applyReadonlyCellBgForNoGroup(dynamicCols);
-	
+
 		       // 4) 값 채우기 (재조회는 specId만)
 		       await fillCalculatedAmountsForSelectedSpecs(appliedSpecIds, null);
-	
+
 		       // 5) 실제 값(0 제외) 없는 동적컬럼 제거
-				 if (dynamicCols.length > 0) {
-			     const prunedCols = pruneEmptyDynamicColumns(dynamicCols);
+		       if (dynamicCols.length > 0) {
+		         const prunedCols = pruneEmptyDynamicColumns(dynamicCols);
 		         gridCalc.setColumns([...baseCalcColumns, ...prunedCols]);
 		         applyReadonlyCellBgForNoGroup(prunedCols);
 		       }
-	
+
 		       if (gridCalc.refreshLayout) setTimeout(() => gridCalc.refreshLayout(), 0);
+
+
 		     })
 		     .catch(err => {
 		       console.error("급여계산 사원 로딩 오류", err);
@@ -1118,88 +1172,94 @@
 		     });
 		 }
 	
-	
-	  /* ============================================================
-	   * ✅ [수정] 동적 컬럼 만들기
-	   * - items가 배열이든, {allowList, ducList} 객체든 전부 처리
-	   * ============================================================ */
 	   function buildDynamicColumnsByGroupItems(items) {
-		   // ✅ groupItems 응답 형태가 배열/객체(allowList, ducList 등) 어떤 것이든 처리
+		   console.log("raw[0] =", Array.isArray(items) ? items[0] : items);
+
 		   const raw = (() => {
-		     if (Array.isArray(items)) return [...items];
+		     // ✅ 1) 배열이면 그대로 써야 함
+		     if (Array.isArray(items)) return items;
 		     if (!items) return [];
-		     // {allowList, ducList} 또는 {allow, duc} 또는 {list} 등 방어
+
 		     const a = items.allowList ?? items.allow ?? items.allowItems ?? [];
 		     const d = items.ducList ?? items.duc ?? items.ducItems ?? [];
 		     const l = items.list ?? items.items ?? [];
-		     const merged = []
+		     return []
 		       .concat(Array.isArray(l) ? l : [])
 		       .concat(Array.isArray(a) ? a : [])
 		       .concat(Array.isArray(d) ? d : []);
-		     return merged;
 		   })();
-	
-		   // ✅ 어떤 응답이 와도 itemId/itemNm/itemTy/dispNo로 정규화
+
 		   const list = raw
 		     .map((it) => {
 		       if (!it) return null;
-	
+
+		       // ✅ wrapper({ it, itemTy, dispNo }) 형태면 원본으로 풀기
+		       it = it.it ?? it;
+
+		       const itemNo = it.itemNo ?? it.item_no ?? it.ITEM_NO;
+
 		       const itemId =
 		         it.itemId ?? it.item_id ??
 		         it.allowId ?? it.allow_id ??
-		         it.ducId ?? it.duc_id;
-	
+		         it.ducId ?? it.duc_id ??
+		         itemNo;
+
 		       const itemNm =
 		         it.itemNm ?? it.item_nm ??
 		         it.allowNm ?? it.allow_nm ??
 		         it.ducNm ?? it.duc_nm ??
-		         it.codeNm ?? it.code_nm; // 혹시 code_nm으로 내려오는 경우 대비
-	
+		         it.codeNm ?? it.code_nm ?? "";
+
 		       const itemTy =
 		         it.itemTy ?? it.item_ty ??
 		         (it.allowId || it.allow_id ? "A" : (it.ducId || it.duc_id ? "D" : null));
-	
-		       const dispNo =
-		    	 it.dispNo ?? it.disp_no;
-	
-		       if (!itemId) return null;
-	
-		       return { itemId: String(itemId), itemNm: String(itemNm ?? ""), itemTy, dispNo };
+
+		       const dispNo = it.dispNo ?? it.disp_no ?? it.DISP_NO;
+
+		       // ✅ 컬럼키에 필수
+		       if (itemTy == null || dispNo == null) return null;
+
+		       return {
+		         itemId: String(itemId ?? ""),
+		         itemNo: (itemNo == null ? null : Number(itemNo)),
+		         itemNm: String(itemNm),
+		         itemTy: String(itemTy),
+		         dispNo: Number(dispNo),
+		       };
 		     })
 		     .filter(Boolean);
-	
-		   const toNum = (v) => {
-		     const n = Number(v);
-		     return Number.isFinite(n) ? n : 999999;
-		   };
-	
-		   // ✅ A(수당) 먼저, 그 다음 D(공제), 같은 타입이면 표시번호→id
+
+		   const toNum = (v) => (Number.isFinite(Number(v)) ? Number(v) : 999999);
+
+		   // ✅ 정렬: A(수당) → D(공제) → dispNo → itemNo
 		   list.sort((a, b) => {
 		     const at = (a.itemTy === "A") ? 0 : 1;
 		     const bt = (b.itemTy === "A") ? 0 : 1;
 		     if (at !== bt) return at - bt;
-	
+
 		     const an = toNum(a.dispNo);
 		     const bn = toNum(b.dispNo);
 		     if (an !== bn) return an - bn;
-	
+
+		     const ao = (a.itemNo == null ? 999999999 : a.itemNo);
+		     const bo = (b.itemNo == null ? 999999999 : b.itemNo);
+		     if (ao !== bo) return ao - bo;
+
 		     return String(a.itemId).localeCompare(String(b.itemId));
 		   });
-	
+
 		   return list.map((it) => ({
-			   header: it.itemNm,
-			   name: `calc_${it.itemTy}_${it.dispNo}`,   // ✅ 여기만 변경
-			   align: "right",
-			   width: 120,
-			   editor: "text",
-			   formatter: moneyFmt
-			 }));
-	
-	
+		     header: (it.itemNm && String(it.itemNm).trim().length > 0)
+		       ? String(it.itemNm).trim()
+		       : `(${it.itemTy}${it.dispNo})`,
+		     name: `calc_${it.itemTy}_${it.dispNo}`,
+		     align: "right",
+		     width: 120,
+		     editor: "text",
+		     formatter: moneyFmt,
+		   }));
 		 }
-	
-	
-	
+
 	
 	  /********************************************************
 	   * ✅ (추가) 재진입 시 "전부 0/빈값"인 동적 컬럼 숨기기
@@ -1207,34 +1267,28 @@
 	   *   컬럼을 숨겨서 화면이 깔끔하게 보이게 함
 	   * - 0도 "값 없음"으로 간주(집계/표시 의미 없음)
 	   ********************************************************/
-	  function pruneEmptyDynamicColumns(dynamicCols) {
-	    if (!gridCalc) return dynamicCols || [];
-	    const rows = gridCalc.getData() || [];
-	    const cols = dynamicCols || [];
-	
-	    const toNum = (v) => {
-	      if (v == null) return 0;
-	      if (typeof v === "number") return v;
-	      const s = String(v).replace(/,/g, "").trim();
-	      if (s === "") return 0;
-	      const n = Number(s);
-	      return Number.isFinite(n) ? n : NaN;
-	    };
-	
-	    return cols.filter(col => {
-	      const key = col?.name;
-	      if (!key) return false;
-	
-	      // 한 행이라도 0이 아닌 값이 있으면 컬럼 유지
-	      return rows.some(r => {
-	        const v = r ? r[key] : null;
-	        if (v == null || v === "") return false;
-	        const n = toNum(v);
-	        if (!Number.isFinite(n)) return true; // 숫자로 변환 불가(문자 등)면 일단 유지
-	        return n !== 0;
-	      });
-	    });
-	  }
+	   function pruneEmptyDynamicColumns(dynamicCols) {
+		   if (!Array.isArray(dynamicCols) || dynamicCols.length === 0) return [];
+
+		   // 1) 현재 그리드의 row 데이터 가져오기 (사용 중인 방식에 맞게 하나만 남기세요)
+		   const rows = gridCalc?.getData?.() ?? gridCalc?.getRows?.() ?? [];
+
+		   // 2) 값이 하나라도 있는 컬럼만 남긴다
+		   return dynamicCols.filter((col) => {
+		     const key = col.name;
+		     if (!key) return false;
+
+		     // 어떤 row라도 값이 있으면 유지
+		     for (let i = 0; i < rows.length; i++) {
+		       const v = rows[i]?.[key];
+		       if (v !== null && v !== undefined && String(v).trim() !== "" && Number(v) !== 0) {
+		         return true;
+		       }
+		     }
+		     return false;
+		   });
+		 }
+
 	
 	   /********************************************************
 	    * ✅ (교체) 계산결과 셀 채우기
@@ -1299,21 +1353,29 @@
 	         totals = null;
 	       }
 	
-			// ✅ 동적 컬럼 값 채우기 (컬럼 name = itemTy_dispNo 형태로 매칭)
-			(items || []).forEach((it) => {
-			  if (!it) return;
-			
-			  const itemTy = it.itemTy ?? it.item_ty;
-			  const dispNo = it.dispNo ?? it.disp_no;
-			  if (!itemTy || dispNo == null) return;
-			
-			  const key = `calc_${itemTy}_${dispNo}`;
-			
-			  const amt = it.amt ?? it.AMT ?? it.amount ?? it.AMOUNT ?? 0;
-			
-			  // grid row에 값 주입
-			  row[key] = amt;
-			});
+	    // ✅ 동적 컬럼 값 채우기 (컬럼 name = calc_{itemTy}_{dispNo} 형태로 매칭)
+	       (items || []).forEach((it) => {
+	         if (!it) return;
+
+	         // ✅ 재조회/미리보기/대문자 키까지 전부 커버
+	         const itemTy = it.itemTy ?? it.item_ty ?? it.ITEM_TY ?? it.itemty;
+	         const dispNoRaw = it.dispNo ?? it.disp_no ?? it.DISP_NO ?? it.dispno;
+
+	         // dispNo는 "9" 같은 문자열로 와도 되고 숫자로 와도 됨 → 키 만들 때 문자열로 통일
+	         const dispNo = (dispNoRaw == null) ? null : String(dispNoRaw).trim();
+
+	         if (!itemTy || !dispNo) return; // 키 못 만들면 주입 불가
+
+	         const key = `calc_${String(itemTy).trim()}_${dispNo}`;
+
+	         // amt도 다양한 키 가능성 커버
+	         const amtRaw = it.amt ?? it.AMT ?? it.amount ?? it.AMOUNT ?? 0;
+	         const amt = Number(String(amtRaw).replaceAll(",", "").trim() || "0");
+
+	         // grid row에 값 주입
+	         row[key] = Number.isFinite(amt) ? amt : 0;
+	       });
+
 
 	
 	       // totals가 내려오는 구조면 여기서 합계도 채워넣기
@@ -1796,6 +1858,8 @@
 	  });
 	
 	  btnItemSave?.addEventListener("click", async () => {
+		try { gridCalc.finishEditing(); } catch (e) {}
+		  
 	    if (!gridGrp || !gridItem) return;
 	
 	    persistCurrentGroupCheckedSet();
@@ -1818,7 +1882,44 @@
 	      );
 	      if (!already) updatedRows.push({ ...r, rowKey: rk });
 	    });
-	
+	 // ✅ 그룹명 중복 방지(프론트) - 저장 전 검증
+	    const normalizeGrpNm = (s) =>
+	      String(s ?? "")
+	        .trim()
+	        .replace(/\s+/g, " ")   // 연속 공백 정리
+	        .toLowerCase();         // 대소문자 무시(원하면 제거 가능)
+
+	    const deletedKeySet2 = new Set((deletedRows || []).map(r => r.rowKey));
+
+	    // grid에 남아있는(삭제 제외) 모든 행 기준으로 "중복 그룹명" 검사
+	    const nameToRowKey = new Map();
+	    let dupRowKey = null;
+
+	    (gridGrp.getData() || []).forEach(r => {
+	      if (!r) return;
+	      if (deletedKeySet2.has(r.rowKey)) return; // 삭제 예정은 검사 제외
+
+	      const nm = normalizeGrpNm(r.grpNm);
+	      if (!nm) return; // 빈값은 아래 필수검사에서 걸리므로 여기선 스킵
+
+	      if (nameToRowKey.has(nm)) {
+	        dupRowKey = r.rowKey; // 중복 발견
+	        return;
+	      }
+	      nameToRowKey.set(nm, r.rowKey);
+	    });
+
+	    if (dupRowKey != null) {
+	      alert("이미 존재하는 그룹명입니다. 그룹명은 중복으로 저장할 수 없습니다.");
+
+	      // ✅ 중복 난 행으로 포커스 이동(가능하면)
+	      try {
+	        gridGrp.focus(dupRowKey, "grpNm");
+	        gridGrp.startEditing(dupRowKey, "grpNm");
+	      } catch (_) {}
+	      return;
+	    }
+
 	    const invalid = [...createdRows, ...updatedRows].some(r => !(r.grpNm || "").trim());
 	    if (invalid) {
 	      alert("그룹명은 필수입니다.");
@@ -1922,9 +2023,10 @@
 	        const selectedSet = new Set(checked.map(r => r.salySpecId));
 	
 	        rows.forEach(r => {
-	          if (selectedSet.has(r.salySpecId)) {
-	            r.calcGrpNm = selectedGrpNm;
-	          }
+	        	if (selectedSet.has(r.salySpecId)) {
+	        		  r.calcGrpNm = selectedGrpNm;
+	        		  r.grpNo = selectedGrpNo;   // ✅ 이 줄 추가
+	        		}
 	        });
 	
 	        gridCalc.resetData(rows);
@@ -1969,9 +2071,8 @@
 	      console.log("[A] first row keys:", Object.keys(gridCalc.getRow(0) || {}));
 	      console.log("[A] preview sample:", pendingCalcBySpecId && Object.entries(pendingCalcBySpecId)[0]);
 	      
-	      applyReadonlyCellBgForNoGroup(dynamicCols);
-	
 	      await fillCalculatedAmountsForSelectedSpecs(salySpecIdList, pendingCalcBySpecId);
+	      applyReadonlyCellBgForNoGroup(dynamicCols);
 	      
 	      console.log("[B] first row after fill:", gridCalc.getRow(0));
 	      console.log("[B] first row keys after fill:", Object.keys(gridCalc.getRow(0) || {}));
@@ -2013,10 +2114,11 @@
 	    const checkedSpecIds = checked.map(r => r.salySpecId).filter(Boolean);
 	
 	    const canUsePreviewSave =
-	      selectedGrpNo != null &&
-	      pendingGrpNo != null &&
-	      Number(pendingGrpNo) === Number(selectedGrpNo) &&
-	      checkedSpecIds.length > 0;
+	    	  (!dirtySpecIdSet || dirtySpecIdSet.size === 0) &&   // ✅ 추가
+	    	  selectedGrpNo != null &&
+	    	  pendingGrpNo != null &&
+	    	  Number(pendingGrpNo) === Number(selectedGrpNo) &&
+	    	  checkedSpecIds.length > 0;
 	
 	    if (canUsePreviewSave) {
 	      try {
@@ -2040,6 +2142,7 @@
 	          body: JSON.stringify({
 	            salyLedgId: currentCalcSalyLedgId,
 	            grpNo: selectedGrpNo,
+	            saveMode: "PATCH",
 	            previewList
 	          })
 	        });
@@ -2180,20 +2283,34 @@
 	      const previewList = dirtyRows.map(r => {
 	        const items = [];
 	
-	        itemIds.forEach(itemId => {
-	          const raw = r[itemId];
-	          const amt = Number(String(raw ?? "0").replaceAll(",", "").trim() || "0");
-	
-	          if (!Number.isFinite(amt) || amt === 0) return;
-	
-	          const m = metaById[String(itemId)] || {};
-	          items.push({
-	            itemTy: m.itemTy ?? null,
-	            itemId: String(itemId),
-	            itemNm: m.itemNm ?? String(itemId),
-	            amt: amt
-	          });
-	        });
+	        itemIds.forEach(colKey => {
+	        	  const raw = r[colKey];
+	        	  const amt = Number(String(raw ?? "0").replaceAll(",", "").trim() || "0");
+	        	  if (!Number.isFinite(amt) || amt === 0) return;
+
+	        	  // ✅ colKey가 "calc_A_9" 같은 경우 여기서 itemTy/dispNo를 뽑아낸다
+	        	  const m1 = /^calc_([AD])_(\d+)$/.exec(String(colKey));
+	        	  let itemTy = null;
+	        	  let dispNo = null;
+
+	        	  if (m1) {
+	        	    itemTy = m1[1];         // "A" or "D"
+	        	    dispNo = m1[2];         // "9" 같은 문자열
+	        	  } else {
+	        	    // 혹시 ALW/DUC 형태면 기존 방식 유지
+	        	    const meta = metaById[String(colKey)] || {};
+	        	    itemTy = meta.itemTy ?? null;
+	        	  }
+
+	        	  // ✅ itemNm은 meta가 있으면 쓰고, 없으면 colKey라도 넣어둠(헤더는 서버 저장용이라 치명적이지 않음)
+	        	  const meta = metaById[String(colKey)] || {};
+
+	        	  items.push({
+	        	    itemTy: itemTy,              // ✅ 절대 null이면 안 됨
+	        	    dispNo: dispNo,
+	        	    amt: amt
+	        	  });
+	        	});
 	
 	        return { salySpecId: r.salySpecId, items };
 	      });
@@ -2208,10 +2325,11 @@
 	        method: "POST",
 	        headers: { "Content-Type": "application/json" },
 	        body: JSON.stringify({
-	          salyLedgId: currentCalcSalyLedgId,
-	          grpNo: grpNoToSave,
-	          previewList
-	        })
+	        	  salyLedgId: currentCalcSalyLedgId,
+	        	  grpNo: grpNoToSave,
+	        	  saveMode: "PATCH",
+	        	  previewList
+	        	})
 	      });
 	
 	      if (saveRes?.result !== "SUCCESS") {
@@ -2247,29 +2365,32 @@
 	  
 	  function applyReadonlyCellBgForNoGroup(dynamicCols) {
 		  if (!gridCalc) return;
-	
+
 		  const cols = (dynamicCols || []).map(c => c?.name).filter(Boolean);
 		  if (!cols.length) return;
-	
+
 		  const rowCount = typeof gridCalc.getRowCount === "function"
 		    ? gridCalc.getRowCount()
 		    : (gridCalc.getData() || []).length;
-	
+
 		  for (let rowKey = 0; rowKey < rowCount; rowKey++) {
 		    const row = gridCalc.getRow(rowKey);
 		    const grpNo = row ? row.grpNo : null;
 		    const isNoGroup = (grpNo == null || grpNo === "" || Number(grpNo) === 0);
-	
+
 		    cols.forEach((colName) => {
-		      // 매번 초기화(재진입/재계산 반복 대비)
 		      if (typeof gridCalc.removeCellClassName === "function") {
 		        gridCalc.removeCellClassName(rowKey, colName, "calc-readonly-cell");
 		      }
-	
+
 		      const v = row ? row[colName] : null;
-		      const isEmpty = (v == null || String(v).trim() === ""); // ✅ 값 비어있음
-	
-		      // ✅ 1) 그룹 미적용 행 OR 2) 그룹 적용됐지만 해당 셀이 비어있음
+
+		      const n = (v == null) ? NaN : Number(String(v).replaceAll(",", "").trim());
+		      const isEmpty =
+		        v == null ||
+		        String(v).trim() === "" ||
+		        (!Number.isNaN(n) && n === 0);   // ✅ 0도 빈값 취급
+
 		      if ((isNoGroup || isEmpty) && typeof gridCalc.addCellClassName === "function") {
 		        gridCalc.addCellClassName(rowKey, colName, "calc-readonly-cell");
 		      }

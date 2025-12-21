@@ -75,5 +75,15 @@ public interface SalyCalcMapper {
                                                     @Param("grpNm") String grpNm);
  // ✅ 재조회용: saly_spec_id 기준 전체 조회
     List<SalySpecItemVO> selectSalySpecItemsBySpecId(@Param("salySpecId") String salySpecId);
+ // (B안) 항목 1건만 삭제: spec + grpNm + itemTy + dispNo
+    int deleteSpecItemByKey(@Param("salySpecId") String salySpecId,
+                            @Param("grpNm") String grpNm,
+                            @Param("itemTy") String itemTy,
+                            @Param("dispNo") Long dispNo);
+
+    // (1번) DB에서 합계 재합산: spec + grpNm 기준
+    Map<String, Object> selectSpecTotalsByGrpNm(@Param("salySpecId") String salySpecId,
+                                                @Param("grpNm") String grpNm);
+    void deleteSpecItemsBySpecId(@Param("salySpecId") String salySpecId);
 
 }

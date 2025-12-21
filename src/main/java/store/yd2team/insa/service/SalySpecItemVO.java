@@ -26,7 +26,7 @@ public class SalySpecItemVO {
     private String salySpecId;     // FK tb_saly_spec
     private String   grpNm;          // 급여계산그룹의 그룹명
     private String itemNm;         // 수당공제명 표시하는거
-    private String dispNo; // 표시번호 저장용 
+    private Long dispNo; // 표시번호 저장용 
     private Long   amt;            // 금액
     private String itemTy;         // 'A' 수당 / 'D' 공제
 

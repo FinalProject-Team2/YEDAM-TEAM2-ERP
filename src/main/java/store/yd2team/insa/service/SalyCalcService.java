@@ -25,7 +25,8 @@ public interface SalyCalcService {
      * - 미리보기에서 넘어온 계산 결과를 DB에 반영한다.
      */
     void savePreviewResult(String salyLedgId, Long grpNo, List<Map<String, Object>> previewList,
-                           String vendId, String loginEmpId);
+            String saveMode,
+            String vendId, String loginEmpId);
 
     // (기존) 급여계산 실행 (선택 사원만) - 필요 시 유지
     void calculateSalyLedg(String salyLedgId, Long grpNo, List<String> salySpecIdList,
