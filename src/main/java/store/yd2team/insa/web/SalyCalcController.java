@@ -175,6 +175,8 @@ public class SalyCalcController {
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> previewList = (List<Map<String, Object>>) body.get("previewList");
+        String saveMode = (String) body.get("saveMode");   // ✅ 추가
+        if (saveMode == null || saveMode.isBlank()) saveMode = "REPLACE"; // ✅ 추가(기본
 
         if (salyLedgId == null || salyLedgId.isBlank()) {
             res.put("result", "FAIL");
@@ -199,6 +201,7 @@ public class SalyCalcController {
                     salyLedgId,
                     grpNo,
                     previewList,
+                    saveMode,
                     login.getVendId(),
                     login.getEmpId()
             );
