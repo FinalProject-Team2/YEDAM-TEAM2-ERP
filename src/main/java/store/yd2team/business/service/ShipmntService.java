@@ -15,6 +15,8 @@ public interface ShipmntService {
            String empId,
            String loginId);
 
+void cancelShipment(String oustId, String vendId, String empId, String loginId);
+
 	/*
 	 * void cancelShipment(String oustId, String vendId, String empId, String
 	 * loginId);

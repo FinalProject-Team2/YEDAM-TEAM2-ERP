@@ -54,6 +54,12 @@ public class ShipmntServiceImpl implements ShipmntService {
             LoginSession.getLoginId()
         );
     }
+
+	@Override
+	public void cancelShipment(String oustId, String vendId, String empId, String loginId) {
+		// TODO Auto-generated method stub
+		
+	}
     
 	/*
 	 * @Override
