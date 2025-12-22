@@ -608,7 +608,7 @@ class ProductAutoComplete {
 }
 	
 	
-// 할인율 조회 함수
+// ============================================================= 할인율 조회 함수
 function fetchDiscountRate(rowKey, productId) {
   const custcomId = $('#autoCustcomId').val();
   if (!custcomId) return;
@@ -630,7 +630,39 @@ function fetchDiscountRate(rowKey, productId) {
     // 수량 있으면 바로 계산
     recalcRow(rowKey);
   });
+}	
+
+	
+// 수정 모달 열 때 호출
+function fillNewEstiModal(data) {
+
+  // 기존 데이터 세팅
+  $('#autoCustcomId').val(data.custcomId);
+  $('#autoCustcomName').val(data.custcomNameResult);
+
+  // 그리드 데이터 세팅
+  window.newEstiGrid.resetData(data.detailList);
+
+  // 할인율 재조회
+  setTimeout(() => {
+	  applyDiscountRatesOnEdit();
+	}, 0);
 }
+
+// 모든 행 할인율 재조회
+function applyDiscountRatesOnEdit() {
+	if (!window.newEstiGrid) return;
+	
+	const rows = window.newEstiGrid.getData();
+	
+	rows.forEach(row => {
+	  if (!row.productId) return;
+	  fetchDiscountRate(row.rowKey, row.productId);
+	});
+}
+
+	
+
 	
 // ---------------------------- 신규 견적서 모달 스크립트
 	//1. 그리드 생성
@@ -684,7 +716,8 @@ function fetchDiscountRate(rowKey, productId) {
 				formatter: ({ value }) => {
 	                   const num = toNumber(value);
 	                   return num ? num.toLocaleString() : '';
-	               } },
+	            } 
+		  },
 	      { header: '할인율(%)', name: 'dcRate',  width: 90, align:'right' },
 	      { header: '할인금액(원)', name: 'saleAmt',  width: 180, align:'right',
 				formatter: ({ value }) => {
@@ -818,6 +851,10 @@ function fetchDiscountRate(rowKey, productId) {
 	const back    = document.getElementById("newEstiBackdrop");
 	
 	function openNewEstiModal() {
+		
+		resetNewEstiForm();
+	    resetEstiModalState();
+	    
 		modal.classList.add("show");
 		modal.style.display = "block";
 		back.style.display = "block";
@@ -852,7 +889,8 @@ function fetchDiscountRate(rowKey, productId) {
 		// 1) 모달 입력창 초기화
 		$('#autoCustcomId').val('');
 		$('#autoCustcomName').val('');
-		$('#autoDueDt').val('');
+		$('#mDueDt').val('');
+		$('#mDueDt').datepicker('setDate', null);
 		$('#autoRemark').val('');
 		$('#applyDate').val('');
 		
@@ -913,7 +951,7 @@ function fetchDiscountRate(rowKey, productId) {
 	  }
 	
 	  // 납기일 체크
-	  const dueDt = document.getElementById("applyDate").value;
+	  const dueDt = document.getElementById("mDueDt").value;
 	  if (!dueDt || dueDt.trim() === "") {
 	    alert("납기일이 선택되지 않았습니다.");
 	    return;
@@ -962,6 +1000,34 @@ function fetchDiscountRate(rowKey, productId) {
 	  })
 	    .then(res => res.json())
 	    .then(result => {
+		  console.log("save result:", result);
+		
+		  if (!result.success) {
+		    alert(result.message || "저장 실패");
+		    return;
+		  }
+		
+		  alert("저장 완료\n견적서 번호 : " + result.estiId);
+		
+		  const estiIdHidden = document.getElementById("estiIdHidden");
+		  console.log("estiIdHidden:", estiIdHidden);
+		
+		  if (estiIdHidden) {
+		    estiIdHidden.value = result.estiId;
+		  }
+		
+		  closeNewEstiModal();
+		
+		  const btnSearch = document.getElementById("btnSearch");
+		  if (btnSearch) {
+		    btnSearch.click();
+		  }
+		})
+		.catch(err => {
+		  console.error("❌ catch error:", err);
+		  alert("저장 중 오류가 발생했습니다.");
+		});
+	    /* .then(result => {
 	      if (result.success) {
 	        alert("저장 완료\n견적서 번호 : " + result.estiId);
 	
@@ -979,7 +1045,7 @@ function fetchDiscountRate(rowKey, productId) {
 	    .catch(err => {
 	      console.error(err);
 	      alert("저장 중 오류가 발생했습니다.");
-	    });
+	    }); */
 	});
 	
 	
@@ -1044,8 +1110,11 @@ function fetchDiscountRate(rowKey, productId) {
 		// 헤더 세팅
 		$("#autoCustcomId").val(data.custcomId);
 		$("#autoCustcomName").val(data.custcomNameResult);
-		$("#applyDate").val(data.dueDt);
+		$("#mDueDt").val(data.dueDt);
 		$("#autoRemark").val(data.rm || "");
+		
+		$('#estiIdText').text(data.estiId);
+		$('#custcomNameText').text(data.custcomNameResult);
 
 	  // 그리드 데이터 변환
 	  const gridData = data.detailList.map(d => ({
@@ -1058,6 +1127,8 @@ function fetchDiscountRate(rowKey, productId) {
 
 	  // 그리드 로딩
 	  loadNewEstiGrid(gridData);
+	  
+	  applyDiscountRatesOnEdit();
 	}
 	
 	// 견적서 모달 닫을때 초기화
@@ -1068,8 +1139,7 @@ function fetchDiscountRate(rowKey, productId) {
 	  $('#applyDate').val('');
 	  $('#autoRemark').val('');
 
-		$('#estiIdText').text(data.estiId);
-		$('#custcomNameText').text(data.custcomNameResult);
+		
 	  
 	  // estiId 초기화 (안 하면 다음에 꼬임)
 	  $("#estiIdHidden").val('');
@@ -1250,9 +1320,21 @@ function fetchDiscountRate(rowKey, productId) {
 	    columns: [
 	      { name: 'productId', header: '상품ID', hidden: true },
 	      { name: 'productName', header: '상품명', width: 302 },
-	      { name: 'qy', header: '수량', width: 100, align: 'right' },
-	      { name: 'price', header: '단가', width: 200, align: 'right' },
-	      { name: 'supplyAmt', header: '공급가액', width: 200, align: 'right' }
+	      { name: 'qy', header: '수량', width: 100, align: 'right',
+				formatter: ({ value }) => {
+	                   const num = toNumber(value);
+	                   return num ? num.toLocaleString() : '';
+	            }  },
+	      { name: 'price', header: '단가', width: 200, align: 'right',
+					formatter: ({ value }) => {
+		                   const num = toNumber(value);
+		                   return num ? num.toLocaleString() : '';
+		            }  },
+	      { name: 'supplyAmt', header: '공급가액', width: 200, align: 'right',
+						formatter: ({ value }) => {
+			                   const num = toNumber(value);
+			                   return num ? num.toLocaleString() : '';
+			            }  }
 	    ]
 	  });
 	}
@@ -1306,7 +1388,7 @@ function fetchDiscountRate(rowKey, productId) {
 	    });
 	});
 	
-	const rciptAppoAmtInput = document.getElementById('rciptAppoAmt');
+	/* const rciptAppoAmtInput = document.getElementById('rciptAppoAmt');
 
 	// 숫자만 남기기
 	function onlyDigits(value) {
@@ -1339,7 +1421,7 @@ function fetchDiscountRate(rowKey, productId) {
 	// 다시 클릭(포커스): 콤마 제거하고 편집 가능
 	rciptAppoAmtInput.addEventListener('focus', (e) => {
 	  e.target.value = onlyDigits(e.target.value);
-	});
+	}); */
 	
 	
 	  
@@ -1395,11 +1477,11 @@ function fetchDiscountRate(rowKey, productId) {
 	$("#newSoModalSaveBtn").on("click", function () {
 		
 		// 숫지에 다시 콤마 제거
-		const rciptAppoAmtRaw = $("#rciptAppoAmt").val();
+		/* const rciptAppoAmtRaw = $("#rciptAppoAmt").val();
 
 		const rciptAppoAmt = rciptAppoAmtRaw
 		  ? Number(rciptAppoAmtRaw.replace(/,/g, ''))
-		  : null;
+		  : null; */
 		
 		  
 		
@@ -1411,13 +1493,13 @@ function fetchDiscountRate(rowKey, productId) {
 	  const soDt = $("#newSoDt").val();
 	  const shipAddr = $("#newSoShipAddr").val();
 	  const orderRm  = $("#newSoRm").val();
-	  const rciptAppoDt = $("#rciptAppoDt").val();   // 입금약속일
+	  //const rciptAppoDt = $("#rciptAppoDt").val();   // 입금약속일
 	  //const rciptAppoAmt = $("#rciptAppoAmt").val(); // 입금약속금액
-	  const appoMtd      = $("#appoMtd").val();      // 결제방법
+	 // const appoMtd      = $("#appoMtd").val();      // 결제방법
 
 	  
-	  console.log("입금약속금액 raw =", $("#rciptAppoAmt").val());
-	  console.log("입금약속금액 payload =", rciptAppoAmt);
+	  /* console.log("입금약속금액 raw =", $("#rciptAppoAmt").val());
+	  console.log("입금약속금액 payload =", rciptAppoAmt); */
 	
 	  // ▶ grid 객체 이름 newSoGrid 사용
 	  const rows = window.newSoGrid ? window.newSoGrid.getData() : [];
@@ -1436,10 +1518,10 @@ function fetchDiscountRate(rowKey, productId) {
 	    dueDt: dueDt,
 	    shipAddr: shipAddr,
 	    rm: orderRm,
-	    rciptAppoDt: rciptAppoDt || null,
-	    rciptAppoAmt: rciptAppoAmt,
+	    //rciptAppoDt: rciptAppoDt || null,
+	    //rciptAppoAmt: rciptAppoAmt,
 	    //rciptAppoAmt: rciptAppoAmt ? Number(rciptAppoAmt) : null,
-	    appoMtd: appoMtd,
+	    //appoMtd: appoMtd,
 	    
 	    detailList: detailList
 	  };
