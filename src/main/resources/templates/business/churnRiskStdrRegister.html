@@ -7,38 +7,41 @@
 <meta charset="UTF-8">
 <title>churn_risk_stdr_register</title>
 
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
 <style>
-.fixed-photo{
-	width:150px;
-	height:200px;
-	object-fit:cover;
+.fixed-photo {
+	width: 150px;
+	height: 200px;
+	object-fit: cover;
 }
-.form-select{ color:#000 !important; }
+
+.form-select {
+	color: #000 !important;
+}
 
 /* ===== 이 화면 전용 범위(wrapper) ===== */
-.churn-stdr-wrapper .help-text{
-	font-size:12px;
-	color:#6c757d;
-	font-weight:300;
-	opacity:0.75;
-
+.churn-stdr-wrapper .help-text {
+	font-size: 12px;
+	color: #6c757d;
+	font-weight: 300;
+	opacity: 0.75;
 	/* 길면 내려가도 됨 */
-	white-space:normal;
+	white-space: normal;
 	margin-left: 0;
 }
 
-.churn-stdr-wrapper .card-header-left{
-	display:flex;
-	align-items:center;
-	gap:4px;
+.churn-stdr-wrapper .card-header-left {
+	display: flex;
+	align-items: center;
+	gap: 4px;
 }
 
-.churn-stdr-wrapper .card-header-left .card-title{
-	margin-bottom:0;
-	white-space:nowrap;
+.churn-stdr-wrapper .card-header-left .card-title {
+	margin-bottom: 0;
+	white-space: nowrap;
 }
 
 /* (선택) 안내문이 너무 길어서 카드 헤더 높이가 커지는 게 싫으면 아래 주석 해제
@@ -56,180 +59,182 @@
 
 		<!-- 휴면기준 -->
 		<div class="row">
-			<div class="card mb-3">
-				<div class="card-header">
-					<div class="card-header-left">
-						<h5 class="card-title me-2">휴면기준</h5>
-						<span class="help-text">* 기준값은 숫자만 입력해주십시오.</span>
+			<div class="col-md-12 mb-3">
+				<div class="card">
+					<div class="card-header">
+						<div class="card-header-left">
+							<h5 class="card-title me-2">휴면기준</h5>
+							<span class="help-text">* 기준값에 숫자만 입력해주십시오.</span>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-outline-dark btnSave"
+								data-type="dormancy">저장</button>
+						</div>
 					</div>
-					<div class="card-header-right">
-						<button type="button" class="btn btn-outline-dark btnSave" data-type="dormancy">저장</button>
-					</div>
-				</div>
 
-				<div class="card-body">
-					<div id="Dormancygrid" style="margin:20px;"></div>
+					<div id="Dormancygrid" style="margin:20px; height:180px;"></div>
 				</div>
 			</div>
 		</div>
 
 		<!-- 이탈위험기준 -->
 		<div class="row">
-			<div class="card mb-3">
-				<div class="card-header">
-					<div class="card-header-left">
-						<h5 class="card-title me-2">이탈위험기준</h5>
-						<span class="help-text">* 기준값은 숫자만 입력해주십시오.</span>
+			<div class="col-md-12 mb-3">
+				<div class="card">
+					<div class="card-header">
+						<div class="card-header-left">
+							<h5 class="card-title me-2">이탈위험기준</h5>
+							<span class="help-text">* 기준값에 숫자만 입력해주십시오.</span>
+						</div>
+						<div class="card-header-right">
+							<button type="button" class="btn btn-outline-dark btnSave"
+								data-type="churn">저장</button>
+						</div>
 					</div>
-					<div class="card-header-right">
-						<button type="button" class="btn btn-outline-dark btnSave" data-type="churn">저장</button>
-					</div>
-				</div>
 
-				<div class="card-body">
-					<div id="Churngrid" style="margin:20px;"></div>
+					<div id="Churngrid" style="margin:20px; height:180px;"></div>
 				</div>
 			</div>
 		</div>
-
 	</div>
 
+
+
+
+
+
+
+
 	<script th:inline="javascript">
-	const allList = /*[[${getChurnStdrList}]]*/ [];
+const allList = /*[[${getChurnStdrList}]]*/ [];
+const safeAllList = Array.isArray(allList) ? allList : [];
 
-	// ===== 공통 테마 =====
-	tui.Grid.applyTheme('default', {
-		cell: {
-			normal: { border:'#ccc', background:'#fff', showVerticalBorder:true },
-			header: { border:'#ccc', background:'#E3E6ED', showVerticalBorder:true },
-			editable: { background:'#FFFDF0', text:'#000' },
-			selectedHeader: { background:'#E3E6ED' },
-			selected: { background:'#ffffff' }
-		}
-	});
+// 테마
+tui.Grid.applyTheme('default', {
+  cell: {
+    normal: { border:'#ccc', background:'#fff', showVerticalBorder:true },
+    header: { border:'#ccc', background:'#E3E6ED', showVerticalBorder:true },
+    editable: { background:'#FFFDF0', text:'#000' },
+    selectedHeader: { background:'#E3E6ED' },
+    selected: { background:'#ffffff' }
+  }
+});
 
-	// ===== 데이터 분리 =====
-	const DormancyData = allList.filter(row => row.salesChange === "휴면");
-	const ChurnData    = allList.filter(row => row.salesChange === "이탈");
+// ty 우선순위(포함 매칭)
+function getTyRank(ty) {
+  const t = String(ty ?? '').replace(/\s+/g, ''); // 공백 제거해서 비교
+  if (t.includes('거래중단기간')) return 1;
+  if (t.includes('매출변동')) return 2;
+  if (t.includes('평균구매주기')) return 3;
+  return 999;
+}
 
-	// ===== 그리드 생성(휴면) =====
-	const Dormancygrid = new tui.Grid({
-		el: document.getElementById('Dormancygrid'),
-		data: DormancyData,
-		scrollX: false,
-		scrollY: false,
-		minBodyHeight: 0,
-		columns: [
-			{ header:'기준유형', name:'ty', sortable:true, align:'center', width:200 },
-			{ header:'휴면/이탈 타입', name:'salesChange', sortable:true, align:'center', hidden:true },
-			{ header:'기준값', name:'stdrValue', editor:'text', align:'center', width:200 },
-			{ header:'설명', name:'stdrDc' },
-			{ header:'사용여부', name:'yn', align:'center', width:200 }
-		]
-	});
+function sortByTyOrder(list) {
+  return list.slice().sort((a, b) => {
+    const aRank = getTyRank(a?.ty);
+    const bRank = getTyRank(b?.ty);
 
-	// ===== 그리드 생성(이탈) =====
-	const Churngrid = new tui.Grid({
-		el: document.getElementById('Churngrid'),
-		data: ChurnData,
-		scrollX: false,
-		scrollY: false,
-		minBodyHeight: 0,
-		autoWidth: true,
-		columns: [
-			{ header:'기준유형', name:'ty', sortable:true, align:'center', width:200 },
-			{ header:'휴면/이탈 타입', name:'salesChange', sortable:true, align:'center', hidden:true },
-			{ header:'기준값', name:'stdrValue', editor:'text', align:'center', width:200 },
-			{ header:'설명', name:'stdrDc' },
-			{ header:'사용여부', name:'yn', align:'center', width:200 }
-		]
-	});
+    if (aRank !== bRank) return aRank - bRank;
 
-	// ===== 기준값: 숫자만 + 자동 접미사(개월 이상 / % 이상) =====
-	function attachNumericAutoSuffix(grid) {
+    // 같은 rank면 id로 안정 정렬(없으면 0)
+    const aId = Number(a?.churnRiskId ?? 0);
+    const bId = Number(b?.churnRiskId ?? 0);
+    return aId - bId;
+  });
+}
 
-		// 편집 시작: input에 숫자만 남기기
-		grid.on('editingStart', (ev) => {
-			if (!ev || ev.columnName !== 'stdrValue') return;
+// 분리 + 정렬
+const DormancyData = sortByTyOrder(safeAllList.filter(row => row.salesChange === "휴면"));
+const ChurnData    = sortByTyOrder(safeAllList.filter(row => row.salesChange === "이탈"));
 
-			setTimeout(() => {
-				const input = document.querySelector('.tui-grid-layer-editing input');
-				if (!input) return;
+// Grid
+const Dormancygrid = new tui.Grid({
+  el: document.getElementById('Dormancygrid'),
+  data: DormancyData,
+  scrollX: false,
+  scrollY: false,
+  bodyHeight: 120,
+  minBodyHeight: 0,
+  columns: [
+    { header:'기준유형', name:'ty', sortable:true, align:'center', width:200 },
+    { header:'휴면/이탈 타입', name:'salesChange', hidden:true },
+    { header:'기준값', name:'stdrValue', editor:'text', align:'center', width:200 },
+    { header:'설명', name:'stdrDc' },
+    { header:'사용여부', name:'yn', align:'center', width:200 }
+  ]
+});
 
-				input.setAttribute('inputmode', 'numeric');
+const Churngrid = new tui.Grid({
+  el: document.getElementById('Churngrid'),
+  data: ChurnData,
+  scrollX: false,
+  scrollY: false,
+  bodyHeight: 120,
+  minBodyHeight: 0,
+  columns: [
+    { header:'기준유형', name:'ty', sortable:true, align:'center', width:200 },
+    { header:'휴면/이탈 타입', name:'salesChange', hidden:true },
+    { header:'기준값', name:'stdrValue', editor:'text', align:'center', width:200 },
+    { header:'설명', name:'stdrDc' },
+    { header:'사용여부', name:'yn', align:'center', width:200 }
+  ]
+});
 
-				input.oninput = () => {
-					input.value = input.value.replace(/[^0-9]/g, '');
-				};
-			}, 0);
-		});
 
-		// 편집 확정(엔터/탭/클릭 등): 숫자 + 접미사 자동
-		grid.on('afterChange', (ev) => {
-			if (!ev || !ev.changes) return;
+//===== 기준값: 숫자만 + 자동 접미사(개월 이상 / % 이상) =====
+function attachNumericAutoSuffix(grid) {
 
-			ev.changes.forEach((ch) => {
-				if (ch.columnName !== 'stdrValue') return;
+  function isMonthType(ty) {
+    const t = String(ty ?? '').replace(/\s+/g, '');
+    return t.includes('기간') || t.includes('주기') || t.includes('거래중단기간') || t.includes('평균구매주기');
+  }
 
-				const row = grid.getRow(ch.rowKey) || {};
-				const raw = String(ch.value ?? '');
-				const digits = raw.replace(/[^0-9]/g, '');
+  // 편집 시작: input에 숫자만 남기기
+  grid.on('editingStart', (ev) => {
+    if (!ev || ev.columnName !== 'stdrValue') return;
 
-				if (!digits) {
-					grid.setValue(ch.rowKey, 'stdrValue', '', false);
-					return;
-				}
+    setTimeout(() => {
+      const input = document.querySelector('.tui-grid-layer-editing input');
+      if (!input) return;
 
-				// 규칙: ty에 '기간' 또는 '주기' 들어가면 개월, 아니면 퍼센트
-				const ty = String(row.ty ?? '');
-				const isMonthType = ty.includes('기간') || ty.includes('주기');
+      input.setAttribute('inputmode', 'numeric');
 
-				const suffix = isMonthType ? '개월 이상' : '% 이상';
-				const newVal = digits + suffix;
+      input.oninput = () => {
+        input.value = input.value.replace(/[^0-9]/g, '');
+      };
+    }, 0);
+  });
 
-				if (newVal !== raw) {
-					grid.setValue(ch.rowKey, 'stdrValue', newVal, false);
-				}
-			});
-		});
-	}
+  // 값 확정 후: 숫자 + 접미사 자동으로 붙이기
+  grid.on('afterChange', (ev) => {
+    if (!ev || !ev.changes) return;
 
-	attachNumericAutoSuffix(Dormancygrid);
-	attachNumericAutoSuffix(Churngrid);
+    ev.changes.forEach((ch) => {
+      if (ch.columnName !== 'stdrValue') return;
 
-	// ===== 저장 버튼 =====
-	document.querySelectorAll('.btnSave').forEach(btn => {
-		btn.addEventListener('click', function () {
-			const type = this.dataset.type; // "dormancy" 또는 "churn"
+      const row = grid.getRow(ch.rowKey) || {};
+      const raw = String(ch.value ?? '');
+      const digits = raw.replace(/[^0-9]/g, '');
 
-			// 편집 종료
-			Dormancygrid.finishEditing();
-			Churngrid.finishEditing();
+      if (!digits) {
+        grid.setValue(ch.rowKey, 'stdrValue', '', false);
+        return;
+      }
 
-			// 변경분 수집
-			const DormancyModified = Dormancygrid.getModifiedRows();
-			const ChurnModified    = Churngrid.getModifiedRows();
+      const suffix = isMonthType(row.ty) ? '개월 이상' : '% 이상';
+      const newVal = digits + suffix;
 
-			const DormancyList = DormancyModified.updatedRows.concat(DormancyModified.createdRows);
-			const ChurnList    = ChurnModified.updatedRows.concat(ChurnModified.createdRows);
+      if (newVal !== raw) {
+        grid.setValue(ch.rowKey, 'stdrValue', newVal, false);
+      }
+    });
+  });
+}
 
-			fetch('/churnRiskStdrRegister/update', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dormancyList: DormancyList,
-					churnList: ChurnList
-				})
-			})
-			.then(res => res.text())
-			.then(() => {
-				if (type === 'dormancy') alert('휴면 기준 저장되었습니다.');
-				else if (type === 'churn') alert('이탈 기준 저장되었습니다.');
-				else alert('저장되었습니다.');
-			})
-			.catch(err => console.error(err));
-		});
-	});
-	</script>
+// ✅ 두 그리드에 적용
+attachNumericAutoSuffix(Dormancygrid);
+attachNumericAutoSuffix(Churngrid);
+</script>
+
 </body>
 </html>
