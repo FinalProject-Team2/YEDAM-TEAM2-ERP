@@ -36,7 +36,7 @@
 
                     <!-- 부서명 : HR 관리자만 노출 (tb_user_role 기준 roleIds 사용) -->
                     <div class="col-md-3"
-                         th:if="${session.LOGIN_EMP != null and #lists.contains(session.LOGIN_EMP.roleIds, 'ROLE_HR_ADMIN')}">
+                         th:if="${session.LOGIN_EMP != null and #lists.contains(session.LOGIN_EMP.roleIds, 'role202512009')}">
                         <label class="form-label">부서명</label>
                         <select class="form-select" id="deptSelect">
                             <option value="">전체</option>
@@ -45,7 +45,7 @@
 
                     <!-- 사원명 : HR 관리자만 검색용 인풋 노출 (tb_user_role 기준 roleIds 사용) -->
                     <div class="col-md-3"
-                         th:if="${session.LOGIN_EMP != null and #lists.contains(session.LOGIN_EMP.roleIds, 'ROLE_HR_ADMIN')}">
+                         th:if="${session.LOGIN_EMP != null and #lists.contains(session.LOGIN_EMP.roleIds, 'role202512009')}">
                         <label class="form-label">사원명</label>
                         <input type="text" id="empNmCond" class="form-control" placeholder="사원명 입력">
                     </div>

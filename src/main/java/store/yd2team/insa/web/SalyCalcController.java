@@ -4,14 +4,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import jakarta.servlet.http.HttpSession;
-
-import org.springframework.web.bind.annotation.*;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import store.yd2team.common.consts.SessionConst;
 import store.yd2team.common.dto.SessionDto;
+import store.yd2team.insa.mapper.SalyCalcMapper;
 import store.yd2team.insa.service.AllowDucVO;
 import store.yd2team.insa.service.CalGrpVO;
 import store.yd2team.insa.service.SalyCalcService;
@@ -22,6 +27,7 @@ import store.yd2team.insa.service.SalySpecItemVO;
 @RequiredArgsConstructor
 @Slf4j
 public class SalyCalcController {
+	private final SalyCalcMapper salyCalcMapper;
 
     private final SalyCalcService salyCalcService;
 
@@ -389,6 +395,49 @@ public class SalyCalcController {
                 .toList());
 
         return res;
+    }
+
+    @PostMapping("/insa/saly/calc/updateAmt")
+    public Map<String,Object> updateAmt(@RequestBody List<SalySpecItemVO> list, HttpSession session) {
+
+        SessionDto login = getLogin(session);
+        if (login == null) return Map.of("result", "FAIL", "message", "세션 만료");
+
+        // 1) 항목 금액 업데이트
+        for (SalySpecItemVO vo : list) {
+            if (vo == null) continue;
+            vo.setUpdtBy(login.getEmpId()); // 필요시 VO에 updtBy 있어야 함
+            salyCalcMapper.updateSpecItemAmt(vo);
+        }
+
+     // 2) salySpecId별 합계 재계산 후 tb_saly_spec 업데이트 (✅ 그룹 조건 제거)
+        Map<String, Boolean> specIdSet = new HashMap<>();
+        for (SalySpecItemVO vo : list) {
+            if (vo == null) continue;
+            if (vo.getSalySpecId() == null) continue;
+            specIdSet.put(vo.getSalySpecId(), true);
+        }
+
+        for (String salySpecId : specIdSet.keySet()) {
+
+            Map<String, Object> totals = salyCalcMapper.selectSpecTotalsBySpecId(salySpecId);
+
+            long payAmt   = totals == null ? 0L : ((Number) totals.getOrDefault("payAmt", 0)).longValue();
+            long ttDucAmt = totals == null ? 0L : ((Number) totals.getOrDefault("ttDucAmt", 0)).longValue();
+            long actPayAmt = payAmt - ttDucAmt;
+
+            Map<String, Object> upd = new HashMap<>();
+            upd.put("salySpecId", salySpecId);
+            upd.put("payAmt", payAmt);
+            upd.put("ttDucAmt", ttDucAmt);
+            upd.put("actPayAmt", actPayAmt);
+            upd.put("updtBy", login.getEmpId());
+
+            salyCalcMapper.updateSalySpecTotals(upd);
+        }
+
+
+        return Map.of("result","SUCCESS");
     }
 
 
