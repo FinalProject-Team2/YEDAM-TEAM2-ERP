@@ -395,6 +395,7 @@
 				})
 				.done((result) => {
 				    console.log(result);
+				    alert("정상 등록되었습니다.");
 				    grid.resetData(result);            // 결과를 grid에 반영
 				})
 				.fail((error) => {
