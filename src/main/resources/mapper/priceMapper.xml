@@ -28,7 +28,7 @@
 	           BETWEEN p.applc_begin_dt
 	               AND NVL(p.applc_end_dt, TO_DATE('29991231','YYYYMMDD'))
 	    </if>
-	    ORDER BY p.price_policy_id
+	    ORDER BY p.applc_end_dt DESC
 
     </select>
 	
