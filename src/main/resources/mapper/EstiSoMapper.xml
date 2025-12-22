@@ -36,7 +36,7 @@
 		             , e.esti_st
 		             , e.recall_resn
 		
-		             -- 🔥 핵심
+		             -- 핵심
 		             , ROW_NUMBER() OVER (
 		                   PARTITION BY e.esti_id
 		                   ORDER BY
@@ -384,9 +384,6 @@
 	        , tt_so_qy
 	        , ship_addr
 	        , rm
-	        , rcipt_appo_dt
-	        , rcipt_appo_amt
-	        , appo_mtd
 	        , crea_dt
 	        , crea_by
 	    ) VALUES (
@@ -403,9 +400,6 @@
 	        , #{ttSoQy}
 	        , #{shipAddr}
 	        , #{rm}
-	        , #{rciptAppoDt}
-	        , #{rciptAppoAmt}
-	        , #{appoMtd}
 	        , SYSDATE
 	        , #{creaBy}
 	    )

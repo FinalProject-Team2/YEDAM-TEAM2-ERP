@@ -828,7 +828,7 @@
 	    columns: [
 	      { header: '상품ID', name: 'productId', hidden: true },
 	      { header: '상품명', name: 'productName', width: 300 },
-	      { header: '단위', name: 'unit', width: 152 },
+	      { header: '단위', name: 'unit', width: 152, align: 'center' },
 	      { header: '판매단가', name: 'basisSaleAmt', width: 240, align: 'right' },
 	    ]
 	  });
@@ -887,7 +887,7 @@
 	    endDt: priceForm.endDt.value,
 	    rm: priceForm.rm.value,
 	
-	    detailList: selected   // 🔥 중요
+	    detailList: selected   // 중요
 	  };
 	
 	  axios.post('/price/policy/saveProduct', payload)
