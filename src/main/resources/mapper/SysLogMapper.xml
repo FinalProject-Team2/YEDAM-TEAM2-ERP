@@ -68,10 +68,10 @@
     </insert>
 
     <!-- 2) 로그 조회 -->
-    <select id="selectLogList"
-        parameterType="store.yd2team.common.dto.SysLogSearchCond"
-        resultMap="SysLogResultMap">
-
+	    <select id="selectLogList"
+	    parameterType="store.yd2team.common.dto.SysLogSearchCond"
+	    resultMap="SysLogResultMap">
+	
 	  SELECT
 	      l.log_id,
 	      l.emp_acct_id,
@@ -79,26 +79,13 @@
 	      TO_CHAR(l.err_dttm, 'YYYY-MM-DD HH24:MI:SS') AS err_dttm,
 	      l.modl_grp,
 	      l.modl_code,
-	      cm.code_nm AS modl_code_nm,
+	      NVL(cm.code_nm, l.modl_code) AS modl_code_nm,
 	      l.target_tb_nm,
 	      l.target_pk,
 	      l.motion_ty,
-	      
-	      CASE l.motion_ty
-	        WHEN 'ro1' THEN '역할 저장'
-	        WHEN 'au1' THEN '메뉴 권한 저장'
-	        WHEN 'lg1' THEN '로그인 성공'
-	        WHEN 'lg2' THEN '로그인 실패'
-	        WHEN 'lg3' THEN '계정 잠금 발생'
-	        WHEN 'lg4' THEN '자동 잠금 해제'
-	        WHEN 'lg5' THEN 'OTP 실패'
-	        WHEN 'lg6' THEN 'OTP 통과/OTP 단계 진입'
-	        WHEN 'ac1' THEN '비밀번호 변경'
-	        WHEN 'co1' THEN '공통코드 등록'
-	        WHEN 'co2' THEN '공통코드 수정'
-	        ELSE l.motion_ty
-          END AS motion_ty_nm,
-	      
+	
+	      NVL(ca.code_nm, l.motion_ty) AS motion_ty_nm,
+	
 	      l.smry,
 	      l.yn,
 	      TO_CHAR(l.crea_dt, 'YYYY-MM-DD HH24:MI:SS') AS crea_dt,
@@ -110,9 +97,13 @@
 	  JOIN tb_emp_acct a
 	    ON l.emp_acct_id = a.emp_acct_id
 	  LEFT JOIN tb_code cm
-	    ON cm.grp_id = 'd' AND cm.code_id = l.modl_code AND cm.yn IN ('e1', 'Y')
+	    ON cm.grp_id = 'd'
+	   AND cm.code_id = l.modl_code
+	   AND cm.yn IN ('e1', 'Y')
 	  LEFT JOIN tb_code ca
-	    ON ca.grp_id = 'ac' AND ca.code_id = l.motion_ty AND ca.yn IN ('e1', 'Y')
+	    ON ca.grp_id = 'ac'
+	   AND ca.code_id = l.motion_ty
+	   AND ca.yn IN ('e1', 'Y')
 	  WHERE 1 = 1
 	
 	  <if test="accountId != null and accountId != ''">

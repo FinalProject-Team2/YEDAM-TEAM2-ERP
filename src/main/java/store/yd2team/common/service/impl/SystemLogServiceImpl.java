@@ -36,11 +36,6 @@ public class SystemLogServiceImpl implements SystemLogService {
 
         SysLogVO log = new SysLogVO();
 
-        String logId = "LOG_" + LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
-                + "_" + UUID.randomUUID().toString().substring(0, 5);
-
-        log.setLogId(logId);
         log.setEmpAcctId(session.getEmpAcctId());
         log.setVendId(session.getVendId());
         log.setModlGrp("MD");        // 나중에 공통코드로 교체
