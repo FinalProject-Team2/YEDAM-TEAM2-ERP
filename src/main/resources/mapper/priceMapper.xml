@@ -167,7 +167,7 @@
 	    SELECT 
 	        product_id AS "productId",
 	        product_name AS "productName",
-	        unit,
+	        'EA'              AS "unit",
 	        basis_sale_amt AS "basisSaleAmt"
 	    FROM tb_product
 	    WHERE 1 = 1
@@ -194,15 +194,15 @@
 
 	<insert id="insertPriceProductDetail" parameterType="map">
         INSERT INTO TB_PRICE_DETAIL (
-            PRICE_DETAIL_NO,
-            PRICE_POLICY_ID,
-            VEND_ID,
-            PRODUCT_ID,
-            APPLC_START_DT,
-            APPLC_END_DT,
-            DC_RATE,
-            CREA_BY,
-            UPDT_BY
+            price_detail_no,
+            price_policy_id,
+            vend_id,
+            product_id,
+            applc_start_dt,
+            applc_end_dt,
+            dc_rate,
+            crea_by,
+            updt_by
         ) VALUES (
             SEQ_PRICE_DETAIL.NEXTVAL,
             #{priceId},

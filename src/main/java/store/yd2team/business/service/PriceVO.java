@@ -23,6 +23,8 @@ public class PriceVO {
     private String yn;
     private String rm;
     
+    private String unit;
+    
     // session
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate creaDt;

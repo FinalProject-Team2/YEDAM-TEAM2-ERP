@@ -15,6 +15,7 @@
 	        , r.ltst_rcipt_dt                AS ltstRciptDt
 	        , r.delay_fg                     AS delayFg
 	        , r.rpay_yn                      AS rpayYn
+	        , r.updt_dt
 	
 	        /* 누적 입금액 (서브쿼리) */
 	        , (
@@ -26,7 +27,8 @@
 	    FROM tb_rcipt r
 	    JOIN tb_custcom c
 	      ON r.custcom_id = c.custcom_id
-	
+		LEFT JOIN tb_rcipt_detail rd
+		       ON r.rcipt_id = rd.rcipt_id
 	    WHERE 1 = 1
 	
 	    <!-- 고객코드 -->
@@ -49,9 +51,9 @@
 		    AND r.trns_dt &lt;= #{endDt}
 		</if>
 	
-	    ORDER BY
-	        r.ltst_rcipt_dt DESC NULLS LAST,
-	        r.trns_dt DESC
+	    ORDER BY COALESCE(r.ltst_rcipt_dt, r.trns_dt) DESC
+	        <!-- r.ltst_rcipt_dt DESC NULLS LAST,
+	        r.trns_dt DESC -->
 	
 	</select>
 	
