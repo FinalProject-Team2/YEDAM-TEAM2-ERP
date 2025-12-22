@@ -193,7 +193,36 @@ function toNumber(val) {
 		                   return num ? num.toLocaleString() : '';
 		               } 
 	   		},
-			{ 
+	   		{
+	   		  header: '진행상태',
+	   		  name: 'codeNm',
+	   		  align: 'center',
+	   		  formatter: ({ row }) => {
+	   		    if (!row.codeNm) return '';
+
+	   		    // 상태별 색상
+	   		    let color = '';
+	   		    if (row.codeId === 'es6') {
+	   		      color = 'blue';
+	   		    } else if (row.codeId === 'es2') {
+	   		      color = 'green';
+	   		    }
+
+	   		    const codeNmHtml = color
+	   		      ? `<span style="color:${color}">${row.codeNm}</span>`
+	   		      : row.codeNm;
+
+	   		    if (row.stResn) {
+	   		      return `
+	   		        ${codeNmHtml}<br>
+	   		        <span style="color:red">${row.stResn}</span>
+	   		      `;
+	   		    }
+
+	   		    return codeNmHtml;
+	   		  }
+	   		},
+			/* { 
 			  header: '진행상태',
 			  name: 'codeNm',
 			  align: 'center',
@@ -204,7 +233,7 @@ function toNumber(val) {
 			      }
 			      return row.codeNm;
 			  }
-			},
+			}, */
 			{ name: 'header', hidden: true },
 			{ name: 'stResn', hidden: true },
 			{ name: 'progrsSt', hidden: true },
