@@ -87,6 +87,8 @@ public interface SalyCalcMapper {
     void deleteSpecItemsBySpecId(@Param("salySpecId") String salySpecId);
     void updateSpecItemAmt(SalySpecItemVO vo);
     Map<String, Object> selectSpecTotalsBySpecId(@Param("salySpecId") String salySpecId);
+    int deleteSpecItemsByLedgId(@Param("salyLedgId") String salyLedgId,
+            @Param("vendId") String vendId);
 
 
 }

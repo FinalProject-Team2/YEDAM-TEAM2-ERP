@@ -153,4 +153,36 @@ public class SalyLedgServiceImpl implements SalyLedgService {
         // ✅ 3) 급여대장 삭제
         salyLedgMapper.deleteSalyLedg(salyLedgId);
     }
+    @Override
+    @Transactional
+    public void confirmSalyLedg(String salyLedgId, String vendId, String loginEmpId) {
+
+        int uncalcCnt = salyLedgMapper.countUncalculatedSpec(salyLedgId, vendId);
+        if (uncalcCnt > 0) {
+            throw new IllegalStateException(
+                "급여계산이 완료되지 않은 명세서가 있어 확정할 수 없습니다. (미계산 " + uncalcCnt + "건)"
+            );
+        }
+
+        salyLedgMapper.updateSalyLedgStatus(
+            salyLedgId,
+            vendId,
+            "sal2",   // 확정
+            loginEmpId
+        );
+    }
+
+    @Override
+    @Transactional
+    public void cancelConfirmSalyLedg(String salyLedgId, String vendId, String loginEmpId) {
+
+        // sal3(지급완료)는 프론트에서 이미 차단 중
+        salyLedgMapper.updateSalyLedgStatus(
+            salyLedgId,
+            vendId,
+            "sal1",   // 미확정
+            loginEmpId
+        );
+    }
+
 }

@@ -424,6 +424,18 @@ WHERE ss.saly_ledg_id = #{salyLedgId}
   WHERE saly_spec_id = #{salySpecId}
     AND grp_nm       = #{grpNm}
 </select>
+<!-- ✅ 급여계산 초기화: 급여대장 기준으로 tb_saly_spec_item 전부 삭제 -->
+<delete id="deleteSpecItemsByLedgId">
+  DELETE FROM tb_saly_spec_item
+   WHERE saly_spec_id IN (
+     SELECT ss.saly_spec_id
+       FROM tb_saly_spec ss
+       JOIN tb_saly_ledg sl
+         ON sl.saly_ledg_id = ss.saly_ledg_id
+      WHERE ss.saly_ledg_id = #{salyLedgId}
+        AND sl.vend_id      = #{vendId}
+   )
+</delete>
 
 
 
