@@ -386,7 +386,7 @@
 	const back  = document.getElementById("custcomBackdrop");
 	
 	/**
-	 * 🔹 priceId 를 받아서
+	 * priceId 를 받아서
 	 *   1) 모달 열고
 	 *   2) 고객사 리스트 조회 후 그리드에 뿌리고
 	 *   3) 해당 priceId 로 저장된 고객사 목록을 조회해서 체크
@@ -810,6 +810,7 @@
 	      if (res.data.result === 'success') {
 	        alert('저장 완료');
 	        document.getElementById('btnInsertInit').click();
+	        closeCustcomModal();
 	        reloadPriceGrid();
 	      } else {
 	        alert(res.data.message || '저장 실패');
@@ -883,7 +884,7 @@
 	  .catch(err => console.error('상품 조회 오류:', err));
 	});
 
-	// 3. 상품모달 저장버튼
+	// 3. 상품 모달 저장버튼
 	document.getElementById('insertProductBtn').addEventListener('click', () => {
 	
 	  const selected = window.productGrid.getCheckedRows();
