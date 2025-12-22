@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+<title>고객 관리</title>
+<style>
+/* 그리드 버튼 스타일 */
+.grid-btn {
+    padding: 4px 10px;
+    border: 1px solid #bbb;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.grid-btn:hover {
+    background-color: #eee;
+}
+</style>
+</head>
+<body layout:fragment="content">
+	<div class="row">
+	
+		<!-- 채권관리 조회 -->
+		<div class="col-md-12">
+			<div class="card mb-3 searchdiv">
+				<div class="card-header">
+					<h5 class="card-title">고객사 조회</h5>
+					<div class="card-header-right">
+						<button type="button" class="btn btn-dark" id="searchInit">초기화</button>
+						<button type="button" class="btn btn-outline-dark" id="searchBtn">조회</button>
+					</div>
+				</div>
+				
+				<!-- /card-body start -->
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-3">
+							<label for="custcomId" class="form-label">고객사코드</label>
+							<input id="custcomId" type="text" class="form-control">
+						</div>
+						<div class="col-md-3">
+							<label for="custcomName" class="form-label">고객사명</label>
+							<input id="custcomName" type="text" class="form-control">
+						</div>
+						<div class="col-md-3">
+							<label for="psch" class="form-label">담당자</label> 
+							<input id="psch" type="text" class="form-control">
+						</div>
+					</div>
+				</div> <!--  card-body end -->
+			</div>
+
+			
+			<div class="card w-100 h-80">
+				<div class="card-header">
+					<h5 class="card-title">고객 정보</h5>
+					<div class="card-header-right">
+						<span>*정렬 기준 : 최근입금일, 채권발생일</span>
+						<!-- <button type="button" class="btn btn-outline-dark" id="newCustBtn">신규</button> -->
+						<div th:replace="~{fragments/buttons :: newButton('MENU_SALES_005', 'newCustBtn')}"></div>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="custGridWrap">
+						<div id="custGrid"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<div th:replace="business/modal/newCustModal :: newCustModal"></div>
+	
+<script>
+	// 0. 거래구분(매입/매출) 공통코드 매핑
+	const bsTypeMap = {}; // { bs1: '매입', bs2: '매출' }
+
+	
+	// 공통코드(단가정책유형) 로딩 + select 채우기 + map 만들기
+	function loadBSTypeCodes() {
+	    fetch('/custcom/bs-codes')
+	        .then(res => res.json())
+	        .then(data => {
+	            const selects = document.querySelectorAll('.bs-type');
+	
+	            // select 옵션 채우기
+	            selects.forEach(select => {
+	                data.forEach(item => {
+	                    const opt = document.createElement('option');
+	                    opt.value = item.codeId;       // bs1, bs2
+	                    opt.textContent = item.codeNm; // 매입, 매출
+	                    select.appendChild(opt);
+	                });
+	            });
+	
+	            // map 채우기 (그리드 formatter에서 사용)
+	            data.forEach(item => {
+	                bsTypeMap[item.codeId] = item.codeNm;
+	            });
+	
+
+	        })
+	        .catch(err => console.error('단가정책유형 코드 조회 오류:', err));
+	}
+	
+	// DOM 준비되면 공통코드부터 로딩
+	window.addEventListener('DOMContentLoaded', loadBSTypeCodes);
+
+
+
+
+	// 1. 더미 데이터
+	const custData = [];
+
+	// 2. Grid 공통 옵션
+	const custGridOptions = {
+	    bodyHeight: 400,
+	    scrollX: true,
+	    scrollY: true,
+	    rowHeaders: ['rowNum'],     //No 번호
+	    columnOptions: {
+	        minWidth: 80,
+	        resizable: true
+	    }
+	};
+
+	// 3. 계정 목록 Grid 생성
+	const custGrid = new tui.Grid({
+	    el: document.getElementById('custGrid'),
+	    data: custData,
+	    ...custGridOptions,
+	    columns: [
+	        { header: '고객코드', name: 'custcomId', width: 120, align: 'center' },
+	        { header: '고객사명', name: 'custcomName', width: 150, align: 'left' },
+	        { header: '거래구분', name: 'bsTy', width: 100, align: 'center',
+	        	formatter: ({ value }) => bsTypeMap[value] || value
+	        },
+	        { header: '대표자', name: 'rpstr', width: 100, align: 'center' },
+	        { header: '사업자번호', name: 'bizNo', width: 140, align: 'center' },
+	        { header: '담당자', name: 'psch', width: 100, align: 'center' },
+	        { header: '담당자연락처', name: 'pschTel', width: 120, align: 'center' },
+	        { header: '이메일', name: 'pschEmail', width: 200, align: 'left' },
+	        { header: '사업장주소', name: 'bizAddr', minWidth: 350 },
+	    ]
+	}); // 3. 끝
+    
+    
+	// 4. 모달 폼 요소 캐싱
+	const newCustForm = {
+		custcomId:  document.getElementById('mcustcomId'),
+		custcomName: document.getElementById('mcustcomName'),
+		bizNo:      document.getElementById('mbizNo'),
+		bizAddr:    document.getElementById('mbizAddr'),
+		bizTel:     document.getElementById('mbizTel'),
+		bizFax:     document.getElementById('mbizFax'),
+		psch:       document.getElementById('mpsch'),
+		pschTel:    document.getElementById('mpschTel'),
+		pschEmail:  document.getElementById('mpschEmail'),
+		rpstr:      document.getElementById('mrpstr'),
+		rpstrTel:   document.getElementById('mrpstrTel'),
+		bsTy:       document.getElementById('mbsTy')
+	}; // 4. 모달 폼 요소 캐싱
+
+
+	    
+    
+ 	
+ 	// 5. 조회 초기화버튼 이벤트
+	// 5-1 초기화버튼
+	document.getElementById("searchInit").addEventListener("click", function () {
+	
+	    // 1) searchForm 객체 초기화
+	    searchForm = {
+	        custcomId: "",
+	        custcomName: "",
+	        psch: ""
+	    };
+	
+	    // 2) 화면 Input 값 초기화
+	    document.querySelector("#custcomId").value = "";
+	    document.querySelector("#custcomName").value = "";
+	    document.querySelector("#psch").value = "";
+	
+	
+	    console.log("검색조건 초기화:", searchForm);
+	});
+	
+	
+	// 5-2 조회버튼 (jQuery 버전)
+	$(document).on("click", "#searchBtn", function () {
+
+	    // 1) 화면 입력값 → searchForm 에 세팅
+	    let searchForm = {
+	    		custcomId: $("#custcomId").val().trim(),
+	    		custcomName: $("#custcomName").val().trim(),
+	    		psch: $("#psch").val().trim()
+	    };
+
+	    console.log("보낼 searchForm >>> ", searchForm);
+
+	    // 2) AJAX 요청
+	    $.ajax({
+	        url: "/custcom/list",
+	        type: "POST",
+	        contentType: "application/json",
+	        data: JSON.stringify(searchForm),
+	        success: function (res) {
+	            console.log("조회결과 >>> ", res);
+
+	            // 3) 그리드 데이터 반영
+	            custGrid.resetData(res);
+	        },
+	        error: function (err) {
+	            console.error("조회 중 오류:", err);
+	        }
+	    });
+	});
+
+	
+
+
+	
+ 	
+// -------------------------------- 신규고객사 등록 및 수정 모달 오픈 버튼이벤트
+	// 신규 버튼 클릭 이벤트
+	$(document).on("click", "#newCustBtn", function () {
+	  openNewCustModal();
+	});
+
+
+    // 1-1 신규 고객사 모달
+	const openBtn = document.getElementById("newCustBtn");
+	const modal   = document.getElementById("newCustModal");
+	const back    = document.getElementById("newCustBackdrop");
+	
+	function openNewCustModal() {
+		modal.classList.add("show");
+		modal.style.display = "block";
+		back.style.display = "block";
+		
+		/* if (!window.newCustGrid) {
+		  loadNewCustGrid();
+		} else {
+		  window.newCustGrid.refreshLayout();
+		} */
+	}
+	
+	// 바깥 클릭 시 닫기
+	function closeNewCustModal() {
+		modal.classList.remove("show");
+		modal.style.display = "none";
+		back.style.display = "none";
+	}
+	
+	modal.addEventListener("click", (event) => {
+		if (!event.target.closest(".modal-content")) {
+		  closeNewCustModal();
+		}
+	});
+
+// end 신규고객사 등록 및 수정 모달	
+
+	// 2. 신규등록 모달 초기화버튼
+	document.getElementById("modalInit").addEventListener("click", function () {
+	
+	    // 1) 화면 Input 값 초기화
+	    newCustForm.custcomId.value   = "";
+	    newCustForm.custcomName.value = "";
+	    newCustForm.bizNo.value       = "";
+	    newCustForm.bizAddr.value     = "";
+	    newCustForm.bizTel.value      = "";
+	    newCustForm.bizFax.value      = "";
+	    newCustForm.psch.value        = "";
+	    newCustForm.pschTel.value     = "";
+	    newCustForm.pschEmail.value   = "";
+	    newCustForm.rpstr.value       = "";
+	    newCustForm.rpstrTel.value    = "";
+	    newCustForm.bsTy.value        = "";   // 거래구분
+	
+	    console.log("모달 입력값 초기화 완료");
+	});
+
+	
+	//5-3 modalSaveBtn(저장버튼) 이벤트
+	document.getElementById("modalSaveBtn").addEventListener("click", function () {
+	
+	    const payload = {
+	        custcomId:   newCustForm.custcomId.value,
+	        custcomName: newCustForm.custcomName.value,
+	        bizNo:       newCustForm.bizNo.value,
+	        bizAddr:     newCustForm.bizAddr.value,
+	        bizTel:      newCustForm.bizTel.value,
+	        bizFax:      newCustForm.bizFax.value,
+	        psch:        newCustForm.psch.value,
+	        pschTel:     newCustForm.pschTel.value,
+	        pschEmail:   newCustForm.pschEmail.value,
+	        rpstr:       newCustForm.rpstr.value,
+	        rpstrTel:    newCustForm.rpstrTel.value,
+	        bsTy:        newCustForm.bsTy.value
+	    };
+	
+	    console.log("저장 payload >>> ", payload);
+	
+	    axios.post("/custcom/save", payload)
+	        .then(res => {
+	            console.log("저장 결과 >>> ", res.data);
+	
+	            if (res.data.result === "success") {
+	                alert("저장 완료");
+
+	                closeNewCustModal();
+	                $("#searchBtn").click();
+
+	            } else {
+	                alert("저장 실패\n" + (res.data.message || ""));
+	            }
+	        })
+	        .catch(err => {
+	            console.error("저장 중 오류:", err);
+	            alert("저장 중 오류가 발생했습니다.");
+	        });
+	});
+
+</script>
+</body>
+</html>

@@ -83,7 +83,9 @@
 				<div class="card-header">
 					<h5 class="card-title">채권 목록</h5>
 					<div class="card-header-right">
-						<span>*정렬 기준 : 최근입금일, 채권발생일</span>
+						<div style="margin-top: 1em; font-size: 12px;">
+							<span class="badge bg-secondary"> ※ 정렬 기준 : 최근입금일, 채권발생일</span>
+						</div>
 						<button class="btn btn-outline-dark" id="rciptListBtn">입금내역</button>
 						<div th:replace="~{fragments/buttons :: rciptButton('MENU_SALES_007', 'openRciptTretModal')}"></div>
 					</div>

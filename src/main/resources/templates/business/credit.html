@@ -5,7 +5,6 @@
      layout:decorate="~{layout}">
 <head>
 <meta charset="UTF-8">
-<!-- <script src="/assets/js/teamUtil.js"></script> -->
 <title>여신 관리</title>
 <style type="text/css">
 /* 그리드 버튼 스타일 */
@@ -89,24 +88,18 @@
                <div class="card-header with-actions">
                    <div class="card-header-left">
                        <h5 class="card-title">여신한도설정 / 여신현황</h5>
+	                   <div style="margin-top: 1em; font-size: 12px;">
+	                       <span class="badge bg-secondary">※ 사용률(%) = 원금잔액 / 여신한도 × 100</span>
+	                       <span class="ms-2 ship-hold-badge">출하정지</span>
+	                   </div>
                    </div>
                    <div class="card-header-right">
-                       <!-- 여신 평가 버튼 추가 -->
-                       <!-- <button type="button" class="btn btn-outline-danger me-2" id="creditEval">여신평가</button> -->
-                       <!-- <button type="button" class="btn btn-outline-dark" id="newBtn">행추가</button> -->
-                       <!-- <div th:replace="~{fragments/buttons :: addRowButton('MENU_SALES_006', 'newBtn')}"></div> -->
                        <button type="button" class="btn btn-dark" id="limitInit">초기화</button>
                        <button type="button" class="btn btn-outline-dark" id="saveBtn">저장</button>
-                       <!-- <div th:replace="~{fragments/buttons :: saveButton('MENU_SALES_006', 'saveBtn')}"></div> -->
                    </div>
                </div>
                <div class="card-body">
                    <!-- 간단한 범례 -->
-                   <div class="mb-2" style="font-size: 12px;">
-                       <span class="badge bg-secondary">※ 사용률(%) = 원금잔액 / 여신한도 × 100</span>
-                       <!-- <span class="ms-2 bad-credit-badge">악성여신</span> -->
-                       <span class="ms-2 ship-hold-badge">출하정지</span>
-                   </div>
                    <div class="creditGridWrap">
                        <div id="creditGrid"></div>
                    </div>
