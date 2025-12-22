@@ -21,4 +21,7 @@ public interface SalyLedgService {
 
     /** 급여대장 + 해당 명세서 전체 삭제 */
     void deleteSalyLedg(String salyLedgId, String vendId);
+    void confirmSalyLedg(String salyLedgId, String vendId, String loginEmpId);
+    void cancelConfirmSalyLedg(String salyLedgId, String vendId, String loginEmpId);
+
 }

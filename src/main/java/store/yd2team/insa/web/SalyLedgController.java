@@ -190,4 +190,56 @@ public class SalyLedgController {
 
         return res;
     }
+    @PostMapping("/insa/saly/confirm")
+    @ResponseBody
+    public Map<String, Object> confirm(@RequestBody Map<String, String> body,
+                                       HttpSession session) {
+
+        Map<String, Object> res = new HashMap<>();
+
+        SessionDto login = getLogin(session);
+        if (login == null) {
+            res.put("result", "FAIL");
+            res.put("message", "세션이 만료되었습니다.");
+            return res;
+        }
+
+        try {
+            salyLedgService.confirmSalyLedg(
+                body.get("salyLedgId"),
+                login.getVendId(),
+                login.getEmpId()
+            );
+            res.put("result", "SUCCESS");
+        } catch (Exception e) {
+            res.put("result", "FAIL");
+            res.put("message", e.getMessage());
+        }
+        return res;
+    }
+
+    @PostMapping("/insa/saly/cancelConfirm")
+    @ResponseBody
+    public Map<String, Object> cancelConfirm(@RequestBody Map<String, String> body,
+                                             HttpSession session) {
+
+        Map<String, Object> res = new HashMap<>();
+
+        SessionDto login = getLogin(session);
+        if (login == null) {
+            res.put("result", "FAIL");
+            res.put("message", "세션이 만료되었습니다.");
+            return res;
+        }
+
+        salyLedgService.cancelConfirmSalyLedg(
+            body.get("salyLedgId"),
+            login.getVendId(),
+            login.getEmpId()
+        );
+
+        res.put("result", "SUCCESS");
+        return res;
+    }
+
 }

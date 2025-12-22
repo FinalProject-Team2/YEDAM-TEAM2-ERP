@@ -50,4 +50,13 @@ public interface SalyLedgMapper {
     int deleteSalySpecByLedgId(@Param("salyLedgId") String salyLedgId);
 
     int insertSalySpecList(@Param("list") List<SalySpecVO> list);
+    
+    int countUncalculatedSpec(@Param("salyLedgId") String salyLedgId,
+            @Param("vendId") String vendId);
+
+int updateSalyLedgStatus(@Param("salyLedgId") String salyLedgId,
+           @Param("vendId") String vendId,
+           @Param("salyLedgSt") String salyLedgSt,
+           @Param("updtBy") String updtBy);
+
 }

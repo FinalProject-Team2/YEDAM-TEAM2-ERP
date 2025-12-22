@@ -439,6 +439,37 @@ public class SalyCalcController {
 
         return Map.of("result","SUCCESS");
     }
+    @PostMapping("/insa/saly/calc/reset")
+    public Map<String, Object> reset(@RequestBody Map<String, Object> body,
+                                     HttpSession session) {
+
+        Map<String, Object> res = new HashMap<>();
+
+        SessionDto login = getLogin(session);
+        if (login == null) {
+            res.put("result", "FAIL");
+            res.put("message", "세션이 만료되었습니다. 다시 로그인해주세요.");
+            return res;
+        }
+
+        String salyLedgId = (String) body.get("salyLedgId");
+        if (salyLedgId == null || salyLedgId.isBlank()) {
+            res.put("result", "FAIL");
+            res.put("message", "급여대장ID가 없습니다.");
+            return res;
+        }
+
+        try {
+            salyCalcService.resetSalyCalc(salyLedgId, login.getVendId(), login.getEmpId());
+            res.put("result", "SUCCESS");
+        } catch (Exception e) {
+            log.error("급여계산 초기화 오류", e);
+            res.put("result", "FAIL");
+            res.put("message", e.getMessage());
+        }
+
+        return res;
+    }
 
 
 

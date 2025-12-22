@@ -54,10 +54,12 @@ public interface SalyCalcService {
 
     int resetSalySpecTotalsByLedgId(String salyLedgId, String vendId, String updtBy);
 
-    void resetSalyCalc(String salyLedgId, String vendId, String empId);
+    void resetSalyCalc(String salyLedgId, String vendId, String loginEmpId);
+
 
     Map<String, Object> getSavedCalcItems(String salyLedgId, Long grpNo, String vendId);
     
     List<SalySpecItemVO> getSalySpecItemsBySpecId(String salySpecId,
             String vendId);
+    
 }

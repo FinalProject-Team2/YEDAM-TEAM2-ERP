@@ -417,10 +417,6 @@ public class SalyCalcServiceImpl implements SalyCalcService {
         throw new UnsupportedOperationException("resetSalySpecTotalsByLedgId: 구현 파일/SQL을 보내주면 맞춰서 연결해드릴게요.");
     }
 
-    @Override
-    public void resetSalyCalc(String salyLedgId, String vendId, String empId) {
-        throw new UnsupportedOperationException("resetSalyCalc: 구현 파일/SQL을 보내주면 맞춰서 연결해드릴게요.");
-    }
 
     @Override
     public Map<String, Object> getSavedCalcItems(String salyLedgId, Long grpNo, String vendId) {
@@ -671,6 +667,19 @@ public class SalyCalcServiceImpl implements SalyCalcService {
         if (salySpecId == null || salySpecId.isBlank()) return List.of();
         // vendId는 현재 SQL에 안 쓰지만 시그니처 통일용
         return salyCalcMapper.selectSalySpecItemsBySpecId(salySpecId);
+    }
+    @Override
+    @Transactional
+    public void resetSalyCalc(String salyLedgId, String vendId, String loginEmpId) {
+        if (salyLedgId == null || salyLedgId.isBlank()) {
+            throw new IllegalArgumentException("급여대장ID가 없습니다.");
+        }
+
+        // ✅ 핵심: 아이템 싹 삭제 (트리거가 합계 0 처리/tt_pay_amt 반영)
+        salyCalcMapper.deleteSpecItemsByLedgId(salyLedgId, vendId);
+
+        // (선택) 필요하면 여기서 tb_saly_spec 합계 0 업데이트도 넣을 수 있지만,
+        // 지웅님이 "트리거로 된다"라고 했으니 생략.
     }
 
 

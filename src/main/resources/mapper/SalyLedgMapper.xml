@@ -204,6 +204,26 @@
       WHERE saly_ledg_id = #{salyLedgId}
    )
 </delete>
+<!-- ✅ 급여 미계산 명세서 개수 -->
+<select id="countUncalculatedSpec" resultType="int">
+  SELECT COUNT(*)
+    FROM tb_saly_spec s
+    JOIN tb_saly_ledg l
+      ON l.saly_ledg_id = s.saly_ledg_id
+   WHERE s.saly_ledg_id = #{salyLedgId}
+     AND l.vend_id      = #{vendId}
+     AND NVL(s.act_pay_amt, 0) = 0
+</select>
+
+<!-- ✅ 급여대장 상태 변경 -->
+<update id="updateSalyLedgStatus">
+  UPDATE tb_saly_ledg
+     SET saly_ledg_st = #{salyLedgSt},
+         updt_dt      = SYSDATE,
+         updt_by      = #{updtBy}
+   WHERE saly_ledg_id = #{salyLedgId}
+     AND vend_id      = #{vendId}
+</update>
 
 
 </mapper>
