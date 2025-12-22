@@ -11,7 +11,7 @@
           FROM tb_user_role
          WHERE vend_id     = #{vendId}
            AND emp_acct_id = #{empAcctId}
-           AND role_id     = 'ROLE_HR_ADMIN'
+           AND role_id     = 'role202512009'
     </select>
 
     <!-- ============================

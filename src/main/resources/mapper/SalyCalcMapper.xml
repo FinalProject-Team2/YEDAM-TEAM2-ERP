@@ -391,19 +391,40 @@ WHERE ss.saly_ledg_id = #{salyLedgId}
      AND disp_no      = #{dispNo}
 </delete>
 
-<!-- (1번) DB에서 합계 재합산: spec + grpNm 기준 -->
-<select id="selectSpecTotalsByGrpNm" resultType="map">
-  SELECT
-    NVL(SUM(CASE WHEN item_ty = 'A' THEN amt END), 0) AS payAmt,
-    NVL(SUM(CASE WHEN item_ty = 'D' THEN amt END), 0) AS ttDucAmt
-  FROM tb_saly_spec_item
-  WHERE saly_spec_id = #{salySpecId}
-    AND grp_nm       = #{grpNm}
-</select>
 
 <delete id="deleteSpecItemsBySpecId">
   DELETE FROM tb_saly_spec_item
    WHERE saly_spec_id = #{salySpecId}
 </delete>
+<!-- SalyCalcMapper.xml -->
+<update id="updateSpecItemAmt">
+  UPDATE tb_saly_spec_item
+     SET amt = #{amt},
+         updt_dt = SYSDATE,
+         updt_by = #{updtBy}
+   WHERE saly_spec_id = #{salySpecId}
+     AND grp_nm       = #{grpNm}
+     AND item_ty      = #{itemTy}
+     AND disp_no      = #{dispNo}
+</update>
+<!-- ✅ spec 전체 합계(그룹 조건 없음) -->
+<select id="selectSpecTotalsBySpecId" resultType="map">
+  SELECT
+    NVL(SUM(CASE WHEN item_ty = 'A' THEN amt END), 0) AS "payAmt",
+    NVL(SUM(CASE WHEN item_ty = 'D' THEN amt END), 0) AS "ttDucAmt"
+  FROM tb_saly_spec_item
+  WHERE saly_spec_id = #{salySpecId}
+</select>
+
+<select id="selectSpecTotalsByGrpNm" resultType="map">
+  SELECT
+    NVL(SUM(CASE WHEN item_ty = 'A' THEN amt END), 0) AS "payAmt",
+    NVL(SUM(CASE WHEN item_ty = 'D' THEN amt END), 0) AS "ttDucAmt"
+  FROM tb_saly_spec_item
+  WHERE saly_spec_id = #{salySpecId}
+    AND grp_nm       = #{grpNm}
+</select>
+
+
 
 </mapper>
