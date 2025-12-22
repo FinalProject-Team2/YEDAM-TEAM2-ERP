@@ -13,7 +13,7 @@ on a.confmer_id = b.emp_id
 left join tb_emp c
 on a.emp_id = c.emp_id
 <where>
-<if test="confmerId == null">  AND a.emp_id = #{empId}</if>
+<if test="confmerId == null or confmerId == ''">  AND a.emp_id = #{empId}</if>
 <if test="vcatnBegin != null">  AND a.vcatn_begin >= #{vcatnBegin}</if>
 <if test="vcatnEnd != null">  <![CDATA[ AND a.vcatn_end <= #{vcatnEnd} ]]> </if>
 <if test="vcatnTy != null and vcatnTy != ''">  AND a.vcatn_ty = #{vcatnTy}</if>
