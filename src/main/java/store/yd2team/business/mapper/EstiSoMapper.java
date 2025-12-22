@@ -71,8 +71,16 @@ public interface EstiSoMapper {
     	    @Param("updtBy") String updtBy
     	);
     
-    // 출하예약수량 증가
+    // 주문 등록 시 출하예약수량 증가
     int increaseOustReserveQty(
+        @Param("vendId") String vendId,
+        @Param("productId") String productId,
+        @Param("qty") Long qty,
+        @Param("updtBy") String updtBy
+    );
+    
+ // 주문 취소 시 출하예약수량 증가
+    int decreaseOustReserveQty(
         @Param("vendId") String vendId,
         @Param("productId") String productId,
         @Param("qty") Long qty,

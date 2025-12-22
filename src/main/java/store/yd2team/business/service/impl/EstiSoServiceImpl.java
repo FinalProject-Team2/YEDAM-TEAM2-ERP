@@ -237,7 +237,7 @@ public class EstiSoServiceImpl implements EstiSoService {
         estiSoMapper.updateEstiStatusToOrdered(
             vo.getEstiId(),
             vo.getVersion(),
-            empId        // 🔥 누가 변경했는지
+            empId        // 누가 변경했는지
         );
 
         return soId;

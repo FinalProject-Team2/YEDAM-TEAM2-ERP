@@ -181,13 +181,13 @@ function toNumber(val) {
 	                   return num ? num.toLocaleString() : '';
 	               }
 			},
-			{ header: '총 주문수량', name: 'ttSoQy', width: 120, align: 'right',
+			{ header: '총 주문수량(EA)', name: 'ttSoQy', width: 120, align: 'right',
 				formatter: ({ value }) => {
 	                   const num = toNumber(value);
 	                   return num ? num.toLocaleString() : '';
 	               } 
 			},
-			{ header: '현 재고수량', name: 'currStockQy', width: 120, align: 'right',
+			{ header: '현 재고수량(EA)', name: 'currStockQy', width: 120, align: 'right',
 	   				formatter: ({ value }) => {
 		                   const num = toNumber(value);
 		                   return num ? num.toLocaleString() : '';
@@ -311,6 +311,21 @@ function toNumber(val) {
 	        alert("승인 완료된 주문서가 아닙니다.");
 	        return;
 	    }
+	    
+	    if (row.progrsSt === 'es5') {
+		    alert("보류된 주문서입니다.");
+		    return;
+		  }
+	    
+	    if (row.progrsSt === 'es6') {
+		    alert("이미 출하지시서가 작성된 주문서입니다.");
+		    return;
+		  }
+	    
+	    if (row.progrsSt === 'es9') {
+		    alert("취소된 주문서입니다.");
+		    return;
+		  }
 	
 	    // --- 모달 데이터 세팅 ---
 	    document.getElementById("viewSoId").value = row.soId;
@@ -538,7 +553,23 @@ function toNumber(val) {
 	    return;
 	  }
 	  
+	  if (row.progrsSt === 'es5') {
+	    alert("이미 보류된 주문서입니다.");
+	    return;
+	  }
+	  
+	  if (row.progrsSt === 'es6') {
+	    alert("출하지시서가 작성된 주문서입니다.");
+	    return;
+	  }
+	  
+	  if (row.progrsSt === 'es9') {
+	    alert("이미 취소된 주문서입니다.");
+	    return;
+	  }
+	  
 	  const reason = prompt(`[${soId}] 보류 사유를 입력하세요:`);
+	  
 	  if (reason === null) return;
 	  if (reason.trim() === "") {
 	    alert("보류 사유는 필수입니다.");
@@ -585,8 +616,18 @@ function toNumber(val) {
 	  const row = soGrid.getRow(parentKeys[0]);
 	  const soId = row.soId;
 	  
-	  if (row.progrsSt === 'es2') {
+/* 	  if (row.progrsSt === 'es2') {
 	    alert("이미 승인된 주문서입니다.");
+	    return;
+	  } */
+	  
+	  if (row.progrsSt === 'es6') {
+	    alert("출하지시서가 작성된 주문서입니다.");
+	    return;
+	  }
+	  
+	  if (row.progrsSt === 'es9') {
+	    alert("이미 취소된 주문서입니다.");
 	    return;
 	  }
 	  

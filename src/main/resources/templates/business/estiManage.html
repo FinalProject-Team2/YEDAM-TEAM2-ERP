@@ -97,8 +97,8 @@
 
 .esti-history-table th,
 .esti-history-table td {
-  padding: 30px 40px;
-  font-size: 25px;
+  padding: 0.5em 1.2em;
+  font-size: 1.2em;
 }
 
 .esti-history-table .btn {
@@ -108,6 +108,11 @@
 .esti-history-table .col-version { width: 60px; }
 .esti-history-table .col-view { width: 50px; }
 .esti-history-table .col-amount { width: 100px; white-space: nowrap; }
+
+.esti-info {
+  display: flex;
+  gap: 32px;
+}
 </style>
 
 </head>
@@ -657,9 +662,10 @@ function fetchDiscountRate(rowKey, productId) {
     	      type: ProductAutoComplete
     	    }
     	  },
-	      { header: '수량*', 
+	      { header: '수량(EA)*', 
 	    	  name: 'qy',  
 	    	  width: 90,
+	    	  align: 'right',
 	    	  editor: {
     		    type: 'text',
     		    options: { inputType: 'number' } // 모바일 키패드 유도용(PC에선 완벽 차단 X)
@@ -674,19 +680,19 @@ function fetchDiscountRate(rowKey, productId) {
               }
     	  	
     	  },
-	      { header: '판매단가', name: 'basisSaleAmt',  width: 180, align:'right',
+	      { header: '판매단가(원)', name: 'basisSaleAmt',  width: 180, align:'right',
 				formatter: ({ value }) => {
 	                   const num = toNumber(value);
 	                   return num ? num.toLocaleString() : '';
 	               } },
 	      { header: '할인율(%)', name: 'dcRate',  width: 90, align:'right' },
-	      { header: '할인금액', name: 'saleAmt',  width: 180, align:'right',
+	      { header: '할인금액(원)', name: 'saleAmt',  width: 180, align:'right',
 				formatter: ({ value }) => {
 	                   const num = toNumber(value);
 	                   return num ? num.toLocaleString() : '';
 	               } },
 	      { 
-	    	  header: '최종금액', 
+	    	  header: '최종금액(원)', 
 	    	  name: 'finalAmt',  
 	    	  width: 222, 
 	    	  align:'right',
@@ -1036,9 +1042,6 @@ function fetchDiscountRate(rowKey, productId) {
 		console.log("견적 detailList:", data.detailList);
 		
 		// 헤더 세팅
-		$('#estiIdText').text(data.estiId);
-		$('#custcomNameText').text(data.custcomNameResult);
-	  
 		$("#autoCustcomId").val(data.custcomId);
 		$("#autoCustcomName").val(data.custcomNameResult);
 		$("#applyDate").val(data.dueDt);
@@ -1121,7 +1124,7 @@ function fetchDiscountRate(rowKey, productId) {
 
 		        if (list.length > 0) {
 		          document.getElementById('custcomNameText').innerText =
-		            list[0].custcomName || '';
+		            list[0].custcomNameText || '';
 		        }
 		    	
 		      const tbody = document.getElementById("estiHistoryTbody");
@@ -1135,10 +1138,7 @@ function fetchDiscountRate(rowKey, productId) {
 		            <td class="text-end">${Number(row.ttSupplyAmt).toLocaleString()}</td>
 		            <td>${row.creaBy}</td>
 		            <td>
-		              <button class="btn btn-sm btn-outline-primary"
-		                onclick="openEstiDetail('${row.estiId}', '${row.version}')">
-		                보기
-		              </button>
+		            	<button class="btn btn-outline-dark" onclick="openEstiDetail('${row.estiId}', '${row.version}')" >보기</button>
 		            </td>
 		          </tr>
 		        `;
