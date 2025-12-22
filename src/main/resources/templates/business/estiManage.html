@@ -1386,41 +1386,6 @@ function applyDiscountRatesOnEdit() {
 	    });
 	});
 	
-	/* const rciptAppoAmtInput = document.getElementById('rciptAppoAmt');
-
-	// 숫자만 남기기
-	function onlyDigits(value) {
-	  return value.replace(/[^\d]/g, '');
-	}
-
-	// 입력 중: 숫자만 허용 (콤마 없음)
-	rciptAppoAmtInput.addEventListener('input', (e) => {
-	  e.target.value = onlyDigits(e.target.value);
-	});
-
-	// 붙여넣기: 숫자만
-	rciptAppoAmtInput.addEventListener('paste', (e) => {
-	  e.preventDefault();
-	  const text = (e.clipboardData || window.clipboardData).getData('text');
-	  e.target.value += onlyDigits(text);
-	});
-
-	// 포커스 아웃: 천단위 콤마 표시
-	rciptAppoAmtInput.addEventListener('blur', (e) => {
-	  const value = onlyDigits(e.target.value);
-	  if (!value) return;
-
-	  const num = Number(value);
-	  if (Number.isFinite(num)) {
-	    e.target.value = num.toLocaleString();
-	  }
-	});
-
-	// 다시 클릭(포커스): 콤마 제거하고 편집 가능
-	rciptAppoAmtInput.addEventListener('focus', (e) => {
-	  e.target.value = onlyDigits(e.target.value);
-	}); */
-	
 	
 	  
 	// 2. 모달 열기/닫기
@@ -1474,16 +1439,7 @@ function applyDiscountRatesOnEdit() {
 	// 4. 모달 저장 버튼
 	$("#newSoModalSaveBtn").on("click", function () {
 		
-		// 숫지에 다시 콤마 제거
-		/* const rciptAppoAmtRaw = $("#rciptAppoAmt").val();
-
-		const rciptAppoAmt = rciptAppoAmtRaw
-		  ? Number(rciptAppoAmtRaw.replace(/,/g, ''))
-		  : null; */
-		
-		  
-		
-	  // ▶ id 이름 newSoXXX 로 맞추기
+	  // id 이름 newSoXXX 로 맞추기
 	  const estiId   = $("#newSoEstiId").val();
 	  const version  = $("#newSoVersion").val();  // 견적 버전
 	  const custcomId = $("#newSoCustcomId").val();
@@ -1491,15 +1447,8 @@ function applyDiscountRatesOnEdit() {
 	  const soDt = $("#newSoDt").val();
 	  const shipAddr = $("#newSoShipAddr").val();
 	  const orderRm  = $("#newSoRm").val();
-	  //const rciptAppoDt = $("#rciptAppoDt").val();   // 입금약속일
-	  //const rciptAppoAmt = $("#rciptAppoAmt").val(); // 입금약속금액
-	 // const appoMtd      = $("#appoMtd").val();      // 결제방법
-
 	  
-	  /* console.log("입금약속금액 raw =", $("#rciptAppoAmt").val());
-	  console.log("입금약속금액 payload =", rciptAppoAmt); */
-	
-	  // ▶ grid 객체 이름 newSoGrid 사용
+	  // grid 객체 이름 newSoGrid 사용
 	  const rows = window.newSoGrid ? window.newSoGrid.getData() : [];
 	
 	  const detailList = rows.map(r => ({
@@ -1516,10 +1465,6 @@ function applyDiscountRatesOnEdit() {
 	    dueDt: dueDt,
 	    shipAddr: shipAddr,
 	    rm: orderRm,
-	    //rciptAppoDt: rciptAppoDt || null,
-	    //rciptAppoAmt: rciptAppoAmt,
-	    //rciptAppoAmt: rciptAppoAmt ? Number(rciptAppoAmt) : null,
-	    //appoMtd: appoMtd,
 	    
 	    detailList: detailList
 	  };
