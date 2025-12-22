@@ -167,7 +167,7 @@ public class EmpLogInController {
             String targetMobile = selectOtpTargetNumber(empAcct); // hp 우선, 없으면 cttpc
             if (targetMobile != null && !targetMobile.isBlank()) {
                 // 정재민 아래 기능은 문자 발송 기능
-                // smsService.sendOtpSms(targetMobile, otpCode, otpValidMin);
+                smsService.sendOtpSms(targetMobile, otpCode, otpValidMin);
                 
                 log.info(">>> [DEV ONLY] OTP 문자 발송: to={}, otpCode={}, validMin={}, failLimit={}",
                         targetMobile, otpCode, otpValidMin, otpFailLimit);
@@ -339,18 +339,16 @@ public class EmpLogInController {
 	 */
 
     // ==========================
-    // OTP 문자 발송 대상 번호 선택 (hp → cttpc 순)
+    // OTP 문자 발송 대상 번호 선택 (cttpc)
     // ==========================
     private String selectOtpTargetNumber(EmpAcctVO empAcct) {
-        // hp(거래처 핸드폰 번호)가 있으면 hp 우선
-        if (empAcct.getHp() != null && !empAcct.getHp().isBlank()) {
-            return empAcct.getHp();
+        if (empAcct == null) return null;
+
+        // cttpc(사원 연락처)만 사용
+        String cttpc = empAcct.getCttpc();
+        if (cttpc != null && !cttpc.isBlank()) {
+            return cttpc;
         }
-        // 없으면 cttpc(사원 연락처) 사용
-        if (empAcct.getCttpc() != null && !empAcct.getCttpc().isBlank()) {
-            return empAcct.getCttpc();
-        }
-        // 둘 다 없으면 null
         return null;
     }
     
@@ -395,8 +393,8 @@ public class EmpLogInController {
     
         String targetMobile = selectOtpTargetNumber(pendingEmp);
         if (targetMobile != null && !targetMobile.isBlank()) {
-            // 나중에 주석으로 막을 예정
-            // smsService.sendOtpSms(targetMobile, otpCode, otpValidMin);
+            // 정재민 나중에 주석으로 막을 예정
+            smsService.sendOtpSms(targetMobile, otpCode, otpValidMin);
     
             log.info(">>> [DEV ONLY] OTP 재발급: to={}, otpCode={}, validMin={}",
                     targetMobile, otpCode, otpValidMin);

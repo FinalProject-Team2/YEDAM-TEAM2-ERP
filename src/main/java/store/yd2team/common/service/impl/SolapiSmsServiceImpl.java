@@ -41,8 +41,8 @@ public class SolapiSmsServiceImpl implements SmsService {
                         + validMin + "분)");
         
         log.info("[SMS-DRY-RUN][OTP] to={}, text={}", cleanTo, message);
-		/* 정재민 나중에 주석해제 할 거임 */
-		  try { messageService.send(message); // 실제 문자 발송
+		/* 정재민 나중에 주석해제 할 거임 */  // 실제 문자 발송
+		  try { messageService.send(message); 
 		  log.info("SOLAPI OTP 전송 성공: to={}", cleanTo); } catch (Exception e) { 
 		  log.error("SOLAPI OTP 전송 실패: to={}, err={}", cleanTo, e.getMessage(), e); }
 		 
@@ -67,7 +67,7 @@ public class SolapiSmsServiceImpl implements SmsService {
 
         log.info("[SMS-DRY-RUN][OTP] to={}, text={}", cleanTo, message);
 		  /* 정재민 나중에 주석 해제할 거임 */
-		  try { messageService.send(message);
+		  try { messageService.send(message); 
 		  log.info("SOLAPI 임시 비밀번호 전송 성공: to={}", cleanTo); } catch (Exception e) {
 		  log.error("SOLAPI 임시 비밀번호 전송 실패: to={}, err={}", cleanTo, e.getMessage(), e);
 		  }
