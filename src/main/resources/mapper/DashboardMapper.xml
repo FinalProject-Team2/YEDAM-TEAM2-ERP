@@ -98,7 +98,7 @@
     FROM tb_user_role ur
     JOIN tb_role r
       ON r.role_id = ur.role_id
-     AND r.vend_id = ur.vend_id
+     AND NVL(r.vend_id,ur.vend_id) = ur.vend_id
     WHERE ur.vend_id = #{vendId}
     GROUP BY r.role_ty
     ORDER BY cnt DESC
