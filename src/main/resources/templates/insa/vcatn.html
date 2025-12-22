@@ -31,7 +31,7 @@
 
 					</div>
 					<div class="card-header-right">
-						<button type="button" class="btn btn-dark">초기화</button>
+						<button id="reset" type="button" class="btn btn-dark">초기화</button>
 						<button id="joHoe" type="button" class="btn btn-outline-dark">조회</button>
 					</div>
 				</div>
@@ -311,6 +311,7 @@
 		    const $joHoeBtn = $("#joHoe"); // 조회버튼
 		    const $registBtn = $("#regist"); // 저장버튼	 d   
 		    const $dleVcatnBtn = $("#dleVcatn"); // 삭제버튼	 d   
+		    const $resetBtn = $("#reset"); // 초기화	 d   
 		    
 		    $("#v_creaDt").val( dateFormat(today,'yyyy-MM-dd') );		    
 
@@ -325,7 +326,17 @@
 			});
 			
 			
-			
+			$resetBtn.on("click", function() {
+				$(".joHoeGrp").each(function() {
+					$(this).val(null);
+				});
+				$('[id^="v_"]').each(function() {
+					$(this).val(null);
+				});
+				$("#v_nm").val([[${Session.empNm}]]);
+				$("#v_empId").val([[${Session.empId}]]);
+				console.log("다 지워졌나?");
+			});
 		    
 		 // 조회버튼 누를시 일어나는 이벤트
 		    $joHoeBtn.on("click", function() {		    	

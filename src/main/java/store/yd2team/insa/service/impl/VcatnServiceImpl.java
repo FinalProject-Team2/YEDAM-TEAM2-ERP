@@ -18,11 +18,11 @@ public class VcatnServiceImpl implements VcatnService{
 	
 	//날짜를 밀리초에서 "일"로 바꾸는 메서드
 			private int vcatnDate(Date begin, Date end) {
-				int b = (int)begin.getTime() / (1000 * 60 * 60 * 24);
-				int e = (int)end.getTime() / (1000 * 60 * 60 * 24);
-				int v = 0;
+				long b = begin.getTime() / (1000 * 60 * 60 * 24);
+				long e = end.getTime() / (1000 * 60 * 60 * 24);
+				long v = 0;
 				if(e-b == 0) {v=1;}else{v=1+e-b;}
-				return v;
+				return (int)v;
 			}
 	
 	@Override
