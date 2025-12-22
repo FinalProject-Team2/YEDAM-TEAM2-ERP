@@ -20,15 +20,7 @@
 .grid-btn:hover {
    background-color: #eee;
 }
-/* 악성여신 / 출하정지 표시용 배지 */
-.bad-credit-badge {
-   display: inline-block;
-   padding: 2px 6px;
-   font-size: 11px;
-   border-radius: 4px;
-   color: #fff;
-   background-color: #dc3545; /* 빨간색 */
-}
+
 .ship-hold-badge {
    display: inline-block;
    padding: 2px 6px;
@@ -42,10 +34,7 @@
 	font-size: 20px;
 	font-weight: bold;
 }
-#custcomInfo {
-	margin-left: 25px;
-	margin-bottom: 30px;
-}
+
 </style>
 </head>
 <body layout:fragment="content">
@@ -59,7 +48,7 @@
                <!-- 카드 헤더 : 제목 + 초기화/조회 버튼 -->
                <div class="card-header with-actions">
                    <div class="card-header-left">
-                       <h5 class="card-title">검색 조건</h5>
+                       <h5 class="card-title">여신 조회</h5>
                    </div>
                    <div class="card-header-right">
                        <button type="button" class="btn btn-dark" id="creditInit">초기화</button>
@@ -71,24 +60,18 @@
                <div class="card-body">
                    <div class="row">
                        <div class="col-md-4">
-                           <label for="autoCustcomId" class="form-label">고객코드</label>
+                           <label for="autoCustcomId" class="form-label">고객사코드</label>
                            <div class="position-relative">
-                               <input id="autoCustcomId" type="text" class="form-control"
-                                      placeholder="고객코드를 입력해주세요" autocomplete="off">
-                               <ul id="autoCustcomIdSuggest"
-                                   class="list-group position-absolute w-100"
-                                   style="z-index: 2000;">
+                               <input id="autoCustcomId" type="text" class="form-control" placeholder="고객코드를 입력해주세요" autocomplete="off">
+                               <ul id="autoCustcomIdSuggest" class="list-group position-absolute w-100" style="z-index: 2000;">
                                </ul>
                            </div>
                        </div>
                        <div class="col-md-4">
                            <label for="autoCustcomName" class="form-label">고객사명</label>
                            <div class="position-relative">
-                               <input id="autoCustcomName" type="text" class="form-control"
-                                      placeholder="고객사명을 입력해주세요" autocomplete="off">
-                               <ul id="autoCustcomNameSuggest"
-                                   class="list-group position-absolute w-100"
-                                   style="z-index: 2000;">
+                               <input id="autoCustcomName" type="text" class="form-control" placeholder="고객사명을 입력해주세요" autocomplete="off">
+                               <ul id="autoCustcomNameSuggest" class="list-group position-absolute w-100" style="z-index: 2000;">
                                </ul>
                            </div>
                        </div>
