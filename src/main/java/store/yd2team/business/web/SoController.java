@@ -51,18 +51,6 @@ public class SoController {
 	        throw new IllegalArgumentException("견적서 ID는 필수입니다.");
 	    }
 
-	    if (vo.getRciptAppoDt() == null) {
-	        throw new IllegalArgumentException("입금약속일은 필수입니다.");
-	    }
-
-	    if (vo.getRciptAppoAmt() == null || vo.getRciptAppoAmt() <= 0) {
-	        throw new IllegalArgumentException("입금약속금액은 0보다 커야 합니다.");
-	    }
-
-	    if (vo.getAppoMtd() == null || vo.getAppoMtd().isBlank()) {
-	        throw new IllegalArgumentException("결제방법은 필수입니다.");
-	    }
-
 
         String soId = estiSoService.saveOrderFromEsti(vo);
 
@@ -71,19 +59,6 @@ public class SoController {
             "soId", soId
         );
     }
-	/*
-	 * @PostMapping("/fromEsti/save")
-	 * 
-	 * @ResponseBody public Map<String, Object> saveOrderFromEsti(@RequestBody
-	 * EstiSoVO vo) {
-	 * 
-	 * String soId = estiSoService.saveOrderFromEsti(vo);
-	 * 
-	 * Map<String, Object> result = new HashMap<>(); result.put("success", true);
-	 * result.put("soId", soId);
-	 * 
-	 * return result; }
-	 */
     
 	
 	// 주문서 조회 (AJAX)

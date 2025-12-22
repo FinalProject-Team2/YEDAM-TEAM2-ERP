@@ -32,13 +32,14 @@
 
 											<!-- custcomId 유지용 -->
 											<input type="hidden" id="custcomIdHidden" name="custcomIdHidden" value="" >
+											<input type="hidden" id="rciptIdHidden" name="rciptIdHidden" value="" >
 
 											<!-- 위쪽 영역 -->
 											
 											<div class="col-6">
 											
-												<label for="custcomName" class="form-label">고객사명</label>
-												<input id="custcomName" type="text" class="form-control" readonly>
+												<label for="mCustcomName" class="form-label">고객사명</label>
+												<input id="mCustcomName" type="text" class="form-control" readonly>
 
 											</div>
 
@@ -66,16 +67,15 @@
 										<div class="row g-3">
 											<!-- 2번째줄 -->
 											<div class="col-md-6">
-												<label for="rciptAmt" class="form-label">입금금액</label> <input
-													id="rciptAmt" name="rciptAmt" type="text" class="form-control"
-													placeholder="YEDAM" align-items-center>
+												<label for="rciptAmt" class="form-label">입금금액</label>
+												<input id="rciptAmt" name="rciptAmt" type="text" class="form-control" align-items-center>
 											</div>
 
 
 
 											<div class="col-md-6">
-												<label for="pmtMtd" class="form-label">결제방법</label> <select
-													id="pmtMtd" name="pmtMtd" class="form-select">
+												<label for="pmtMtd" class="form-label">결제방법</label>
+												<select id="pmtMtd" name="pmtMtd" class="form-select">
 													<option value="">선택</option>
 													<option value="현금">현금</option>
 													<option value="카드">카드</option>
@@ -87,9 +87,8 @@
 										<div class="row g-3">
 											<div class="col-md-12">
 												<div class="col-md-12">
-													<label for="rm" class="form-label">비고</label> <input
-														id="rm" name="rm" type="text" class="form-control"
-														placeholder="YEDAM" align-items-center>
+													<label for="rm" class="form-label">비고</label>
+													<input id="rm" name="rm" type="text" class="form-control"  align-items-center>
 												</div>
 											</div>
 										</div>

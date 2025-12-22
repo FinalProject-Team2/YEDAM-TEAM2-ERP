@@ -23,7 +23,7 @@
 		<div class="col-md-12">
 			<div class="card mb-3 searchdiv">
 				<div class="card-header">
-					<h5 class="card-title">검색조건</h5>
+					<h5 class="card-title">채권 조회</h5>
 					<div class="card-header-right">
 						<button type="button" class="btn btn-dark" id="searchInitBtn">초기화</button>
 						<button class="btn btn-outline-dark" id="searchBtn">조회</button>
@@ -34,7 +34,7 @@
 				<div class="card-body">
 					<div class="row">
 						<div class="col-md-3">
-							<label for="custcomId" class="form-label">고객코드</label>
+							<label for="custcomId" class="form-label">고객사코드</label>
 							<input id="custcomId" type="text" class="form-control">
 						</div>
 						<div class="col-md-3">
@@ -81,9 +81,10 @@
 			
 			<div class="card w-100 h-80">
 				<div class="card-header">
-					<h5 class="card-title">채권관리</h5>
+					<h5 class="card-title">채권 목록</h5>
 					<div class="card-header-right">
-						<!-- <button class="btn btn-outline-dark" id="openRciptTretModal">입금처리</button> -->
+						<span>*정렬 기준 : 최근입금일, 채권발생일</span>
+						<button class="btn btn-outline-dark" id="rciptListBtn">입금내역</button>
 						<div th:replace="~{fragments/buttons :: rciptButton('MENU_SALES_007', 'openRciptTretModal')}"></div>
 					</div>
 				</div>
@@ -94,7 +95,7 @@
 		</div>
 	</div>
 
-
+<div th:replace="business/modal/rciptTretModal :: rciptTretModal"></div>
 <div th:replace="business/modal/rciptListModal :: rciptListModal"></div>
 	
 <script>
@@ -127,6 +128,7 @@
         const grid = new tui.Grid({
             el: document.getElementById('grid'),
             bodyHeight: 360,
+            //rowHeaders: ['checkbox'],
             data: gridData,
             columnOptions: {
             	minWidth: 80,
@@ -136,19 +138,7 @@
             scrollY: true,
             autoWidth: true,
             columns: [
-            	/* {header: '채권ID', name: 'rciptId', width: 130, align: 'center'}, */
-            	{
-		            header: '채권ID',
-		            name: 'rciptId',
-		            width: 130,
-		            align: 'center',
-		            formatter: ({ value }) => {
-		            	  return `<a class="rcipt-link" style="pointer-events:auto">${value}</a>`;
-		            	}
-		            /* formatter: ({ value }) => {
-	            	  return `<a href="#" class="rcipt-link" data-rcipt-id="${value}">${value}</a>`;
-	            	} */
-		        },
+            	{header: '채권ID', name: 'rciptId', width: 130, align: 'center'},
                 {header: '고객ID', name: 'custcomId', width: 130, align: 'center'},
                 {header: '고객사명', name: 'custcomName', width: 300, align: 'left'},
                 {header: '채권발생일', name: 'trnsDt', width: 160, align: 'center'},
@@ -284,6 +274,8 @@
         
     	// 바깥 클릭 시 닫기
     	function closeRciptTretModal() {
+    		resetRciptTretModal();
+    		
     		modal.classList.remove("show");
     		modal.style.display = "none";
     		rciptTretBackdrop.style.display = "none";
@@ -294,6 +286,24 @@
     			closeRciptTretModal();
     		}
     	});
+    	
+    	
+    	// 모달 초기화 함수
+    	function resetRciptTretModal() {
+
+    	    // hidden 값 초기화
+    	    $('#custcomIdHidden').val('');
+    	    $('#rciptIdHidden').val('');
+
+    	    // 표시용 input 초기화
+    	    $('#mCustcomName').val('');
+
+    	    // 입력 필드 초기화
+    	    $('#rciptDt').val('');
+    	    $('#rciptAmt').val('');
+    	    $('#pmtMtd').val('');
+    	    $('#rm').val('');
+    	}
     	
 
     	
@@ -306,7 +316,7 @@
 	        const custcomId = $('#custcomIdHidden').val();
 	        const rciptDt   = $('#rciptDt').val();
 	        const rciptAmt  = $('#rciptAmt').val().replace(/,/g, '');
-	        const pmtMtd    = $('#mPmtMtd').val();
+	        const pmtMtd    = $('#pmtMtd').val();
 	        const rm        = $('#rm').val();
 	
 	        // 기본 검증 (UX)
@@ -379,105 +389,87 @@
 	}); // 입금처리 저장 end
         
 // ======================================================입금 상세내역
-	// 채권id 클릭 이벤트
-	grid.on('click', function (ev) {
-		console.log('click rciptId', ev, grid.getRow(ev.rowKey));
-		
-	  // 유효성
-	  if (ev.rowKey == null || !ev.columnName) return;
-	  if (ev.columnName !== 'rciptId') return;
+// 입금내역 버튼 클릭 (행 선택 기준)
+$(document).on("click", "#rciptListBtn", function () {
+
+  const focused = grid.getFocusedCell();
+
+  // 행 선택 여부 체크
+  if (!focused || focused.rowKey == null || focused.rowKey < 0) {
+    alert('입금내역을 조회할 채권을 선택하세요.');
+    return;
+  }
+
+  const rowKey = focused.rowKey;
+
+  const rowData = grid.getRow(rowKey);
+
+  if (!rowData || !rowData.rciptId) {
+    alert('채권 ID가 없습니다.');
+    return;
+  }
+
+  openRciptListModal(rowData);
+});
+
+
+	// 입금내역 모달 DOM
+	const rciptListModal    = document.getElementById("rciptListModal");
+	const rciptListBackdrop = document.getElementById("rciptListBackdrop");
 	
-	  // 클릭 대상이 a 태그면 기본 동작 방지
-	  if (ev.nativeEvent) {
-	    const target = ev.nativeEvent.target;
-	    if (target && target.matches('a.rcipt-link')) {
-	      ev.nativeEvent.preventDefault();
-	    }
-	  }
 	
-	  // 안전하게 rowData 가져오기
-	  const rowData = grid.getRow(ev.rowKey);
-	  if (!rowData) return;
+	// 입금내역 모달 오픈
+	function openRciptListModal(rowData) {
+	
+	  // 상단 텍스트 세팅
+	  document.getElementById('rciptIdText').innerText = rowData.rciptId;
+	  document.getElementById('mCustcomNameText').innerText = rowData.custcomName || '';
 	
 	  // 모달 오픈
-	  openRciptListModal(rowData);
-	});
+	  rciptListModal.classList.add("show");
+	  rciptListModal.style.display = "block";
+	  rciptListBackdrop.style.display = "block";
+	  document.body.classList.add("modal-open");
 	
-	// 입금 상세내역 모달 DOM 참조
-	const rciptListModal    = document.getElementById('rciptListModal');
-	const rciptListBackdrop = document.getElementById('rciptListBackdrop');
-	
-	console.log(rciptListModal, rciptListBackdrop);
-	
-	// 입금 상세내역 모달 오픈 이벤트
-	function openRciptListModalUI() {
-	  if (!rciptListModal || !rciptListBackdrop) return;
-	
-	  rciptListModal.classList.add('show');
-	  rciptListModal.style.display = 'block';
-	
-	  rciptListBackdrop.classList.add('show');
-	  rciptListBackdrop.style.display = 'block';
-	
+	  // 기존 데이터 초기화
 	  if (window.rciptListGrid) {
-	    setTimeout(() => window.rciptListGrid.refreshLayout(), 0);
+	    window.rciptListGrid.resetData([]);
 	  }
+	
+	  // 입금내역 조회
+	  fetch(`/rcipt/detail/list?rciptId=${rowData.rciptId}`)
+	    .then(res => res.json())
+	    .then(data => {
+	      window.rciptListGrid.resetData(data || []);
+	      window.rciptListGrid.refreshLayout();
+	    })
+	    .catch(err => {
+	      console.error(err);
+	      alert('입금 내역 조회 중 오류가 발생했습니다.');
+	    });
 	}
 	
 	
-	// 모달 닫기
-	function closeRciptListModalUI() {
-	  if (!rciptListModal || !rciptListBackdrop) return;
-	
-	  rciptListModal.classList.remove('show');
-	  rciptListModal.style.display = 'none';
-	
-	  rciptListBackdrop.classList.remove('show');
-	  rciptListBackdrop.style.display = 'none';
+	// 입금내역 모달 닫기
+	function closeRciptListModal() {
+	  rciptListModal.classList.remove("show");
+	  rciptListModal.style.display = "none";
+	  rciptListBackdrop.style.display = "none";
+	  document.body.classList.remove("modal-open");
 	}
 	
-	// 모달 오픈 데이터 로드
-	function openRciptListModal(rowData) {
-
-	    if (!rowData || !rowData.rciptId) {
-	        alert('채권 정보가 없습니다.');
-	        return;
-	    }
-
-	    document.getElementById('rciptIdText').innerText = rowData.rciptId;
-	    document.getElementById('mCustcomNameText').innerText = rowData.custcomName;
-	    
-
-	    openRciptListModalUI();
-
-	    fetch(`/rcipt/detail/list?rciptId=${rowData.rciptId}`)
-	        .then(res => res.json())
-	        .then(data => {
-	            window.rciptListGrid.resetData(data || []);
-	            window.rciptListGrid.refreshLayout();
-	        })
-	        .catch(err => {
-	            console.error(err);
-	            alert('입금 내역 조회 중 오류가 발생했습니다.');
-	        });
-	}
 	
 	// 바깥 클릭 시 모달 닫기
-	if (rciptListModal) {
-	  rciptListModal.addEventListener('click', function (event) {
-	    // .modal-content 바깥을 클릭하면 닫기
-	    if (!event.target.closest('.modal-content')) {
-	      closeRciptListModalUI();
-	    }
-	  });
-	}
+	rciptListModal.addEventListener("click", (event) => {
+	  if (!event.target.closest(".modal-content")) {
+	    closeRciptListModal();
+	  }
+	});
 	
-	// 백드롭 클릭으로 닫기
-	if (rciptListBackdrop) {
-	  rciptListBackdrop.addEventListener('click', function () {
-	    closeRciptListModalUI();
-	  });
-	}
+	rciptListBackdrop.addEventListener("click", () => {
+	  closeRciptListModal();
+	});
+	
 	
 	
 	// 입금 상세내역 모달 그리드
@@ -489,7 +481,13 @@
 	    bodyHeight: 300,
 	    columnOptions: { resizable: true },
 	    columns: [
-	        { header: '입금일자', name: 'rciptDt', align: 'center', width: 120 },
+	        { header: '입금일자', name: 'rciptDt', align: 'center', width: 120,
+	        	formatter: ({ value }) => {
+					if (!value) return '';
+					const d = new Date(value);
+					return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        		}
+	        },
 	        {
 	            header: '입금금액',
 	            name: 'rciptAmt',
@@ -500,7 +498,7 @@
 	        { header: '결제방법', name: 'pmtMtd', align: 'center', width: 120 },
 	        { header: '비고', name: 'rm', align: 'left' }
 	    ]
-	});
+	}); 
 	
 	
     </script>
