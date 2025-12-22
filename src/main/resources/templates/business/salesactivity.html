@@ -20,8 +20,9 @@
 .form-select {
 	color: #000 !important;
 }
+
 .btn-group .btn:not(:last-child) {
-  border-right-width: 0 !important;
+	border-right-width: 0 !important;
 }
 </style>
 <body layout:fragment="content">
@@ -46,22 +47,30 @@
 							<div class="row mb-2">
 								<div class="col-md-3">
 									<label class="form-label">업종</label> <input type="text"
-										class="form-control" placeholder="코딩" name="industryType" th:value="${stdrvo != null ? stdrvo.industryType : ''}">
+										class="form-control" placeholder="코딩" name="industryType"
+										th:value="${stdrvo != null ? stdrvo.industryType : ''}">
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">업체규모</label> 
-									<select name="companySize" class="form-select">
-  <option value="" th:selected="${stdrvo == null || stdrvo.companySize == null || stdrvo.companySize == ''}">규모선택</option>
-  <option value="대기업" th:selected="${stdrvo != null && stdrvo.companySize == '대기업'}">대기업</option>
-  <option value="준대기업" th:selected="${stdrvo != null && stdrvo.companySize == '준대기업'}">준대기업</option>
-  <option value="중견기업" th:selected="${stdrvo != null && stdrvo.companySize == '중견기업'}">중견기업</option>
-  <option value="강소기업" th:selected="${stdrvo != null && stdrvo.companySize == '강소기업'}">강소기업</option>
-  <option value="중소기업" th:selected="${stdrvo != null && stdrvo.companySize == '중소기업'}">중소기업</option>
-</select>
+									<label class="form-label">업체규모</label> <select
+										name="companySize" class="form-select">
+										<option value=""
+											th:selected="${stdrvo == null || stdrvo.companySize == null || stdrvo.companySize == ''}">규모선택</option>
+										<option value="대기업"
+											th:selected="${stdrvo != null && stdrvo.companySize == '대기업'}">대기업</option>
+										<option value="준대기업"
+											th:selected="${stdrvo != null && stdrvo.companySize == '준대기업'}">준대기업</option>
+										<option value="중견기업"
+											th:selected="${stdrvo != null && stdrvo.companySize == '중견기업'}">중견기업</option>
+										<option value="강소기업"
+											th:selected="${stdrvo != null && stdrvo.companySize == '강소기업'}">강소기업</option>
+										<option value="중소기업"
+											th:selected="${stdrvo != null && stdrvo.companySize == '중소기업'}">중소기업</option>
+									</select>
 								</div>
 								<div class="col-md-3">
-									<label class="form-label">지역/상권</label><input name="region" placeholder="지역" class="form-control"
-       th:value="${stdrvo != null ? stdrvo.region : ''}">
+									<label class="form-label">지역/상권</label><input name="region"
+										placeholder="지역" class="form-control"
+										th:value="${stdrvo != null ? stdrvo.region : ''}">
 								</div>
 							</div>
 							<!-- <div class="col-md-6">
@@ -100,8 +109,9 @@
 				</div>
 			</div>
 			<div class="card-body">
-				<div id="potentialgrid"
-					style="height: 150px; width: 100%; overflow-y: auto; overflow-x: auto;"></div>
+				<div class="tab-pane-custom">
+					<div id="potentialgrid" style="height: 150px;"></div>
+				</div>
 			</div>
 		</div>
 	</form>
@@ -111,17 +121,15 @@
 				<!-- 탭 -->
 				<div class="card-header-left">
 					<div class="btn-group" role="group" aria-label="영업활동 탭">
-					  <input type="radio" class="btn-check" name="salesTab" id="salesTab1" autocomplete="off" checked>
-					  <label class="btn btn-outline-primary fw-bold" for="salesTab1" data-target="#tabContact">
-					  <i class="fa fa-edit me-1"></i>접촉사항 </label>
-					
-					  <input type="radio" class="btn-check" name="salesTab" id="salesTab2" autocomplete="off">
-					  <label class="btn btn-outline-primary fw-bold" for="salesTab2" data-target="#tabLead"><i class="fa fa-edit me-1">
-					  </i>리드분석</label>
-					
-					  <input type="radio" class="btn-check" name="salesTab" id="salesTab3" autocomplete="off">
-					  <label class="btn btn-outline-primary fw-bold" for="salesTab3" data-target="#tabDemo">
-					  <i class="fa fa-edit me-1"></i>견적 및 데모활동</label>
+						<input type="radio" class="btn-check" name="salesTab" id="salesTab1" autocomplete="off" checked> 
+							<label class="btn btn-outline-primary fw-bold" for="salesTab1" data-target="#tabContact"> 
+								<i class="fa fa-edit me-1"></i>접촉사항</label> 
+							<input type="radio" class="btn-check" name="salesTab" id="salesTab2" autocomplete="off"> 
+								<label class="btn btn-outline-primary fw-bold" for="salesTab2" data-target="#tabLead">
+									<i class="fa fa-edit me-1"> </i>리드분석</label>
+							<input type="radio" class="btn-check" name="salesTab" id="salesTab3" autocomplete="off">
+								<label class="btn btn-outline-primary fw-bold" for="salesTab3" data-target="#tabDemo">
+									<i class="fa fa-edit me-1"></i>견적 및 데모활동</label>
 					</div>
 				</div>
 				<!-- 버튼 -->
@@ -139,25 +147,30 @@
 			<div class="card-body" style="height: 300px;">
 				<!-- 접촉사항 탭 -->
 				<div id="tabContact" class="tab-pane-custom">
-					<div id="contactGrid"
-						style="height: 280px;"></div>
+					<div id="contactGrid" style="height: 280px;"></div>
 				</div>
 				<!-- 리드분석 탭 -->
 				<div id="tabLead" class="tab-pane-custom" style="display: none;">
-					<div id="leadgrid"
-						style="height: 280px; "></div>
+					<div id="leadgrid" style="height: 280px;"></div>
 				</div>
 				<!-- 견적 및 데모활동 탭 -->
 				<div id="tabDemo" class="tab-pane-custom" style="display: none;">
-					<div id="demoGrid"
-						style="height: 280px;"></div>
+					<div id="demoGrid" style="height: 280px;"></div>
 				</div>
 			</div>
 		</div>
 	</form>
+
+
+
+
+
+
+
+
+
+
 	<script th:inline="javascript">
-	
-	
    // 공통 테마
    tui.Grid.applyTheme('default', {
        cell: {
@@ -183,16 +196,42 @@
            }
        }
    });
+   
+// ✅ 서버 데이터
+	const rawData = /*[[${potentialstdrList}]]*/ [];
+	const safeRawData = Array.isArray(rawData) ? rawData : [];
+	
+	const sorted = safeRawData
+	  .map(row => ({
+	    ...row,
+	    leadScore: row.leadScore == null ? 0 : Number(row.leadScore)
+	  }))
+	  .sort((a, b) => b.leadScore - a.leadScore);
+	
+	let currentRank = 0;
+	let prevScore = null;
+	
+	const potentialData = sorted.map((row, index) => {
+	  if (prevScore === row.leadScore) {
+	    row.rank = currentRank;
+	  } else {
+	    currentRank = index + 1;
+	    row.rank = currentRank;
+	    prevScore = row.leadScore;
+	  }
+	  return row;
+	});
+   
+   
     // 잠재고객 Grid
-   const potentialData = /*[[${potentialstdrList}]]*/ [];
    console.log("potentialData", potentialData);
    const potentialgrid = new tui.Grid({
        el: document.getElementById('potentialgrid'),
        data: potentialData,
-       scrollX: true,
+       scrollX: false,
        scrollY: true,
        minBodyHeight : 0,
-       bodyHeight: 240,
+       bodyHeight: 110,
        autoWidth: true,
        columns : [ {
 			header : '순위',
@@ -246,6 +285,7 @@
    //
    // 접촉 Grid
    const contactData = /*[[${contactrList}]]*/ [];
+   const safeContactData = Array.isArray(contactData) ? contactData : [];
    console.log("contactData", contactData);
    const contactGrid = new tui.Grid({
        el: document.getElementById('contactGrid'),
@@ -295,9 +335,11 @@
        ]
    });
    //
-   // 리드 Grid
+   // 리드
    const leadData = /*[[${leadList}]]*/ [];
+   const safeLeadData = Array.isArray(leadData) ? leadData : [];
    console.log("leadData", leadData);
+   
    const leadgrid = new tui.Grid({
        el: document.getElementById('leadgrid'),
        data: leadData,
@@ -357,6 +399,7 @@
    //
    // 견적/데모 Grid
    const demoData = /*[[${demoList}]]*/ [];
+   const safeDemoData = Array.isArray(demoData) ? demoData : [];
    console.log("demoData", demoData);
    const demoGrid = new tui.Grid({
        el: document.getElementById('demoGrid'),
