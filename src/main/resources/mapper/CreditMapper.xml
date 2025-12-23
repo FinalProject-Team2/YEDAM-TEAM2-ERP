@@ -35,6 +35,7 @@
 		    cdt.mrtgg_lmt,
 		    cdt.credit_lmt,
 		    cdt.cdtln_lmt,
+		    cdt.shipmnt_stop,
 		    
 		    CASE
 			    WHEN NVL(cdt.cdtln_lmt, 0) = 0 THEN 0

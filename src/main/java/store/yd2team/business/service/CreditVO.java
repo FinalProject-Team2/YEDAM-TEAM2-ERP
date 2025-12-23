@@ -27,6 +27,7 @@ public class CreditVO {
    private LocalDate lastEvalDt;
    private int useRate;
    
+   
    // --- 신규 추가 (여신관리 기능 강화용)
    private Integer creditMm;      // 여신 개월 수
    private String badCreditYn;    // 악성여신 여부
