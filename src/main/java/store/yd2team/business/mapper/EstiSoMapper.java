@@ -60,6 +60,9 @@ public interface EstiSoMapper {
     
     
     // === 주문 관련 추가 ===
+	void callCreateSoFromEsti(EstiSoVO vo);
+	
+	
     String createSoId();
     int insertSo(EstiSoVO vo);
     int insertSoDetail(EstiSoDetailVO vo);

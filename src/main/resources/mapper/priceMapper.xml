@@ -48,7 +48,7 @@
 
 <!-- 저장버튼 insert update 머지문 -->
 	<update id="savePricePolicy" parameterType="store.yd2team.business.service.PriceVO">
-	    MERGE INTO TB_PRICE t
+	    MERGE INTO tb_price t
 	    USING (
 	        SELECT 
 	            #{priceId}   AS price_policy_id,

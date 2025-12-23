@@ -172,6 +172,7 @@ public class EstiSoServiceImpl implements EstiSoService {
     }
 
     // 주문서 저장
+    @Transactional
     @Override
     public String saveOrderFromEsti(EstiSoVO vo) {
 
@@ -180,68 +181,60 @@ public class EstiSoServiceImpl implements EstiSoService {
         String empId  = LoginSession.getEmpId();
 
         vo.setVendId(vendId);
+        vo.setEmpId(empId);     // 프로시저 IN 파라미터용
         vo.setCreaBy(empId);
         vo.setUpdtBy(empId);
 
-        // 1) 주문번호 생성
-        String soId = estiSoMapper.createSoId();
-        vo.setSoId(soId);
+        // 프로시저 호출
+        // - 내부에서 주문번호 생성
+        // - 주문 헤더/상세 INSERT
+        // - 출하예약수량 증가
+        // - 견적 상태(es4) 변경
+        estiSoMapper.callCreateSoFromEsti(vo);
 
-        // 2) 합계 계산
-        long ttSupply = 0L;
-        long ttQty = 0L;
-        long ttVat = 0L;
-
-        if (vo.getDetailList() != null) {
-            for (EstiSoDetailVO d : vo.getDetailList()) {
-
-                long supply = d.getSupplyAmt() == null ? 0L : d.getSupplyAmt();
-                long qy     = d.getQy() == null ? 0L : d.getQy();
-
-                ttSupply += supply;
-                ttQty    += qy;
-                ttVat    += supply / 10;
-                
-             // 출하예약수량 증가
-                estiSoMapper.increaseOustReserveQty(
-                    vendId,
-                    d.getProductId(),
-                    qy,
-                    empId
-                );
-
-                // 주문 상세에도 세션 정보
-                d.setVendId(vendId);
-                d.setCreaBy(empId);
-                d.setUpdtBy(empId);
-            }
-        }
-
-        vo.setTtSupplyPrice(ttSupply);
-        vo.setTtSurtaxPrice(ttVat);
-        vo.setTtPrice(ttSupply + ttVat);
-        vo.setTtSoQy(ttQty);
-
-        // 3) 주문 헤더 INSERT
-        estiSoMapper.insertSo(vo);
-
-        // 4) 주문 상세 INSERT
-        if (vo.getDetailList() != null) {
-            for (EstiSoDetailVO d : vo.getDetailList()) {
-                d.setSoId(soId);
-                estiSoMapper.insertSoDetail(d);
-            }
-        }
-
-        // 5) 견적 상태 변경 (주문 완료)
-        estiSoMapper.updateEstiStatusToOrdered(
-            vo.getEstiId(),
-            vo.getVersion(),
-            empId        // 누가 변경했는지
-        );
-
-        return soId;
+        // 프로시저 OUT 파라미터
+        //   #{soId, mode=OUT}
+        return vo.getSoId();
     }
+	/*
+	 * @Override public String saveOrderFromEsti(EstiSoVO vo) {
+	 * 
+	 * // 세션 정보 String vendId = LoginSession.getVendId(); String empId =
+	 * LoginSession.getEmpId();
+	 * 
+	 * vo.setVendId(vendId); vo.setCreaBy(empId); vo.setUpdtBy(empId);
+	 * 
+	 * // 1) 주문번호 생성 String soId = estiSoMapper.createSoId(); vo.setSoId(soId);
+	 * 
+	 * // 2) 합계 계산 long ttSupply = 0L; long ttQty = 0L; long ttVat = 0L;
+	 * 
+	 * if (vo.getDetailList() != null) { for (EstiSoDetailVO d : vo.getDetailList())
+	 * {
+	 * 
+	 * long supply = d.getSupplyAmt() == null ? 0L : d.getSupplyAmt(); long qy =
+	 * d.getQy() == null ? 0L : d.getQy();
+	 * 
+	 * ttSupply += supply; ttQty += qy; ttVat += supply / 10;
+	 * 
+	 * // 출하예약수량 증가 estiSoMapper.increaseOustReserveQty( vendId, d.getProductId(),
+	 * qy, empId );
+	 * 
+	 * // 주문 상세에도 세션 정보 d.setVendId(vendId); d.setCreaBy(empId); d.setUpdtBy(empId);
+	 * } }
+	 * 
+	 * vo.setTtSupplyPrice(ttSupply); vo.setTtSurtaxPrice(ttVat);
+	 * vo.setTtPrice(ttSupply + ttVat); vo.setTtSoQy(ttQty);
+	 * 
+	 * // 3) 주문 헤더 INSERT estiSoMapper.insertSo(vo);
+	 * 
+	 * // 4) 주문 상세 INSERT if (vo.getDetailList() != null) { for (EstiSoDetailVO d :
+	 * vo.getDetailList()) { d.setSoId(soId); estiSoMapper.insertSoDetail(d); } }
+	 * 
+	 * // 5) 견적 상태 변경 (주문 완료) estiSoMapper.updateEstiStatusToOrdered(
+	 * vo.getEstiId(), vo.getVersion(), empId // 누가 변경했는지 );
+	 * 
+	 * return soId; }
+	 */
     
     
     

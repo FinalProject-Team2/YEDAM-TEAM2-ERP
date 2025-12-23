@@ -361,6 +361,20 @@
 	  ORDER BY d.esti_detail_no
 	</select>
     
+<!-- ======================= 주문서 등록 프로시저 -->
+	<update id="callCreateSoFromEsti" statementType="CALLABLE" parameterType="store.yd2team.business.service.EstiSoVO">
+	
+	    { CALL pr_create_so_from_esti(
+	        #{vendId,   mode=IN},
+	        #{empId,    mode=IN},
+	        #{estiId,   mode=IN},
+	        #{version,  mode=IN, jdbcType=VARCHAR},
+	        #{soId,     mode=OUT, jdbcType=VARCHAR}
+	    ) }
+	
+	</update>
+    
+    
     
     <!-- 주문번호 생성 -->
 	<select id="createSoId" resultType="string">
