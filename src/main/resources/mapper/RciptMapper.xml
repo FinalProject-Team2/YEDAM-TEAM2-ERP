@@ -6,54 +6,54 @@
 	<select id="selectRciptList" parameterType="store.yd2team.business.service.RciptVO" resultType="store.yd2team.business.service.RciptVO">
 	
 	    SELECT
-	          r.rcipt_id                     AS rciptId
-	        , r.custcom_id                   AS custcomId
-	        , c.custcom_name                 AS custcomName
-	        , r.trns_dt                      AS trnsDt
-	        , r.bond_amt                     AS bondAmt
-	        , r.bond_baln                    AS bondBaln
-	        , r.ltst_rcipt_dt                AS ltstRciptDt
-	        , r.delay_fg                     AS delayFg
-	        , r.rpay_yn                      AS rpayYn
-	        , r.updt_dt
-	
-	        /* 누적 입금액 (서브쿼리) */
-	        , (
-	            SELECT NVL(SUM(d.rcipt_amt), 0)
-	              FROM tb_rcipt_detail d
-	             WHERE d.rcipt_id = r.rcipt_id
-	          ) AS rciptAmtSum
-	
-	    FROM tb_rcipt r
-	    JOIN tb_custcom c
-	      ON r.custcom_id = c.custcom_id
-		LEFT JOIN tb_rcipt_detail rd
-		       ON r.rcipt_id = rd.rcipt_id
-	    WHERE 1 = 1
-	
-	    <!-- 고객코드 -->
-	    <if test="custcomId != null and custcomId != ''">
-	        AND r.custcom_id = #{custcomId}
-	    </if>
-	
-	    <!-- 고객사명 -->
-	    <if test="custcomName != null and custcomName != ''">
-	        AND c.custcom_name LIKE '%' || #{custcomName} || '%'
-	    </if>
-	
-	    <!-- 채권 발생일 -->
-	    <if test="startDt != null">
-		    AND r.trns_dt &gt;= #{startDt}
-		</if>
+		    r.rcipt_id        AS rciptId,
+		    r.custcom_id      AS custcomId,
+		    c.custcom_name    AS custcomName,
+		    r.trns_dt         AS trnsDt,
+		    r.ltst_rcipt_dt   AS ltstRciptDt,
+		    r.rpay_yn         AS rpayYn,
+		    (
+	          SELECT NVL(SUM(d.rcipt_amt), 0)
+	            FROM tb_rcipt_detail d
+	           WHERE d.rcipt_id = r.rcipt_id
+	        ) AS rciptAmtSum,
 		
-		<!-- 채권 발생일 종료 -->
-		<if test="endDt != null">
-		    AND r.trns_dt &lt;= #{endDt}
-		</if>
-	
-	    ORDER BY COALESCE(r.ltst_rcipt_dt, r.trns_dt) DESC
-	        <!-- r.ltst_rcipt_dt DESC NULLS LAST,
-	        r.trns_dt DESC -->
+		    /* 그리드에 보여줄 채권금액 */
+		    (r.bond_amt - prev_input_amt) AS bondAmt,
+		
+		    /* 입금액(건당) */
+		    d.rcipt_amt       AS rciptAmt,
+		
+		    /* 누적입금액 */
+		    acc_input_amt     AS accRciptAmt,
+		
+		    /* 채권잔액 */
+		    (r.bond_amt - acc_input_amt) AS bondBaln,
+		
+		    d.rcipt_dt        AS rciptDt
+		FROM (
+		    SELECT
+		        d.*,
+		        SUM(d.rcipt_amt) OVER (
+		            PARTITION BY d.rcipt_id
+		            ORDER BY d.rcipt_dt, d.rcipt_detail_no
+		        ) AS acc_input_amt,
+		        NVL(
+		            SUM(d.rcipt_amt) OVER (
+		                PARTITION BY d.rcipt_id
+		                ORDER BY d.rcipt_dt, d.rcipt_detail_no
+		                ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+		            ),
+		            0
+		        ) AS prev_input_amt
+		    FROM tb_rcipt_detail d
+		) d
+		LEFT JOIN tb_rcipt r
+		     ON r.rcipt_id = d.rcipt_id
+		LEFT JOIN tb_custcom c
+		     ON c.custcom_id = r.custcom_id
+		ORDER BY r.rcipt_id, d.rcipt_dt DESC, d.rcipt_detail_no DESC
+			    
 	
 	</select>
 	
