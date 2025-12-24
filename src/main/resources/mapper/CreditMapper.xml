@@ -35,6 +35,7 @@
 		    cdt.mrtgg_lmt,
 		    cdt.credit_lmt,
 		    cdt.cdtln_lmt,
+		    r.bond_baln,
 		    cdt.shipmnt_stop,
 		    
 		    CASE
@@ -57,6 +58,8 @@
 		FROM tb_cdtln_lmt cdt
 		LEFT JOIN tb_custcom cust
 		       ON cdt.custcom_id = cust.custcom_id
+		LEFT JOIN tb_rcipt r
+		       ON cdt.custcom_id = r.custcom_id
 		/* tb_atmpt + tb_atmpt_detail 집계 서브쿼리 */
 		LEFT JOIN (
 		    SELECT

@@ -17,6 +17,7 @@ public class CreditVO {
    private Long mrtggLmt;
    private Long creditLmt;
    private Long cdtlnLmt;
+   private Long bondBaln;
    private String lmtoverCheck;
    private String yn;
    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

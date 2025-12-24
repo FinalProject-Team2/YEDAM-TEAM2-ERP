@@ -369,6 +369,8 @@
 	        #{empId,    mode=IN},
 	        #{estiId,   mode=IN},
 	        #{version,  mode=IN, jdbcType=VARCHAR},
+	        #{shipAddr, mode=IN, jdbcType=VARCHAR},
+            #{rm,       mode=IN, jdbcType=VARCHAR},
 	        #{soId,     mode=OUT, jdbcType=VARCHAR}
 	    ) }
 	
